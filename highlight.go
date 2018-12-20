@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"monkey/highlight"
+	"magpie/highlight"
 	"os"
 )
 

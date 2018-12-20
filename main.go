@@ -9,10 +9,10 @@ import (
 	"regexp"
 	"runtime"
 	"math/rand"
-	"monkey/eval"
-	"monkey/lexer"
-	"monkey/parser"
-	"monkey/repl"
+	"magpie/eval"
+	"magpie/lexer"
+	"magpie/parser"
+	"magpie/repl"
 	"os"
 )
 
@@ -24,7 +24,7 @@ func runProgram(filename string) {
 	}
 	f, err := ioutil.ReadFile(wd + "/" + filename)
 	if err != nil {
-		fmt.Println("monkey: ", err.Error())
+		fmt.Println("magpie: ", err.Error())
 		os.Exit(1)
 	}
 	l := lexer.New(filename, string(f))
@@ -47,7 +47,7 @@ func runProgram(filename string) {
 }
 
 // Register go package methods/types
-// Note here, we use 'gfmt', 'glog', 'gos' 'gtime', because in monkey
+// Note here, we use 'gfmt', 'glog', 'gos' 'gtime', because in magpie
 // we already have built in module 'fmt', 'log' 'os', 'time'.
 // And Here we demonstrate the use of import go language's methods.
 func RegisterGoGlobals() {
@@ -195,7 +195,7 @@ func main() {
 	//We must reset `os.Args`, or the `flag` module will not functioning correctly
 	os.Args = os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("Monkey programming language REPL\n")
+		fmt.Println("Magpie programming language REPL\n")
 		repl.Start(os.Stdout, true)
 	} else {
 		runProgram(args[0])

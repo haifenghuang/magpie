@@ -1,6 +1,6 @@
 # Syntax Support for VS Code(vsc)
 
-This file provides Syntax highlighting support for the monkey Language in `Vs Code`
+This file provides Syntax highlighting support for the magpie Language in `Vs Code`
 
 ## VS Code screenshot
 

@@ -1,11 +1,11 @@
-# Monkey Programming Language
+# Magpie Programming Language
 
 Chinese version: [中文](README_cn.md)
 
 Table of Contents
 =================
 
-* [Monkey Programming Language](#monkey-programming-language)
+* [Magpie Programming Language](#magpie-programming-language)
   * [Summary](#summary)
   * [Overview](#overview)
   * [Installation](#installation)
@@ -69,11 +69,11 @@ Table of Contents
 
 ## Summary
 
-Monkey is a toy language interpreter, written in Go. It has C-style syntax, and is largely inspired by Ruby, Python, Perl and c#
+Magpie is a toy language interpreter, written in Go. It has C-style syntax, and is largely inspired by Ruby, Python, Perl and c#
 It support the normal control flow, functional programming and object oriented programming.
 It also has a REPL with realtime syntax highlighter.
 
-This is a sample program using monkey language:
+This is a sample program using magpie language:
 
 ```swift
 
@@ -169,7 +169,7 @@ Below is the html document generated using the `mdoc` tool:
 
 ## Overview
 
-This project is based on mayoms's project [monkey](https://github.com/mayoms/monkey) with some bug fixes and a lot of new features including:
+This project is based on mayoms's project [magpie](https://github.com/mayoms/magpie) with some bug fixes and a lot of new features including:
 
 * Added simple class support(Indexer, operator overloading, property, static method/property/field and class annotation)
 * Modified string module(which can correctly handle utf8 character encoding)
@@ -206,8 +206,8 @@ Just download the repository and run `./run.sh`
 To access the REPL, simply run the following:
 
 ```sh
-~ » monkey
-Monkey programming language REPL
+~ » magpie
+Magpie programming language REPL
 
 >>
 ```
@@ -215,14 +215,14 @@ Monkey programming language REPL
 or, to run a program:
 
 ```sh
-monkey path/to/file
+magpie path/to/file
 ```
 
 ## Language Tour
 
 ### Comments
 
-Monkey support two kinds of single line comment and also block comment.
+Magpie support two kinds of single line comment and also block comment.
 
 ```swift
 // this is a single line comment
@@ -235,7 +235,7 @@ Monkey support two kinds of single line comment and also block comment.
 
 ### Data Types
 
-Monkey supports 9 basic data types: `String`, `Int`, `UInt`, `Float`, `Bool`, `Array`, `Hash`, `Tuple` and `Nil`
+Magpie supports 9 basic data types: `String`, `Int`, `UInt`, `Float`, `Bool`, `Array`, `Hash`, `Tuple` and `Nil`
 
 ```swift
 s1 = "hello, 黄"       # strings are UTF-8 encoded
@@ -252,7 +252,7 @@ n = nil
 
 ### Constants(Literal)
 
-In monkey, there are mainly eleven types of constants(Literals).
+In magpie, there are mainly eleven types of constants(Literals).
 
 * Integer
 * UInteger
@@ -321,7 +321,7 @@ println(f2(1,2))
 
 ### Variables
 
-Variables in Monkey could start with the keyword `let`, or nothing with the
+Variables in Magpie could start with the keyword `let`, or nothing with the
 form `variable=value`.
 
 ```swift
@@ -357,7 +357,7 @@ Below code is not correct：
 a, b, c = 1, "hello world", [1,2,3]
 ```
 
-Note：Starting from Monkey 5.0，when the decalared variable already exists, it's value will be overwritten:
+Note：Starting from Magpie 5.0，when the decalared variable already exists, it's value will be overwritten:
 
 ```swift
 let x, y = 10, 20;
@@ -485,7 +485,7 @@ println(LogOption.getName(LogOption.Lshortfile))
 ```
 
 ### Meta-Operators
-Monkey has some meta-operators borrowed from perl6.
+Magpie has some meta-operators borrowed from perl6.
 There are strict rules for meta-operators:
 
 * Meta-operators can only operator on arrays.
@@ -506,7 +506,7 @@ println(value1) //result: 40
 println(value2) //result: 2HELLO2
 ```
 
-At the moment, Monkey has six meta-operators：
+At the moment, Magpie has six meta-operators：
 * <p>~+</p>
 * <p>~-</p>
 * <p>~*</p>
@@ -715,7 +715,7 @@ case i in {
 
 ```
 ### using statement
-In monkey, if you have some resources you want to release/free/close, e.g. close opended file, close network connection etc，
+In magpie, if you have some resources you want to release/free/close, e.g. close opended file, close network connection etc，
 you can use the `using` statement just like `c#`.
 
 ```swift
@@ -738,7 +738,7 @@ using (infile = newFile("./file.demo", "r")) {
 ```
 
 ### User Defined Operator
-In monkey, you are free to define some operators, but you cannot
+In magpie, you are free to define some operators, but you cannot
 overwrite predefined operators.
 
 > Note: Not all operators could be user defined.
@@ -834,7 +834,7 @@ Below is a list of predefined operators and user defined operators:
 
 ### Integer
 
-In monkey, integer is treated as an object, so you could call it's methods.
+In magpie, integer is treated as an object, so you could call it's methods.
 Please see below examples:
 
 ```swift
@@ -870,7 +870,7 @@ if 9.isOdd() {
 
 ### Float
 
-In monkey, float is also treated as an object, so you could call it's methods.
+In magpie, float is also treated as an object, so you could call it's methods.
 Please see below examples:
 
 ```swift
@@ -886,7 +886,7 @@ println(f2)
 
 ### Decimal
 
-In monkey, decimal is Arbitrary-precision fixed-point decimal numbers.
+In magpie, decimal is Arbitrary-precision fixed-point decimal numbers.
 And the code mainly based on [decimal](https://github.com/shopspring/decimal).
 
 Please see below examples:
@@ -912,7 +912,7 @@ fmt.println("123.45678901234567/3 = ", d3.div(d2))
 
 ### Array
 
-In monkey, you could use [] to initialize an empty array:
+In magpie, you could use [] to initialize an empty array:
 
 ```swift
 emptyArr = []
@@ -1011,7 +1011,7 @@ println(arr) // result: [3,4,3,4,3,4]
 
 ### String
 
-In monkey, there are three types of `string`:
+In magpie, there are three types of `string`:
 
 * Raw string
 * Double quoted string(Could not contains newline)
@@ -1040,7 +1040,7 @@ println('str={str}') //output: "Hello World"
 
 ```
 
-In monkey, strings are utf8-encoded, you could use utf-8 encoded name as a variable name.
+In magpie, strings are utf8-encoded, you could use utf-8 encoded name as a variable name.
 
 ```swift
 三 = 3
@@ -1099,7 +1099,7 @@ println(a) // result: 121314.6789
 ```
 
 ### Hash
-In monkey, the builtin hash will keep the order of keys when they are added to the hash, just like python's orderedDict.
+In magpie, the builtin hash will keep the order of keys when they are added to the hash, just like python's orderedDict.
 
 You could use {} to initialize an empty hash:
 
@@ -1133,7 +1133,7 @@ hashObj -= 5
 println(hash)
 ```
 
-In monkey, Hash is also an object, so you could use them to operate on hash object:
+In magpie, Hash is also an object, so you could use them to operate on hash object:
 
 ```swift
 
@@ -1158,7 +1158,7 @@ println("Reverse Hash =", revHash)
 
 ### Tuple
 
-In monkey, `tuple` is just like array, but it could not be changed once it has been created.
+In magpie, `tuple` is just like array, but it could not be changed once it has been created.
 
 Tuples are constructed using parenthesized list notation:
 
@@ -1288,7 +1288,7 @@ println(revTuple) //result: (9, 8, 7, 6, 4, 2, 5, 3, 1)
 
 ### class
 
-Monkey has limited support for the oop concept, below is a list of features:
+Magpie has limited support for the oop concept, below is a list of features:
 
 * inheritance and polymorphism
 * operator overloading
@@ -1299,8 +1299,8 @@ Monkey has limited support for the oop concept, below is a list of features:
 * class annotations(limited support)
 * constructor method and normal methods support default value and variadic parameters
 
-The monkey parser could parse `public`, `private`, `protected`, but it has no effect in the evaluation phase.
-That means monkey do not support access modifiers at present.
+The magpie parser could parse `public`, `private`, `protected`, but it has no effect in the evaluation phase.
+That means magpie do not support access modifiers at present.
 
 You use `class` keyword to declare a class and use `new class(xxx)` to create an instance of a `class`.
 
@@ -1313,7 +1313,7 @@ class Animal {
 }
 ```
 
-In monkey, all class is inherited from the root class `object`. 
+In magpie, all class is inherited from the root class `object`. 
 `object` class include some common method like `toString()`, `instanceOf()`, `is_a()`, `classOf()`, `hashCode`.
 
 Above code is same as:
@@ -1533,7 +1533,7 @@ dateObj.getDateInfo()
 
 #### indexer
 
-Monkey has support for class `indexer`(like c#). 
+Magpie has support for class `indexer`(like c#). 
 An indexer is a member that enables an object to be indexed in the same way as an array.
 
 You declare an Indexer using `property this[parameter]`.
@@ -1641,7 +1641,7 @@ Note：Non-static variable/method/property could access static variable/method/p
 
 #### Class Category
 
-Monkey also support class Category like objective-c（C# is called 'extension methods'）.
+Magpie also support class Category like objective-c（C# is called 'extension methods'）.
 
 ```swift
 class Animal {
@@ -1667,7 +1667,7 @@ animal.Run()
 
 #### Annotations
 
-Monkey also has very simple annotation support like java：
+Magpie also has very simple annotation support like java：
 
 * Only mehotd and property of class can have annotations(not class itself, or other simple functions)
 * In the body of `Annotation` class, only support property, do not support methods.
@@ -1675,7 +1675,7 @@ Monkey also has very simple annotation support like java：
 
 
 You could use `class @annotationName {}` to declare an annotation class.
-Monkey also include some builtin annotations:
+Magpie also include some builtin annotations:
 
 * @Override annotation(just like java's @Override).
 * @NotNull
@@ -1847,7 +1847,7 @@ if (ret == false) {
 
 ```
 
-Maybe you are curious about why `nil` or `false` have message() function? Because in monkey, `nil` and `false`
+Maybe you are curious about why `nil` or `false` have message() function? Because in magpie, `nil` and `false`
 both are objects, so they have method to operate on it.
 
 ### About `defer` keyword
@@ -1889,7 +1889,7 @@ defer file.close()
 
 ### Concatenation of different types
 
-In monkey, you could concatenate of different types. See below for examples:
+In magpie, you could concatenate of different types. See below for examples:
 
 ```swift
 // Number plus assignment
@@ -1934,7 +1934,7 @@ println(hash)
 
 ### Comprehensions
 
-Monkey support list(array,string, range, tuple) comprehensions.
+Magpie support list(array,string, range, tuple) comprehensions.
 list comprehension will return an array.
 please see following examples:
 
@@ -1960,7 +1960,7 @@ z = [v * 10 for k,v in {"key1": 10, "key2": 20, "key3": 30}]
 println(z) //result: [100, 200, 300]
 ```
 
-Monkey also support hash comprehension.
+Magpie also support hash comprehension.
 hash comprehension will return a hash.
 please see following examples:
 
@@ -2022,7 +2022,7 @@ println(values)
 
 ### Function
 
-Function in monkey is a first-class object. This means the language supports passing functions as arguments to
+Function in magpie is a first-class object. This means the language supports passing functions as arguments to
 other functions, returning them as the values from other functions, and assigning them to variables or storing
 them in data structures.
 
@@ -2106,7 +2106,7 @@ println("hhf".upper)  //result: "HHF"
 println("hhf".upper())
 ```
 
-Before ver5.0, Monkey do not support multiple return values, But there are many ways to do it.
+Before ver5.0, Magpie do not support multiple return values, But there are many ways to do it.
 
 Below suggest a way of doing it:
 
@@ -2126,7 +2126,7 @@ if ret[1] != "" {
 }
 ```
 
-Starting from ver5.0, Monkey support multiple return values using 'let'.
+Starting from ver5.0, Magpie support multiple return values using 'let'.
 The returned values are wrapped as a tuple.
 
 ```swift
@@ -2208,15 +2208,15 @@ for i in XRange(10) {
 ```
 
 ## Use `go` language modules
-Monkey has experimental support for working with `go` modules.
+Magpie has experimental support for working with `go` modules.
 
 If you need to use `go`s language package fucntion, you first need to use `RegisterFunctions' or `RegisterVars` to
-register `go` language functions or types into monkey language.
+register `go` language functions or types into magpie language.
 
 Below is an example of `main.go`(extracted):
 
 ```swift
-// Because in monkey we already have built in module `fmt`, here we use `gfmt` for package name.
+// Because in magpie we already have built in module `fmt`, here we use `gfmt` for package name.
 eval.RegisterFunctions("gfmt", []interface{}{
     fmt.Errorf,
     fmt.Println, fmt.Print, fmt.Printf,
@@ -2233,7 +2233,7 @@ eval.RegisterFunctions("io/ioutil", []interface{}{
 
 eval.Eval(program, scope)
 ```
-Now, in your monkey file, you could use it like below:
+Now, in your magpie file, you could use it like below:
 
 ```swift
 gfmt.Printf("Hello %s!\n", "go function");
@@ -2255,8 +2255,8 @@ For more detailed examples, please see `goObj.my`.
 
 ## Standard module introduction
 
-In monkey, there are some standard modules provided for you. e.g. json, sql, sort, fmt, os, logger, time, flag, net, http, etc...
-This is a brief introduction of some of the monkey standard modules, don't expect it to be thorough.
+In magpie, there are some standard modules provided for you. e.g. json, sql, sort, fmt, os, logger, time, flag, net, http, etc...
+This is a brief introduction of some of the magpie standard modules, don't expect it to be thorough.
 If you are curious, please see the source code.
 
 #### fmt module
@@ -2399,7 +2399,7 @@ if (ret == false) {
 
 #### linq module
 
-In monkey, the `linq` module support seven types of object:
+In magpie, the `linq` module support seven types of object:
 
 * File object (create using `newFile` builtin function)
 * Csv reader object (created using `newCsvReader` builtin function)
@@ -2492,7 +2492,7 @@ println('["st", "ng"] selectManyByIndexed() = {result}')
 
 #### Linq for file
 
-Now, monkey has a powerful `linq for file` support. it can be used to operate
+Now, magpie has a powerful `linq for file` support. it can be used to operate
 files a little bit like awk. See below for example:
 
 ```swift
@@ -2641,7 +2641,7 @@ For testing `sql` module, you need to do following:
     _ "github.com/mattn/go-sqlite3"
 ```
 
-3. Recompile monkey source.
+3. Recompile magpie source.
 
 Below is a complete source of the `examples/db.my`:
 
@@ -2720,7 +2720,7 @@ os.exit()
 
 ## About regular expression
 
-In monkey, regard to regular expression, you could use:
+In magpie, regard to regular expression, you could use:
 
 * Regular expression literal
 * 'regexp' module
@@ -2753,8 +2753,8 @@ Note: For detailed explanation of 'Regular Expression' pattern matching, you cou
 
 Included has some useful utilities like `formatter` and `highlighter`.
 
-The formatter utility can format the monkey language.
-The highlighter utility can highlight the monkey language to console or html.
+The formatter utility can format the magpie language.
+The highlighter utility can highlight the magpie language to console or html.
 
 You could also combine the two utilities:
 

@@ -3,16 +3,16 @@ export GOPATH=$(pwd)
 
 # format each go file
 #echo "Formatting go file..."
-#for file in `find ./src/monkey -name "*.go"`; do
+#for file in `find ./src/magpie -name "*.go"`; do
 #	echo "    `basename $file`"
 #	go fmt $file > /dev/null
 #done
 
 echo ""
 
-# run: ./monkey demo.my or ./monkey
-echo "Building REPL...(monkey)"
-go build -o monkey main.go
+# run: ./magpie demo.my or ./magpie
+echo "Building REPL...(magpie)"
+go build -o magpie main.go
 
 echo "Building mdoc...(mdoc)"
 go build -o mdoc mdoc.go

@@ -1,13 +1,13 @@
-/* Documentor generator for monkey. */
+/* Documentor generator for magpie. */
 package main
 
 import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"monkey/docs"
-	"monkey/lexer"
-	"monkey/parser"
+	"magpie/docs"
+	"magpie/lexer"
+	"magpie/parser"
 	"path/filepath"
 	"strings"
 	"os"
@@ -49,7 +49,7 @@ func genDoc(filename string, cfg doc.Config) {
 	}
 	f, err := ioutil.ReadFile(wd + "/" + filename)
 	if err != nil {
-		fmt.Println("monkey: ", err.Error())
+		fmt.Println("magpie: ", err.Error())
 		os.Exit(1)
 	}
 
@@ -108,7 +108,7 @@ func genDoc(filename string, cfg doc.Config) {
 
 func main() {
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [monkey file]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [magpie file]\n", os.Args[0])
 		flag.PrintDefaults()
 		os.Exit(0)
 	}

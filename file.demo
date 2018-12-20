@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"monkey/eval"
-	"monkey/lexer"
-	"monkey/parser"
-	"monkey/repl"
+	"magpie/eval"
+	"magpie/lexer"
+	"magpie/parser"
+	"magpie/repl"
 	"os"
 )
 
@@ -18,7 +18,7 @@ func runProgram(filename string) {
 	}
 	f, err := ioutil.ReadFile(wd + "/" + filename)
 	if err != nil {
-		fmt.Println("monkey: ", err.Error())
+		fmt.Println("magpie: ", err.Error())
 		os.Exit(1)
 	}
 	l := lexer.New(filename, string(f))
@@ -44,7 +44,7 @@ func main() {
 	//We must reset `os.Args`, or the `flag` module will not functioning correctly
 	os.Args = os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("Monkey programming language REPL\n")
+		fmt.Println("Magpie programming language REPL\n")
 		repl.Start(os.Stdout, true)
 	} else {
 		runProgram(args[0])

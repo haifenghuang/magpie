@@ -1,9 +1,9 @@
-# Monkey程序语言
+# Magpie程序语言
 
 Table of Contents
 =================
 
-* [Monkey程序语言](#monkey%E7%A8%8B%E5%BA%8F%E8%AF%AD%E8%A8%80)
+* [Magpie程序语言](#magpie%E7%A8%8B%E5%BA%8F%E8%AF%AD%E8%A8%80)
   * [主页](#%E4%B8%BB%E9%A1%B5)
   * [概述](#%E6%A6%82%E8%BF%B0)
   * [总览](#%E6%80%BB%E8%A7%88)
@@ -68,15 +68,15 @@ Table of Contents
 
 ## 主页
 
-[monkey](https://github.com/haifenghuang/monkey)
+[magpie](https://github.com/haifenghuang/magpie)
 
 ## 概述
 
-Monkey是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl和C#.
+Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl和C#.
 支持常用的控制流程，函数式编程和面向对象编程。
 同时它还包括一个实时语法高亮的REPL。
 
-下面是一个使用monkey语言的示例程序:
+下面是一个使用magpie语言的示例程序:
 
 ```swift
 
@@ -170,7 +170,7 @@ Property 'LastName' is not valid!
 
 ## 总览
 
-此项目是基于mayoms的项目 [monkey](https://github.com/mayoms/monkey)，修改了其中的一些bug，同时增加了许多语言特性：
+此项目是基于mayoms的项目 [magpie](https://github.com/mayoms/magpie)，修改了其中的一些bug，同时增加了许多语言特性：
 * 增加了简单面向对象（oop)支持(索引器，操作符重载，属性，static方法,注解)
 * 更改了`string`模块(能够正确处理utf8字符编码)
 * 修改了`file`模块(包含一些新方法).
@@ -211,23 +211,23 @@ Property 'LastName' is not valid!
 你可以如下方式使用REPL:
 
 ```sh
-~ » monkey
-Monkey programming language REPL
+~ » magpie
+Magpie programming language REPL
 
 >>
 ```
 
-或者运行一个monkey文件:
+或者运行一个magpie文件:
 
 ```sh
-monkey path/to/file
+magpie path/to/file
 ```
 
 ## 语言之旅
 
 ### 注释
 
-Monkey支持两种形式的单行注释和块注释：
+Magpie支持两种形式的单行注释和块注释：
 
 ```swift
 // a single line comment
@@ -242,7 +242,7 @@ Monkey支持两种形式的单行注释和块注释：
 
 ### 数据类型
 
-Monkey支持9种基本类型: `String`, `Int`, `UInt`, `Float`, `Bool`, `Array`, `Hash`, `Tuple`和`Nil`
+Magpie支持9种基本类型: `String`, `Int`, `UInt`, `Float`, `Bool`, `Array`, `Hash`, `Tuple`和`Nil`
 
 ```swift
 s1 = "hello, 黄"       # strings are UTF-8 encoded
@@ -259,7 +259,7 @@ n = nil
 
 ### 常量(字面值)
 
-Monkey中，主要有11种类型的常量(字面量).
+Magpie中，主要有11种类型的常量(字面量).
 
 * Integer
 * UInteger
@@ -360,7 +360,7 @@ let (j, k, l) = {"j": 50, "l": "good"}
 a, b, c = 1, "hello world", [1,2,3]
 ```
 
-注：从Monkey 5.0开始，`let`的含义有所变化，如果声明的变量已经存在，给变量赋值的时候就会覆盖原来的值：
+注：从Magpie 5.0开始，`let`的含义有所变化，如果声明的变量已经存在，给变量赋值的时候就会覆盖原来的值：
 
 ```swift
 let x, y = 10, 20;
@@ -376,7 +376,7 @@ printf("x=%d, y=%d\n", x, y) //结果：x=10, y=30
 
 ### 保留字
 
-下面列出了monkey语言的保留字：
+下面列出了magpie语言的保留字：
 
 * fn
 * let
@@ -488,7 +488,7 @@ println(LogOption.getName(LogOption.Lshortfile))
 ```
 
 ### 元操作符(Meta-Operators)
-Monkey内嵌了一些类似Perl6的元操作符。
+Magpie内嵌了一些类似Perl6的元操作符。
 但是对于元操作符有严格的限制：
 
 * 元操作符只能针对数组进行操作
@@ -509,7 +509,7 @@ println(value1) //结果：40
 println(value2) //结果：2HELLO2
 ```
 
-目前为止，Monkey中有六个元操作符：
+目前为止，Magpie中有六个元操作符：
 * <p>~+</p>
 * <p>~-</p>
 * <p>~*</p>
@@ -721,12 +721,12 @@ case i in {
 ```
 
 ### `using`语句
-在Monkey中，如果你有一些资源需要释放(release/free/close)，例如关闭文件，释放网络连接等等，
+在Magpie中，如果你有一些资源需要释放(release/free/close)，例如关闭文件，释放网络连接等等，
 你可以使用类似`c#`的`using`语句。
 
 ```swift
 // 这里，我们使用'using'语句，因此你不必显示调用infile.close()。
-// 当'using'语句执行完后，Monkey解析器会隐式调用infile.close()。
+// 当'using'语句执行完后，Magpie解析器会隐式调用infile.close()。
 using (infile = newFile("./file.demo", "r")) {
     if (infile == nil) {
         println("opening 'file.demo' for reading failed, error:", infile.message())
@@ -744,7 +744,7 @@ using (infile = newFile("./file.demo", "r")) {
 ```
 
 ### 用户自定义操作符
-在Monkey中， 你可以自定义一些操作符， 但是你不能覆盖Monkey内置的操作符。
+在Magpie中， 你可以自定义一些操作符， 但是你不能覆盖Magpie内置的操作符。
 
 > 注: 并不是所有的操作符都可以自定义。
 
@@ -782,7 +782,7 @@ let pp = 10.^20
 printf("pp=%v\n", pp) // result: pp=[10, 12, 14, 16, 18, 20]
 ```
 
-下面的表格列出了Monkey内置的运算符和用户可以自定义的运算符：
+下面的表格列出了Magpie内置的运算符和用户可以自定义的运算符：
 
 <table>
   <tr>
@@ -840,7 +840,7 @@ printf("pp=%v\n", pp) // result: pp=[10, 12, 14, 16, 18, 20]
 
 ### 整型(Integer)
 
-在Monkey中，整型也是一个对象。因此，你可以调用这个对象的方法。请看下面的例子：
+在Magpie中，整型也是一个对象。因此，你可以调用这个对象的方法。请看下面的例子：
 
 ```swift
 x = (-1).next()
@@ -875,7 +875,7 @@ if 9.isOdd() {
 
 ### 浮点型(Float)
 
-在Monkey中，浮点型也是一个对象。因此，你可以调用这个对象的方法。请看下面的例子：
+在Magpie中，浮点型也是一个对象。因此，你可以调用这个对象的方法。请看下面的例子：
 
 ```swift
 f0 = 15.20
@@ -890,7 +890,7 @@ println(f2)
 
 ### Decimal类型
 
-在Monkey中，Decimal类型表示一个任意精度固定位数的十进数(Arbitrary-precision fixed-point decimal numbers).
+在Magpie中，Decimal类型表示一个任意精度固定位数的十进数(Arbitrary-precision fixed-point decimal numbers).
 这个类型的代码主要是基于[decimal](https://github.com/shopspring/decimal).
 
 请看下面的例子：
@@ -916,7 +916,7 @@ fmt.println("123.45678901234567/3 = ", d3.div(d2))
 
 ### 数组(Array)
 
-在Monkey中, 你可以使用[]来初始化一个空的数组:
+在Magpie中, 你可以使用[]来初始化一个空的数组:
 
 ```swift
 emptyArr = []
@@ -1015,7 +1015,7 @@ println(arr) // 结果: [3,4,3,4,3,4]
 
 ### 字符串(String)
 
-在monkey中, 有三种类型的`string`:
+在magpie中, 有三种类型的`string`:
 
 * 原生字符串(可包含`\n`)
 * 双引号字符串(不可包含`\n`)
@@ -1044,7 +1044,7 @@ println('str={str}') //输出: "Hello World"
 
 ```
 
-在monkey中, 字符串是utf8编码的, 这说明你可以使用utf8编码的字符作为变量名：
+在magpie中, 字符串是utf8编码的, 这说明你可以使用utf8编码的字符作为变量名：
 
 ```swift
 三 = 3
@@ -1103,7 +1103,7 @@ println(a) // 结果：121314.6789
 ```
 
 ### 哈希(Hash)
-在monkey中，哈希默认会保持Key的插入顺序，类似Python的orderedDict.
+在magpie中，哈希默认会保持Key的插入顺序，类似Python的orderedDict.
 
 你可以使用{}来创建一个空的哈希:
 
@@ -1163,7 +1163,7 @@ println("Reverse Hash =", revHash)
 
 ### 元祖(Tuple)
 
-在Monkey中, `tuple`与数组非常类似, 但一旦你创建了一个元祖，你就不能够更改它。
+在Magpie中, `tuple`与数组非常类似, 但一旦你创建了一个元祖，你就不能够更改它。
 
 Tuples使用括号来创建:
 
@@ -1286,7 +1286,7 @@ println(revTuple) //结果: (9, 8, 7, 6, 4, 2, 5, 3, 1)
 
 ### 类
 
-Monkey支持简单的面向对象编程, 下面列出了Mokey支持的特性：
+Magpie支持简单的面向对象编程, 下面列出了Mokey支持的特性：
 
 * 继承和多态
 * 操作符重载
@@ -1297,8 +1297,8 @@ Monkey支持简单的面向对象编程, 下面列出了Mokey支持的特性：
 * 注解（类似java的annotation）
 * 类的构造器方法和类的普通方法支持多参数和默认参数
 
-monkey解析器(parser)能够正确的处理关键字`public`, `private`, `protected`, 但是解释器(evaluator)会忽略这些。
-也就是说，monkey现在暂时不支持访问限定。
+magpie解析器(parser)能够正确的处理关键字`public`, `private`, `protected`, 但是解释器(evaluator)会忽略这些。
+也就是说，magpie现在暂时不支持访问限定。
 
 你可以使用`class`关键字来声明一个类，使用`new Class(xxx)`来创建一个类的实例。
 
@@ -1311,7 +1311,7 @@ class Animal {
 }
 ```
 
-在monkey中，所有的类都继承于`object`根类。`object`根类包含几个所有类的共通方法。比如`toString()`, `instanceOf()`, `is_a()`, `classOf()`, `hashCode`。
+在magpie中，所有的类都继承于`object`根类。`object`根类包含几个所有类的共通方法。比如`toString()`, `instanceOf()`, `is_a()`, `classOf()`, `hashCode`。
 `instanceOf()`等价于`is_a()`
 
 下面的代码和上面的代码等价:
@@ -1531,7 +1531,7 @@ dateObj.getDateInfo()
 
 #### 索引器
 
-Monkey还支持类似C#的索引器(`Indexer`)。
+Magpie还支持类似C#的索引器(`Indexer`)。
 索引器能够让你像访问数组一样访问对象。
 
 索引器使用如下的方式声明：
@@ -1641,7 +1641,7 @@ Test.Main()
 
 #### 类类别(class category)
 
-Monkey支持类似objective-c的类别（C#中称为extension methods）。
+Magpie支持类似objective-c的类别（C#中称为extension methods）。
 
 ```swift
 class Animal {
@@ -1667,7 +1667,7 @@ animal.Run()
 
 #### 注解
 
-Monkey也支持非常简单的“注解”：
+Magpie也支持非常简单的“注解”：
 
 * 仅支持类的属性和方法的注解(不支持类自身的注解，也不支持普通方法的注解)
 * 注解类的声明中，仅支持属性，不支持方法
@@ -1675,7 +1675,7 @@ Monkey也支持非常简单的“注解”：
 
 
 使用`class @annotationName {}`的方式来声明一个注解。
-Monkey同时包含几个内置的注解：
+Magpie同时包含几个内置的注解：
 
 * @Override（作用类似于java的@Override）。
 * @NotNull
@@ -1769,7 +1769,7 @@ Property 'LastName' not valid!
 
 ### 标准输入/输出/错误
 
-Monkey中预定义了下面三个对象: `stdin`, `stdout`, `stderr`。分别代表标准输入，标准输出，标准错误。
+Magpie中预定义了下面三个对象: `stdin`, `stdout`, `stderr`。分别代表标准输入，标准输出，标准错误。
 
 ```swift
 stdout.writeLine("Hello world")
@@ -1848,7 +1848,7 @@ if (ret == false) {
 
 ```
 
-也许你会觉得奇怪，为什么`nil`或`false`有`message()`方法？ 因为在monkey中, `nil`和`false`两个都是对象，因此它们都有方法。
+也许你会觉得奇怪，为什么`nil`或`false`有`message()`方法？ 因为在magpie中, `nil`和`false`两个都是对象，因此它们都有方法。
 
 ### 关于`defer`关键字
 
@@ -1875,7 +1875,7 @@ I'm defer1
 
 ### 不同类型的联接
 
-Monkey中，你可以联接不同的类型。请看下面的例子:
+Magpie中，你可以联接不同的类型。请看下面的例子:
 
 ```swift
 // Number plus assignment
@@ -1920,7 +1920,7 @@ println(hash)
 
 ### 列表推导(Comprehensions)
 
-Monkey支持列表推导(列表可以为数组,字符串，Range，Tuple, 哈希)。
+Magpie支持列表推导(列表可以为数组,字符串，Range，Tuple, 哈希)。
 列表推导的返回值均为数组。请看下面的例子:
 
 ```swift
@@ -1946,7 +1946,7 @@ z = [v * 10 for k,v in {"key1":10, "key2":20, "key3":30}]
 println(z) //结果：[100, 200, 300]
 ```
 
-Monkey同时也支持哈希推导。
+Magpie同时也支持哈希推导。
 哈希推导的返回值均为哈希。请看下面的例子:
 
 ```swift
@@ -2000,7 +2000,7 @@ println(values)
 
 ### 函数
 
-在Monkey中，函数和别的基础类型一样，能够作为函数的参数，作为函数的返回值
+在Magpie中，函数和别的基础类型一样，能够作为函数的参数，作为函数的返回值
 
 函数还可以有缺省参数和可变参数。
 
@@ -2082,9 +2082,6 @@ println("hhf".upper)  //结果: "HHF"
 println("hhf".upper())
 ```
 
-
-Monkey5.0之前，函数不支持多个返回值, 但有很多方法可以达到目的.
-
 下面是其中的一种实现方式:
 
 ```swift
@@ -2103,7 +2100,7 @@ if ret[1] != "" {
 }
 ```
 
-从版本5.0开始，Monkey可以使用let语句支持函数返回多个值。
+从版本5.0开始，Magpie可以使用let语句支持函数返回多个值。
 返回的多个值被包装为一个元祖(tuple)。
 
 ```swift
@@ -2183,15 +2180,15 @@ for i in XRange(10) {
 ```
 
 ## 使用`go`语言模块
-Monkey提供了引入`go`语言模块的功能(实验性)。
+Magpie提供了引入`go`语言模块的功能(实验性)。
 
 如果你需要使用`go`语言的package函数或类型，你首先需要使用`RegisterFunctions'或`RegisterVars`
-来注册`go`语言的方法或类型到Monkey语言中。
+来注册`go`语言的方法或类型到Magpie语言中。
 
 下面是`main.go`中的例子(节选):
 
 ```swift
-// 因为Monkey语言中，已经提供了内置模块`fmt`, 因此这里我们使用`gfmt`作为名字。
+// 因为Magpie语言中，已经提供了内置模块`fmt`, 因此这里我们使用`gfmt`作为名字。
 eval.RegisterFunctions("gfmt", []interface{}{
     fmt.Errorf,
     fmt.Println, fmt.Print, fmt.Printf,
@@ -2208,7 +2205,7 @@ eval.RegisterFunctions("io/ioutil", []interface{}{
 
 eval.Eval(program, scope)
 ```
-接下来, 在你的Monkey文件中，像下面这样使用导入的方法:
+接下来, 在你的Magpie文件中，像下面这样使用导入的方法:
 
 ```swift
 gfmt.Printf("Hello %s!\n", "go function");
@@ -2230,9 +2227,9 @@ for file in files {
 
 ## 标准模块介绍
 
-Monkey中,预定义了一些标准模块，例如：json, sql, sort, fmt, os, logger, time, flag, net, http等等。
+Magpie中,预定义了一些标准模块，例如：json, sql, sort, fmt, os, logger, time, flag, net, http等等。
 
-下面是对monkey的标准模块的一个简短的描述。
+下面是对magpie的标准模块的一个简短的描述。
 
 ### fmt 模块
 
@@ -2374,7 +2371,7 @@ if (ret == false) {
 
 ### linq 模块
 
-在Monkey中, `linq`模块支持下面的其中类型的对象:
+在Magpie中, `linq`模块支持下面的其中类型的对象:
 
 * File对象 (使用内置函数`newFile`创建)
 * Csv reader对象(使用内置函数`newCsvReader`创建)
@@ -2467,7 +2464,7 @@ println('["st", "ng"] selectManyByIndexed() = {result}')
 
 ### Linq for file支持
 
-现在，monkey有了一个支持`linq for file`的功能。这个功能类似awk。
+现在，magpie有了一个支持`linq for file`的功能。这个功能类似awk。
 请看下面的代码:
 
 ```swift
@@ -2617,7 +2614,7 @@ println('{resultValue}')
     _ "github.com/mattn/go-sqlite3"
 ```
 
-3. 重新编译monkey源码.
+3. 重新编译magpie源码.
 
 下面是一个完整的使用数据库的例子(`examples/db.my`):
 
@@ -2698,8 +2695,8 @@ os.exit()
 
 项目还包含了一些使用的工具：`formatter`和`highlighter`。
 
-formatter工具能够格式化monkey语言。
-highlighter工具能够语法高亮monkey语言（提供两种输出：命令行和html）。
+formatter工具能够格式化magpie语言。
+highlighter工具能够语法高亮magpie语言（提供两种输出：命令行和html）。
 
 你也可以将它们合起来使用:
 
@@ -2709,7 +2706,7 @@ highlighter工具能够语法高亮monkey语言（提供两种输出：命令行
 
 ## 文档生成
 
-Monkey还包含一个命令行工具`mdoc`，可以从Monkey文件的注释生成markdown类型的文档或者HTML文档。
+Magpie还包含一个命令行工具`mdoc`，可以从Magpie文件的注释生成markdown类型的文档或者HTML文档。
 
 目前仅仅支持以下语句的注释生成:
 
@@ -2763,7 +2760,7 @@ HTML文档的生成是调用github的REST API，因此必须在网络连接正�
 
 ## 语法高亮
 
-目前，monkey支持以下几种编辑器的语法高亮:
+目前，magpie支持以下几种编辑器的语法高亮:
 
 1. vim
 
@@ -2799,4 +2796,4 @@ MIT
 ## 备注
 
 如果你喜欢此项目，请点击下面的链接，多多star，fork。谢谢！
-[monkey](https://github.com/haifenghuang/monkey)
+[magpie](https://github.com/haifenghuang/magpie)
