@@ -4,7 +4,7 @@ Table of Contents
 =================
 
 <details><summary>目录</summary>
-<p>
+
 * [Magpie程序语言](#magpie%E7%A8%8B%E5%BA%8F%E8%AF%AD%E8%A8%80)
   * [主页](#%E4%B8%BB%E9%A1%B5)
   * [概述](#%E6%A6%82%E8%BF%B0)
@@ -68,7 +68,7 @@ Table of Contents
   * [许可证](#%E8%AE%B8%E5%8F%AF%E8%AF%81)
   * [备注](#%E5%A4%87%E6%B3%A8)
 
-</p>
+
 </details>
 
 ## 主页
