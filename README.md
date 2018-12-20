@@ -4,7 +4,8 @@ Chinese version: [中文](README_cn.md)
 
 Table of Contents
 =================
-
+<details><summary>TOC</summary>
+<p>
 * [Magpie Programming Language](#magpie-programming-language)
   * [Summary](#summary)
   * [Overview](#overview)
@@ -66,6 +67,9 @@ Table of Contents
   * [Syntax Highlight](#syntax-highlight)
   * [Future Plans](#future-plans)
   * [License](#license)
+
+</p>
+</details>
 
 ## Summary
 
