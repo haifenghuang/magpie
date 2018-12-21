@@ -24,6 +24,7 @@ var (
 	BREAK    = &Break{}
 	CONTINUE = &Continue{}
 	NIL      = &Nil{}
+	EMPTY    = &Optional{Value:NIL}
 )
 
 var includeScope *Scope

@@ -1182,6 +1182,7 @@ func init() {
 	NewTemplateObj()
 	NewDecimalObj()
 	NewUnicodeObj()
+	NewOptionalObj()
 }
 
 func marshalJsonObject(obj interface{}) (bytes.Buffer, error) {
