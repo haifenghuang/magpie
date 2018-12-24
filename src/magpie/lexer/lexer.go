@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
-	_ "fmt"
+	"fmt"
 )
 
 const bom = 0xFEFF // byte order mark, only permitted as very first character
@@ -541,12 +541,62 @@ func (l *Lexer) NextInterpToken() token.Token {
 }
 
 func (l *Lexer) readIdentifier() string {
+// 	defer func() {
+//		if err := recover(); err != nil {
+// 			fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", err)
+// 		}
+//    }()
+
+	// Built-in types which you can extend.
+	builtinTypes := []string{
+		"integer.",  // signed integer
+		"uinteger.", // unsigned integer
+		"float.",
+		"boolean.",
+		"string.",
+		"array.",
+		"tuple.",
+		"hash."}
+
 	position := l.position
-	for isLetter(l.ch) || isDigit(l.ch) {
+	// Why '?' : Because Magpie support Optional, so it should be good for 
+	// a Optional type to denote it meaning with a '?' like 'isEmpty?'
+
+	// Why '.' : Because Magpie support extend built-in types with 'int', 'float', etc.
+	// For example, you could extend 'int' type with 'int.funname(xxx)'
+	for isLetter(l.ch) || isDigit(l.ch) || l.ch == '?' || l.ch == '.' {
 		l.readNext()
 	}
-	return string(l.input[position:l.position])
 
+	//if identifier contains '?', then it must be the last one
+	ret := string(l.input[position:l.position])
+
+	cnt := strings.Count(ret, "?")
+	if  cnt > 1 { //multiple '?'
+		errStr := fmt.Sprintf("Line[%d]: Identifier() could only contain one '?' character", l.line, ret)
+		panic(errStr)
+	} else if cnt == 1 { //only one '?'
+		if ret[len(ret) - 1:] != "?" {
+			errStr := fmt.Sprintf("Line[%d]: '?' character must be the last character in '%s' identifier", l.line, ret)
+			panic(errStr)
+		}
+	}
+
+	ok := false
+	// If contains '.', we only allows identifiers in the builtinTypes variable.
+	if strings.Contains(ret, ".") {
+		for _, prefix := range builtinTypes {
+			if strings.HasPrefix(ret, prefix) {
+				ok = true
+			}
+		}
+		if !ok {
+			errStr := fmt.Sprintf("Line[%d]: '.' character only allowed in 'int|uint|float|boolean|string|array|tuple|hash|object'", l.line)
+			panic(errStr)
+		}
+	}
+	
+	return ret
 }
 
 func (l *Lexer) readRegExLiteral() (literal string) {

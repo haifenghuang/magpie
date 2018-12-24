@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"magpie/ast"
+	_ "magpie/lexer"
 	"magpie/token"
 	"os"
 	"path"
@@ -4267,10 +4268,35 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 
 	default:
 		switch o := call.Call.(type) {
-		case *ast.Identifier:      //e.g. method call like '[1,2,3].first'
+		case *ast.Identifier:      //e.g. method call like '[1,2,3].first', 'float.to_integer'
+			// Check if it's a builtin type extension method, for example: "int.xxx()", "float.xxx()"
+			name := fmt.Sprintf("%s.%s", strings.ToLower(string(m.Type())), o.String())
+			if fn, ok := scope.Get(name); ok {
+				extendScope := NewScope(scope)
+				extendScope.Set("self", obj) // Set "self" to be the implicit object.
+				results := Eval(fn.(*Function).Literal.Body, extendScope)
+				if results.Type() == RETURN_VALUE_OBJ {
+					return results.(*ReturnValue).Value
+				}
+				return results
+			}
+
 			return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
-		case *ast.CallExpression:  //e.g. method call like '[1,2,3].first()'
+		case *ast.CallExpression:  //e.g. method call like '[1,2,3].first()', 'float.to_integer()'
 			args := evalArgs(o.Arguments, scope)
+			// Check if it's a builtin type extension method, for example: "int.xxx()", "float.xxx()"
+			name := fmt.Sprintf("%s.%s", strings.ToLower(string(m.Type())), o.Function.String())
+			if fn, ok := scope.Get(name); ok {
+				extendScope := extendFunctionScope(fn.(*Function), args)
+				extendScope.Set("self", obj) // Set "self" to be the implicit object.
+
+				results := Eval(fn.(*Function).Literal.Body, extendScope)
+				if results.Type() == RETURN_VALUE_OBJ {
+					return results.(*ReturnValue).Value
+				}
+				return results
+			}
+
 			return obj.CallMethod(call.Call.Pos().Sline(), scope, o.Function.String(), args...)
 		}
 	}
@@ -5312,4 +5338,21 @@ func reportTypoSuggestionsMeth(line string, scope *Scope, objName string, miss s
 	} else {
 		panic(NewError(line, NOMETHODERROR, miss, objName))
 	}
+}
+
+func extendFunctionScope(fn *Function, args []Object) *Scope {
+	fl := fn.Literal
+	scope := NewScope(fn.Scope)
+
+	// Set the defaults
+	for k, v := range fl.Values {
+		scope.Set(k, Eval(v, scope))
+	}
+	for idx, param := range fl.Parameters {
+		if idx < len(args) { // default parameters must be in the last part.
+			scope.Set(param.(*ast.Identifier).Value, args[idx])
+		}
+	}
+
+	return scope
 }
