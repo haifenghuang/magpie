@@ -26,6 +26,17 @@ var (
 	CONTINUE = &Continue{}
 	NIL      = &Nil{}
 	EMPTY    = &Optional{Value:NIL}
+
+	// Built-in types which you can extend.
+	builtinTypes = []string{
+		"integer",  // signed integer
+		"uinteger", // unsigned integer
+		"float",
+		"boolean",
+		"string",
+		"array",
+		"tuple",
+		"hash"}
 )
 
 var includeScope *Scope
@@ -4268,36 +4279,58 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 
 	default:
 		switch o := call.Call.(type) {
-		case *ast.Identifier:      //e.g. method call like '[1,2,3].first', 'float.to_integer'
-			// Check if it's a builtin type extension method, for example: "int.xxx()", "float.xxx()"
-			name := fmt.Sprintf("%s.%s", strings.ToLower(string(m.Type())), o.String())
-			if fn, ok := scope.Get(name); ok {
-				extendScope := NewScope(scope)
-				extendScope.Set("self", obj) // Set "self" to be the implicit object.
-				results := Eval(fn.(*Function).Literal.Body, extendScope)
-				if results.Type() == RETURN_VALUE_OBJ {
-					return results.(*ReturnValue).Value
+		case *ast.Identifier:      //e.g. method call like '[1,2,3].first', 'float$to_integer'
+			// Check if it's a builtin type extension method, for example: "float$xxx()"
+			ok := false
+			objType := strings.ToLower(string(obj.Type()))
+			for _, prefix := range builtinTypes {
+				if strings.HasPrefix(objType, prefix) {
+					ok = true
 				}
-				return results
 			}
-
-			return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
-		case *ast.CallExpression:  //e.g. method call like '[1,2,3].first()', 'float.to_integer()'
+			if ok {
+				name := fmt.Sprintf("%s$%s", objType, o.String())
+				if fn, ok := scope.Get(name); ok {
+					extendScope := NewScope(scope)
+					extendScope.Set("self", obj) // Set "self" to be the implicit object.
+					results := Eval(fn.(*Function).Literal.Body, extendScope)
+					if results.Type() == RETURN_VALUE_OBJ {
+						return results.(*ReturnValue).Value
+					}
+					return results
+				} else {
+					return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
+				}
+			} else {
+				return obj.CallMethod(call.Call.Pos().Sline(), scope, o.String())
+			}
+		case *ast.CallExpression:  //e.g. method call like '[1,2,3].first()', 'float$to_integer()'
 			args := evalArgs(o.Arguments, scope)
-			// Check if it's a builtin type extension method, for example: "int.xxx()", "float.xxx()"
-			name := fmt.Sprintf("%s.%s", strings.ToLower(string(m.Type())), o.Function.String())
-			if fn, ok := scope.Get(name); ok {
-				extendScope := extendFunctionScope(fn.(*Function), args)
-				extendScope.Set("self", obj) // Set "self" to be the implicit object.
-
-				results := Eval(fn.(*Function).Literal.Body, extendScope)
-				if results.Type() == RETURN_VALUE_OBJ {
-					return results.(*ReturnValue).Value
+			// Check if it's a builtin type extension method, for example: "float$xxx()"
+			ok := false
+			objType := strings.ToLower(string(obj.Type()))
+			for _, prefix := range builtinTypes {
+				if strings.HasPrefix(objType, prefix) {
+					ok = true
 				}
-				return results
 			}
+			if ok {
+				name := fmt.Sprintf("%s$%s", strings.ToLower(string(m.Type())), o.Function.String())
+				if fn, ok := scope.Get(name); ok {
+					extendScope := extendFunctionScope(fn.(*Function), args)
+					extendScope.Set("self", obj) // Set "self" to be the implicit object.
 
-			return obj.CallMethod(call.Call.Pos().Sline(), scope, o.Function.String(), args...)
+					results := Eval(fn.(*Function).Literal.Body, extendScope)
+					if results.Type() == RETURN_VALUE_OBJ {
+						return results.(*ReturnValue).Value
+					}
+					return results
+				} else {
+					return obj.CallMethod(call.Call.Pos().Sline(), scope, o.Function.String(), args...)
+				}
+			} else {
+				return obj.CallMethod(call.Call.Pos().Sline(), scope, o.Function.String(), args...)
+			}
 		}
 	}
 

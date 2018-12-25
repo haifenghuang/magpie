@@ -1,4 +1,4 @@
-fn safeDivision(a, b) {
+fn safeDivision?(a, b) {
     if (b == 0){
         return optional.empty();
     } else {
@@ -6,18 +6,18 @@ fn safeDivision(a, b) {
     }
 }
 
-op1 = safeDivision(10, 0)
+op1 = safeDivision?(10, 0)
 if (!op1.isPresent()) {
     println(op1)
 
 }
 
-op2 = safeDivision(10, 2)
+op2 = safeDivision?(10, 2)
 if (op2.isPresent()) {
     println(op2)
 
     let val = op2.get()
-    printf("safeDivision(10, 2)=%d\n", int(val))
+    printf("safeDivision?(10, 2)=%d\n", int(val))
 }
 
 println("-------------------------------\n")

@@ -1,10 +1,10 @@
-fn float.to_integer() {
+fn float$to_integer() {
    return ( int( self ) );
 }
 
 printf("12.5.to_integer()=%d\n", 12.5.to_integer())
 
-fn array.find(item) {
+fn array$find(item) {
    i = 0;
    length = len(self);
 

@@ -31,6 +31,8 @@ Table of Contents
     * [字符串(String)](#%E5%AD%97%E7%AC%A6%E4%B8%B2string)
     * [哈希(Hash)](#%E5%93%88%E5%B8%8Chash)
     * [元祖(Tuple)](#%E5%85%83%E7%A5%96tuple)
+    * [扩展基本类型](#%E6%89%A9%E5%B1%95%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B)
+    * [Optional类型](#optional%E7%B1%BB%E5%9E%8B)
     * [类](#%E7%B1%BB)
       * [继承和多态](#%E7%BB%A7%E6%89%BF%E5%92%8C%E5%A4%9A%E6%80%81)
       * [操作符重载](#%E6%93%8D%E4%BD%9C%E7%AC%A6%E9%87%8D%E8%BD%BD)
@@ -198,6 +200,8 @@ Property 'LastName' is not valid!
 * 支持可变参数和缺省参数的函数
 * 支持列表推导(list comprehension)和哈希推导(hash comprehension)
 * 支持用户自定义操作符
+* 支持基本类型扩展, 例如‘int.xxx(params)'
+* Optional对象支持
 * 使用Go Package的方法(`RegisterFunctions`和`RegisterVars`)
 
 这个项目的目的主要有以下几点：
@@ -1288,6 +1292,79 @@ println(tp) //结果: (1, 3, 5, 2, 4, 6, 7, 8, 9)
 revTuple = reverse(tp)
 println(revTuple) //结果: (9, 8, 7, 6, 4, 2, 5, 3, 1)
 ```
+
+### 扩展基本类型
+对于基本类型的扩展，Magpie也提供了相应的支持。
+
+支持的可以扩展的基本类型如下：
+* integer
+* uinteger
+* float
+* boolean
+* string
+* array
+* tuple
+* hash
+
+语法是： 基本类型+$+方法名称(参数)
+
+```swift
+fn float$to_integer() {
+   return ( int( self ) );
+}
+
+printf("12.5.to_integer()=%d\n", 12.5.to_integer())
+
+fn array$find(item) {
+   i = 0;
+   length = len(self);
+
+   while (i < length) {
+     if (self[i] == item) {
+       return i;
+     }
+     i++;
+   }
+
+   // if not found
+   return -1;
+};
+
+idx = [25,20,38].find(10);
+printf("[25,20,38].find(10) = %d\n", idx) // not found, return -1
+
+idx = [25,20,38].find(38);
+printf("[25,20,38].find(38) = %d\n", idx) //found, returns 2
+```
+
+### Optional类型
+Magpie支持类似java8的Optional类型。
+
+```swift
+fn safeDivision?(a, b) {
+    if (b == 0){
+        return optional.empty();
+    } else {
+        return optional.of(a/b);
+    }
+}
+
+op1 = safeDivision?(10, 0)
+if (!op1.isPresent()) {
+    println(op1)
+
+}
+
+op2 = safeDivision?(10, 2)
+if (op2.isPresent()) {
+    println(op2)
+
+    let val = op2.get()
+    printf("safeDivision?(10, 2)=%d\n", int(val))
+}
+```
+
+建议您使用'?'作为方法的最后一个字符，来表示它是一个Optional类型。
 
 ### 类
 

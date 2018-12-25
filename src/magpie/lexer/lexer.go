@@ -547,24 +547,13 @@ func (l *Lexer) readIdentifier() string {
 // 		}
 //    }()
 
-	// Built-in types which you can extend.
-	builtinTypes := []string{
-		"integer.",  // signed integer
-		"uinteger.", // unsigned integer
-		"float.",
-		"boolean.",
-		"string.",
-		"array.",
-		"tuple.",
-		"hash."}
-
 	position := l.position
 	// Why '?' : Because Magpie support Optional, so it should be good for 
 	// a Optional type to denote it meaning with a '?' like 'isEmpty?'
 
-	// Why '.' : Because Magpie support extend built-in types with 'int', 'float', etc.
-	// For example, you could extend 'int' type with 'int.funname(xxx)'
-	for isLetter(l.ch) || isDigit(l.ch) || l.ch == '?' || l.ch == '.' {
+	// Why '$' : Because Magpie support extend built-in types with 'integer', 'float', etc.
+	// For example, you could extend 'integer' type with 'integer$funcname(xxx)'
+	for isLetter(l.ch) || isDigit(l.ch) || l.ch == '?' || l.ch == '$' {
 		l.readNext()
 	}
 
@@ -582,20 +571,6 @@ func (l *Lexer) readIdentifier() string {
 		}
 	}
 
-	ok := false
-	// If contains '.', we only allows identifiers in the builtinTypes variable.
-	if strings.Contains(ret, ".") {
-		for _, prefix := range builtinTypes {
-			if strings.HasPrefix(ret, prefix) {
-				ok = true
-			}
-		}
-		if !ok {
-			errStr := fmt.Sprintf("Line[%d]: '.' character only allowed in 'int|uint|float|boolean|string|array|tuple|hash|object'", l.line)
-			panic(errStr)
-		}
-	}
-	
 	return ret
 }
 

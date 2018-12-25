@@ -31,6 +31,8 @@ Table of Contents
     * [String](#string)
     * [Hash](#hash)
     * [Tuple](#tuple)
+    * [Extend basic type](#extend-basic-type)
+    * [Optional type](#optional-type)
     * [class](#class)
       * [inheritance and polymorphism](#inheritance-and-polymorphism)
       * [operator overloading](#operator-overloading)
@@ -196,6 +198,8 @@ This project is based on mayoms's project [magpie](https://github.com/mayoms/mag
 * function with default value and variadic parameters
 * list comprehension and hash comprehension support
 * user defined operator support
+* Extending basic type with something like 'int.xxx(params)'
+* Optional object support
 * Using method of Go Package(`RegisterFunctions` and `RegisterVars`)
 
 There are a number of tasks to complete, as well as a number of bugs. The purpose of this project was to dive deeper into Go, as well as get a better understanding of how programming languages work. It has been successful in those goals. There may or may not be continued work - I do plan on untangling a few messy spots, and there are a few features I'd like to see implemented. This will happen as time and interest allows.
@@ -1288,6 +1292,80 @@ println(tp) //result: (1, 3, 5, 2, 4, 6, 7, 8, 9)
 revTuple = reverse(tp)
 println(revTuple) //result: (9, 8, 7, 6, 4, 2, 5, 3, 1)
 ```
+
+### Extend basic type 
+Magpie also provides support for extending basic types.
+
+The basic types that can be extended are as follows：
+* integer
+* uinteger
+* float
+* boolean
+* string
+* array
+* tuple
+* hash
+
+The syntax is: BasicType + "$" + MethodName(params)
+
+```swift
+fn float$to_integer() {
+   return ( int( self ) );
+}
+
+printf("12.5.to_integer()=%d\n", 12.5.to_integer())
+
+fn array$find(item) {
+   i = 0;
+   length = len(self);
+
+   while (i < length) {
+     if (self[i] == item) {
+       return i;
+     }
+     i++;
+   }
+
+   // if not found
+   return -1;
+};
+
+idx = [25,20,38].find(10);
+printf("[25,20,38].find(10) = %d\n", idx) // not found, return -1
+
+idx = [25,20,38].find(38);
+printf("[25,20,38].find(38) = %d\n", idx) //found, returns 2
+```
+
+### Optional type
+Magpie has support for Optional type like java8.
+
+```swift
+fn safeDivision?(a, b) {
+    if (b == 0){
+        return optional.empty();
+    } else {
+        return optional.of(a/b);
+    }
+}
+
+op1 = safeDivision?(10, 0)
+if (!op1.isPresent()) {
+    println(op1)
+
+}
+
+op2 = safeDivision?(10, 2)
+if (op2.isPresent()) {
+    println(op2)
+
+    let val = op2.get()
+    printf("safeDivision?(10, 2)=%d\n", int(val))
+}
+```
+
+It is recommended that you use '?' as the last character of method to denote
+that it is an option.
 
 ### class
 
