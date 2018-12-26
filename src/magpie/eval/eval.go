@@ -3891,6 +3891,10 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 		}
 	}
 
+	if fn.Type() == CLASS_OBJ {
+		panic(NewError(call.Function.Pos().Sline(), CLASSCREATEERROR, call.Function.String()))
+	}
+
 	f := fn.(*Function)
 
 	var thisObj Object

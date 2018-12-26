@@ -52,6 +52,7 @@ const (
 	INDEXNOTFOUNDERROR
 	CALLNONSTATICERROR
 	CLASSCATEGORYERROR
+	CLASSCREATEERROR
 	PARENTNOTANNOTATION
 	OVERRIDEERROR
 	METAOPERATORERROR
@@ -106,6 +107,7 @@ var errorType = map[int]string{
 	INDEXNOTFOUNDERROR:"Indexer not found for class(%s)",
 	CALLNONSTATICERROR:"Could not call non-static.",
 	CLASSCATEGORYERROR:"No class(%s) found for category(%s).",
+	CLASSCREATEERROR:  "You must use 'new' to create class('%s')",
 	PARENTNOTANNOTATION:"Annotation(%s)'s Parent(%s) is not annotation.",
 	OVERRIDEERROR:      "Method(%s) of class(%s) must override a superclass method!",
 	METAOPERATORERROR:  "Meta-Operators' item must be Numbers|String!",
