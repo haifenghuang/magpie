@@ -2375,11 +2375,10 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 					msg := fmt.Sprintf("Syntax Error:%v- Function literal is not allowed in 'let' statement of class.", s.Pos())
 					p.errors = append(p.errors, msg)
 					return nil
-				default:
-					cls.Members = append(cls.Members, s)
 				}
 			} //end for
 
+			cls.Members = append(cls.Members, s)
 		case *ast.FunctionStatement: //class methods
 			cls.Methods[s.Name.Value] = s
 		case *ast.PropertyDeclStmt: //properties
