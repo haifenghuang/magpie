@@ -174,7 +174,7 @@ Below is the html document generated using the `mdoc` tool:
 
 ## Overview
 
-This project is based on mayoms's project [magpie](https://github.com/mayoms/magpie) with some bug fixes and a lot of new features including:
+This project is based on mayoms's project [monkey](https://github.com/mayoms/monkey) with some bug fixes and a lot of new features including:
 
 * Added simple class support(Indexer, operator overloading, property, static method/property/field and class annotation)
 * Modified string module(which can correctly handle utf8 character encoding)
@@ -461,7 +461,7 @@ fmt.printf("newArr=%v\n", newArr)
 
 ### `enum` keyword
 
-In mokey, you can use enum to define constants.
+In Magpie, you can use enum to define constants.
 
 ```swift
 LogOption = enum {
@@ -722,7 +722,7 @@ case i in {
 
 ```
 ### using statement
-In magpie, if you have some resources you want to release/free/close, e.g. close opended file, close network connection etc，
+In magpie, if you have some resources you want to release/free/close, e.g. close opened file, close network connection etc，
 you can use the `using` statement just like `c#`.
 
 ```swift
@@ -1750,7 +1750,7 @@ animal.Run()
 
 Magpie also has very simple annotation support like java：
 
-* Only mehotd and property of class can have annotations(not class itself, or other simple functions)
+* Only method and property of class can have annotations(not class itself, or other simple functions)
 * In the body of `Annotation` class, only support property, do not support methods.
 * When use annotations, you must create an object.
 
@@ -1877,7 +1877,7 @@ stdin >> name;
 printf("Welcome, name=%v\n", name)
 ```
 
-Insertion operator (`<<`) and Extraction operator(`>>`) can also be used for operating file object。
+Insertion operator (`<<`) and Extraction operator(`>>`) can also be used for operating file object.
 
 ```swift
 //Read file by using extraction operator(">>")
@@ -2291,7 +2291,7 @@ for i in XRange(10) {
 ## Use `go` language modules
 Magpie has experimental support for working with `go` modules.
 
-If you need to use `go`s language package fucntion, you first need to use `RegisterFunctions' or `RegisterVars` to
+If you need to use go`s language package function, you first need to use `RegisterFunctions` or `RegisterVars` to
 register `go` language functions or types into magpie language.
 
 Below is an example of `main.go`(extracted):
@@ -2710,7 +2710,7 @@ println('{resultValue}')
 
 The `sql` module provides a lower abstraction layer for working with database.
 
-It should correctly handle database null values, though not throughly tested.
+It should correctly handle database null values, though not thoroughly tested.
 
 For testing `sql` module, you need to do following:
 

@@ -177,7 +177,7 @@ Property 'LastName' is not valid!
 
 ## 总览
 
-此项目是基于mayoms的项目 [magpie](https://github.com/mayoms/magpie)，修改了其中的一些bug，同时增加了许多语言特性：
+此项目是基于mayoms的项目 [monkey](https://github.com/mayoms/monkey)，修改了其中的一些bug，同时增加了许多语言特性：
 * 增加了简单面向对象（oop)支持(索引器，操作符重载，属性，static方法,注解)
 * 更改了`string`模块(能够正确处理utf8字符编码)
 * 修改了`file`模块(包含一些新方法).
@@ -466,7 +466,7 @@ fmt.printf("newArr=%v\n", newArr)
 
 ### `enum`关键字
 
-在mokey中，你可以使用`enum`来定义常量.
+在Magpie中，你可以使用`enum`来定义常量.
 
 ```swift
 LogOption = enum {
@@ -2264,7 +2264,7 @@ for i in XRange(10) {
 ## 使用`go`语言模块
 Magpie提供了引入`go`语言模块的功能(实验性)。
 
-如果你需要使用`go`语言的package函数或类型，你首先需要使用`RegisterFunctions'或`RegisterVars`
+如果你需要使用`go`语言的package函数或类型，你首先需要使用`RegisterFunctions`或`RegisterVars`
 来注册`go`语言的方法或类型到Magpie语言中。
 
 下面是`main.go`中的例子(节选):
