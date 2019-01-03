@@ -1370,6 +1370,69 @@ func (ls *LetStatement) Docs() string {
 }
 
 ///////////////////////////////////////////////////////////
+//                    CONST STATEMENT                    //
+///////////////////////////////////////////////////////////
+type ConstStatement struct {
+	Token  token.Token
+	Name  *Identifier
+	Value Expression
+
+	StaticFlag bool
+	ModifierLevel ModifierLevel //used in 'class'
+	Annotations []*AnnotationStmt
+
+	//Doc related
+	Doc *CommentGroup // associated documentation; or nil
+	SrcEndToken token.Token
+}
+
+func (cs *ConstStatement) Pos() token.Position {
+	return cs.Token.Pos
+}
+
+func (cs *ConstStatement) End() token.Position {
+	return cs.Value.End()
+}
+
+//Below two methods implements 'Source' interface.
+func (cs *ConstStatement) SrcStart() token.Position {
+	return cs.Pos()
+}
+
+func (cs *ConstStatement) SrcEnd() token.Position {
+	ret := cs.SrcEndToken.Pos
+	length := utf8.RuneCountInString(cs.SrcEndToken.Literal)
+	ret.Offset += length
+	return ret
+}
+
+func (cs *ConstStatement) statementNode()       {}
+func (cs *ConstStatement) TokenLiteral() string { return cs.Token.Literal }
+
+func (cs *ConstStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(cs.ModifierLevel.String())
+	if cs.StaticFlag {
+		out.WriteString("static ")
+	}
+
+	out.WriteString(cs.TokenLiteral() + " ")
+
+	out.WriteString(cs.Name.TokenLiteral())
+	out.WriteString(" = ")
+	if cs.Value != nil {
+		out.WriteString(cs.Value.String())
+	}
+	out.WriteString(";")
+	return out.String()
+}
+
+func (cs *ConstStatement) Docs() string {
+	return cs.String()
+}
+
+///////////////////////////////////////////////////////////
 //                      INCLUDE STATEMENT                //
 ///////////////////////////////////////////////////////////
 type IncludeStatement struct {

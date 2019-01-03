@@ -90,6 +90,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalIncludeStatement(node, scope)
 	case *ast.LetStatement:
 		return evalLetStatement(node, scope)
+	case *ast.ConstStatement:
+		return evalConstStatement(node, scope)
 	case *ast.ReturnStatement:
 		return evalReturnStatement(node, scope)
 	case *ast.DeferStmt:
@@ -363,7 +365,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 		default:
 			panic(NewError(l.Pos().Sline(), GENERICERROR, "Only Array|Tuple|Hash is allowed!"))
 		}
-	
+
 		return
 	}
 
@@ -382,7 +384,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 				valuesLen += 1
 				values = append(values, tupleObj)
 			}
-			
+
 		} else {
 			valuesLen += 1
 			values = append(values, val)
@@ -408,6 +410,15 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 		}
 	}
 
+	return
+}
+
+func evalConstStatement(c *ast.ConstStatement, scope *Scope) (val Object) {
+	val = Eval(c.Value, scope)
+	if val.Type() == ERROR_OBJ {
+		return val
+	}
+	scope.SetConst(c.Name.Value, val)
 	return
 }
 
@@ -615,7 +626,7 @@ func evalStrAssignExpression(a *ast.AssignExpression, name string, left Object, 
 			case *UInteger:
 				idx = int64(o.UInt64)
 			}
-			
+
 			if idx < 0 || idx >= int64(len(leftVal)) {
 				panic(NewError(a.Pos().Sline(), INDEXERROR, idx))
 			}
@@ -2565,7 +2576,7 @@ func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
 					    while (i++ < 10) {
 					        return x * y
 					    }
-					    return x + y 
+					    return x + y
 					}
 					println(add(2,3))
 				*/
@@ -4025,7 +4036,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 		//          "GOOS": runtime.GOOS,
 		//       })
 		// The eval.RegisterVars will call SetGlobalObj("runtime.GOOS"), so the
-		// global scope's name is 'runtime.GOOS', not 'runtime', therefore, the above 
+		// global scope's name is 'runtime.GOOS', not 'runtime', therefore, the above
 		// GetGlobalObj('runtime') will returns false.
 		if obj, ok := GetGlobalObj(str + "." + call.Call.String()); ok {
 			return obj
@@ -4201,8 +4212,8 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					//
 					//When calling dogObj.MethodA, `thisObj` refers to `dogObj` instance,
 					//when the above 'if' branch is executed, the `dogObj` instance's scope
-					//has no such variable(i.e. misc), because it belongs to `Dog` class's static 
-					// variable, not instance variable so the 'if' test will fail. For it to walk, 
+					//has no such variable(i.e. misc), because it belongs to `Dog` class's static
+					// variable, not instance variable so the 'if' test will fail. For it to walk,
 					// we need to check for static variable of 'Dog' class.
 					val, ok = clsObj.Scope.Get(o.Value)
 					if ok {
@@ -4247,7 +4258,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			// subClassObj = new SubClass(xxx)
 			//
 			// When you instantiate 'subClassObj' using `new`,
-			// the interpreter will call `init` method. In the 'init', the 'parent' is a Class object, 
+			// the interpreter will call `init` method. In the 'init', the 'parent' is a Class object,
 			// but 'this' is an instance, so the scope is the instance's scope, not class's scope.
 			thisObj, _ := scope.Get("this")
 			if thisObj != nil && thisObj.Type() == INSTANCE_OBJ { //'this' refers to 'ObjectInstance' object
@@ -5255,7 +5266,7 @@ func obj2Expression(obj Object) ast.Expression {
 		hash := &ast.HashLiteral{}
 		hash.Pairs = make(map[ast.Expression]ast.Expression)
 
-		
+
 		for _, hk := range value.Order { //hk:hash key
 			v, _ := value.Pairs[hk]
 			key := &ast.StringLiteral{Value: v.Key.Inspect()}

@@ -32,6 +32,7 @@ type HighlightIntf interface {
 var keywords = map[string]int{
 	"fn":       1,
 	"let":      1,
+	"const":    1,
 	"true":     1,
 	"false":    1,
 	"if":       1,

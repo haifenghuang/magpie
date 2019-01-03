@@ -69,6 +69,12 @@ let SIZE = 10
 //This is the constant 'CENTER'.
 let CENTER = 15.0
 
+//This is the constant 'PI'
+const PI = 3.14159
+
+//This is the constant 'GRAVITATION'
+const GRAVITATION = 9.8
+
 /* Add returns the addition of its two parameters
  * @param {int} x  this is the first parameter
  * @param {int} y  this is the second parameter

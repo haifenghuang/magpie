@@ -50,6 +50,7 @@ type File struct {
 	Classes []*Classes
 	Enums   []*Value
 	Lets    []*Value
+	Consts  []*Value
 	Funcs   []*Function
 	GenHTML int
 }
@@ -100,6 +101,7 @@ func New(name string, program *ast.Program) *File {
 	var classes []*ast.ClassStatement
 	var enums   []*ast.EnumStatement
 	var lets    []*ast.LetStatement
+	var consts  []*ast.ConstStatement
 	var funcs   []*ast.FunctionStatement
 
 	fh, _ := os.Open(name)
@@ -118,6 +120,10 @@ func New(name string, program *ast.Program) *File {
 			if s.Doc != nil {
 				lets = append(lets, s)
 			}
+		case *ast.ConstStatement:
+			if s.Doc != nil {
+				consts = append(consts, s)
+			}
 		case *ast.FunctionStatement:
 			if s.Doc != nil {
 				funcs = append(funcs, s)
@@ -130,6 +136,7 @@ func New(name string, program *ast.Program) *File {
 		Classes: sortedClasses(classes, fh),
 		Enums:   sortedEnums(enums, fh),
 		Lets:    sortedLets(lets, fh),
+		Consts:  sortedConsts(consts, fh),
 		Funcs:   sortedFuncs(funcs, fh),
 		GenHTML: Cfg.GenHTML,
 	}
@@ -246,6 +253,12 @@ func postProcessingHtml(htmlStr string, file *File) string {
 		letName := let.Name
 		src  := fmt.Sprintf("<h3>%s</h3>", letName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(letName), letName)
+		html = strings.Replace(html, src, dest, -1)
+	}
+	for _, cons := range file.Consts {
+		consName := cons.Name
+		src  := fmt.Sprintf("<h3>%s</h3>", consName)
+		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(consName), consName)
 		html = strings.Replace(html, src, dest, -1)
 	}
 	for _, fn := range file.Funcs {
@@ -405,6 +418,31 @@ func sortedLets(lets []*ast.LetStatement, fh *os.File) []*Value {
 			Name:    l.Names[0].Value,
 			Doc:     preProcessCommentSpecial(l.Doc.Text()),
 			Text:    l.Docs(),
+			ShowSrc: Cfg.ShowSrcComment,
+			Src:     src,
+			SrcLines: lineSrc,
+			GenHTML: Cfg.GenHTML,
+		}
+		i++
+	}
+
+	sortBy(
+		func(i, j int) bool { return list[i].Name < list[j].Name },
+		func(i, j int) { list[i], list[j] = list[j], list[i] },
+		len(list),
+	)
+	return list
+}
+
+func sortedConsts(consts []*ast.ConstStatement, fh *os.File) []*Value {
+	list := make([]*Value, len(consts))
+	i := 0
+	for _, c := range consts {
+		src, lineSrc := genSourceText(c, fh)
+		list[i] = &Value{
+			Name:    c.Name.Value,
+			Doc:     preProcessCommentSpecial(c.Doc.Text()),
+			Text:    c.Docs(),
 			ShowSrc: Cfg.ShowSrcComment,
 			Src:     src,
 			SrcLines: lineSrc,

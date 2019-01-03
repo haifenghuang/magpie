@@ -3,6 +3,7 @@ package eval
 import (
 	"fmt"
 	"magpie/ast"
+	"os"
 	"sync"
 )
 
@@ -15,7 +16,8 @@ var BuiltinClasses = map[string]*Class {
 
 func NewScope(p *Scope) *Scope {
 	s := make(map[string]Object)
-	ret := &Scope{store: s, parentScope: p}
+	r := make(map[string]bool)
+	ret := &Scope{store: s, readonly:r, parentScope: p}
 	if p == nil {
 		ret.CallStack = &CallStack{Frames: []CallFrame{CallFrame{}}} //creat a new empty CallStack
 	} else {
@@ -46,6 +48,7 @@ func (frame *CallFrame) runDefers(s *Scope) {
 
 type Scope struct {
 	store       map[string]Object
+	readonly    map[string]bool
 	parentScope *Scope
 	CallStack   *CallStack
 
@@ -99,7 +102,24 @@ func (s *Scope) Set(name string, val Object) Object {
 	s.Lock()
 	defer s.Unlock()
 
+	//check if it is readonly
+	_, ok := s.store[name]
+	if ok && s.readonly[name] {
+		fmt.Printf("Const variable '%s' cannot be modified.\n", name)
+		os.Exit(3)
+	}
+
 	s.store[name] = val
+	return val
+}
+
+func (s *Scope) SetConst(name string, val Object) Object {
+	s.Lock()
+	defer s.Unlock()
+
+	s.store[name] = val
+	s.readonly[name] = true //mark it as readonly
+
 	return val
 }
 
@@ -110,6 +130,10 @@ func (s *Scope) Reset(name string, val Object) (Object, bool) {
 	var ok bool
 	_, ok = s.store[name]
 	if ok {
+		if s.readonly[name] {
+			fmt.Printf("Const variable '%s' cannot be modified.\n", name)
+			os.Exit(3)
+		}
 		s.store[name] = val
 	}
 

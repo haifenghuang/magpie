@@ -1,4 +1,4 @@
-# File `doc.my`
+# File `doc.mp`
 Table of Contents
 =================
 
@@ -6,6 +6,10 @@ Table of Contents
   * [CENTER](#center)
   * [Parse](#parse)
   * [SIZE](#size)
+
+* Consts
+  * [GRAVITATION](#gravitation)
+  * [PI](#pi)
 
 * Enums
   * [Color](#color)
@@ -46,6 +50,7 @@ Table of Contents
 ```swift
 let CENTER = 15.0
 ```
+
 This is the constant 'CENTER'.
 
 ### Parse
@@ -55,42 +60,62 @@ let Parse = fn(lexer) {
 	fmt.Printf("The parser take a lexer as input, and generate an AST\n")
 }
 ```
+
 This is a demo parser
 
 ### SIZE
 ```swift
 let SIZE = 10
 ```
+
 This is the constant 'SIZE'.
+
+## Consts
+
+### GRAVITATION
+```swift
+const GRAVITATION = 9.8
+```
+
+This is the constant 'GRAVITATION'
+
+### PI
+```swift
+const PI = 3.14159
+```
+
+This is the constant 'PI'
 
 ## Enums
 
 ### Color
 ```swift
-enum Color{
-	GRAY = 5, 
-	RED = 0, 
-	BLUE = 1, 
-	YELLOW = 2, 
-	BLACK = 3, 
-	WHITE = 4
-}
+enum Color {
+	RED = 0,
+	BLUE = 1,
+	YELLOW = 2,
+	BLACK = 3,
+	WHITE = 4,
+	GRAY = 5
+};
 ```
+
 Color enum is the color of the image.
 This is just for demo purpose.
 
 ### LogOption
 ```swift
-enum LogOption{
-	LUTC = (1 << 5), 
-	LstdFlags = ((1 << 4) | (1 << 5)), 
-	Ldate = (1 << 0), 
-	Ltime = (1 << 1), 
-	Lmicroseconds = (1 << 2), 
-	Llongfile = (1 << 3), 
-	Lshortfile = (1 << 4)
-}
+enum LogOption {
+	Ldate         = 1 << 0,
+	Ltime         = 1 << 1,
+	Lmicroseconds = 1 << 2,
+	Llongfile     = 1 << 3,
+	Lshortfile    = 1 << 4,
+	LUTC          = 1 << 5,
+	LstdFlags     = 1 << 4 | 1 << 5
+};
 ```
+
 LogOption enum is defined for Log options.
 
 ## Functions
@@ -99,14 +124,21 @@ LogOption enum is defined for Log options.
 ```swift
 fn Add (x, y) 
 ```
+
 Add returns the addition of its two parameters
 
 This is a example of calling `Add` with two ints:
-```swiftsum = Add(1, 2) //result is 3
+```swift
+sum = Add(1, 2) //result is 3
+sum = Add(4, 5) //result is 9
+sum = Add(-1, 2) //result is 1
 ```
 
 This is a example of calling `Add` with two strings:
-```swiftsum = Add("Hello ", "world") //result is "Hello world"
+```swift
+sum = Add("Hello ", "world") //result is "Hello world"
+sum = Add("Welcome ", "world") //result is "Welcome world"
+sum = Add("Hi ", "world") //result is "Hi world"
 ```
 
 #### Parameters
@@ -132,6 +164,7 @@ fn Add(x,y) {
 ```swift
 fn Div (x, y) 
 ```
+
 Div returns the division of its two parameters
 
 #### Source
@@ -145,6 +178,7 @@ fn Div(x,y) {
 ```swift
 fn Mul (x, y) 
 ```
+
 Mul returns the multiply of its two parameters
 
 #### Source
@@ -158,6 +192,7 @@ fn Mul(x,y) {
 ```swift
 fn Sub (x, y) 
 ```
+
 Sub returns the subtraction of its two parameters
 
 #### Parameters
@@ -183,6 +218,7 @@ fn Sub(x,y) {
 ```swift
 class @DepartmentValidator{ ... }
 ```
+
 DepartmentValidator annotation class.
 It is used for checking a list of department.
 
@@ -197,6 +233,7 @@ class @DepartmentValidator {
 ```swift
 class @MinMaxValidator{ ... }
 ```
+
 MinMaxValidator annotation class
 It is used for checking min and max length
 The max length has a default value of 10
@@ -213,6 +250,7 @@ class @MinMaxValidator {
 ```swift
 class @NoSpaceValidator{ ... }
 ```
+
 NoSpaceValidator annotation class(it's a marker annotation).
 It is used for checking spaces.
 
@@ -225,6 +263,7 @@ class @NoSpaceValidator {}
 ```swift
 class Person{ ... }
 ```
+
  A Persion class which has three private variable:
 * firstName
 * lastName
@@ -236,14 +275,16 @@ and two methods :'init' and 'Msg'.
 
 ##### firstName
 ```swift
-let firstName; 
+let firstName;
 ```
+
 this is the firstname
 
 ##### lastName
 ```swift
-let lastName; 
+let lastName;
 ```
+
 this is the last name
 
 #### Functions
@@ -252,6 +293,7 @@ this is the last name
 ```swift
 fn Msg (extra1, extra2, args) 
 ```
+
 Method 'Msg' demonstrate function default values and variable arguements
 
 #### Parameters
@@ -265,6 +307,7 @@ Method 'Msg' demonstrate function default values and variable arguements
 ```swift
 fn init (firstname, lastname, nickname) 
 ```
+
 This is the constructor of the Person class.
 
 #### Source
@@ -302,6 +345,7 @@ class Person {
 ```swift
 class Request{ ... }
 ```
+
 Request class represent a user made request.
 
 #### Source
@@ -325,6 +369,7 @@ class Request {
 ```swift
 class RequestHandler{ ... }
 ```
+
 RequestHandler class is responsible for processing the annotation.
 
 #### Source
@@ -369,18 +414,17 @@ class RequestHandler {
 ```swift
 class RequestMain{ ... }
 ```
+
 RequestMain class. It is the user/client code.
 #### Note
 This is note one.</br>
 This is note two.</br>
 This is note three.</br>
-</br>
 
 #### Warning
 This is warning one.</br>
 This is warning two.</br>
 This is warning three.</br>
-</br>
 
 #### Source
 ```swift
@@ -396,4 +440,4 @@ class RequestMain {
 ```
 
 ***
-_Last updated 2018-03-05_
+_Last updated 2019-01-03_

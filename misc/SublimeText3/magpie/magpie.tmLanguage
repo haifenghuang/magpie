@@ -24,13 +24,13 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.comment.my</string>
+					<string>punctuation.definition.comment.mp</string>
 				</dict>
 			</dict>
 			<key>match</key>
 			<string>/\*\*/</string>
 			<key>name</key>
-			<string>comment.block.empty.my</string>
+			<string>comment.block.empty.mp</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -58,68 +58,68 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>storage.modifier.my</string>
+					<string>storage.modifier.mp</string>
 				</dict>
 				<key>10</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>11</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>12</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>13</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.structure.my</string>
+					<string>storage.type.structure.mp</string>
 				</dict>
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.type.class.my</string>
+					<string>entity.name.type.class.mp</string>
 				</dict>
 				<key>5</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.template.my</string>
+					<string>storage.type.template.mp</string>
 				</dict>
 				<key>6</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.separator.inheritance.my</string>
+					<string>punctuation.separator.inheritance.mp</string>
 				</dict>
 				<key>7</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>8</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 				<key>9</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class.my</string>
+					<string>entity.other.inherited-class.mp</string>
 				</dict>
 			</dict>
 			<key>end</key>
 			<string>(?={)</string>
 			<key>name</key>
-			<string>meta.definition.class.my</string>
+			<string>meta.definition.class.mp</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -130,13 +130,13 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>storage.modifier.my</string>
+							<string>storage.modifier.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>(?={)</string>
 					<key>name</key>
-					<string>meta.definition.class.extends.my</string>
+					<string>meta.definition.class.extends.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -159,28 +159,28 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>storage.modifier.my</string>
+					<string>storage.modifier.mp</string>
 				</dict>
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.structure.my</string>
+					<string>storage.type.structure.mp</string>
 				</dict>
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.type.struct.my</string>
+					<string>entity.name.type.struct.mp</string>
 				</dict>
 				<key>5</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.template.my</string>
+					<string>storage.type.template.mp</string>
 				</dict>
 			</dict>
 			<key>end</key>
 			<string>(?={)</string>
 			<key>name</key>
-			<string>meta.definition.struct.my</string>
+			<string>meta.definition.struct.mp</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -191,13 +191,13 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>storage.modifier.my</string>
+							<string>storage.modifier.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>(?={)</string>
 					<key>name</key>
-					<string>meta.definition.class.extends.my</string>
+					<string>meta.definition.class.extends.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -219,13 +219,13 @@
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.function.constructor.my</string>
+					<string>entity.name.function.constructor.mp</string>
 				</dict>
 			</dict>
 			<key>end</key>
 			<string>(?={)</string>
 			<key>name</key>
-			<string>meta.definition.constructor.my</string>
+			<string>meta.definition.constructor.mp</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -248,7 +248,7 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.function.destructor.my</string>
+					<string>entity.name.function.destructor.mp</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -258,11 +258,11 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.parameters.my</string>
+					<string>punctuation.definition.parameters.mp</string>
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>meta.definition.destructor.my</string>
+			<string>meta.definition.destructor.mp</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -282,18 +282,18 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.structure.my</string>
+					<string>storage.type.structure.mp</string>
 				</dict>
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.function.my</string>
+					<string>entity.name.function.mp</string>
 				</dict>
 			</dict>
 			<key>end</key>
 			<string>(?={)</string>
 			<key>name</key>
-			<string>meta.definition.method.my</string>
+			<string>meta.definition.method.mp</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -306,7 +306,7 @@
 			<key>match</key>
 			<string>\b([A-Z][A-Z0-9_]+)\b</string>
 			<key>name</key>
-			<string>constant.other.my</string>
+			<string>constant.other.mp</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -320,62 +320,62 @@
 			<key>match</key>
 			<string>\|&gt;</string>
 			<key>name</key>
-			<string>constant.language.pipe.my</string>
+			<string>constant.language.pipe.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(enum|struct)\b</string>
 			<key>name</key>
-			<string>storage.type.structure.my</string>
+			<string>storage.type.structure.mp</string>
 		</dict>
 
 		<dict>
 			<key>match</key>
 			<string>\b(try|catch|finally|throw)\b</string>
 			<key>name</key>
-			<string>keyword.control.exception.my</string>
+			<string>keyword.control.exception.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(spawn|defer|using)\b</string>
 			<key>name</key>
-			<string>keyword.control.my</string>
+			<string>keyword.control.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(if|else|elseif|elsif|elif|unless|case)\b</string>
 			<key>name</key>
-			<string>keyword.control.conditional.my</string>
+			<string>keyword.control.conditional.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(class|new|property|get|set|default|this|parent|static|public|private|protected|interface)\b</string>
 			<key>name</key>
-			<string>keyword.control.class.my</string>
+			<string>keyword.control.class.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(break|continue)\b</string>
 			<key>name</key>
-			<string>keyword.control.branch.my</string>
+			<string>keyword.control.branch.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(while|for|do|where|in)\b</string>
 			<key>name</key>
-			<string>keyword.control.repeat.my</string>
+			<string>keyword.control.repeat.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(return|fn|let)\b</string>
+			<string>\b(return|fn|let|const)\b</string>
 			<key>name</key>
-			<string>keyword.control.statement.my</string>
+			<string>keyword.control.statement.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(include)\b</string>
 			<key>name</key>
-			<string>keyword.control.include.my</string>
+			<string>keyword.control.include.mp</string>
 		</dict>
 		<dict>
 			<key>captures</key>
@@ -383,36 +383,36 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>keyword.control.module.my</string>
+					<string>keyword.control.module.mp</string>
 				</dict>
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>entity.name.function.package.my</string>
+					<string>entity.name.function.package.mp</string>
 				</dict>
 			</dict>
 			<key>match</key>
 			<string>^\s*(include)\s+([^ ;]+?);</string>
 			<key>name</key>
-			<string>meta.include.my</string>
+			<string>meta.include.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(true|false)\b</string>
 			<key>name</key>
-			<string>constant.language.boolean.my</string>
+			<string>constant.language.boolean.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(nil)\b</string>
 			<key>name</key>
-			<string>constant.language.my</string>
+			<string>constant.language.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b((0x[0-9a-fA-F]*)|(0b[0-1]*)|(0c[0-7]*)|(([0-9_]+\.?[0-9_]*)|(\.[0-9_]+))((e|E)(\+|-)?[0-9_]+)?)\b</string>
 			<key>name</key>
-			<string>constant.numeric.my</string>
+			<string>constant.numeric.mp</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -426,31 +426,31 @@
 			<key>match</key>
 			<string>(==|!=|&lt;=|&gt;=|&lt;&gt;|&lt;|&gt;)</string>
 			<key>name</key>
-			<string>keyword.operator.comparison.my</string>
+			<string>keyword.operator.comparison.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>(\-\-|\+\+)</string>
 			<key>name</key>
-			<string>keyword.operator.increment-decrement.my</string>
+			<string>keyword.operator.increment-decrement.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>(\-|\+|\*|\/|~|%)</string>
 			<key>name</key>
-			<string>keyword.operator.arithmetic.my</string>
+			<string>keyword.operator.arithmetic.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>(!|&amp;&amp;|\|\|)</string>
 			<key>name</key>
-			<string>keyword.operator.logical.my</string>
+			<string>keyword.operator.logical.mp</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b(opNeg|opCom|opPostInc|opPostDec|opCast|opAdd|opSub|opSub_r|opMul|opDiv|opDiv_r|opMod|opMod_r|opAnd|opOr|opXor|opShl|opShl_r|opShr|opShr_r|opUShr|opUShr_r|opCat|opCat_r|opEquals|opEquals|opCmp|opCmp|opCmp|opCmp|opAddAssign|opSubAssign|opMulAssign|opDivAssign|opModAssign|opAndAssign|opOrAssign|opXorAssign|opShlAssign|opShrAssign|opUShrAssign|opCatAssign|opIndex|opIndexAssign|opCall|opSlice|opSliceAssign|opPos|opAdd_r|opMul_r|opAnd_r|opOr_r|opXor_r)\b</string>
 			<key>name</key>
-			<string>keyword.operator.overload.my</string>
+			<string>keyword.operator.overload.mp</string>
 		</dict>
 	</array>
 	<key>repository</key>
@@ -477,13 +477,13 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>\)</string>
 					<key>name</key>
-					<string>comment.block.nested.my</string>
+					<string>comment.block.nested.mp</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -493,13 +493,13 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>\}</string>
 					<key>name</key>
-					<string>comment.block.nested.my</string>
+					<string>comment.block.nested.mp</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -509,13 +509,13 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>&gt;</string>
 					<key>name</key>
-					<string>comment.block.nested.my</string>
+					<string>comment.block.nested.mp</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -525,13 +525,13 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
 					<string>\+/</string>
 					<key>name</key>
-					<string>comment.block.nested.my</string>
+					<string>comment.block.nested.mp</string>
 				</dict>
 				<dict>
 					<key>captures</key>
@@ -539,13 +539,13 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>match</key>
 					<string>(//).*$\n?</string>
 					<key>name</key>
-					<string>comment.line.double-slash.my</string>
+					<string>comment.line.double-slash.mp</string>
 				</dict>
 				<dict>
 					<key>name</key>
@@ -577,13 +577,13 @@
 						<key>2</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.comment.my</string>
+							<string>punctuation.definition.comment.mp</string>
 						</dict>
 					</dict>
 					<key>match</key>
 					<string>(#).*$\n?</string>
 					<key>name</key>
-					<string>comment.line.sharp.my</string>
+					<string>comment.line.sharp.mp</string>
 				</dict>
 			</array>
 		</dict>
@@ -611,7 +611,7 @@
 					<key>end</key>
 					<string>(?=\))</string>
 					<key>name</key>
-					<string>meta.definition.param-list.my</string>
+					<string>meta.definition.param-list.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -630,13 +630,13 @@
 					<key>match</key>
 					<string>\\(\\|[abefnprtv'"?]|[0-3]\d{,2}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|&amp;\w+;)</string>
 					<key>name</key>
-					<string>constant.character.escape.my</string>
+					<string>constant.character.escape.mp</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>\\.</string>
 					<key>name</key>
-					<string>invalid.illegal.unknown-escape.my</string>
+					<string>invalid.illegal.unknown-escape.mp</string>
 				</dict>
 			</array>
 		</dict>
@@ -652,7 +652,7 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.begin.my</string>
+							<string>punctuation.definition.string.begin.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
@@ -662,11 +662,11 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.end.my</string>
+							<string>punctuation.definition.string.end.mp</string>
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>string.quoted.double.my</string>
+					<string>string.quoted.double.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -683,7 +683,7 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.begin.my</string>
+							<string>punctuation.definition.string.begin.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
@@ -693,11 +693,11 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.end.my</string>
+							<string>punctuation.definition.string.end.mp</string>
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>string.quoted.single.my</string>
+					<string>string.quoted.single.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -714,7 +714,7 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.begin.my</string>
+							<string>punctuation.definition.string.begin.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
@@ -724,16 +724,16 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.end.my</string>
+							<string>punctuation.definition.string.end.mp</string>
 						</dict>
 						<key>2</key>
 						<dict>
 							<key>name</key>
-							<string>meta.empty-string.double.my</string>
+							<string>meta.empty-string.double.mp</string>
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>string.quoted.double.raw.backtick.my</string>
+					<string>string.quoted.double.raw.backtick.mp</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -743,7 +743,7 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.begin.my</string>
+							<string>punctuation.definition.string.begin.mp</string>
 						</dict>
 					</dict>
 					<key>end</key>
@@ -753,11 +753,11 @@
 						<key>0</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.string.end.my</string>
+							<string>punctuation.definition.string.end.mp</string>
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>string.quoted.single.my</string>
+					<string>string.quoted.single.mp</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -773,7 +773,7 @@
 			<key>match</key>
 			<string>\b(abs|range|addm|chr|newFile|int|float|str|array|len|methods|ord|print|printf|println|type|chan|assert|reverse|dialTCP|listenTCP|dialUDP|dialUnix|listenUnix|dbOpen|newTime|newDate|newCond|newOnce|newMutex|newRWMutex|newWaitGroup|newPipe|newLogger|newList|deepEqual|newCsvReader|newCsvWriter|instanceOf|is_a|classOf)\b</string>
 			<key>name</key>
-			<string>support.type.built-ins.functions.my</string>
+			<string>support.type.built-ins.functions.mp</string>
 		</dict>
 		<key>support-type-built-ins-d</key>
 		<dict>
@@ -802,25 +802,25 @@
 			<key>match</key>
 			<string>\b(__todo__)\b</string>
 			<key>name</key>
-			<string>support.type.built-ins.exceptions.my</string>
+			<string>support.type.built-ins.exceptions.mp</string>
 		</dict>
 		<key>support-type-built-ins-interfaces-d</key>
 		<dict>
 			<key>match</key>
 			<string>\b(__todo__)\b</string>
 			<key>name</key>
-			<string>support.type.built-ins.interfaces.my</string>
+			<string>support.type.built-ins.interfaces.mp</string>
 		</dict>
 		<key>support-type-built-ins-structs-d</key>
 		<dict>
 			<key>match</key>
 			<string>\b(__todo__)\b</string>
 			<key>name</key>
-			<string>support.type.built-ins.structs.my</string>
+			<string>support.type.built-ins.structs.mp</string>
 		</dict>
 	</dict>
 	<key>scopeName</key>
-	<string>source.my</string>
+	<string>source.mp</string>
 	<key>uuid</key>
 	<string>B64C47C0-FDE6-434B-A547-B6D05DC2CC90</string>
 </dict>

@@ -1,5 +1,5 @@
 {
-    "name": "my",
+    "name": "mp",
     "displayName": "magpie",
     "description": "Magpie language",
     "version": "0.0.1",
@@ -14,7 +14,7 @@
         "languages": [{
             "id": "magpie",
             "aliases": ["magpie", "magpie"],
-            "extensions": [".my"],
+            "extensions": [".mp"],
             "configuration": "./language-configuration.json"
         }],
         "grammars": [{

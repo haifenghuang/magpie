@@ -32,6 +32,7 @@ Table of Contents
 {{block "index" .}}_no index_{{end}}
 {{if eq 1 .GenHTML}}<p>__TOC_PLACEHOLDER_LINE_END__</p>{{end}}
 {{block "lets" .}}_no lets_{{end}}
+{{block "consts" .}}_no consts_{{end}}
 {{block "enums" .}}_no enums_{{end}}
 {{block "functions" .}}_no functions_{{end}}
 {{block "classes" .}}_no classes_{{end}}
@@ -43,6 +44,11 @@ _Last updated {{genDate}}_`
 {{if gt (len .Lets) 0}}
 * Lets{{range $idx, $let := .Lets}}
   * [{{$let.Name}}](#{{sanitizedAnchorName $let.Name}}){{end}}
+{{end}}
+
+{{if gt (len .Consts) 0}}
+* Consts{{range $idx, $const := .Consts}}
+  * [{{$const.Name}}](#{{sanitizedAnchorName $const.Name}}){{end}}
 {{end}}
 
 {{if gt (len .Enums) 0}}
@@ -87,6 +93,20 @@ _Last updated {{genDate}}_`
 {{codeBlock $let.Src}}
 {{if eq 1 .GenHTML}}<p>__LINENUMBER_PLACEHOLDER_LINE__{{$let.SrcLines}}</p>{{end}}
 {{$let.Doc}}
+  {{end}}
+{{end}}
+
+{{end}}`
+
+	constsTpl = `{{define "consts"}}
+{{if gt (len .Consts) 0}}
+
+## Consts
+  {{range $idx, $const := .Consts}}
+### {{$const.Name}}
+{{codeBlock $const.Src}}
+{{if eq 1 .GenHTML}}<p>__LINENUMBER_PLACEHOLDER_LINE__{{$const.SrcLines}}</p>{{end}}
+{{$const.Doc}}
   {{end}}
 {{end}}
 
@@ -203,5 +223,5 @@ _Last updated {{genDate}}_`
   {{end}}
   {{end}}
 {{end}}`
-	templs = []string{baseTpl, indexTpl, letsTpl, enumsTpl, functionsTpl, classesTpl}
+	templs = []string{baseTpl, indexTpl, letsTpl, constsTpl, enumsTpl, functionsTpl, classesTpl}
 )

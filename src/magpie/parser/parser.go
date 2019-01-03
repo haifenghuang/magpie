@@ -330,6 +330,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.CONST:
+		return p.parseConstStatement()
 	case token.RETURN:
 		return p.parseReturnStatement()
 	case token.DEFER:
@@ -850,6 +852,30 @@ func (p *Parser) parseLetStatement2(stmt *ast.LetStatement) *ast.LetStatement {
 	
 	stmt.SrcEndToken = p.curToken
 	return stmt;
+}
+
+//const a = xxx
+func (p *Parser) parseConstStatement() *ast.ConstStatement {
+	stmt := &ast.ConstStatement{Token: p.curToken}
+	stmt.Doc = p.lineComment
+
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	if !p.expectPeek(token.ASSIGN) {
+		return nil
+	}
+
+	p.nextToken()
+	stmt.Value = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	stmt.SrcEndToken = p.curToken
+	return stmt
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {

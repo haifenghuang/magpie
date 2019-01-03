@@ -39,19 +39,19 @@ const (
 	COMMA     // ,
 	SEMICOLON // ;
 
-	LPAREN   // (
-	RPAREN   // )
-	LBRACE   // {
-	RBRACE   // }
-	LBRACKET // [
-	RBRACKET // ]
-	COLON    // :
-	DOT      // .
-	DOTDOT   // ..  (PARTIAL IMPLEMENTED, ONLY SUPPORT INTEGER/SingleString RANGE, AND ONLY USED IN 'FOR X IN A..B {}' )
-	ELLIPSIS //... Function Variadic parameters
-	PIPE     // |>
+	LPAREN    // (
+	RPAREN    // )
+	LBRACE    // {
+	RBRACE    // }
+	LBRACKET  // [
+	RBRACKET  // ]
+	COLON     // :
+	DOT       // .
+	DOTDOT    // ..  (PARTIAL IMPLEMENTED, ONLY SUPPORT INTEGER/SingleString RANGE, AND ONLY USED IN 'FOR X IN A..B {}' )
+	ELLIPSIS  //... Function Variadic parameters
+	PIPE      // |>
 	THINARROW // ->
-	FATARROW // =>
+	FATARROW  // =>
 
 	INCREMENT // ++
 	DECREMENT // --
@@ -66,10 +66,11 @@ const (
 	CONDAND // &&
 	CONDOR  // ||
 
-	AT      //@
+	AT //@
 
 	FUNCTION
 	LET
+	CONST
 	TRUE
 	FALSE
 	IF
@@ -111,15 +112,15 @@ const (
 	UNLESS
 
 	//class related
-	INTERFACE  //NOT IMPLEMENTED
+	INTERFACE //NOT IMPLEMENTED
 	CLASS
 	NEW
 	PROPERTY
 	GET
 	SET
-	PUBLIC     //NOT IMPLEMENTED
-	PRIVATE    //NOT IMPLEMENTED
-	PROTECTED  //NOT IMPLEMENTED
+	PUBLIC    //NOT IMPLEMENTED
+	PRIVATE   //NOT IMPLEMENTED
+	PROTECTED //NOT IMPLEMENTED
 	STATIC
 	DEFAULT
 
@@ -134,60 +135,61 @@ const (
 	TILDESLASH    // ~/
 	TILDEMOD      // ~%
 	TILDECARET    // ~^
-	
+
 	USING
-	QUESTIONMM  // ?? (Null Coalescing Operator)
+	QUESTIONMM // ?? (Null Coalescing Operator)
 
 )
 
 var keywords = map[string]TokenType{
-	"fn":       FUNCTION,
-	"let":      LET,
-	"true":     TRUE,
-	"false":    FALSE,
-	"if":       IF,
-	"elif":     ELIF,
-	"elsif":    ELSIF,
-	"elseif":   ELSEIF,
-	"else":     ELSE,
-	"return":   RETURN,
-	"include":  INCLUDE,
-	"and":      AND,
-	"or":       OR,
-	"struct":   STRUCT,
-	"do":       DO,
-	"while":    WHILE,
-	"break":    BREAK,
-	"continue": CONTINUE,
-	"for":      FOR,
-	"in":       IN,
-	"where":    WHERE,
-	"grep":     GREP,
-	"map":      MAP,
-	"case":     CASE,
-	"is":       IS,
-	"try":      TRY,
-	"catch":    CATCH,
-	"finally":  FINALLY,
-	"throw":    THROW,
-	"defer":    DEFER,
-	"spawn":    SPAWN,
-	"nil":      NIL,
-	"enum":     ENUM,
-	"qw":       QW, //“quoted words”
-	"unless":   UNLESS,
-	"interface":INTERFACE,
-	"class":    CLASS,
-	"new":      NEW,
-	"property": PROPERTY,
-	"get":      GET,
-	"set":      SET,
-	"public":   PUBLIC,
-	"private":  PRIVATE,
-	"protected":PROTECTED,
-	"static":   STATIC,
-	"default":  DEFAULT,
-	"using":    USING,
+	"fn":        FUNCTION,
+	"let":       LET,
+	"const":     CONST,
+	"true":      TRUE,
+	"false":     FALSE,
+	"if":        IF,
+	"elif":      ELIF,
+	"elsif":     ELSIF,
+	"elseif":    ELSEIF,
+	"else":      ELSE,
+	"return":    RETURN,
+	"include":   INCLUDE,
+	"and":       AND,
+	"or":        OR,
+	"struct":    STRUCT,
+	"do":        DO,
+	"while":     WHILE,
+	"break":     BREAK,
+	"continue":  CONTINUE,
+	"for":       FOR,
+	"in":        IN,
+	"where":     WHERE,
+	"grep":      GREP,
+	"map":       MAP,
+	"case":      CASE,
+	"is":        IS,
+	"try":       TRY,
+	"catch":     CATCH,
+	"finally":   FINALLY,
+	"throw":     THROW,
+	"defer":     DEFER,
+	"spawn":     SPAWN,
+	"nil":       NIL,
+	"enum":      ENUM,
+	"qw":        QW, //“quoted words”
+	"unless":    UNLESS,
+	"interface": INTERFACE,
+	"class":     CLASS,
+	"new":       NEW,
+	"property":  PROPERTY,
+	"get":       GET,
+	"set":       SET,
+	"public":    PUBLIC,
+	"private":   PRIVATE,
+	"protected": PROTECTED,
+	"static":    STATIC,
+	"default":   DEFAULT,
+	"using":     USING,
 }
 
 //for debug & testing
@@ -305,6 +307,8 @@ func (tt TokenType) String() string {
 		return "FUNCTION"
 	case LET:
 		return "LET"
+	case CONST:
+		return "CONST"
 	case TRUE:
 		return "TRUE"
 	case FALSE:

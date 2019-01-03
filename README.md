@@ -378,6 +378,13 @@ let x, _, y = 10, 20, 30
 printf("x=%d, y=%d\n", x, y) //result: x=10, y=30
 ```
 
+You can also use the `const` keyword to declare a constant:
+
+```swift
+const PI = 3.14159
+PI = 3.14 //error
+```
+
 ### Reserved keywords
 
 Keywords are predefined, reserved identifiers that have special meanings to the compiler. They cannot be used as identifiers. Below is a list of reserved keywords
@@ -2332,7 +2339,7 @@ for file in files {
 }
 ```
 
-For more detailed examples, please see `goObj.my`.
+For more detailed examples, please see `goObj.mp`.
 
 ## Standard module introduction
 
@@ -2724,7 +2731,7 @@ For testing `sql` module, you need to do following:
 
 3. Recompile magpie source.
 
-Below is a complete source of the `examples/db.my`:
+Below is a complete source of the `examples/db.mp`:
 
 ```swift
 let dbOp = fn() {
@@ -2840,7 +2847,7 @@ The highlighter utility can highlight the magpie language to console or html.
 You could also combine the two utilities:
 
 ```sh
-./fmt xx.my | ./highlight  //output to console(console highlight not support windows)
+./fmt xx.mp | ./highlight  //output to console(console highlight not support windows)
 ```
 
 ## Document generator
@@ -2859,13 +2866,13 @@ The tool only support below statement for document generator:
 
 ```sh
 //generate markdown file, the generated file is named 'doc.md'
-./mdoc examples/doc.my
+./mdoc examples/doc.mp
 
 //generate html file, the generated file is named 'doc.html'
-./mdoc -html examples/doc.my
+./mdoc -html examples/doc.mp
 
 //generate html file, also generate source code of classes and functions. the generated file is named 'doc.html'
-./mdoc -html -showsource examples/doc.my
+./mdoc -html -showsource examples/doc.mp
 
 //Use the some builtin css types for styling the generated html
 //    0 - GitHub
@@ -2877,14 +2884,14 @@ The tool only support below statement for document generator:
 //    6 - Atom Dark
 //    7 - Forgotten Light
 
-./mdoc -html -showsource -css 1 examples/doc.my
+./mdoc -html -showsource -css 1 examples/doc.mp
 
 //Using external css file for styling the generated html file.
 //The '-cssfile' option has higher priority than the '-css' option.
 //If the supplied css file does not exists, then the '-css' option will be used.
-./mdoc -html -showsource -css 1 -cssfile ./examples/github-markdown.css examples/doc.my
+./mdoc -html -showsource -css 1 -cssfile ./examples/github-markdown.css examples/doc.mp
 
-//processing all the '.my' files in examples directory, generate html.
+//processing all the '.mp' files in examples directory, generate html.
 ./mdoc -html examples
 ```
 The generating of HTML document is base on github REST API，so you must have network connection to make it work.

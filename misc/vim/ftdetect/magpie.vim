@@ -1,1 +1,1 @@
-au BufNewFile,BufRead *.my setlocal filetype=magpie
+au BufNewFile,BufRead *.mp setlocal filetype=magpie

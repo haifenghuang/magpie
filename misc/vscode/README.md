@@ -9,7 +9,7 @@ This file provides Syntax highlighting support for the magpie Language in `Vs Co
 
 ## Installation for vsc
 
-Just copy `my` directory to vsc's extension directory.
+Just copy `mp` directory to vsc's extension directory.
 e.g. in my computer, it's `C:\Users\huanghai\.vscode\extensions`
 
 ## Known Issues

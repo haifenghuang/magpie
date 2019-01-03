@@ -1,6 +1,6 @@
-# my README
+# mp README
 
-This is the README for your extension "my". After writing up a brief description, we recommend including the following sections.
+This is the README for your extension "mp". After writing up a brief description, we recommend including the following sections.
 
 ## Features
 
@@ -24,8 +24,8 @@ For example:
 
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `mpExtension.enable`: enable/disable this extension
+* `mpExtension.thing`: set to `blah` to do something
 
 ## Known Issues
 

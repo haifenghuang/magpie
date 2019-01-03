@@ -383,6 +383,13 @@ let x, _, y = 10, 20, 30
 printf("x=%d, y=%d\n", x, y) //结果：x=10, y=30
 ```
 
+你还可以使用`const`关键字来声明一个常量:
+
+```swift
+const PI = 3.14159
+PI = 3.14 //error
+```
+
 ### 保留字
 
 下面列出了magpie语言的保留字：
@@ -2305,7 +2312,7 @@ for file in files {
 }
 ```
 
-更详细的例子请参照`goObj.my`。
+更详细的例子请参照`goObj.mp`。
 
 ## 标准模块介绍
 
@@ -2698,7 +2705,7 @@ println('{resultValue}')
 
 3. 重新编译magpie源码.
 
-下面是一个完整的使用数据库的例子(`examples/db.my`):
+下面是一个完整的使用数据库的例子(`examples/db.mp`):
 
 ```swift
 let dbOp = fn() {
@@ -2783,7 +2790,7 @@ highlighter工具能够语法高亮magpie语言（提供两种输出：命令行
 你也可以将它们合起来使用:
 
 ```sh
-./fmt xx.my | ./highlight  //输出到屏幕(命令行高亮不只是windows)
+./fmt xx.mp | ./highlight  //输出到屏幕(命令行高亮不只是windows)
 ```
 
 ## 文档生成
@@ -2802,13 +2809,13 @@ Magpie还包含一个命令行工具`mdoc`，可以从Magpie文件的注释生�
 
 ```sh
 //生成markdown文件, 生成的文件名为'doc.md'
-./mdoc examples/doc.my
+./mdoc examples/doc.mp
 
 //生成html文件, 生成的文件名为'doc.html'
-./mdoc -html examples/doc.my
+./mdoc -html examples/doc.mp
 
 //生成html文件, 同时生成函数和类的代码，生成的文件名为'doc.html'
-./mdoc -html -showsource examples/doc.my
+./mdoc -html -showsource examples/doc.mp
 
 //使用内置的css格式修饰html文档
 //    0 - GitHub
@@ -2820,14 +2827,14 @@ Magpie还包含一个命令行工具`mdoc`，可以从Magpie文件的注释生�
 //    6 - Atom Dark
 //    7 - Forgotten Light
 
-./mdoc -html -showsource -css 1 examples/doc.my
+./mdoc -html -showsource -css 1 examples/doc.mp
 
 //使用外部css文件来修饰html文档(优先级高于'-css'选项)
 //'-cssfile'选项的优先级高于'-css'选项
 //如果提供的css文件不存在或者文件读取错误,则使用'-css'选项
-./mdoc -html -showsource -css 1 -cssfile ./examples/github-markdown.css examples/doc.my
+./mdoc -html -showsource -css 1 -cssfile ./examples/github-markdown.css examples/doc.mp
 
-//遍历examples目录下的所有'.my'的文件，生成html
+//遍历examples目录下的所有'.mp'的文件，生成html
 ./mdoc -html examples
 ```
 
