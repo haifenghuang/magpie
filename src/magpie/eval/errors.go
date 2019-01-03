@@ -98,7 +98,7 @@ var errorType = map[int]string{
 	PARENTNOTDECL:     "Parent class %s not declared",
 	CLSNOTDEFINE:      "Class %s not defined",
 	CLSMEMBERPRIVATE:  "Variable(%s) of class(%s) is private",
-	CLSCALLPRIVATE:    "Method %s() of class(%s) is private",
+	CLSCALLPRIVATE:    "Method (%s) of class(%s) is private",
 	PROPERTYUSEERROR:  "Invalid use of Property(%s) of class(%s)",
 	MEMBERUSEERROR:    "Invalid use of member(%s) of class(%s)",
 	INDEXERUSEERROR:   "Invalid use of Indexer of class(%s)",

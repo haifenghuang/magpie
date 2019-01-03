@@ -142,6 +142,8 @@ type Parser struct {
 
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
+
+	classMap     map[string]bool
 }
 
 type (
@@ -166,6 +168,7 @@ func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 	}
 	p.l.SetMode(lexer.ScanComments)
 
+	p.classMap = make(map[string]bool)
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -179,6 +182,7 @@ func New(l *lexer.Lexer, wd string) *Parser {
 		path:   wd,
 	}
 
+	p.classMap = make(map[string]bool)
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -415,6 +419,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	}
 
 	stmt.ClassLiteral.Name = stmt.Name.Value
+	p.classMap[stmt.Name.Value] = true
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
@@ -785,6 +790,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 			v = p.parseClassLiteral()
 			if len(stmt.Names) >= i {
 				v.(*ast.ClassLiteral).Name = stmt.Names[i].Value  //get ClassLiteral's class Name
+				p.classMap[stmt.Names[i].Value] = true
 			}
 		} else {
 			v = p.parseExpressionStatement().Expression
@@ -2698,6 +2704,13 @@ func (p *Parser) parseNewExpression() ast.Expression {
 		return nil
 	}
 
+	clsName := call.Function.(*ast.Identifier).Value
+	if _, ok := p.classMap[clsName]; !ok {
+		pos := p.fixPosCol()
+		msg := fmt.Sprintf("Syntax Error:%v- 'new' should follow a 'class' name.", pos)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
 	newExp.Class = call.Function
 	newExp.Arguments = call.Arguments
 
