@@ -336,6 +336,19 @@ let a, b, c = 1, "hello world", [1,2,3]
 d = 4
 e = 5
 姓 = "黄"
+
+// '≠' is equal to '!='
+let a = 5 ≠ 6
+
+// '≤' is equal to '<='
+let b = 7 ≤ 8
+
+// '≥' is equal to '>='
+let c = 10 ≥ 9
+
+// '÷' is equal to '/'
+let d = 10 ÷ 4
+
 ```
 
 You can also use `Destructuring assignment`.

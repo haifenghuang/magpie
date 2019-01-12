@@ -114,6 +114,11 @@ var tokenMap = map[rune]token.TokenType{
 	'^': token.BITXOR,
 	'@': token.AT,
 	'_': token.UNDERSCORE,
+
+	'≠': token.NEQ,
+	'≤': token.LE,
+	'≥': token.GE,
+	'÷': token.SLASH,
 }
 
 func (l *Lexer) NextToken() token.Token {
