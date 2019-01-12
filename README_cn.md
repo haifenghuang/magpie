@@ -407,7 +407,7 @@ PI = 3.14 //error
 下面列出了magpie语言的保留字：
 
 * fn
-* let
+* let const
 * true false nil
 * if elsif elseif elif else
 * unless

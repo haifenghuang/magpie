@@ -403,7 +403,7 @@ PI = 3.14 //error
 Keywords are predefined, reserved identifiers that have special meanings to the compiler. They cannot be used as identifiers. Below is a list of reserved keywords
 
 * fn
-* let
+* let const
 * true false nil
 * if elsif elseif elif else
 * unless
