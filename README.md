@@ -65,6 +65,14 @@ println(opt)
 
 ### Control Flow
 
+* if
+* for
+* while
+* do
+* case-in
+
+#### if
+
 ```swift
 //if
 let a, b = 10, 5
@@ -85,8 +93,11 @@ if 10.isEven() {
 if 9.isOdd() {
     println("9 is odd")
 }
+```
 
-//for
+#### for
+
+```swift
 i = 9
 for { // forever loop
     i = i + 2
@@ -100,22 +111,31 @@ for (i = 0; i < 5; i++) {  // c-like for, '()' is a must
     if (i == 2) { continue }
     println('i is {i}')
 }
+```
 
-// while
+#### while
+
+```swift
 i = 10
 while (i>3) {
     i--
     println('i={i}')
 }
+```
 
-// do
+#### do
+
+```swift
 i = 10
 do {
     i--
     if (i==3) { break }
 }
+```
 
-//case-in
+#### case-in
+
+```swift
 let i = [{"a": 1, "b": 2}, 10]
 let x = [{"a": 1, "b": 2},10]
 case i in {
@@ -176,6 +196,10 @@ for i in (1,2,3) {
 
 ### Function
 
+* Default value
+* Variadic parameters
+* Mutiple return values
+
 ```swift
 //Function with default values and variadic parameters
 add = fn(x, y=5, z=7, args...) {
@@ -224,21 +248,33 @@ elseif (RUNTIME_OS == "windows") {
 
 ### Class
 
+* Simple
+* Inheritance
+* Operator overloading
+* Property(like c#)
+* Indexer
+
+#### Simple
+
 ```swift
-//Simple
 class Animal {
     let name = ""
     fn init(name) {    //'init' is the constructor
         //do somthing
     }
 }
+```
 
-//inheritance
+#### Inheritance
+
+```swift
 class Dog : Animal { //Dog inherits from Animal
 }
+```
 
+#### Operator overloading
 
-//operator overloading
+```swift
 class Vector {
     let x = 0;
     let y = 0;
@@ -268,9 +304,11 @@ println(v3.String());
 
 v4 = v1 + 10
 println(v4.String());
+```
 
+#### Property(like c#)
 
-//property(like c#)
+```swift
 class Date {
     let month = 7;  // Backing store
     property Month
@@ -302,9 +340,11 @@ class Date {
 
 dateObj = new Date(2000, 5, 11)
 dateObj.getDateInfo()
+```
 
+#### Indexer
 
-//index
+```swift
 class IndexedNames
 {
     let namelist = []

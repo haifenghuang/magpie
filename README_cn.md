@@ -67,8 +67,15 @@ println(opt)
 
 ### 控制流程
 
+* if
+* for
+* while
+* do
+* case-in
+ 
+#### if
+
 ```swift
-//if
 let a, b = 10, 5
 if (a > b) {
     println("a > b")
@@ -87,8 +94,11 @@ if 10.isEven() {
 if 9.isOdd() {
     println("9 is odd")
 }
+```
 
-//for
+#### for
+
+```swfit
 i = 9
 for { // 无限循环
     i = i + 2
@@ -102,22 +112,31 @@ for (i = 0; i < 5; i++) {  // 类似C语音的for循环，这里括号'()'是必
     if (i == 2) { continue }
     println('i is {i}')
 }
+```
 
-// while
+#### while
+
+```swift
 i = 10
 while (i>3) {
     i--
     println('i={i}')
 }
+```
 
-// do
+#### do
+
+```swift
 i = 10
 do {
     i--
     if (i==3) { break }
 }
+```
 
-//case-in
+#### case-in
+
+```swift
 let i = [{"a": 1, "b": 2}, 10]
 let x = [{"a": 1, "b": 2},10]
 case i in {
@@ -226,21 +245,33 @@ elseif (RUNTIME_OS == "windows") {
 
 ### 类
 
+* 简单
+* 继承
+* 操作符重载
+* 属性(类似c#)
+* 索引器
+
+#### 简单
+
 ```swift
-//简单
 class Animal {
     let name = ""
     fn init(name) {    //'init'是构造方法
         //do somthing
     }
 }
+```
 
-//继承
+#### 继承
+
+```swift
 class Dog : Animal { //Dog继承于Animal
 }
+```
 
+#### 操作符重载
 
-//操作符重载
+```swift
 class Vector {
     let x = 0;
     let y = 0;
@@ -270,9 +301,11 @@ println(v3.String());
 
 v4 = v1 + 10
 println(v4.String());
+```
 
+#### 属性(类似c#)
 
-//属性(类似c#)
+```swift
 class Date {
     let month = 7;  // Backing store
     property Month
@@ -304,9 +337,11 @@ class Date {
 
 dateObj = new Date(2000, 5, 11)
 dateObj.getDateInfo()
+```
 
+#### 索引器
 
-//index
+```swift
 class IndexedNames
 {
     let namelist = []
