@@ -37,7 +37,7 @@ hash -= "key2"
 hash -= 5
 println(hash)
 
-#Testing `fmt` module
+#Testing 'fmt' module
 i = 108
 f = 25.383
 b=true
@@ -55,7 +55,7 @@ fmt.printf("sp=%s", sp)
 
 fmt.fprintf(stdout, "Hello %s\n", "world")
 
-#Testing `logger` module
+#Testing 'logger' module
 ##Log to stdout
 log = newLogger(stdout, "LOGGER-", logger.LSTDFLAGS | logger.LMICROSECONDS)
 
@@ -73,7 +73,7 @@ for i in 1..5 {
 let plus_one = for i in [1,2,3,4] { i + 1 }
 fmt.println(plus_one)
 
-# Underscore support for `int` and `float` type
+# Underscore support for 'int' and 'float' type
 let pi = 3.14_159_265
 fmt.println(pi)
 
@@ -101,19 +101,19 @@ for idx, v in "abcd" {
 }
 println()
 
-//"for k, v in xxx" not support array, `k` is index
+//"for k, v in xxx" not support array, 'k' is index
 for idx, v in ["a", "b", "c", "d"] {
     printf("idx=%d, v=%s\n", idx, v)
 }
 println()
 
-//"for i in xxx",default index is `$_`
+//"for i in xxx",default index is '$_'
 for item in ["a", "b", "c", "d"] where $_ % 2 == 0 {  //$_ is the index
     printf("idx=%d, v=%s\n", $_, item)
 }
 println()
 
-//"for i in xx..xx",default index is `$_`
+//"for i in xx..xx",default index is '$_'
 for item in 10..20 where $_ % 2 == 0 { //$_ is the index
     printf("idx=%d, v=%d\n", $_, item)
 }

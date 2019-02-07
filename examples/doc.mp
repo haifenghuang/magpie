@@ -80,7 +80,7 @@ const GRAVITATION = 9.8
  * @param {int} y  this is the second parameter
  * @return {int} retuns the addition of it's two parameters if both parameters are ints.
  *
- * This is a example of calling `Add` with two ints:
+ * This is a example of calling 'Add' with two ints:
  * @example
  * sum = Add(1, 2) //result is 3
  * sum = Add(4, 5) //result is 9
@@ -89,7 +89,7 @@ const GRAVITATION = 9.8
  *
  * @return {string} retuns the string concatenation of it's two parameters if both parameters are strings
  *
- * This is a example of calling `Add` with two strings:
+ * This is a example of calling 'Add' with two strings:
  * @example
  * sum = Add("Hello ", "world") //result is "Hello world"
  * sum = Add("Welcome ", "world") //result is "Welcome world"

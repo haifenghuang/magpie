@@ -67,6 +67,7 @@ const (
 	CONDOR  // ||
 
 	AT //@
+	CMD // `
 
 	FUNCTION
 	LET
@@ -303,6 +304,8 @@ func (tt TokenType) String() string {
 		return "||"
 	case AT:
 		return "@"
+	case CMD:
+		return "``"
 	case FUNCTION:
 		return "FUNCTION"
 	case LET:

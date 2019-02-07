@@ -3001,6 +3001,27 @@ func (u *UsingStmt) String() string {
 }
 
 ///////////////////////////////////////////////////////////
+//                        COMMAND                        //
+///////////////////////////////////////////////////////////
+type CmdExpression struct {
+	Token token.Token
+	Value string
+}
+
+func (c *CmdExpression) Pos() token.Position {
+	return c.Token.Pos
+}
+
+func (c *CmdExpression) End() token.Position {
+	length := utf8.RuneCountInString(c.Value)
+	return token.Position{Line: c.Token.Pos.Line, Col: c.Token.Pos.Col + length}
+}
+
+func (c *CmdExpression) expressionNode()      {}
+func (c *CmdExpression) TokenLiteral() string { return c.Token.Literal }
+func (c *CmdExpression) String() string       { return c.Value }
+
+///////////////////////////////////////////////////////////
 //                       COMMENTS                        //
 ///////////////////////////////////////////////////////////
 

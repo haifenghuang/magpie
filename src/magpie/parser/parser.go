@@ -227,6 +227,7 @@ func (p *Parser) registerAction() {
 	p.registerPrefix(token.CLASS, p.parseClassLiteral)
 	p.registerPrefix(token.NEW, p.parseNewExpression)
 	p.registerPrefix(token.UDO, p.parsePrefixExpression)
+	p.registerPrefix(token.CMD, p.parseCommand)
 
 	//Meta-Operators
 	p.registerPrefix(token.TILDEPLUS, p.parsePrefixExpression)
@@ -477,6 +478,11 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 
 func (p *Parser) parsePostfixExpression(left ast.Expression) ast.Expression {
 	return &ast.PostfixExpression{Token: p.curToken, Left: left, Operator: p.curToken.Literal}
+}
+
+// `cmd xx xx`
+func (p *Parser) parseCommand() ast.Expression {
+	return &ast.CmdExpression{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 //func (p *Parser) parseGroupedExpression() ast.Expression {

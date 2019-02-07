@@ -24,7 +24,7 @@ else {
 }
 
 let orgSrc = "Tomato is fruit"
-let patternA = `fruit`
+let patternA = ``fruit``
 # =~(match), !~(unmatch)
 if orgSrc =~ patternA {
 	println("'Tomato is fruit' contains 'fruit'")
@@ -32,7 +32,7 @@ if orgSrc =~ patternA {
 	println("'Tomato is fruit' not contains 'fruit'")
 }
 
-let patternB = `animal`
+let patternB = ``animal``
 if orgSrc != patternB {
 	println("'Tomato is fruit' not contains 'animal'")
 }else {
@@ -50,13 +50,13 @@ println('replaceAllStringFunc, (antonio carlos jobim), upper=({upperText})')
 
 
 //test findAllStringSubmatch()
-re = regexp.compile(`(.)at`) // want to know what is in front of 'at'
+re = regexp.compile(``(.)at``) // want to know what is in front of 'at'
 res = regexp.findAllStringSubmatch("The cat sat on the mat.", -1)
 fmt.printf("findAllStringSubmatch, %v\n", res) //[[cat c] [sat s] [mat m]]
 
 
 
-if regexp.mustCompile(`Hello`).matchString("Hello Regular Expression.") == true {
+if regexp.mustCompile(``Hello``).matchString("Hello Regular Expression.") == true {
 	fmt.printf("Match\n")
 } else {
 	fmt.printf("No match\n")

@@ -16,53 +16,53 @@ template.parseTextFiles("./examples/looping.tmpl").execute(file, arr)
 
 //use parse()
 //Note here: we need to use "{{-" and "-}}" to remove the newline from the output
-template.newText("array").parse(`Looping
+template.newText("array").parse(``Looping
 {{- range . }}
 	key={{ .key }}, value={{ .value -}}
 {{- end }}
-`).execute(resultValue, arr)
+``).execute(resultValue, arr)
 println('{resultValue}')
 
 //test using hash
 hs = { "key" : "key1", "value" : "value1" }
-template.newText("hash").parse(`key={{.key }}, value={{ .value -}}`).execute(resultValue, hs)
+template.newText("hash").parse(``key={{.key }}, value={{ .value -}}``).execute(resultValue, hs)
 println('{resultValue}')
 
 //test using integer
 iValue = 15
-template.newText("int").parse(`value={{.}}`).execute(resultValue, iValue)
+template.newText("int").parse(``value={{.}}``).execute(resultValue, iValue)
 println('{resultValue}')
 
 //test using float
 fValue = 15.2
-template.newText("float").parse(`value={{.}}`).execute(resultValue, fValue)
+template.newText("float").parse(``value={{.}}``).execute(resultValue, fValue)
 println('{resultValue}')
 
 //test using boolean
 bValue = true
-template.newText("bool").parse(`value={{.}}`).execute(resultValue, bValue)
+template.newText("bool").parse(``value={{.}}``).execute(resultValue, bValue)
 println('{resultValue}')
 
 //test using time
 tValue = newTime()
-template.newText("time").parse(`value={{.}}`).execute(resultValue, tValue)
+template.newText("time").parse(``value={{.}}``).execute(resultValue, tValue)
 println('{resultValue}')
 
 //test using string
 sValue = "world"
-template.newText("string").parse(`value={{.}}
+template.newText("string").parse(``value={{.}}
 value={{printf "%q" . -}}
-`).execute(resultValue, sValue)
+``).execute(resultValue, sValue)
 println('{resultValue}')
 
 //test using Nil
 nValue = nil
-template.newText("Nil").parse(`value={{.}}`).execute(resultValue, nValue)
+template.newText("Nil").parse(``value={{.}}``).execute(resultValue, nValue)
 println('{resultValue}')
 
 
 //test template.funcs()
-templateText = `
+templateText = ``
 Input: {{printf "%q" .}}
 Output 0: {{title .}}
 Output 1: {{title . | printf "%q"}}
@@ -71,7 +71,7 @@ Output 2: {{printf "%q" . | title}}
 Output 3: {{upper .}}
 Output 4: {{upper . | printf "%q"}}
 Output 5: {{printf "%q" . | upper}}
-`
+``
 
 template.newText("titleTest").funcs(
 {
@@ -82,7 +82,7 @@ template.newText("titleTest").funcs(
 println('{resultValue}')
 
 
-envText = `ENVIRONMENT PATH: {{getenv .}}`
+envText = ``ENVIRONMENT PATH: {{getenv .}}``
 template.newText("titleTest").funcs(
 {
 	"getenv" : fn(x){os.getenv(x)}
@@ -96,8 +96,8 @@ println('{resultValue}')
 //        HTML Template Test
 /////////////////////////////////
 guardians = ["Gamora", "Groot", "Nebula", "Rocket", "Star-Lord"]
-master  = `Names:{{block "list" .}}{{"\n"}}{{range .}}{{println "-" .}}{{end}}{{end}}`
-overlay = `{{define "list"}} {{join . ", "}}{{end}} `
+master  = ``Names:{{block "list" .}}{{"\n"}}{{range .}}{{println "-" .}}{{end}}{{end}}``
+overlay = ``{{define "list"}} {{join . ", "}}{{end}} ``
 
 masterTmpl = template.newHtml("master").funcs(
 {

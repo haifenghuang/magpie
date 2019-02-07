@@ -8,6 +8,7 @@ import (
 	_ "magpie/lexer"
 	"magpie/token"
 	"os"
+	"os/exec"
 	"path"
 	"reflect"
 	"regexp"
@@ -220,6 +221,10 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	//using
 	case *ast.UsingStmt:
 		return evalUsingStatement(node, scope)
+
+	//command expression
+	case *ast.CmdExpression:
+		return evalCmdExpression(node, scope)
 	}
 	return nil
 }
@@ -5227,6 +5232,62 @@ func evalUsingStatement(u *ast.UsingStmt, scope *Scope) Object {
 	Eval(u.Block, scope)
 
 	return NIL
+}
+
+//code copied from https://github.com/abs-lang/abs with modification for windowns command.
+func evalCmdExpression(t *ast.CmdExpression, scope *Scope) Object {
+	cmd := t.Value
+	// Match all strings preceded by
+	// a $ or a \$
+	re := regexp.MustCompile("(\\\\)?\\$([a-zA-Z_]{1,})")
+	cmd = re.ReplaceAllStringFunc(cmd, func(m string) string {
+		// If the string starts with a backslash,
+		// that's an escape, so we should replace
+		// it with the remaining portion of the match.
+		// \$VAR becomes $VAR
+		if string(m[0]) == "\\" {
+			return m[1:]
+		}
+
+		// If the string starts with $, then
+		// it's an interpolation. Let's
+		// replace $VAR with the variable
+		// named VAR in the ABS' environment.
+		// If the variable is not found, we
+		// just dump an empty string
+		v, ok := scope.Get(m[1:])
+
+		if !ok {
+			return ""
+		}
+
+		return v.Inspect()
+	})
+
+	var commands []string
+	var executor string
+	if (runtime.GOOS == "windows") {
+		commands = []string{"/C", cmd}
+		executor = "cmd.exe"
+	} else {
+		commands = []string{"-c", cmd}
+		executor = "bash"
+	}
+
+	c := exec.Command(executor, commands...)
+	c.Env = os.Environ()
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	c.Stdin = os.Stdin
+	c.Stdout = &out
+	c.Stderr = &stderr
+	err := c.Run()
+
+	if err != nil {
+		return &String{String: stderr.String(), Valid: false}
+	}
+
+	return &String{String: strings.Trim(out.String(), "\n"), Valid: true}
 }
 
 // Convert a Object to an ast.Expression.

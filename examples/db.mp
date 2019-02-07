@@ -1,12 +1,12 @@
 let dbOp = fn() {
-	os.remove("./foo.db") //delete `foo.db` file
+	os.remove("./foo.db") //delete 'foo.db' file
 	let db = dbOpen("sqlite3", "./foo.db")
 	if (db == nil) {
 		println("DB open failed, error:", db.message())
 		return false
 	}
 	defer db.close()
-	let sqlStmt = `create table foo (id integer not null primary key, name text);delete from foo;`
+	let sqlStmt = ``create table foo (id integer not null primary key, name text);delete from foo;``
 	let exec_ret = db.exec(sqlStmt)
 	if (exec_ret == nil) {
 		println("DB exec failed! error:", exec_ret.message())
@@ -19,7 +19,7 @@ let dbOp = fn() {
 		return false
 	}
 
-	let stmt = tx.prepare(`insert into foo(id, name) values(?, ?)`)
+	let stmt = tx.prepare(``insert into foo(id, name) values(?, ?)``)
 	if (stmt == nil) {
 		println("tx.Prepare failed!, error:", stmt.message())
 		return false
@@ -30,7 +30,7 @@ let dbOp = fn() {
 	for (i = 0; i < 105; i++) {
 		let name = "hello" + i
 		if (i>100) {
-			//insert `null` value. There are six predefined values:
+			//insert 'null' value. There are six predefined values:
 			let rs = stmt.exec(i, sql.STRING_NULL)
 		} else {
 			let rs = stmt.exec(i, name)
@@ -53,7 +53,7 @@ let dbOp = fn() {
 	defer rows.close()
 	while (rows.next()) {
 		rows.scan(id, name)
-		if (name.valid()) { //check if it's `null`
+		if (name.valid()) { //check if it's 'null'
 			println(id, "|", name)
 		} else {
 			println(id, "|", "null")

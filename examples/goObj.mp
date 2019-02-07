@@ -26,7 +26,7 @@ for file in files {
 	gfmt.Printf("Name=%s, Size=%d\n", file.Name(), file.Size())
 }
 
-for s in gregex.MustCompile(`[\s_]`).Split("foo_bar_baz", -1) {
+for s in gregex.MustCompile(``[\s_]``).Split("foo_bar_baz", -1) {
   println(s)
 }
 

@@ -83,7 +83,7 @@ let fields = {
                 "colour"   : "red",
                 "fruit"    : "apple"
              }
-let pattern = `animal|fruit`
+let pattern = ``animal|fruit``
 # =~(match), !~(unmatch)
 let values = map { fields[$_] } grep { $_ =~ pattern } fields.keys()
 println(values)
@@ -106,7 +106,7 @@ let testStr = "123"
 case testStr in { //in(exact/partial match), is(only exact match)
     "abc","mno"  { println("testStr is 'abc' or 'mno'") }
     "def"        { println("testStr is 'def'") }
-    `\d+`        { println("testStr contains digit") } #regexp match
+    ``\d+``      { println("testStr contains digit") } #regexp match
     else         { println("testStr not matched") }
 }
 
@@ -214,7 +214,7 @@ for i in fn(x){ x+1 }(4)..fn(x){ x+1 }(0) where i > 2 {
   println('i={i}')
 }
 
-//`for`, `while` is a expression, so it could be passed to a variable
+//'for', 'while' is a expression, so it could be passed to a variable
 let c1 = 10
 let cc1 = while (c1>3) {  c1-- }
 println("\ncc1 = ", cc1)
@@ -286,7 +286,7 @@ for i in xxxxx1[0:3] {
 let yyy1 = "黄H海H峰Hello黄"
 let yyy2 = map {
     let v = $_ //save $_
-    if ($_ =~ `H`) {
+    if ($_ =~ ``H``) {
        $_ = "M"
     } else {
        $_ = v
@@ -298,13 +298,13 @@ println('yyy2 is {yyy2}')
 println(os.args())
 println(os.getenv("PATH"))
 println(os.getwd())
-println(os.runCmd("find", ".", "-name", `\*.my`))
+println(os.runCmd("find", ".", "-name", ``\*.my``))
 //os.copyFile("./xx.my", "./demo.my")
 
 //Below will not get expected result, WHY?
 //I tried using go language，same problem, not know why
 //spawn fn() {
-//    println(os.runCmd("find", ".", "-name", `\*.my`))
+//    println(os.runCmd("find", ".", "-name", ``\*.my``))
 //}()
 
 
@@ -324,7 +324,7 @@ let hsJson = {"key1" :10,
           "key6" : {"subkey1":12, "subkey2":"Json"},
           "key7" : fn(x,y){x+y}(1,2)
 }
-let hashStr = json.marshal(hsJson) //same as `json.toJson(hsJson)`
+let hashStr = json.marshal(hsJson) //same as 'json.toJson(hsJson)'
 println(json.indent(hashStr, "  "))
 
 let hsJson1 = json.unmarshal(hashStr)
@@ -334,14 +334,14 @@ println(hsJson1)
 let arrJson = [1,2.3,"HHF",[],{ "key" :10, "key1" :11}]
 let arrStr = json.marshal(arrJson)
 println(json.indent(arrStr))
-let arr1Json = json.unmarshal(arrStr)  //same as `json.fromJson(arrStr)`
+let arr1Json = json.unmarshal(arrStr)  //same as 'json.fromJson(arrStr)'
 println(arr1Json)
 
-#Test `os.expand` method
+#Test 'os.expand' method
 let expnd = os.expand("my home is ${HOME}, NAME is $NAME", fn(x) {
                            case x in {
-                              "HOME"  { return `[/c/Users/huanghai/Desktop/magpie-master]` }
-                              "NAME"  { return `[HuangHaiFeng]` }
+                              "HOME"  { return ``[/c/Users/huanghai/Desktop/magpie-master]`` }
+                              "NAME"  { return ``[HuangHaiFeng]`` }
                            }
             })
 println(expnd)
@@ -443,7 +443,7 @@ let ExampleWaitGroup = fn() {
 
 ExampleWaitGroup()
 
-#Testing `fmt` module
+#Testing 'fmt' module
 let i, f, b, s = 108, 25.383,true, "Hello, world"
 fmt.printf("i=[%05d, %X], b=[%t], f=[%.5f], s=[%-15s]\n", i, i, b, f, s)
 

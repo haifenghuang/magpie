@@ -402,11 +402,19 @@ func (l *Lexer) readRunesToken() token.Token {
 				tok.Literal = s
 				return tok
 			}
-		} else if l.ch == 96 { //raw string
-			if s, err := l.readRawString(); err == nil {
-				tok.Type = token.STRING
-				tok.Literal = s
-				return tok
+		} else if l.ch == 96 {
+			if l.peek() == 96 { //raw string
+				if s, err := l.readRawString(); err == nil {
+					tok.Type = token.STRING
+					tok.Literal = s
+					return tok
+				}
+			} else { // it's a command
+				if s, err := l.readCommand(l.ch); err == nil {
+					tok.Type = token.CMD
+					tok.Literal = s
+					return tok
+				}
 			}
 		}
 	case isSingleQuote(l.ch):
@@ -428,13 +436,15 @@ func newToken(tokenType token.TokenType, ch rune) token.Token {
 
 func (l *Lexer) readRawString() (string, error) {
 	var ret []rune
+	l.readNext()
 	for {
 		l.readNext()
 		if l.ch == 0 {
 			return "", errors.New("unexpected EOF")
 		}
 
-		if l.ch == 96 {
+		if l.ch == 96 && l.peek() == 96{
+			l.readNext()
 			l.readNext()
 			break
 		}
@@ -543,6 +553,42 @@ func (l *Lexer) NextInterpToken() token.Token {
 	l.readNext()
 	tok.Pos = l.getPos()
 	return tok
+}
+
+func (l *Lexer) readCommand(r rune) (string, error) {
+	var ret []rune
+eoc:
+	for {
+		l.readNext()
+		switch l.ch {
+		case '\r':
+		case '\n':
+			//swallow it
+			continue
+		case 0:
+			return "", errors.New("unexpected EOF")
+		case r:
+			l.readNext()
+			break eoc //eoc:end of command
+		case '\\':
+			l.readNext()
+			switch l.ch {
+			case '$':
+				ret = append(ret, '\\')
+				ret = append(ret, '$')
+				continue
+			case '`':
+				ret = append(ret, '`')
+				continue
+			}
+			ret = append(ret, l.ch)
+			continue
+		default:
+			ret = append(ret, l.ch)
+		}
+	}
+
+	return string(ret), nil
 }
 
 func (l *Lexer) readIdentifier() string {

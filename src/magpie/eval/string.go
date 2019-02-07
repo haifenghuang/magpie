@@ -205,7 +205,7 @@ func (s *String) CallMethod(line string, scope *Scope, method string, args ...Ob
 		return s.IsEmpty(line, args...)
 	case "hash":
 		return s.Hash(line, args...)
-	case "valid", "isValid":
+	case "valid", "isValid", "ok":
 		return s.IsValid(line, args...)
 	case "setValid":
 		return s.SetValid(line, args...)

@@ -37,7 +37,7 @@ filewrite = fn() {
 	file.writeLine("This is the first line")
 	file.writeLine("This is the second line")
 	file.writeString("这是第三行\n")
-	//Using `fmt.fprintf` function to write to file
+	//Using 'fmt.fprintf' function to write to file
 	fmt.fprintf(file, "This is the %s line\n", "fourth")
 
 	return true
