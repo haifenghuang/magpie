@@ -12,7 +12,7 @@ const (
 	FLOAT //float literal
 
 	EQ         // ==
-	NEQ        // !=, ≠
+	NEQ        // !=
 	MATCH      // =~
 	NOTMATCH   // !~
 	ASSIGN     // =
@@ -23,7 +23,7 @@ const (
 	BANG       // !
 	ASTERISK   // *
 	ASTERISK_A // *= (ASTERISK ASSIGN)
-	SLASH      // '/' or '÷':  divide
+	SLASH      // '/' divide
 	SLASH_A    // /= (SLASH ASSIGN)
 	MOD        // %
 	MOD_A      // %= //MOD ASSIGN
@@ -31,10 +31,10 @@ const (
 	QUESTIONM  // ? (QUESTION MARK)
 
 	LT        // <
-	LE        // <=, ≤
+	LE        // <=
 	SHIFT_L   // << (SHIFT LEFT)
 	GT        // >
-	GE        // >=, ≥
+	GE        // >=
 	SHIFT_R   // >> (SHIFT RIGHT)
 	COMMA     // ,
 	SEMICOLON // ;

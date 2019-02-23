@@ -1802,8 +1802,6 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		}
 
 		return nativeBoolToBooleanObject(left == right)
-	case node.Operator == "≠":
-		fallthrough
 	case node.Operator == "!=":
 		if isGoObj(left) || isGoObj(right) { // if it's GoObject
 			ret := compareGoObj(left, right)
@@ -1977,7 +1975,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 		} else {
 			return checkNumInfix(left, right, val)
 		}
-	case "/", "~/", "÷":
+	case "/", "~/":
 		if rightVal == 0 {
 			panic(NewError(node.Pos().Sline(), DIVIDEBYZERO))
 		}
@@ -2012,13 +2010,13 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case ">":
 		return nativeBoolToBooleanObject(leftVal > rightVal)
-	case "<=", "≤":
+	case "<=":
 		return nativeBoolToBooleanObject(leftVal <= rightVal)
-	case ">=", "≥":
+	case ">=":
 		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	case "==":
 		return nativeBoolToBooleanObject(leftVal == rightVal)
-	case "!=", "≠":
+	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 	default:
 		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
@@ -2061,17 +2059,17 @@ func evalStringInfixExpression(node *ast.InfixExpression, left Object, right Obj
 
 	case "==":
 		return nativeBoolToBooleanObject(l.String == r.String)
-	case "!=", "≠":
+	case "!=":
 		return nativeBoolToBooleanObject(l.String != r.String)
 	case "+":
 		return NewString(l.String + r.String)
 	case "<":
 		return nativeBoolToBooleanObject(l.String < r.String)
-	case "<=", "≤":
+	case "<=":
 		return nativeBoolToBooleanObject(l.String <= r.String)
 	case ">":
 		return nativeBoolToBooleanObject(l.String > r.String)
-	case ">=", "≥":
+	case ">=":
 		return nativeBoolToBooleanObject(l.String >= r.String)
 	}
 	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
@@ -2126,7 +2124,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		}
 		return FALSE
 
-	case "!=", "≠":
+	case "!=":
 		if isGoObj(left) || isGoObj(right) { // if it's GoObject
 			ret := compareGoObj(left, right)
 			if ret {
@@ -2253,7 +2251,7 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 			}
 		}
 		return TRUE
-	case "!=", "≠":
+	case "!=":
 		if left.Type() != right.Type() {
 			return TRUE
 		}
@@ -2341,7 +2339,7 @@ func evalTupleInfixExpression(node *ast.InfixExpression, left Object, right Obje
 			}
 		}
 		return TRUE
-	case "!=", "≠":
+	case "!=":
 		if left.Type() != right.Type() {
 			return TRUE
 		}
@@ -2382,7 +2380,7 @@ func evalHashInfixExpression(node *ast.InfixExpression, left Object, right Objec
 		return leftHash
 	case "==":
 		return nativeBoolToBooleanObject(compareHashObj(leftHash.Pairs, rightHash.Pairs))
-	case "!=", "≠":
+	case "!=":
 		return nativeBoolToBooleanObject(!compareHashObj(leftHash.Pairs, rightHash.Pairs))
 	}
 	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
@@ -2427,7 +2425,7 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 			return TRUE
 		}
 		return FALSE
-	case "!=", "≠":
+	case "!=":
 		if left.Type() != right.Type() {
 			return TRUE
 		}

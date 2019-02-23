@@ -345,18 +345,6 @@ let a, b, c = 1, "hello world", [1,2,3]
 d = 4
 e = 5
 姓="黄"
-
-// '≠' is equal to '!='
-let a = 5 ≠ 6
-
-// '≤' is equal to '<='
-let b = 7 ≤ 8
-
-// '≥' is equal to '>='
-let c = 10 ≥ 9
-
-// '÷' is equal to '/'
-let d = 10 ÷ 4
 ```
 你还可以使用`解构赋值`(Destructuring assignment), 当使用这种方法的时候，等号左边的变量必须用‘()’包起来:
 
