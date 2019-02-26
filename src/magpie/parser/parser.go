@@ -2803,6 +2803,7 @@ func (p *Parser) parsePipeExpression(left ast.Expression) ast.Expression {
 // EXPRESSION => EXPRESSION
 //(x, y) => x + y + 5      left expression is *TupleLiteral
 //(x) => x + 5             left expression is *Identifier
+// x  => x + 5             left expression is *Identifier
 //()  => 5 + 5             left expression is nil
 func (p *Parser) parseFatArrowFunction(left ast.Expression) ast.Expression {
 	tok := token.Token{Type:token.FUNCTION, Literal:"fn"}

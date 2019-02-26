@@ -487,13 +487,9 @@ printf("x=<%s>\n", x)
 
 ```swift
 let mm = [1,2,3,4,5,6,7,8,9,10]
-println('before mm={mm}')
+result = linq.from(mm).where(x => x % 2 == 0).select(x => x + 2).toSlice()
 
-result = linq.from(mm).where(fn(x) {
-    x % 2 == 0
-}).select(fn(x) {
-    x = x + 2
-}).toSlice()
+println('before mm={mm}')
 println('after result={result}')
 ```
 
