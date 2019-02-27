@@ -35,6 +35,7 @@ const (
 	CONDOR
 	CONDAND
 	NULLCOALESCING //??
+	TERNARY
 	EQUALS
 	LESSGREATER
 	BITOR
@@ -42,7 +43,6 @@ const (
 	BITAND
 	SHIFTS
 	SLICE
-	TERNARY
 	DOTDOT
 	SUM
 	PRODUCT
@@ -2179,7 +2179,7 @@ func (p *Parser) parseTernaryExpression(condition ast.Expression) ast.Expression
 		Token:     p.curToken,
 		Condition: condition,
 	}
-	precedence := p.curPrecedence()
+	precedence := SLICE
 	p.nextToken() //skip the '?'
 	expression.IfTrue = p.parseExpression(precedence)
 
