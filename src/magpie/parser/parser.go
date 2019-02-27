@@ -675,6 +675,28 @@ func (p *Parser) parseStringLiteralExpression() ast.Expression {
 func (p *Parser) parseInterpolatedString() ast.Expression {
 	is := &ast.InterpolatedString{Token: p.curToken, Value: p.curToken.Literal, ExprMap: make(map[byte]ast.Expression)}
 
+
+	/*
+		BUG FIX FOR BELOW CODE:
+			student = { "First": "Svetlana", "Last":"Omelchenko", "ID": 111, "Scores": 77.5 }
+			println('  {student.Last}, {student.First}:{student.Scores} '); //bug
+		The result is :
+			   Svetlana, 77.5:{2}
+	*/
+	for !p.curTokenIs(token.LBRACE) {
+		p.nextToken()
+	}
+	if p.peekTokenIs(token.RBRACE) {
+		pos := p.fixPosCol()
+		msg := fmt.Sprintf("Syntax Error:%v- In single quote, you can not have empty '{}'.", pos)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+	/*
+		BUG FIX(END)
+	*/
+
+
 	key := "0"[0]
 	for {
 		if p.curTokenIs(token.LBRACE) {
