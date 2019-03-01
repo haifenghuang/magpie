@@ -225,6 +225,10 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	//command expression
 	case *ast.CmdExpression:
 		return evalCmdExpression(node, scope)
+
+	//linq query expression
+	case *ast.QueryExpr:
+		return evalLinqQueryExpression(node, scope)
 	}
 	return nil
 }
@@ -2636,6 +2640,9 @@ func evalGrepExpression(ge *ast.GrepExpr, scope *Scope) Object {
 	} else if aValue.Type() == TUPLE_OBJ {
 		tuple, _ := aValue.(*Tuple)
 		members = tuple.Members
+	} else if aValue.Type() == LINQ_OBJ {
+		linqObj, _ := aValue.(*LinqObj)
+		members = linqObj.ToSlice(ge.Pos().Sline()).(*Array).Members
 	}
 
 	result := &Array{}
@@ -2696,6 +2703,9 @@ func evalMapExpression(me *ast.MapExpr, scope *Scope) Object {
 	} else if aValue.Type() == TUPLE_OBJ {
 		tuple, _ := aValue.(*Tuple)
 		members = tuple.Members
+	} else if aValue.Type() == LINQ_OBJ {
+		linqObj, _ := aValue.(*LinqObj)
+		members = linqObj.ToSlice(me.Pos().Sline()).(*Array).Members
 	}
 
 	result := &Array{}
@@ -2757,6 +2767,9 @@ func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
 	} else if aValue.Type() == TUPLE_OBJ {
 		tuple, _ := aValue.(*Tuple)
 		members = tuple.Members
+	} else if aValue.Type() == LINQ_OBJ {
+		linqObj, _ := aValue.(*LinqObj)
+		members = linqObj.ToSlice(lc.Pos().Sline()).(*Array).Members
 	}
 
 	ret := &Array{}
@@ -3394,6 +3407,10 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 	} else if aValue.Type() == TUPLE_OBJ {
 		tuple, _ := aValue.(*Tuple)
 		members = tuple.Members
+	} else if aValue.Type() == LINQ_OBJ {
+		linqObj := aValue.(*LinqObj)
+		arr := linqObj.ToSlice(fal.Pos().Sline()).(*Array)
+		members = arr.Members
 	} else if aValue.Type() == GO_OBJ { // GoObject
 		goObj := aValue.(*GoObject)
 		arr := GoValueToObject(goObj.obj).(*Array)
@@ -5287,6 +5304,143 @@ func evalCmdExpression(t *ast.CmdExpression, scope *Scope) Object {
 
 	return &String{String: strings.Trim(out.String(), "\n"), Valid: true}
 }
+
+//========================================================
+//               LINQ EVALUATION LOGIC(BEGIN)
+//========================================================
+// Evaluate linq query expression
+func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
+	fromExpr := query.From.(*ast.FromExpr)
+	queryBodyExpr := query.QueryBody.(*ast.QueryBodyExpr)
+
+	innerScope := NewScope(scope)
+
+	inValue := Eval(fromExpr.Expr, innerScope)
+	if inValue.Type() == ERROR_OBJ {
+		return inValue
+	}
+
+	line := query.Pos().Sline()
+
+	lq := &LinqObj{}
+	//=================================================
+	// query_expression : from_clause query_body
+	//=================================================
+	//from_clause : FROM identifier IN expression
+	fromObj := lq.From(line, innerScope, inValue).(*LinqObj)
+
+	//query_body : query_body_clause* select_or_group_clause query_continuation?
+	var tmpLinq *LinqObj = fromObj
+
+	//query_body_clause*
+	for _, queryBody := range queryBodyExpr.QueryBody {
+		queryBodyExpr := queryBody.(*ast.QueryBodyClauseExpr)
+
+		switch clause := queryBodyExpr.Expr.(type) {
+		case *ast.AssignExpression: //let-clause
+			fmt.Printf("LET: [NOT IMPLEMENTED]\n")
+
+		case *ast.FromExpr: // from_clause : FROM identifier IN expression
+			fmt.Printf("NESTING FROM： [NOT IMPLEMENTED]\n")
+
+		case *ast.WhereExpr: // where_clause : WHERE expression
+			whereExp := clause
+
+			fl := constructFuncLiteral(fromExpr.Var, whereExp.Expr)
+			fnObj := evalFunctionLiteral(fl, innerScope)
+			tmpLinq = tmpLinq.Where(line, innerScope, fnObj).(*LinqObj)
+
+		case *ast.JoinExpr:
+			fmt.Printf("JOIN： [NOT IMPLEMENTED]\n")
+
+		case *ast.OrderExpr: // orderby_clause : ORDERBY ordering (','  ordering)*
+			orderExpr := clause
+			var i int = 0
+			for _, orderingExpr := range orderExpr.Ordering {
+				order := orderingExpr.(*ast.OrderingExpr)
+				fl := constructFuncLiteral(fromExpr.Var, order.Expr)
+				fnObj := evalFunctionLiteral(fl, innerScope)
+
+				if order.IsAscending {
+					if i > 0 {
+						tmpLinq = tmpLinq.ThenBy(line, innerScope, fnObj).(*LinqObj)
+					} else {
+						tmpLinq = tmpLinq.OrderBy(line, innerScope, fnObj).(*LinqObj)
+					}
+				} else {
+					if i > 0 {
+						tmpLinq = tmpLinq.ThenByDescending(line, innerScope, fnObj).(*LinqObj)
+					} else {
+						tmpLinq = tmpLinq.OrderByDescending(line, innerScope, fnObj).(*LinqObj)
+					}
+				}
+				i++
+			}
+
+			//Note Here: we must convert the LinqObj to an array, then from
+			//           the converted array, construct a new LinqObj.
+			//
+			// Is there a better way for doing this???
+			arr := tmpLinq.ToOrderedSlice(line).(*Array)
+			tmpLinq = tmpLinq.From(line, innerScope, arr).(*LinqObj)
+
+		default:
+			fmt.Printf("[NOT IMPLEMENTED]\n")
+		}
+	}
+
+	//select_or_group_clause
+	switch queryBodyExpr.Expr.(type) {
+	case *ast.SelectExpr:
+		/*
+		let selectArr = [1,2,3,4,5,6,7,8,9,10]
+		[NORMAL]:
+			result = linq.from(selectArr).select(fn(x) {
+				x = x + 2
+			})
+		<=>
+		[LINQ]:
+			result = from x in selectArr select x + 2
+		*/
+		selectExp := queryBodyExpr.Expr.(*ast.SelectExpr)
+		fl := constructFuncLiteral(fromExpr.Var, selectExp.Expr)
+		fnObj := evalFunctionLiteral(fl, innerScope)
+		return tmpLinq.Select(line, innerScope, fnObj)
+
+	case *ast.GroupExpr:
+		/*
+		let groupByArr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+		[NORMAL]:
+			result = linq.from(groupByArr).groupBy(
+				fn(v) { return v % 2 == 0 },
+				fn(v) { return v }
+			)
+		<=>
+		[LINQ]:
+			result = from v in groupByArr group v BY v % 2 == 0
+		*/
+		groupExp := queryBodyExpr.Expr.(*ast.GroupExpr)
+		keyFuncLiteral     := constructFuncLiteral(fromExpr.Var, groupExp.ByExpr)
+		elementFuncLiteral := constructFuncLiteral(fromExpr.Var, groupExp.GroupExpr)
+		keySelector     := evalFunctionLiteral(keyFuncLiteral, innerScope)
+		elementSelector := evalFunctionLiteral(elementFuncLiteral, innerScope)
+		return tmpLinq.GroupBy(line, innerScope, keySelector, elementSelector)
+	}
+	
+	return NIL
+}
+
+//construct a FunctionLiteral for use with linq.xxx() function
+func constructFuncLiteral(value string, expr ast.Expression) *ast.FunctionLiteral {
+	fl := &ast.FunctionLiteral{Parameters:[]ast.Expression{}}
+	fl.Parameters = append(fl.Parameters, &ast.Identifier{Value:value})
+	fl.Body = &ast.BlockStatement{Statements: []ast.Statement{&ast.ExpressionStatement{Expression: expr}}}
+
+	return fl
+}
+//========================================================
+//               LINQ EVALUATION LOGIC(END)
+//========================================================
 
 // Convert a Object to an ast.Expression.
 func obj2Expression(obj Object) ast.Expression {

@@ -140,6 +140,21 @@ const (
 	USING
 	QUESTIONMM // ?? (Null Coalescing Operator)
 
+	//linq query
+	FROM
+	//WHERE
+	SELECT
+	GROUP
+	INTO
+	ORDERBY
+	JOIN
+	//LET
+	//IN
+	ON
+	EQUALS
+	BY
+	ASCENDING
+	DESCENDING
 )
 
 var keywords = map[string]TokenType{
@@ -191,6 +206,22 @@ var keywords = map[string]TokenType{
 	"static":    STATIC,
 	"default":   DEFAULT,
 	"using":     USING,
+
+	//linq query
+	"from":       FROM,
+	//"where":      WHERE,
+	"select":     SELECT,
+	"group":      GROUP,
+	"into":       INTO,
+	"orderby":    ORDERBY,
+	"join":       JOIN,
+	//"let":      LET,
+	//"in":       IN,
+	"on":         ON,
+	"equals":     EQUALS,
+	"by":         BY,
+	"ascending":  ASCENDING,
+	"descending": DESCENDING,
 }
 
 //for debug & testing
@@ -429,7 +460,38 @@ func (tt TokenType) String() string {
 	case TILDECARET:
 		return "~^"
 	case USING:
-		return "using"
+		return "USING"
+
+	//linq query
+	case FROM:
+		return "FROM"
+	//case WHERE:
+	//	return "WHERE"
+	case SELECT:
+		return "SELECT"
+	case GROUP:
+		return "GROUP"
+	case INTO:
+		return "INTO"
+	case ORDERBY:
+		return "ORDERBY"
+	case JOIN:
+		return "JOIN"
+	//case LET:
+	//	return "LET"
+	//case IN:
+	//	return "IN"
+	case ON:
+		return "ON"
+	case EQUALS:
+		return "EQUALS"
+	case BY:
+		return "BY"
+	case ASCENDING:
+		return "ASCENDING"
+	case DESCENDING:
+		return "DESCENDING"
+
 	default:
 		return "UNKNOWN"
 	}

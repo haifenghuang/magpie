@@ -16,6 +16,25 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 
 完整的语言教程：[docs](docs)
 
+## 举例
+
+```swift
+let ingredients = [
+    {Name: "Sugar",  Calories: 500},
+    {Name: "Egg",    Calories: 100},
+    {Name: "Milk",   Calories: 150},
+    {Name: "Flour",  Calories: 50},
+    {Name: "Butter", Calories: 200},
+]
+
+ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
+for item in ingredient {
+    // json marshaling for pretty-print
+    itemStr = json.marshal(item)
+    println(json.indent(itemStr, "  "))
+}
+```
+
 ## 入门
 
 下面演示了Magpie语言的一些功能:

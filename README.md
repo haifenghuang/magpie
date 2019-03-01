@@ -20,6 +20,25 @@ It also has a REPL with realtime syntax highlighter.
 
 Complete language tutorial can be found in [docs](docs)
 
+## Example
+
+```swift
+let ingredients = [
+    {Name: "Sugar",  Calories: 500},
+    {Name: "Egg",    Calories: 100},
+    {Name: "Milk",   Calories: 150},
+    {Name: "Flour",  Calories: 50},
+    {Name: "Butter", Calories: 200},
+]
+
+ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
+for item in ingredient {
+    // json marshaling for pretty-print
+    itemStr = json.marshal(item)
+    println(json.indent(itemStr, "  "))
+}
+```
+
 ## Getting started
 
 Below demonstrates some features of the Magpie language:

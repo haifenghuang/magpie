@@ -12,10 +12,12 @@ syn keyword     magpieDeclaration       let const
 hi def link     magpieDirective         Statement
 hi def link     magpieDeclaration       Type
 
+" Linq Keywords
+syn keyword     magpieLinq              from where select group into orderby join in on equals by ascending descending
 
 syn keyword     magpieStatement         return let const spawn defer struct enum using
 syn keyword     magpieException         try catch finally throw
-syn keyword     magpieConditional       if else elseif elsif elif unless where and or case in is
+syn keyword     magpieConditional       if else elseif elsif elif unless and or case is
 syn keyword     magpieRepeat            do while for break continue grep map
 syn keyword     magpieBranch            break continue
 syn keyword     magpieClass             class new property get set default this parent static public private protected interface
@@ -26,10 +28,14 @@ hi def link     magpieConditional       Conditional
 hi def link     magpieBranch            Conditional
 hi def link     magpieLabel             Label
 hi def link     magpieRepeat            Repeat
-
+hi def link     magpieLinq              Keyword
 
 syn match       magpieDeclaration       /\<fn\>/
 syn match       magpieDeclaration       /^fn\>/
+
+
+syn keyword magpieCommentTodo contained TODO FIXME XXX NOTE
+hi def link magpieCommentTodo Todo
 
 syn match comment "#.*$"    contains=@Spell,magpieCommentTodo
 syn match comment "\/\/.*$" contains=@Spell,magpieCommentTodo
@@ -83,7 +89,6 @@ syn cluster     magpieStringGroup       contains=magpieEscapeOctal,magpieEscapeC
 syn region      magpieString            start=+"+ skip=+\\\\\|\\"+ end=+"+ contains=@magpieStringGroup
 syn region      magpieRegExString       start=+/[^/*]+me=e-1 skip=+\\\\\|\\/+ end=+/\s*$+ end=+/\s*[;.,)\]}]+me=e-1 oneline
 syn region      magpieRawString         start=+`+ end=+`+
-
 
 hi def link     magpieString            String
 hi def link     magpieRawString         String

@@ -337,6 +337,12 @@
 		</dict>
 		<dict>
 			<key>match</key>
+			<string>\b(from|select|group|into|orderby|join|on|equals|by|ascending|descending)\b</string>
+			<key>name</key>
+			<string>keyword.control.linq.mp</string>
+		</dict>
+		<dict>
+			<key>match</key>
 			<string>\b(spawn|defer|using)\b</string>
 			<key>name</key>
 			<string>keyword.control.mp</string>

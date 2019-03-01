@@ -122,13 +122,13 @@ const KEYVALUE_OBJ = "KEYVALUE_OBJ"
 // from a map). This type is also used by ToMap() method to output result of a
 // query into a map.
 type KeyValueObj struct {
-	Key   Object
-	Value Object
+	KeyObj   Object
+	ValueObj Object
 }
 
 func (kv *KeyValueObj) Inspect() string {
 	hash := NewHash()
-	hash.Push("", kv.Key, kv.Value)
+	hash.Push("", kv.KeyObj, kv.ValueObj)
 	//hash.Pairs[hashable.HashKey()] = HashPair{Key: kv.Key, Value: kv.Value}
 	return hash.Inspect()
 }
@@ -138,36 +138,34 @@ func (kv *KeyValueObj) Type() ObjectType { return KEYVALUE_OBJ }
 func (kv *KeyValueObj) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	switch method {
 	case "key":
-		return kv.Key_(line, args...)
+		return kv.Key(line, args...)
 	case "value":
-		return kv.Value_(line, args...)
+		return kv.Value(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, kv.Type()))
 }
 
-//Note : we could not use "Key" as method name, because 'Key' is a member of KeyValueObj
-func (kv *KeyValueObj) Key_(line string, args ...Object) Object {
+func (kv *KeyValueObj) Key(line string, args ...Object) Object {
 	if len(args) != 0 {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
-	return kv.Key
+	return kv.KeyObj
 }
 
-//Note : we could not use "Value" as method name, because 'Value' is a member of KeyValueObj
-func (kv *KeyValueObj) Value_(line string, args ...Object) Object {
+func (kv *KeyValueObj) Value(line string, args ...Object) Object {
 	if len(args) != 0 {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
-	return kv.Value
+	return kv.ValueObj
 }
 
 const GROUP_OBJ = "GROUP_OBJ"
 
 // Group is a type that is used to store the result of GroupBy method.
 type GroupObj struct {
-	Key   Object
-	Group []Object
+	KeyObj Object
+	Group  []Object
 }
 
 func (g *GroupObj) Inspect() string {
@@ -176,7 +174,7 @@ func (g *GroupObj) Inspect() string {
 		arr.Members = append(arr.Members, v)
 	}
 	hash := NewHash()
-	hash.Push("", g.Key, arr)
+	hash.Push("", g.KeyObj, arr)
 	//hash.Pairs[hashable.HashKey()] = HashPair{Key: g.Key, Value: arr}
 	return hash.Inspect()
 }
@@ -186,19 +184,18 @@ func (g *GroupObj) Type() ObjectType { return GROUP_OBJ }
 func (g *GroupObj) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	switch method {
 	case "key":
-		return g.Key_(line, args...)
+		return g.Key(line, args...)
 	case "value":
 		return g.Value(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, g.Type()))
 }
 
-//Note : we could not use "Key" as method name, because 'Key' is a member of GroupObj
-func (g *GroupObj) Key_(line string, args ...Object) Object {
+func (g *GroupObj) Key(line string, args ...Object) Object {
 	if len(args) != 0 {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
-	return g.Key
+	return g.KeyObj
 }
 
 func (g *GroupObj) Value(line string, args ...Object) Object {
@@ -256,8 +253,10 @@ type LinqObj struct {
 }
 
 //lq:linq
+func (lq *LinqObj) iter() bool { return true }
 func (lq *LinqObj) Inspect() string {
 	r := toSlice(lq)
+
 	return r.Inspect()
 }
 
@@ -568,7 +567,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 		}}
 	case ARRAY_OBJ:
 		arr := obj.(*Array)
-		len := len(arr.Members)
+		itemLen := len(arr.Members)
 
 		//must return a new LinqObj
 		return &LinqObj{Query: Query{
@@ -577,7 +576,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 
 				return func() (item Object, ok *Boolean) {
 					ok = &Boolean{Valid: true}
-					ok.Bool = index < len
+					ok.Bool = index < itemLen
 					if ok.Bool {
 						item = arr.Members[index]
 						index++
@@ -588,7 +587,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 		}}
 	case TUPLE_OBJ:
 		tuple := obj.(*Tuple)
-		len := len(tuple.Members)
+		itemLen := len(tuple.Members)
 
 		//must return a new LinqObj
 		return &LinqObj{Query: Query{
@@ -597,7 +596,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 
 				return func() (item Object, ok *Boolean) {
 					ok = &Boolean{Valid: true}
-					ok.Bool = index < len
+					ok.Bool = index < itemLen
 					if ok.Bool {
 						item = tuple.Members[index]
 						index++
@@ -629,7 +628,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 						key := keys.Members[index]
 						value := values.Members[index]
 
-						item = &KeyValueObj{Key: key, Value: value}
+						item = &KeyValueObj{KeyObj: key, ValueObj: value}
 
 						index++
 					}

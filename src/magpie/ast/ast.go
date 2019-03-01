@@ -3021,6 +3021,355 @@ func (c *CmdExpression) expressionNode()      {}
 func (c *CmdExpression) TokenLiteral() string { return c.Token.Literal }
 func (c *CmdExpression) String() string       { return c.Value }
 
+
+///////////////////////////////////////////////////////////
+//                     LINQ QUERY                        //
+///////////////////////////////////////////////////////////
+
+/* Syntax:(From Antlr)
+	query_expression : from_clause query_body
+	from_clause : FROM identifier IN expression
+	query_body : query_body_clause* select_or_group_clause query_continuation?
+	query_body_clause: from_clause | let_clause | where_clause | combined_join_clause | orderby_clause
+	where_clause : WHERE expression
+	combined_join_clause : JOIN identifier IN expression ON expression EQUALS expression (INTO identifier)?
+	orderby_clause : ORDERBY ordering (','  ordering)*
+	ordering : expression (ASCENDING | DESCENDING)?
+	select_or_group_clause : SELECT expression | GROUP expression BY expression
+	query_continuation : INTO identifier query_body
+*/
+
+//query_expression : from_clause query_body
+type QueryExpr struct {
+	Token      token.Token //'from'
+	From       Expression //FromExpr
+	QueryBody  Expression //QueryBodyExpr
+}
+
+func (q *QueryExpr) Pos() token.Position {
+	return q.Token.Pos
+}
+
+func (q *QueryExpr) End() token.Position {
+	return q.QueryBody.End()
+}
+
+func (q *QueryExpr) expressionNode()      {}
+func (q *QueryExpr) TokenLiteral() string { return q.Token.Literal }
+func (q *QueryExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(q.From.String())
+	out.WriteString(" ")
+	out.WriteString(q.QueryBody.String())
+
+	s := out.String()
+	return strings.Join(strings.Fields(s), " ") // remove extra spaces
+}
+
+//from_clause : FROM identifier IN expression
+type FromExpr struct {
+	Token      token.Token //from
+	Var        string //identifier
+	Expr       Expression
+}
+
+func (f *FromExpr) Pos() token.Position {
+	return f.Token.Pos
+}
+
+func (f *FromExpr) End() token.Position {
+	return f.Expr.End()
+}
+
+func (f *FromExpr) expressionNode()      {}
+func (f *FromExpr) TokenLiteral() string { return f.Token.Literal }
+func (f *FromExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString("from ")
+	out.WriteString(f.Var)
+	out.WriteString(" in ")
+	out.WriteString(f.Expr.String())
+
+	return out.String()
+}
+
+//query_body : query_body_clause* select_or_group_clause query_continuation?
+type QueryBodyExpr struct {
+	QueryBody         []Expression //QueryBodyClauseExpr
+	Expr              Expression   //SelectExpr or GroupExpr
+	QueryContinuation Expression   //QueryContinuationExpr
+}
+
+func (q *QueryBodyExpr) Pos() token.Position {
+	if len(q.QueryBody) == 0 {
+		return q.Expr.Pos()
+	}
+	return q.QueryBody[0].Pos()
+}
+
+func (q *QueryBodyExpr) End() token.Position {
+	if q.QueryContinuation == nil {
+		return q.Expr.End()
+	}
+	return q.QueryContinuation.End()
+}
+
+func (q *QueryBodyExpr) expressionNode()      {}
+func (q *QueryBodyExpr) TokenLiteral() string { return "query_body_expr" }
+func (q *QueryBodyExpr) String() string       {
+	var out bytes.Buffer
+
+	queryBody := []string{}
+	for _, qb := range q.QueryBody {
+		queryBody = append(queryBody, qb.String())
+	}
+	out.WriteString(strings.Join(queryBody, " "))
+
+	out.WriteString(q.Expr.String())
+
+	if q.QueryContinuation != nil {
+		out.WriteString(q.QueryContinuation.String())
+	}
+
+	return out.String()
+}
+
+//query_body_clause: from_clause | let_clause | where_clause | combined_join_clause | orderby_clause
+type QueryBodyClauseExpr struct {
+	Expr  Expression
+}
+
+func (q *QueryBodyClauseExpr) Pos() token.Position {
+	return q.Expr.Pos()
+}
+
+func (q *QueryBodyClauseExpr) End() token.Position {
+	return q.Expr.End()
+}
+
+func (q *QueryBodyClauseExpr) expressionNode()      {}
+func (q *QueryBodyClauseExpr) TokenLiteral() string { return "query_body_clause_expr" }
+func (q *QueryBodyClauseExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(q.Expr.String())
+	return out.String()
+}
+
+//where_clause : WHERE expression
+type WhereExpr struct {
+	Token token.Token //'where'
+	Expr  Expression
+}
+
+func (w *WhereExpr) Pos() token.Position {
+	return w.Token.Pos
+}
+
+func (w *WhereExpr) End() token.Position {
+	return w.Expr.End()
+}
+
+func (w *WhereExpr) expressionNode()      {}
+func (w *WhereExpr) TokenLiteral() string { return w.Token.Literal }
+func (w *WhereExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(" where ")
+	out.WriteString(w.Expr.String())
+
+	return out.String()
+}
+
+//combined_join_clause : JOIN identifier IN expression ON expression EQUALS expression (INTO identifier)?
+type JoinExpr struct {
+	Token     token.Token //'join'
+	JoinVar   string      //identifier
+	InExpr    Expression
+	OnExpr    Expression
+	EqualExpr Expression
+	IntoVar   *Identifier //why IntoVar's type is '*Identifier', not 'string'? because we need it in 'End()' function.
+}
+
+func (j *JoinExpr) Pos() token.Position {
+	return j.Token.Pos
+}
+
+func (j *JoinExpr) End() token.Position {
+	if j.IntoVar == nil {
+		return j.EqualExpr.End()
+	}
+	return j.IntoVar.End()
+}
+
+func (j *JoinExpr) expressionNode()      {}
+func (j *JoinExpr) TokenLiteral() string { return j.Token.Literal }
+func (j *JoinExpr) String() string       {
+	var out bytes.Buffer
+	out.WriteString(" join ")
+	out.WriteString(j.JoinVar)
+	out.WriteString(" in ")
+	out.WriteString(j.InExpr.String())
+	out.WriteString(" on ")
+	out.WriteString(j.OnExpr.String())
+	out.WriteString(" equals ")
+	out.WriteString(j.EqualExpr.String())
+
+	if j.IntoVar != nil {
+		out.WriteString(" into ")
+		out.WriteString(j.IntoVar.String())
+	}
+
+	return out.String()
+}
+
+//orderby_clause : ORDERBY ordering (','  ordering)*
+type OrderExpr struct {
+	Token token.Token //'orderby'
+	Ordering []Expression //[]*OrderingExpr
+}
+
+func (o *OrderExpr) Pos() token.Position {
+	return o.Token.Pos
+}
+
+func (o *OrderExpr) End() token.Position {
+	return o.Ordering[len(o.Ordering)-1].End()
+}
+
+func (o *OrderExpr) expressionNode()      {}
+func (o *OrderExpr) TokenLiteral() string { return o.Token.Literal }
+func (o *OrderExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(" orderby ")
+	ordering := []string{}
+	for _, order := range o.Ordering {
+		ordering = append(ordering, order.String())
+	}
+	out.WriteString(strings.Join(ordering, ", "))
+
+	return out.String()
+}
+
+//ordering : expression (ASCENDING | DESCENDING)?
+type OrderingExpr struct {
+	Expr Expression
+	IsAscending bool // if there is no 'ASCENDING or 'DESCENDING', it's default to 'ASCENDING'
+	HasSortOrder bool
+	OrderToken token.Token //'ascending' or 'descending'
+}
+
+func (o *OrderingExpr) Pos() token.Position {
+	return o.Expr.Pos()
+}
+
+func (o *OrderingExpr) End() token.Position {
+	if o.HasSortOrder {
+		length := utf8.RuneCountInString(o.OrderToken.Literal)
+		return token.Position{Line: o.OrderToken.Pos.Line, Col: o.OrderToken.Pos.Col + length}
+	}
+
+	return o.Expr.End()
+}
+
+func (o *OrderingExpr) expressionNode()      {}
+func (o *OrderingExpr) TokenLiteral() string { return "ordering_expr" }
+func (o *OrderingExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(o.Expr.String())
+	if o.HasSortOrder {
+		out.WriteString(" ")
+		out.WriteString(o.OrderToken.Literal)
+	}
+	return out.String()
+}
+
+//select_or_group_clause : SELECT expression | GROUP expression BY expression
+//SELECT expression
+type SelectExpr struct {
+	Token token.Token //'select'
+	Expr  Expression
+}
+
+func (s *SelectExpr) Pos() token.Position {
+	return s.Token.Pos
+}
+
+func (s *SelectExpr) End() token.Position {
+	return s.Expr.End()
+}
+
+func (s *SelectExpr) expressionNode()      {}
+func (s *SelectExpr) TokenLiteral() string { return s.Token.Literal }
+func (s *SelectExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(" select ")
+	out.WriteString(s.Expr.String())
+
+	return out.String()
+}
+
+//GROUP expression BY expression
+type GroupExpr struct {
+	Token     token.Token //'group'
+	GroupExpr Expression
+	ByExpr    Expression
+}
+
+func (g *GroupExpr) Pos() token.Position {
+	return g.Token.Pos
+}
+
+func (g *GroupExpr) End() token.Position {
+	return g.ByExpr.End()
+}
+
+func (g *GroupExpr) expressionNode()      {}
+func (g *GroupExpr) TokenLiteral() string { return g.Token.Literal }
+func (g *GroupExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(" group ")
+	out.WriteString(g.GroupExpr.String())
+	out.WriteString(" by ")
+	out.WriteString(g.ByExpr.String())
+
+	return out.String()
+}
+
+//query_continuation : INTO identifier query_body
+type QueryContinuationExpr struct
+{
+	Token token.Token // 'into'
+	Var   string
+	Expr  Expression //QueryBodyExpr
+}
+
+func (q *QueryContinuationExpr) Pos() token.Position {
+	return q.Token.Pos
+}
+
+func (q *QueryContinuationExpr) End() token.Position {
+	return q.Expr.End()
+}
+
+func (q *QueryContinuationExpr) expressionNode()      {}
+func (q *QueryContinuationExpr) TokenLiteral() string { return q.Token.Literal }
+func (q *QueryContinuationExpr) String() string       {
+	var out bytes.Buffer
+
+	out.WriteString(" into ")
+	out.WriteString(q.Var)
+	out.WriteString(q.Expr.String())
+
+	return out.String()
+}
+
 ///////////////////////////////////////////////////////////
 //                       COMMENTS                        //
 ///////////////////////////////////////////////////////////

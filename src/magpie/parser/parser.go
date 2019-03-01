@@ -237,6 +237,9 @@ func (p *Parser) registerAction() {
 	p.registerPrefix(token.TILDEMOD, p.parsePrefixExpression)
 	p.registerPrefix(token.TILDECARET, p.parsePrefixExpression)
 
+	//linq query
+	p.registerPrefix(token.FROM, p.parseLinqExpression)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -674,28 +677,6 @@ func (p *Parser) parseStringLiteralExpression() ast.Expression {
 
 func (p *Parser) parseInterpolatedString() ast.Expression {
 	is := &ast.InterpolatedString{Token: p.curToken, Value: p.curToken.Literal, ExprMap: make(map[byte]ast.Expression)}
-
-
-	/*
-		BUG FIX FOR BELOW CODE:
-			student = { "First": "Svetlana", "Last":"Omelchenko", "ID": 111, "Scores": 77.5 }
-			println('  {student.Last}, {student.First}:{student.Scores} '); //bug
-		The result is :
-			   Svetlana, 77.5:{2}
-	*/
-	for !p.curTokenIs(token.LBRACE) {
-		p.nextToken()
-	}
-	if p.peekTokenIs(token.RBRACE) {
-		pos := p.fixPosCol()
-		msg := fmt.Sprintf("Syntax Error:%v- In single quote, you can not have empty '{}'.", pos)
-		p.errors = append(p.errors, msg)
-		return nil
-	}
-	/*
-		BUG FIX(END)
-	*/
-
 
 	key := "0"[0]
 	for {
@@ -2910,6 +2891,311 @@ func (p *Parser) parseUsingStatement() *ast.UsingStmt {
 	usingStmt.Block = p.parseBlockStatement()
 
 	return usingStmt
+}
+
+/*
+	query_expression : from_clause query_body
+	from_clause : FROM identifier IN expression
+	query_body : query_body_clause* select_or_group_clause query_continuation?
+	query_body_clause: from_clause| let_clause | where_clause | combined_join_clause | orderby_clause
+	where_clause : WHERE expression
+	combined_join_clause : JOIN  identifier IN expression ON expression EQUALS expression (INTO identifier)?
+	orderby_clause : ORDERBY ordering (','  ordering)*
+	ordering : expression (ASCENDING | DESCENDING)?
+	select_or_group_clause : SELECT expression | GROUP expression BY expression
+	query_continuation : INTO identifier query_body
+*/
+
+// query_expression : from_clause query_body
+func (p *Parser) parseLinqExpression() ast.Expression {
+	queryExpr := &ast.QueryExpr{Token: p.curToken}
+
+	//from_clause
+	queryExpr.From = p.parseFromExpression()
+	p.nextToken()
+
+	//query_body
+	queryExpr.QueryBody = p.parseQueryBodyExpression()
+
+
+	if queryExpr.QueryBody.(*ast.QueryBodyExpr).Expr == nil {
+		msg := fmt.Sprintf("Syntax Error:%v- Linq query must be ended with 'select' or 'group'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	return queryExpr
+}
+
+//from_clause : FROM identifier IN expression
+func (p *Parser) parseFromExpression() ast.Expression {
+	fromExpr := &ast.FromExpr{}
+
+	//FROM
+	fromExpr.Token = p.curToken
+
+	//identifier
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	fromExpr.Var = p.curToken.Literal
+
+	//IN
+	if !p.expectPeek(token.IN) {
+		return nil
+	}
+	p.nextToken()
+
+	//expression
+	fromExpr.Expr = p.parseExpression(LOWEST)
+
+	return fromExpr
+}
+
+//query_body : query_body_clause* select_or_group_clause query_continuation?
+func (p *Parser) parseQueryBodyExpression() ast.Expression {
+	queryBodyExpr := &ast.QueryBodyExpr{}
+
+	//------------------------
+	// query_body_clause*
+	//------------------------
+	//query_body_clause: from_clause | let_clause | where_clause | combined_join_clause | orderby_clause
+	queryBodyExpr.QueryBody = []ast.Expression{}
+	for p.curTokenIs(token.FROM) || p.curTokenIs(token.LET) || p.curTokenIs(token.WHERE) || p.curTokenIs(token.JOIN) || p.curTokenIs(token.ORDERBY) {
+		queryBodyExpr.QueryBody = append(queryBodyExpr.QueryBody, p.parseQueryBodyClauseExpr())
+		p.nextToken()
+	}
+
+	//select_or_group_clause
+	if p.curTokenIs(token.SELECT) {
+		queryBodyExpr.Expr = p.parseSelectExpression()
+	} else if p.curTokenIs(token.GROUP) {
+		queryBodyExpr.Expr = p.parseGroupExpression()
+	}
+
+	//------------------------
+	// query_continuation?
+	//------------------------
+	//query_continuation : INTO identifier query_body
+	if p.peekTokenIs(token.INTO) {
+		p.nextToken()
+		queryBodyExpr.QueryContinuation = p.parseQueryContinuationExpression()
+	}
+	
+	return queryBodyExpr
+}
+
+//query_body_clause: from_clause| let_clause | where_clause | combined_join_clause | orderby_clause
+func (p *Parser) parseQueryBodyClauseExpr() ast.Expression {
+	queryBodyClauseExpr := &ast.QueryBodyClauseExpr{}
+
+	switch p.curToken.Type {
+	case token.FROM:
+		//from_clause
+		queryBodyClauseExpr.Expr = p.parseFromExpression()
+	case token.LET:
+		//let_clause
+		expr := &ast.AssignExpression{}
+		expr.Token = token.Token{Type: token.ASSIGN, Literal: "="}
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		expr.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		if !p.expectPeek(token.ASSIGN) {
+			return nil
+		}
+		p.nextToken()
+		expr.Value = p.parseExpression(LOWEST)
+		queryBodyClauseExpr.Expr = expr
+	case token.WHERE:
+		//where_clause
+		queryBodyClauseExpr.Expr = p.parseWhereExpression()
+	case token.JOIN:
+		//combined_join_clause
+		queryBodyClauseExpr.Expr = p.parseJoinExpression()
+	case token.ORDERBY:
+		//orderby_clause
+		queryBodyClauseExpr.Expr = p.parseOrderByExpression()
+	default:
+		return nil
+	}
+
+	return queryBodyClauseExpr
+}
+
+//query_continuation : INTO identifier query_body
+func (p *Parser) parseQueryContinuationExpression() ast.Expression {
+	exp := &ast.QueryContinuationExpr{}
+
+	//INTO
+	exp.Token = p.curToken //'into'
+
+	//identifier
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	exp.Var = p.curToken.Literal
+	p.nextToken()
+
+	//query_body
+	exp.Expr = p.parseQueryBodyExpression()
+
+	return exp
+}
+
+//SELECT expression
+func (p *Parser) parseSelectExpression() ast.Expression {
+	exp := &ast.SelectExpr{}
+
+	//SELECT
+	exp.Token = p.curToken
+	p.nextToken()
+
+	//expression
+	exp.Expr = p.parseExpression(LOWEST)
+
+	return exp
+}
+
+//GROUP expression BY expression
+func (p *Parser) parseGroupExpression() ast.Expression {
+	exp := &ast.GroupExpr{}
+
+	//GROUP
+	exp.Token = p.curToken
+	p.nextToken()
+
+	//expression
+	exp.GroupExpr = p.parseExpression(LOWEST)
+
+	//BY
+	if !p.expectPeek(token.BY) {
+		return nil
+	}
+	p.nextToken()
+
+	//expression
+	exp.ByExpr = p.parseExpression(LOWEST)
+
+	return exp
+}
+
+//where_clause : WHERE expression
+func (p *Parser) parseWhereExpression() ast.Expression {
+	exp := &ast.WhereExpr{}
+
+	//WHERE
+	exp.Token = p.curToken
+	p.nextToken()
+
+	//expression
+	exp.Expr = p.parseExpression(LOWEST)
+
+	return exp
+}
+
+//combined_join_clause : JOIN identifier IN expression ON expression EQUALS expression (INTO identifier)?
+func (p *Parser) parseJoinExpression() ast.Expression {
+	exp := &ast.JoinExpr{}
+
+	//JOIN
+	exp.Token = p.curToken
+
+	//identifier
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+	exp.JoinVar = p.curToken.Literal
+	p.nextToken()
+
+	//IN
+	if !p.expectPeek(token.IN) {
+		return nil
+	}
+	p.nextToken()
+
+	//expression
+	exp.InExpr = p.parseExpression(LOWEST)
+	p.nextToken()
+
+	//ON
+	if !p.curTokenIs(token.ON) {
+		return nil
+	}
+	p.nextToken()
+
+	exp.OnExpr = p.parseExpression(LOWEST)
+	p.nextToken()
+
+	//EQUALS
+	if !p.curTokenIs(token.EQUALS) {
+		return nil
+	}
+	p.nextToken()
+
+	//expression
+	exp.EqualExpr = p.parseExpression(LOWEST)
+	p.nextToken()
+
+	//(INTO identifier)?
+	if p.curTokenIs(token.INTO) {
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		exp.IntoVar = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	}
+
+	return exp
+}
+
+//orderby_clause : ORDERBY ordering (','  ordering)*
+func (p *Parser) parseOrderByExpression() ast.Expression {
+	exp := &ast.OrderExpr{}
+
+	//ORDERBY
+	exp.Token = p.curToken // 'orderby'
+	p.nextToken()
+
+	//ordering (','  ordering)*
+	exp.Ordering = []ast.Expression{}
+	exp.Ordering = append(exp.Ordering, p.parseOrderingExpr())
+
+	if !p.peekTokenIs(token.COMMA) {
+		return exp
+	}
+
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		exp.Ordering = append(exp.Ordering, p.parseOrderingExpr())
+	}
+
+	return exp
+}
+
+//ordering : expression (ASCENDING | DESCENDING)?
+func (p *Parser) parseOrderingExpr() ast.Expression {
+	exp := &ast.OrderingExpr{IsAscending:true, HasSortOrder: false}
+
+	//expression
+	exp.Expr = p.parseExpression(LOWEST)
+
+	//(ASCENDING | DESCENDING)?
+	if p.peekTokenIs(token.ASCENDING) {
+		exp.HasSortOrder = true
+		exp.IsAscending = true
+
+		p.nextToken()
+		exp.OrderToken = p.curToken
+	} else if p.peekTokenIs(token.DESCENDING) {
+		exp.HasSortOrder = true
+		exp.IsAscending = false
+
+		p.nextToken()
+		exp.OrderToken = p.curToken
+	}
+
+	return exp
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
