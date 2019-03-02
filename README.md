@@ -22,21 +22,40 @@ Complete language tutorial can be found in [docs](docs)
 
 ## Example
 
-```swift
-let ingredients = [
-    {Name: "Sugar",  Calories: 500},
-    {Name: "Egg",    Calories: 100},
-    {Name: "Milk",   Calories: 150},
-    {Name: "Flour",  Calories: 50},
-    {Name: "Butter", Calories: 200},
-]
+```csharp
+class Linq {
+    static fn TestSimpleLinq() {
+        //Prepare Data Source
+        let ingredients = [
+            {Name: "Sugar",  Calories: 500},
+            {Name: "Egg",    Calories: 100},
+            {Name: "Milk",   Calories: 150},
+            {Name: "Flour",  Calories: 50},
+            {Name: "Butter", Calories: 200},
+        ]
 
-ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
-for item in ingredient {
-    // json marshaling for pretty-print
-    itemStr = json.marshal(item)
-    println(json.indent(itemStr, "  "))
+	//Query Data Source
+        ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
+
+        //Display
+        for item in ingredient => println(item)
+    }
+
+    static fn TestFileLinq() {
+        //Read Data Source from file.
+        file = newFile("./examples/linqSample.csv", "r")
+
+        //Query Data Source
+        result = from field in file where int(field[1]) > 300000 select field[0]
+
+        //Display
+        for item in result => printf("item = %s\n", item)
+    }
 }
+
+Linq.TestSimpleLinq()
+println("======================================")
+Linq.TestFileLinq()
 ```
 
 ## Getting started

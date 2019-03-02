@@ -398,6 +398,7 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 		return nil
 	}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	p.classMap[stmt.Name.Value] = true
 
 	if p.peekTokenIs(token.LPAREN) {
 		p.nextToken()
@@ -425,7 +426,6 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	}
 
 	stmt.ClassLiteral.Name = stmt.Name.Value
-	p.classMap[stmt.Name.Value] = true
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
@@ -1054,11 +1054,18 @@ func (p *Parser) parseWhileLoopExpression() ast.Expression {
 		p.nextToken()
 	}
 
-	if !p.expectPeek(token.LBRACE) {
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		loop.Block = p.parseBlockStatement()
+	} else if p.peekTokenIs(token.FATARROW) {
+		p.nextToken() //skip current token
+		p.nextToken() //skip '=>' token
+		loop.Block = p.parseExpressionStatement().Expression
+	} else {
+		msg := fmt.Sprintf("Syntax Error:%v- for loop must be followed by a '{' or '=>'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
 		return nil
 	}
-
-	loop.Block = p.parseBlockStatement()
 
 	p.registerPrefix(token.BREAK, p.parseBreakWithoutLoopContext)
 	p.registerPrefix(token.CONTINUE, p.parseContinueWithoutLoopContext)
@@ -1128,17 +1135,38 @@ func (p *Parser) parseCForLoopExpression(curToken token.Token) ast.Expression {
 		return nil
 	}
 
-	if !p.expectPeek(token.LBRACE) {
+	if !p.peekTokenIs(token.LBRACE) && !p.peekTokenIs(token.FATARROW) {
+		msg := fmt.Sprintf("Syntax Error:%v- for loop must be followed by a '{' or '=>'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
 		return nil
 	}
 
+	var isBlock bool = false
+	if p.peekTokenIs(token.LBRACE) {
+		isBlock = true
+	} else {
+		p.nextToken()
+	}
+
+	p.nextToken()
+
 	if init == nil && cond == nil && update == nil {
 		loop := &ast.ForEverLoop{Token: curToken}
-		loop.Block = p.parseBlockStatement()
+		if isBlock {
+			loop.Block = p.parseBlockStatement()
+		} else {
+			msg := fmt.Sprintf("Syntax Error:%v- Never end loop must use block statment.", p.curToken.Pos)
+			p.errors = append(p.errors, msg)
+			return nil
+		}
 		result = loop
 	} else {
 		loop := &ast.ForLoop{Token: curToken, Init:init, Cond:cond, Update:update}
-		loop.Block = p.parseBlockStatement()
+		if isBlock {
+			loop.Block = p.parseBlockStatement()
+		} else {
+			loop.Block = p.parseExpressionStatement().Expression
+		}
 		result = loop
 	}
 
@@ -1161,7 +1189,14 @@ func (p *Parser) parseForEachArrayOrRangeExpression(curToken token.Token, variab
 		return nil
 	}
 	p.nextToken()
-	aValue1 := p.parseExpression(LOWEST)
+
+	/*
+		Note: Here we use precedence 'FATARROW', not 'LOWEST'.
+		if we use 'LOWEST', below code will report error:
+			c = for i in a => i + 1
+		    (error message:  for loop must be followed by a '{' or '=>'.)
+	*/
+	aValue1 := p.parseExpression(FATARROW)
 
 	var aValue2 ast.Expression
 	if p.peekTokenIs(token.DOTDOT) {
@@ -1173,16 +1208,24 @@ func (p *Parser) parseForEachArrayOrRangeExpression(curToken token.Token, variab
 
 	var aCond ast.Expression
 	if p.peekTokenIs(token.WHERE) {
-		p.nextToken()
-		p.nextToken()
-		aCond = p.parseExpression(LOWEST)
+		p.nextToken() //skip current token
+		p.nextToken() //skip 'where' token
+		aCond = p.parseExpression(FATARROW)
 	}
 
-	if !p.expectPeek(token.LBRACE) {
+	var aBlock ast.Node
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		aBlock = p.parseBlockStatement()
+	} else if p.peekTokenIs(token.FATARROW) {
+		p.nextToken() //skip current token
+		p.nextToken() //skip '=>'
+		aBlock = p.parseExpressionStatement().Expression
+	} else {
+		msg := fmt.Sprintf("Syntax Error:%v- for loop must be followed by a '{' or '=>'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
 		return nil
 	}
-
-	aBlock := p.parseBlockStatement()
 
 	var result ast.Expression
 	if !isRange {
@@ -1219,19 +1262,27 @@ func (p *Parser) parseForEachMapExpression(curToken token.Token, variable string
 	}
 
 	p.nextToken()
-	loop.X = p.parseExpression(LOWEST)
+	loop.X = p.parseExpression(FATARROW)
 
 	if p.peekTokenIs(token.WHERE) {
 		p.nextToken()
 		p.nextToken()
-		loop.Cond = p.parseExpression(LOWEST)
+		loop.Cond = p.parseExpression(FATARROW)
 	}
 
-	if !p.expectPeek(token.LBRACE) {
+	if p.peekTokenIs(token.LBRACE) {
+		p.nextToken()
+		loop.Block = p.parseBlockStatement()
+	} else if p.peekTokenIs(token.FATARROW) {
+		p.nextToken() //skip current token
+		p.nextToken() //skip '=>' token
+		loop.Block = p.parseExpressionStatement().Expression
+	} else {
+		msg := fmt.Sprintf("Syntax Error:%v- for loop must be followed by a '{' or '=>'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
 		return nil
 	}
 
-	loop.Block = p.parseBlockStatement()
 	p.registerPrefix(token.BREAK, p.parseBreakWithoutLoopContext)
 	p.registerPrefix(token.CONTINUE, p.parseContinueWithoutLoopContext)
 
@@ -3298,6 +3349,15 @@ func(p *Parser) fixPosCol() token.Position {
 	}
 
 	return pos
+}
+
+//DEBUG ONLY
+func(p *Parser) debugToken(message string) {
+	fmt.Printf("%s, curToken = %s, peekToken = %s\n", message, p.curToken.Literal, p.peekToken.Literal)
+}
+
+func(p *Parser) debugNode(message string, node ast.Node) {
+	fmt.Printf("%s, Node = %s\n", message, node.String())
 }
 
 //stupid method to convert 'some'(not all) unicode number to ascii number

@@ -117,7 +117,7 @@ type ForLoop struct {
 	Init   Expression
 	Cond   Expression
 	Update Expression
-	Block  *BlockStatement
+	Block  Node //BlockStatement or single expression
 }
 
 func (fl *ForLoop) Pos() token.Position {
@@ -154,7 +154,7 @@ type ForEachArrayLoop struct {
 	Var   string
 	Value Expression //value to range over
 	Cond  Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Block *BlockStatement
+	Block Node //BlockStatement or single expression
 }
 
 func (fal *ForEachArrayLoop) Pos() token.Position {
@@ -192,7 +192,7 @@ type ForEachMapLoop struct {
 	Value string
 	X     Expression //value to range over
 	Cond  Expression //Conditional clause(nil if there is no 'WHERE' clause)
-	Block *BlockStatement
+	Block Node //BlockStatement or single expression
 }
 
 func (fml *ForEachMapLoop) Pos() token.Position {
@@ -258,7 +258,7 @@ type ForEachDotRange struct {
 	StartIdx Expression
 	EndIdx   Expression
 	Cond     Expression //conditional clause(nil if there is no 'WHERE' clause)
-	Block    *BlockStatement
+	Block    Node //BlockStatement or single expression
 }
 
 func (fdr *ForEachDotRange) Pos() token.Position {
@@ -298,7 +298,7 @@ func (fdr *ForEachDotRange) String() string {
 type WhileLoop struct {
 	Token     token.Token
 	Condition Expression
-	Block     *BlockStatement
+	Block     Node //BlockStatement or single expression
 }
 
 func (wl *WhileLoop) Pos() token.Position {

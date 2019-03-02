@@ -18,21 +18,40 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 
 ## 举例
 
-```swift
-let ingredients = [
-    {Name: "Sugar",  Calories: 500},
-    {Name: "Egg",    Calories: 100},
-    {Name: "Milk",   Calories: 150},
-    {Name: "Flour",  Calories: 50},
-    {Name: "Butter", Calories: 200},
-]
+```csharp
+class Linq {
+    static fn TestSimpleLinq() {
+        //数据源
+        let ingredients = [
+            {Name: "Sugar",  Calories: 500},
+            {Name: "Egg",    Calories: 100},
+            {Name: "Milk",   Calories: 150},
+            {Name: "Flour",  Calories: 50},
+            {Name: "Butter", Calories: 200},
+        ]
 
-ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
-for item in ingredient {
-    // json marshaling for pretty-print
-    itemStr = json.marshal(item)
-    println(json.indent(itemStr, "  "))
+	//检索数据源
+        ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
+
+        //显示
+        for item in ingredient => println(item)
+    }
+
+    static fn TestFileLinq() {
+        //从文件读取数据源
+        file = newFile("./examples/linqSample.csv", "r")
+
+        //检索数据源
+        result = from field in file where int(field[1]) > 300000 select field[0]
+
+        //显示
+        for item in result => printf("item = %s\n", item)
+    }
 }
+
+Linq.TestSimpleLinq()
+println("======================================")
+Linq.TestFileLinq()
 ```
 
 ## 入门

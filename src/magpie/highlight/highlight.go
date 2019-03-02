@@ -80,18 +80,16 @@ var keywords = map[string]int{
 	"interface":1,
 	"default":  1,
 	"from":1,
-	"where":1,
 	"select":1,
 	"group":1,
 	"into":1,
 	"orderby":1,
 	"join":1,
-	"in":1,
 	"on":1,
 	"equals":1,
 	"by":1,
 	"ascending":1,
-	"descending":1
+	"descending":1,
 }
 
 const (
