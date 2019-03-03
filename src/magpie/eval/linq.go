@@ -967,8 +967,6 @@ func (lq *LinqObj) Take(line string, args ...Object) Object {
 
 // TakeWhile returns elements from a collection as long as a specified condition
 // is true, and then skips the remaining elements.
-// FirstWith returns the first element of a collection that satisfies a
-// specified condition.
 func (lq *LinqObj) TakeWhile(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
@@ -2980,3 +2978,506 @@ func getComparer(data Object) comparer {
 		panic("Comparer not supported")
 	}
 }
+
+//========================================================
+//               LINQ EVALUATION LOGIC(BEGIN)
+//========================================================
+//func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
+//	if len(args) != 2 {
+//		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+//	}
+//
+//	varStr := args[1].(*String).String
+//	arr := args[0].(*Array)
+//	itemLen := len(arr.Members)
+//
+//	return &LinqObj{Query: Query{
+//		Iterate: func() Iterator {
+//			index := 0
+//
+//			return func() (item Object, ok *Boolean) {
+//				ok = &Boolean{Valid: true}
+//				ok.Bool = index < itemLen
+//				if ok.Bool {
+//					item = arr.Members[index]
+//					scope.Set(varStr, item)
+//					index++
+//				}
+//				return
+//			}
+//		},
+//	}}
+//}
+
+func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
+	if len(args) < 2 {
+		panic(NewError(line, ARGUMENTERROR, "'>=2'", len(args)))
+	}
+
+	obj := args[0]
+	varObj := args[1]
+
+	//check object type
+	if obj.Type() != STRING_OBJ && obj.Type() != ARRAY_OBJ &&
+		obj.Type() != HASH_OBJ && obj.Type() != FILE_OBJ && obj.Type() != CSV_OBJ &&
+		obj.Type() != CHANNEL_OBJ {
+		panic(NewError(line, PARAMTYPEERROR, "first", "from", "*Hash|*Array|*String|*File|*CsvObj|*ChanObject", obj.Type()))
+	}
+
+	switch obj.Type() {
+	case FILE_OBJ:
+		if len(args) != 2 && len(args) != 3 && len(args) != 4 {
+			panic(NewError(line, GENERICERROR, "File object should have 2|3|4 parameter(s):from(file, variable, [field-separator], [selector])"))
+		}
+
+		varStr := varObj.(*String).String
+
+		var fsStr string = "," //field separator(default is ",")
+		if len(args) == 3 {
+			//get the field separator
+			fsObj, ok := args[2].(*String)
+			if !ok {
+				panic(NewError(line, PARAMTYPEERROR, "third", "from", "*String", args[2].Type()))
+			}
+			fsStr = fsObj.String
+		}
+
+		var selector *Function = nil
+		if len(args) == 4 {
+			//get the selector function
+			var ok bool
+			selector, ok = args[3].(*Function)
+			if !ok {
+				panic(NewError(line, PARAMTYPEERROR, "fourth", "from", "*Function", args[3].Type()))
+			}
+		}
+
+		scop := NewScope(scope)
+		arr := &Array{}
+		var lineNo int64 = 0
+		l := obj.(*FileObject).ReadLine(line)
+		for l != NIL {
+			if selector != nil {
+				scop.Set(selector.Literal.Parameters[0].(*ast.Identifier).Value, l.(*String))
+				cond := Eval(selector.Literal.Body, scop)
+				if obj, ok1 := cond.(*ReturnValue); ok1 {
+					cond = obj.Value
+				}
+				if IsTrue(cond) {
+					//read the next line
+					l = obj.(*FileObject).ReadLine(line)
+					lineNo++
+					continue
+				}
+			}
+
+			hash := NewHash()
+			//0 means the whole line
+			fieldIndex := NewInteger(0)
+			hash.Push(line, fieldIndex, l)
+			//hash.Pairs[fieldIndex.HashKey()] = HashPair{Key: fieldIndex, Value: l}
+
+			lineNoKey := NewString("line")
+			hash.Push(line, lineNoKey, NewInteger(lineNo))
+			//hash.Pairs[lineNoKey.HashKey()] = HashPair{Key: lineNoKey, Value: NewInteger(lineNo)}
+
+			//strArr := strings.Split(l.(*String).String, fsStr)
+			strArr := regexp.MustCompile(fsStr).Split(l.(*String).String, -1)
+
+			nfKey := NewString("nf") //nf : number of fields
+			hash.Push(line, nfKey, NewInteger(int64(len(strArr))))
+			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(strArr)))}
+
+			for idx, v := range strArr {
+				fieldIndex := NewInteger(int64(idx+1))
+				hash.Push(line, fieldIndex, NewString(v))
+				//hash.Pairs[fieldIndex.HashKey()] = HashPair{Key: fieldIndex, Value: NewString(v)}
+			}
+			arr.Members = append(arr.Members, hash)
+
+			//read the next line
+			l = obj.(*FileObject).ReadLine(line)
+			lineNo++
+		}
+
+		//Now the 'arr' variable is like below:
+		//  arr = [
+		//      {"line" : LineNo1, "nf" :line1's number of fields, 0 : line1, 1 : field1, 2 :field2, ...},
+		//      {"line" :LineNo2, "nf" :line2's number of fields, 0 : line2, 1 : field1, 2 :field2, ...}
+		//  ]
+		len := len(arr.Members)
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < len
+					if ok.Bool {
+						item = arr.Members[index]
+						scope.Set(varStr, item)
+						index++
+					}
+					return
+				}
+			},
+		}}
+	case CSV_OBJ:
+		varStr := varObj.(*String).String
+
+		arr := &Array{}
+		str2DArr := obj.(*CsvObj).ReadAll(line)
+		for _, fieldArr := range str2DArr.(*Array).Members {
+			hash := NewHash()
+
+			nfKey := NewString("nf") //nf : number of fields
+			hash.Push(line, nfKey, NewInteger(int64(len(fieldArr.(*Array).Members))))
+			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(fieldArr.(*Array).Members)))}
+
+			for idx, field := range fieldArr.(*Array).Members {
+				fieldIdx := NewInteger(int64(idx+1))
+				hash.Push(line, fieldIdx, field)
+				//hash.Pairs[fieldIdx.HashKey()] = HashPair{Key: fieldIdx, Value: field}
+			}
+			arr.Members = append(arr.Members, hash)
+		}
+
+		//Now the 'arr' variable is like below:
+		//  arr = [
+		//      {"nf" :line1's number of fields, 1 : field1, 2 :field2, ...},
+		//      {"nf" :line2's number of fields, 1 : field1, 2 :field2, ...}
+		//  ]
+		len := len(arr.Members)
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < len
+					if ok.Bool {
+						item = arr.Members[index]
+						scope.Set(varStr, item)
+						index++
+					}
+					return
+				}
+			},
+		}}
+	case STRING_OBJ:
+		source := obj.(*String).String
+		varStr := varObj.(*String).String
+		runes := []rune(source)
+		len := len(runes)
+
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < len
+					if ok.Bool {
+						item = NewString(string(runes[index]))
+						scope.Set(varStr, item)
+						index++
+					}
+
+					return
+				}
+			},
+		}}
+	case ARRAY_OBJ:
+		arr := obj.(*Array)
+		itemLen := len(arr.Members)
+
+		varStr := varObj.(*String).String
+
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < itemLen
+					if ok.Bool {
+						item = arr.Members[index]
+						scope.Set(varStr, item)
+						index++
+					}
+					return
+				}
+			},
+		}}
+	case TUPLE_OBJ:
+		tuple := obj.(*Tuple)
+		itemLen := len(tuple.Members)
+
+		varStr := varObj.(*String).String
+
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < itemLen
+					if ok.Bool {
+						item = tuple.Members[index]
+						scope.Set(varStr, item)
+						index++
+					}
+					return
+				}
+			},
+		}}
+	case HASH_OBJ:
+		hash := obj.(*Hash)
+		len := len(hash.Pairs)
+
+		varStr := varObj.(*String).String
+
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				index := 0
+
+				keys := &Array{}
+				values := &Array{}
+				for _, hk := range hash.Order {
+					pair, _ := hash.Pairs[hk]
+					keys.Members = append(keys.Members, pair.Key)
+					values.Members = append(values.Members, pair.Value)
+				}
+
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					ok.Bool = index < len
+					if ok.Bool {
+						key := keys.Members[index]
+						value := values.Members[index]
+
+						item = &KeyValueObj{KeyObj: key, ValueObj: value}
+						scope.Set(varStr, item)
+						index++
+					}
+
+					return
+				}
+			},
+		}}
+	case CHANNEL_OBJ:
+		channel := obj.(*ChanObject)
+
+		varStr := varObj.(*String).String
+		//must return a new LinqObj
+		return &LinqObj{Query: Query{
+			Iterate: func() Iterator {
+				return func() (item Object, ok *Boolean) {
+					ok = &Boolean{Valid: true}
+					item = channel.Recv(line)
+					scope.Set(varStr, item)
+					ok.Bool = channel.done
+					return
+				}
+			},
+		}}
+	default:
+		return &LinqObj{Query: Query{Iterate: obj.(*LinqObj).Query.Iterate}}
+	} //end switch
+
+	return NIL
+}
+
+func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
+	if len(args) != 2 {
+		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+	}
+
+	block, ok := args[0].(*Function)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "let", "*Function", args[0].Type()))
+	}
+
+	letVarObj, ok := args[1].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "second", "let", "*String", args[1].Type()))
+	}
+	letVar := letVarObj.String
+
+	s := NewScope(scope)
+	return &LinqObj{Query: Query{
+		Iterate: func() Iterator {
+			next := lq.Query.Iterate()
+
+			return func() (item Object, ok *Boolean) {
+				_, ok = next()
+				if ok.Bool {
+					bodyResult := Eval(block.Literal.Body, s)
+					if obj, ok1 := bodyResult.(*ReturnValue); ok1 {
+						bodyResult = obj.Value
+					}
+					item = bodyResult
+					scope.Set(letVar, item)
+				}
+				return
+			}
+		},
+	}}
+}
+
+
+func (lq *LinqObj) FromInner(line string, scope *Scope, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	fromVarObj, ok := args[0].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "from", "*String", args[0].Type()))
+	}
+
+	resultArr := &Array{}
+	next := lq.Query.Iterate()
+	for item, ok := next(); ok.Bool; item, ok = next() {
+		arr := item.(*Array)
+		for _, innerItem := range arr.Members {
+			resultArr.Members = append(resultArr.Members, innerItem)
+		}
+	}
+
+	return lq.FromQuery(line, scope, resultArr, fromVarObj)
+}
+
+// Where filters a collection of values based on a predicate.
+func (lq *LinqObj) Where2(line string, scope *Scope, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	block, ok := args[0].(*Function)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type()))
+	}
+
+
+	s := NewScope(scope)
+
+	return &LinqObj{Query: Query{
+		Iterate: func() Iterator {
+			next := lq.Query.Iterate()
+
+			return func() (item Object, ok *Boolean) {
+				for item, ok = next(); ok.Bool; item, ok = next() {
+					cond := Eval(block.Literal.Body, s)
+					if obj, ok1 := cond.(*ReturnValue); ok1 {
+						cond = obj.Value
+					}
+					if IsTrue(cond) {
+						return
+					}
+				}
+
+				return
+			}
+		},
+	}}
+}
+
+func (lq *LinqObj) Select2(line string, scope *Scope, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	block, ok := args[0].(*Function)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type()))
+	}
+
+	s := NewScope(scope)
+
+	return &LinqObj{Query: Query{
+		Iterate: func() Iterator {
+			next := lq.Query.Iterate()
+
+			return func() (item Object, ok *Boolean) {
+				_, ok = next()
+				if ok.Bool {
+					item = Eval(block.Literal.Body, s)
+					if obj, ok1 := item.(*ReturnValue); ok1 {
+						item = obj.Value
+					}
+				}
+				return
+			}
+		},
+	}}
+}
+
+func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
+	if len(args) != 2 {
+		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+	}
+
+	keySelector, ok := args[0].(*Function)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "groupBy", "*Function", args[0].Type()))
+	}
+
+	elementSelector, ok := args[1].(*Function)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type()))
+	}
+
+	s := NewScope(scope)
+	return &LinqObj{Query: Query{
+		func() Iterator {
+			next := lq.Query.Iterate()
+			set := make(map[Object][]Object)
+
+				for _, ok := next(); ok.Bool; _, ok = next() {
+//				s.Set(keySelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
+
+				key := Eval(keySelector.Literal.Body, s)
+				if obj, ok1 := key.(*ReturnValue); ok1 {
+					key = obj.Value
+				}
+//				s.Set(elementSelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
+				element := Eval(elementSelector.Literal.Body, s)
+				if obj, ok1 := element.(*ReturnValue); ok1 {
+					element = obj.Value
+				}
+
+				set[key] = append(set[key], element)
+			}
+
+			len := len(set)
+			idx := 0
+			groups := make([]*GroupObj, len)
+			for k, v := range set {
+				groups[idx] = &GroupObj{k, v}
+				idx++
+			}
+
+			index := 0
+			return func() (item Object, ok *Boolean) {
+				ok = &Boolean{Valid: true}
+				ok.Bool = index < len
+				if ok.Bool {
+					item = groups[index]
+					index++
+				}
+
+				return
+			}
+		},
+	}}
+}
+
+//========================================================
+//               LINQ EVALUATION LOGIC(END)
+//========================================================

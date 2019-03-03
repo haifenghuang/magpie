@@ -5327,10 +5327,10 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 	// query_expression : from_clause query_body
 	//=================================================
 	//from_clause : FROM identifier IN expression
-	fromObj := lq.From(line, innerScope, inValue).(*LinqObj)
+	fromObj := lq.FromQuery(line, innerScope, inValue, NewString(fromExpr.Var)).(*LinqObj)
 
 	//query_body : query_body_clause* select_or_group_clause query_continuation?
-	var tmpLinq *LinqObj = fromObj
+	tmpLinq := fromObj
 
 	//query_body_clause*
 	for _, queryBody := range queryBodyExpr.QueryBody {
@@ -5338,17 +5338,23 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 
 		switch clause := queryBodyExpr.Expr.(type) {
 		case *ast.AssignExpression: //let-clause
-			fmt.Printf("LET: [NOT IMPLEMENTED]\n")
+			assignExp := clause
 
+			fl := constructFuncLiteral("", assignExp.Value)
+			fnObj := evalFunctionLiteral(fl, innerScope)
+			letVar := assignExp.Name.(*ast.Identifier).Value
+			tmpLinq = tmpLinq.Let(line, innerScope, fnObj, NewString(letVar)).(*LinqObj)
+			
 		case *ast.FromExpr: // from_clause : FROM identifier IN expression
-			fmt.Printf("NESTING FROM： [NOT IMPLEMENTED]\n")
+			innerFrom := clause
+			tmpLinq = tmpLinq.FromInner(line, innerScope, NewString(innerFrom.Var)).(*LinqObj)
 
 		case *ast.WhereExpr: // where_clause : WHERE expression
 			whereExp := clause
 
-			fl := constructFuncLiteral(fromExpr.Var, whereExp.Expr)
+			fl := constructFuncLiteral("", whereExp.Expr)
 			fnObj := evalFunctionLiteral(fl, innerScope)
-			tmpLinq = tmpLinq.Where(line, innerScope, fnObj).(*LinqObj)
+			tmpLinq = tmpLinq.Where2(line, innerScope, fnObj).(*LinqObj)
 
 		case *ast.JoinExpr:
 			fmt.Printf("JOIN： [NOT IMPLEMENTED]\n")
@@ -5356,9 +5362,18 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 		case *ast.OrderExpr: // orderby_clause : ORDERBY ordering (','  ordering)*
 			orderExpr := clause
 			var i int = 0
+			var str string
 			for _, orderingExpr := range orderExpr.Ordering {
 				order := orderingExpr.(*ast.OrderingExpr)
-				fl := constructFuncLiteral(fromExpr.Var, order.Expr)
+
+				switch expression := order.Expr.(type) {
+				case *ast.MethodCallExpression:
+					str = expression.Object.String()
+				case *ast.Identifier:
+					str = expression.Value
+				}
+
+				fl := constructFuncLiteral(str, order.Expr)
 				fnObj := evalFunctionLiteral(fl, innerScope)
 
 				if order.IsAscending {
@@ -5382,7 +5397,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			//
 			// Is there a better way for doing this???
 			arr := tmpLinq.ToOrderedSlice(line).(*Array)
-			tmpLinq = tmpLinq.From(line, innerScope, arr).(*LinqObj)
+			tmpLinq = tmpLinq.FromQuery(line, innerScope, arr, NewString(str)).(*LinqObj)
 
 		default:
 			fmt.Printf("[NOT IMPLEMENTED]\n")
@@ -5403,9 +5418,9 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			result = from x in selectArr select x + 2
 		*/
 		selectExp := queryBodyExpr.Expr.(*ast.SelectExpr)
-		fl := constructFuncLiteral(fromExpr.Var, selectExp.Expr)
+		fl := constructFuncLiteral("", selectExp.Expr)
 		fnObj := evalFunctionLiteral(fl, innerScope)
-		return tmpLinq.Select(line, innerScope, fnObj)
+		return tmpLinq.Select2(line, innerScope, fnObj)
 
 	case *ast.GroupExpr:
 		/*
@@ -5420,11 +5435,12 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			result = from v in groupByArr group v BY v % 2 == 0
 		*/
 		groupExp := queryBodyExpr.Expr.(*ast.GroupExpr)
-		keyFuncLiteral     := constructFuncLiteral(fromExpr.Var, groupExp.ByExpr)
-		elementFuncLiteral := constructFuncLiteral(fromExpr.Var, groupExp.GroupExpr)
+
+		keyFuncLiteral     := constructFuncLiteral("", groupExp.ByExpr)
+		elementFuncLiteral := constructFuncLiteral("", groupExp.GroupExpr)
 		keySelector     := evalFunctionLiteral(keyFuncLiteral, innerScope)
 		elementSelector := evalFunctionLiteral(elementFuncLiteral, innerScope)
-		return tmpLinq.GroupBy(line, innerScope, keySelector, elementSelector)
+		return tmpLinq.GroupBy2(line, innerScope, keySelector, elementSelector)
 	}
 	
 	return NIL
@@ -5433,7 +5449,9 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 //construct a FunctionLiteral for use with linq.xxx() function
 func constructFuncLiteral(value string, expr ast.Expression) *ast.FunctionLiteral {
 	fl := &ast.FunctionLiteral{Parameters:[]ast.Expression{}}
-	fl.Parameters = append(fl.Parameters, &ast.Identifier{Value:value})
+	if len(value) > 0 {
+		fl.Parameters = append(fl.Parameters, &ast.Identifier{Value:value})
+	}
 	fl.Body = &ast.BlockStatement{Statements: []ast.Statement{&ast.ExpressionStatement{Expression: expr}}}
 
 	return fl

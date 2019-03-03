@@ -47,11 +47,36 @@ class Linq {
         //显示
         for item in result => printf("item = %s\n", item)
     }
+
+    static fn TestComplexLinq() {
+        //数据源
+        stringList = [
+            "A penny saved is a penny earned.",
+            "The early bird catches the worm.",
+            "The pen is mightier than the sword." 
+        ]
+
+        //检索数据源
+        earlyBirdQuery =
+            from sentence in stringList
+            let words = sentence.split(" ")
+            from word in words
+            let w = word.lower()
+            where w[0] == "a" || w[0] == "e" ||
+                  w[0] == "i" || w[0] == "o" ||
+                  w[0] == "u"
+            select word
+
+        //显示
+        for v in earlyBirdQuery => printf("'%s' starts with a vowel\n", v)
+    }
 }
 
 Linq.TestSimpleLinq()
 println("======================================")
 Linq.TestFileLinq()
+println("======================================")
+Linq.TestComplexLinq()
 ```
 
 ## 入门

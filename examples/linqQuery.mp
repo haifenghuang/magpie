@@ -35,20 +35,19 @@ for item in ingredient {
 printf("\n================================================================\n\n")
 
 let students = [
-       { First: "Svetlana", Last:"Omelchenko", ID: 111, Scores: 77.5 },
-       { First: "Claire",   Last:"O'Donnell",  ID: 112, Scores: 72.25 },
-       { First: "Sven",     Last:"Mortensen",  ID: 113, Scores: 93.5 },
-       { First: "Cesar",    Last:"Garcia",     ID: 114, Scores: 75.5 },
-       { First: "Debra",    Last:"Garcia",     ID: 115, Scores: 88.25 } 
+       { First: "Svetlana", Last:"Omelchenko", ID: 111, Scores: [97, 72, 81, 60] },
+       { First: "Claire",   Last:"O'Donnell",  ID: 112, Scores: [75, 84, 91, 39] },
+       { First: "Sven",     Last:"Mortensen",  ID: 113, Scores: [99, 89, 91, 95] },
+       { First: "Cesar",    Last:"Garcia",     ID: 114, Scores: [72, 81, 65, 84] },
+       { First: "Debra",    Last:"Garcia",     ID: 115, Scores: [97, 89, 85, 82] } 
 ]
-booleanGroupQuery = from student in students group student by student.Scores >= 80; //pass or fail!
-
+booleanGroupQuery = from student in students group student by student.Scores.average() >= 80; //pass or fail!
 // Execute the query and access items in each group
 for studentGroup in booleanGroupQuery { //convert it to an array
     println(studentGroup.key == true ? "High averages" : "Low averages");
 
     for student in studentGroup.value {
-        printf("   %s, %s: %v\n", student.Last, student.First, student.Scores)
+        printf("   %s, %s: %v\n", student.Last, student.First, student.Scores.average())
     }
 }
 
@@ -83,21 +82,38 @@ for item in result
     printf("item = %s\n", item)
 }
 
+printf("\n================================================================\n\n")
+stringList = [
+            "A penny saved is a penny earned.",
+            "The early bird catches the worm.",
+            "The pen is mightier than the sword." 
+]
 
-//Magpie can parse below linq expression
-//without any problem, but the evaluation wil fail.
+earlyBirdQuery =
+    from sentence in stringList
+    let words = sentence.split(" ")
+    from word in words
+    let w = word.lower()
+    where w[0] == "a" || w[0] == "e" ||
+          w[0] == "i" || w[0] == "o" ||
+          w[0] == "u"
+    select word
 
-//stringList = [
-//            "A penny saved is a penny earned.",
-//            "The early bird catches the worm.",
-//            "The pen is mightier than the sword." 
-//];
-//earlyBirdQuery =
-//    from sentence in stringList
-//    let words = sentence.split(" ")
-//    from word in words
-//    let w = word.lower()
-//    where w[0] == "a" || w[0] == "e" ||
-//          w[0] == "i" || w[0] == "o" ||
-//          w[0] == "u"
-//    select word
+for v in earlyBirdQuery =>printf("'%s' starts with a vowel\n", v)
+
+printf("\n================================================================\n\n")
+ingredients =[
+    { Name : "Sugar",  Calories: 500 },
+    { Name : "Egg",    Calories: 100 },
+    { Name : "Milk",   Calories: 150 },
+    { Name : "Flour",  Calories: 50  },
+    { Name : "Butter", Calories: 200 }
+]
+
+highCalDairyQuery =
+    from i in ingredients
+    let isDairy = i.Name == "Milk" || i.Name == "Butter"
+    where i.Calories >= 150 && isDairy
+    select i
+
+for ingredient in highCalDairyQuery => println(ingredient.Name)

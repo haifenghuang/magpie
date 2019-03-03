@@ -51,11 +51,36 @@ class Linq {
         //Display
         for item in result => printf("item = %s\n", item)
     }
+
+    static fn TestComplexLinq() {
+        //Data Source
+        stringList = [
+            "A penny saved is a penny earned.",
+            "The early bird catches the worm.",
+            "The pen is mightier than the sword." 
+        ]
+
+        //Query Data Source
+        earlyBirdQuery =
+            from sentence in stringList
+            let words = sentence.split(" ")
+            from word in words
+            let w = word.lower()
+            where w[0] == "a" || w[0] == "e" ||
+                  w[0] == "i" || w[0] == "o" ||
+                  w[0] == "u"
+            select word
+
+        //Display
+        for v in earlyBirdQuery => printf("'%s' starts with a vowel\n", v)
+    }
 }
 
 Linq.TestSimpleLinq()
 println("======================================")
 Linq.TestFileLinq()
+println("======================================")
+Linq.TestComplexLinq()
 ```
 
 ## Getting started

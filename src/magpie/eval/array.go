@@ -68,6 +68,8 @@ func (a *Array) CallMethod(line string, scope *Scope, method string, args ...Obj
 		return a.Last(line, args...)
 	case "tail","rest":
 		return a.Tail(line, args...)
+	case "average":
+		return a.Average(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, a.Type()))
 }
@@ -362,6 +364,52 @@ func (a *Array) Tail(line string, args ...Object) Object {
 	copy(newMembers, a.Members)
 	return &Array{Members: newMembers}
 }
+
+func (a *Array) Average(line string, args ...Object) Object {
+	l := len(args)
+	if l != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", l))
+	}
+
+	length := len(a.Members)
+	if length == 0 {
+		return NewFloat(0)
+	}
+
+	var r float64
+
+	n := 0
+	switch a.Members[0].(type) {
+	case *Integer:
+		var sum int64 = 0
+
+		for _, item := range a.Members {
+			sum += item.(*Integer).Int64
+			n++
+		}
+
+		r = float64(sum)
+	case *UInteger:
+		var sum uint64 = 0
+
+		for _, item := range a.Members {
+			sum += item.(*UInteger).UInt64
+			n++
+		}
+
+		r = float64(sum)
+	case *Float:
+		var r float64 = 0
+
+		for _, item := range a.Members {
+			r += item.(*Float).Float64
+			n++
+		}
+	}
+
+	return NewFloat(r / float64(n))
+}
+
 
 //Json marshal handling
 func (a *Array) MarshalJSON() ([]byte, error) {
