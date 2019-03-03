@@ -6,6 +6,7 @@ import (
 	"errors"
 	_ "fmt"
 	"magpie/ast"
+	"math"
 	"reflect"
 	"strings"
 )
@@ -70,6 +71,12 @@ func (a *Array) CallMethod(line string, scope *Scope, method string, args ...Obj
 		return a.Tail(line, args...)
 	case "average":
 		return a.Average(line, args...)
+	case "sum":
+		return a.Sum(line, args...)
+	case "min":
+		return a.Min(line, args...)
+	case "max":
+		return a.Max(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, a.Type()))
 }
@@ -373,43 +380,172 @@ func (a *Array) Average(line string, args ...Object) Object {
 
 	length := len(a.Members)
 	if length == 0 {
+		return NewFloat(math.NaN())
+	}
+
+	var sum float64 = 0
+	for _, member := range a.Members {
+		var r float64
+		switch item := member.(type) {
+		case *Integer:
+			r = float64(item.Int64)
+		case *UInteger:
+			r = float64(item.UInt64)
+		case *Float:
+			r = item.Float64
+		}
+		sum += r
+	}
+
+	return NewFloat(sum / float64(length))
+}
+
+func (a *Array) Sum(line string, args ...Object) Object {
+	l := len(args)
+	if l != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", l))
+	}
+
+	length := len(a.Members)
+	if length == 0 {
 		return NewFloat(0)
 	}
 
-	var r float64
-
-	n := 0
-	switch a.Members[0].(type) {
-	case *Integer:
-		var sum int64 = 0
-
-		for _, item := range a.Members {
-			sum += item.(*Integer).Int64
-			n++
+	var sum float64 = 0
+	for _, member := range a.Members {
+		var r float64
+		switch item := member.(type) {
+		case *Integer:
+			r = float64(item.Int64)
+		case *UInteger:
+			r = float64(item.UInt64)
+		case *Float:
+			r = item.Float64
 		}
+		sum += r
+	}
 
-		r = float64(sum)
-	case *UInteger:
-		var sum uint64 = 0
+	return NewFloat(sum)
 
-		for _, item := range a.Members {
-			sum += item.(*UInteger).UInt64
-			n++
-		}
+//	var r float64 = 0
+//
+//	switch a.Members[0].(type) {
+//	case *Integer:
+//		var sum int64 = 0
+//
+//		for _, item := range a.Members {
+//			sum += item.(*Integer).Int64
+//		}
+//
+//		r = float64(sum)
+//	case *UInteger:
+//		var sum uint64 = 0
+//
+//		for _, item := range a.Members {
+//			sum += item.(*UInteger).UInt64
+//		}
+//
+//		r = float64(sum)
+//	case *Float:
+//		for _, item := range a.Members {
+//			r += item.(*Float).Float64
+//		}
+//	}
+//
+//	return NewFloat(r)
+}
 
-		r = float64(sum)
-	case *Float:
-		var r float64 = 0
+// Min returns the minimum value in a collection of values.
+func (a *Array) Min(line string, args ...Object) Object {
+	if len(args) != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
 
-		for _, item := range a.Members {
-			r += item.(*Float).Float64
-			n++
+	length := len(a.Members)
+	if length == 0 {
+		return NIL
+	}
+
+	item := a.Members[0]
+	compare := getComparer2(item)
+	r := item
+
+	for i := 1; i < length; i++ {
+		item = a.Members[i]
+		if compare(item, r) < 0 {
+			r = item
 		}
 	}
 
-	return NewFloat(r / float64(n))
+	return r
 }
 
+// Max returns the maximum value in a collection of values.
+func (a *Array) Max(line string, args ...Object) Object {
+	if len(args) != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	length := len(a.Members)
+	if length == 0 {
+		return NIL
+	}
+
+	item := a.Members[0]
+	compare := getComparer2(item)
+	r := item
+
+	for i := 1; i < length; i++ {
+		item = a.Members[i]
+		if compare(item, r) > 0 {
+			r = item
+		}
+	}
+
+	return r
+}
+
+//there is a getComparer() in 'linq.go'
+//here I extend it to compare different types.
+func getComparer2(data Object) comparer {
+	switch data.(type) {
+	case *Integer:
+	case *UInteger:
+	case *Float:
+	default:
+		panic("Comparer not supported")
+	}
+	return func(x, y Object) int {
+		var a float64
+		var b float64
+		switch num := x.(type) {
+		case *Integer:
+			a = float64(num.Int64)
+		case *UInteger:
+			a = float64(num.UInt64)
+		case *Float:
+			a = num.Float64
+		}
+
+		switch num := y.(type) {
+		case *Integer:
+			b = float64(num.Int64)
+		case *UInteger:
+			b = float64(num.UInt64)
+		case *Float:
+			b = num.Float64
+		}
+
+		switch {
+		case a > b:
+			return 1
+		case b > a:
+			return -1
+		default:
+			return 0
+		}
+	}
+}
 
 //Json marshal handling
 func (a *Array) MarshalJSON() ([]byte, error) {
