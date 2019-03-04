@@ -1220,6 +1220,7 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 		func() Iterator {
 			next := lq.Query.Iterate()
 			set := make(map[Object][]Object)
+			setTmp := make(map[Object]bool)
 
 			for item, ok := next(); ok.Bool; item, ok = next() {
 				s.Set(keySelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
@@ -1234,7 +1235,18 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 					element = obj.Value
 				}
 
-				set[key] = append(set[key], element)
+				for k, _ := range setTmp {
+					if reflect.DeepEqual(k, key) {
+						setTmp[key] = true
+						set[k] = append(set[k], element)
+						break
+					}
+				}
+
+				if _, has := setTmp[key]; !has {
+					setTmp[key] = true
+					set[key] = append(set[key], element)
+				}
 			}
 
 			len := len(set)
@@ -3438,6 +3450,7 @@ func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 		func() Iterator {
 			next := lq.Query.Iterate()
 			set := make(map[Object][]Object)
+			setTmp := make(map[Object]bool)
 
 				for _, ok := next(); ok.Bool; _, ok = next() {
 //				s.Set(keySelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
@@ -3452,7 +3465,18 @@ func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 					element = obj.Value
 				}
 
-				set[key] = append(set[key], element)
+				for k, _ := range setTmp {
+					if reflect.DeepEqual(k, key) {
+						setTmp[key] = true
+						set[k] = append(set[k], element)
+						break
+					}
+				}
+
+				if _, has := setTmp[key]; !has {
+					setTmp[key] = true
+					set[key] = append(set[key], element)
+				}
 			}
 
 			len := len(set)

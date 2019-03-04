@@ -5366,12 +5366,13 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			for _, orderingExpr := range orderExpr.Ordering {
 				order := orderingExpr.(*ast.OrderingExpr)
 
-				switch expression := order.Expr.(type) {
-				case *ast.MethodCallExpression:
-					str = expression.Object.String()
-				case *ast.Identifier:
-					str = expression.Value
-				}
+				str = order.Var
+//				switch expression := order.Expr.(type) {
+//				case *ast.MethodCallExpression:
+//					str = expression.Object.String()
+//				case *ast.Identifier:
+//					str = expression.Value
+//				}
 
 				fl := constructFuncLiteral(str, order.Expr)
 				fnObj := evalFunctionLiteral(fl, innerScope)

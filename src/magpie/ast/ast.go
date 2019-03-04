@@ -3260,6 +3260,7 @@ type OrderingExpr struct {
 	IsAscending bool // if there is no 'ASCENDING or 'DESCENDING', it's default to 'ASCENDING'
 	HasSortOrder bool
 	OrderToken token.Token //'ascending' or 'descending'
+	Var string
 }
 
 func (o *OrderingExpr) Pos() token.Position {

@@ -117,3 +117,19 @@ highCalDairyQuery =
     select i
 
 for ingredient in highCalDairyQuery => println(ingredient.Name)
+
+printf("\n================================================================\n\n")
+//Data Source
+words = [ "blueberry", "chimpanzee", "abacus", "banana", "apple", "cheese" ];
+// Create the query.
+wordGroups =
+    from w in words
+    group w by w[0];
+
+// Execute the query.
+for wordGroup in wordGroups 
+{
+    printf("Words that start with the letter '%s':\n", wordGroup.key);
+    for word in wordGroup.value => printf("\t%s\n", word)
+    println()
+}

@@ -3226,7 +3226,7 @@ func (p *Parser) parseOrderByExpression() ast.Expression {
 
 //ordering : expression (ASCENDING | DESCENDING)?
 func (p *Parser) parseOrderingExpr() ast.Expression {
-	exp := &ast.OrderingExpr{IsAscending:true, HasSortOrder: false}
+	exp := &ast.OrderingExpr{IsAscending:true, HasSortOrder: false, Var:p.curToken.Literal}
 
 	//expression
 	exp.Expr = p.parseExpression(LOWEST)
