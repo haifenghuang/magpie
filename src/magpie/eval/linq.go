@@ -1315,13 +1315,29 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 			innernext := inner.Query.Iterate()
 
 			innerLookup := make(map[Object][]Object)
+			setTmp := make(map[Object]bool)
+
 			for innerItem, ok := innernext(); ok.Bool; innerItem, ok = innernext() {
 				s.Set(innerKeySelector.Literal.Parameters[0].(*ast.Identifier).Value, innerItem)
 				innerKey := Eval(innerKeySelector.Literal.Body, s)
 				if obj, ok1 := innerKey.(*ReturnValue); ok1 {
 					innerKey = obj.Value
 				}
-				innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
+
+				for k, _ := range setTmp {
+					if reflect.DeepEqual(k, innerKey) {
+						setTmp[innerKey] = true
+						innerLookup[k] = append(innerLookup[k], innerItem)
+						break
+					}
+				}
+
+				if _, has := setTmp[innerKey]; !has {
+					setTmp[innerKey] = true
+					innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
+				}
+
+//				innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
 			}
 
 			var outerItem Object

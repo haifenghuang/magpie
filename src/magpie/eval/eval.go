@@ -5357,7 +5357,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			tmpLinq = tmpLinq.Where2(line, innerScope, fnObj).(*LinqObj)
 
 		case *ast.JoinExpr:
-			fmt.Printf("JOIN： [NOT IMPLEMENTED]\n")
+			fmt.Printf("JOIN: [NOT IMPLEMENTED]\n")
 
 		case *ast.OrderExpr: // orderby_clause : ORDERBY ordering (','  ordering)*
 			orderExpr := clause

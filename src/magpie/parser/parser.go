@@ -3157,7 +3157,6 @@ func (p *Parser) parseJoinExpression() ast.Expression {
 		return nil
 	}
 	exp.JoinVar = p.curToken.Literal
-	p.nextToken()
 
 	//IN
 	if !p.expectPeek(token.IN) {
