@@ -46,6 +46,8 @@ class Linq {
 
         //显示
         for item in result => printf("item = %s\n", item)
+
+        file.close()
     }
 
     static fn TestComplexLinq() {

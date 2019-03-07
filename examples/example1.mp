@@ -68,6 +68,7 @@ log.setOutput(file)
 for i in 1..5 {
   log.printf("这是第<%d>个\n", i)
 }
+file.close() //do not forget to clsoe the file
 
 //for loop is an expression, not statement, so it could be assigned to a variable
 let plus_one = for i in [1,2,3,4] { i + 1 }

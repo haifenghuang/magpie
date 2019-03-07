@@ -3117,7 +3117,7 @@ func (p *Parser) parseGroupExpression() ast.Expression {
 	p.nextToken()
 
 	//expression
-	exp.GroupExpr = p.parseExpression(LOWEST)
+	exp.GrpExpr = p.parseExpression(LOWEST)
 
 	//BY
 	if !p.expectPeek(token.BY) {

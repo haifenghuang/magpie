@@ -1066,7 +1066,7 @@ result = linq.from(file,",",fn(line){ //the second parameter is field separator,
 	fields[5]  //only output the fifth field
 })
 println(result)
-
+file.close() //do not forget to clsoe the file
 
 //another test: linq for "file"
 file = newFile("./examples/linqSample.csv", "r") //open linqSample.csv file for reading

@@ -1276,7 +1276,7 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 //
 // A join refers to the operation of correlating the elements of two sources of
 // information based on a common key. Join brings the two information sources
-// and the keys by which they are matched together in one method callp. This
+// and the keys by which they are matched together in one method call. This
 // differs from the use of SelectMany, which requires more than one method call
 // to perform the same operation.
 //

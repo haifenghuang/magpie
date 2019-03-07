@@ -13,6 +13,7 @@ println('{resultValue}')
 //use parseFiles(), write to a file
 file = newFile("./examples/outTemplate.log", "a+")
 template.parseTextFiles("./examples/looping.tmpl").execute(file, arr)
+file.close() //do not forget to clsoe the file
 
 //use parse()
 //Note here: we need to use "{{-" and "-}}" to remove the newline from the output

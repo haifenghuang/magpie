@@ -3372,6 +3372,8 @@ func evalForEverLoopExpression(fel *ast.ForEverLoop, scope *Scope) Object {
 //for item in string
 //for item in tuple
 //for item in channel
+//for item in goObj
+//for item in linqObj
 func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object { //fal:For Array Loop
 	innerScope := NewScope(scope)
 
@@ -3512,6 +3514,7 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 //for index, value in string
 //for index, value in array
 //for index, value in tuple
+//for index, value in linqObj
 func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope) Object {
 	var members []Object
 	if val.Type() == STRING_OBJ {
@@ -3526,6 +3529,10 @@ func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope
 	} else if val.Type() == TUPLE_OBJ {
 		tuple, _ := val.(*Tuple)
 		members = tuple.Members
+	} else if val.Type() == LINQ_OBJ {
+		linqObj := val.(*LinqObj)
+		arr := linqObj.ToSlice(fml.Pos().Sline()).(*Array)
+		members = arr.Members
 	}
 
 	ret := &Array{}
@@ -3598,7 +3605,9 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 
 	//for index, value in arr
 	//for index, value in string
-	if aValue.Type() == STRING_OBJ || aValue.Type() == ARRAY_OBJ || aValue.Type() == TUPLE_OBJ {
+	//for index, value in tuple
+	//for index, value in linqObj
+	if aValue.Type() == STRING_OBJ || aValue.Type() == ARRAY_OBJ || aValue.Type() == TUPLE_OBJ || aValue.Type() == LINQ_OBJ {
 		return evalForEachArrayWithIndex(fml, aValue, innerScope)
 	}
 
@@ -5367,13 +5376,6 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 				order := orderingExpr.(*ast.OrderingExpr)
 
 				str = order.Var
-//				switch expression := order.Expr.(type) {
-//				case *ast.MethodCallExpression:
-//					str = expression.Object.String()
-//				case *ast.Identifier:
-//					str = expression.Value
-//				}
-
 				fl := constructFuncLiteral(str, order.Expr)
 				fnObj := evalFunctionLiteral(fl, innerScope)
 
@@ -5438,7 +5440,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 		groupExp := queryBodyExpr.Expr.(*ast.GroupExpr)
 
 		keyFuncLiteral     := constructFuncLiteral("", groupExp.ByExpr)
-		elementFuncLiteral := constructFuncLiteral("", groupExp.GroupExpr)
+		elementFuncLiteral := constructFuncLiteral("", groupExp.GrpExpr)
 		keySelector     := evalFunctionLiteral(keyFuncLiteral, innerScope)
 		elementSelector := evalFunctionLiteral(elementFuncLiteral, innerScope)
 		return tmpLinq.GroupBy2(line, innerScope, keySelector, elementSelector)

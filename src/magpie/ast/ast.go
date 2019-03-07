@@ -3317,9 +3317,9 @@ func (s *SelectExpr) String() string       {
 
 //GROUP expression BY expression
 type GroupExpr struct {
-	Token     token.Token //'group'
-	GroupExpr Expression
-	ByExpr    Expression
+	Token   token.Token //'group'
+	GrpExpr Expression
+	ByExpr  Expression
 }
 
 func (g *GroupExpr) Pos() token.Position {
@@ -3336,7 +3336,7 @@ func (g *GroupExpr) String() string       {
 	var out bytes.Buffer
 
 	out.WriteString(" group ")
-	out.WriteString(g.GroupExpr.String())
+	out.WriteString(g.GrpExpr.String())
 	out.WriteString(" by ")
 	out.WriteString(g.ByExpr.String())
 

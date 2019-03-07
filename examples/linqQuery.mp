@@ -81,6 +81,7 @@ for item in result
 {
     printf("item = %s\n", item)
 }
+file.close() //do not forget to clsoe the file
 
 printf("\n================================================================\n\n")
 stringList = [
