@@ -231,6 +231,8 @@ type Function struct {
 	Scope    *Scope
 	Instance *ObjectInstance //For use with class functions
 	Annotations []*ObjectInstance
+
+	Async      bool
 }
 
 func (f *Function) Inspect() string  { return f.Literal.String() }
@@ -1250,22 +1252,21 @@ func marshalJsonObject(obj interface{}) (bytes.Buffer, error) {
 func unmarshalJsonObject(val interface{}) (Object, error) {
 	var ret Object
 	var err error = nil
-	switch val.(type) {
+	switch v := val.(type) {
 	case []interface{}:
-		ret, err = unmarshalArray(val.([]interface{}))
+		ret, err = unmarshalArray(v)
 	case map[string]interface{}:
-		ret, err = unmarshalHash(val.(map[string]interface{}))
+		ret, err = unmarshalHash(v)
 	case float64:
-		ret = NewFloat(val.(float64))
+		ret = NewFloat(v)
 	case bool:
-		b := val.(bool)
-		if b {
+		if v {
 			ret = TRUE
 		} else {
 			ret = FALSE
 		}
 	case string:
-		ret = NewString(val.(string))
+		ret = NewString(v)
 	case nil:
 		ret = NIL
 	}

@@ -240,6 +240,10 @@ func (p *Parser) registerAction() {
 	//linq query
 	p.registerPrefix(token.FROM, p.parseLinqExpression)
 
+	//async & await
+	p.registerPrefix(token.ASYNC, p.parseAsyncLiteral)
+	p.registerPrefix(token.AWAIT, p.parseAwaitExpression)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -365,6 +369,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseEnumStatement()
 	case token.USING:
 		return p.parseUsingStatement()
+	case token.ASYNC:
+		return p.parseAsyncStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -2394,6 +2400,10 @@ func isClassStmtToken(t token.Token) bool {
 		return true
 	}
 
+	if tt == token.ASYNC { //async
+		return true
+	}
+
 	return false
 }
 
@@ -2592,13 +2602,20 @@ LABEL:
 	} //end for
 
 	if !isClassStmtToken(p.curToken) {
-		msg := fmt.Sprintf("Syntax Error:%v- expected token to be 'let'|'property'|'fn'|'public'|'protected'|'private'|'static', got %s instead.", p.curToken.Pos, p.curToken.Type)
+		msg := fmt.Sprintf("Syntax Error:%v- expected token to be 'let'|'property'|'fn'|'async'|'public'|'protected'|'private'|'static', got %s instead.", p.curToken.Pos, p.curToken.Type)
 		p.errors = append(p.errors, msg)
 		return nil
 	}
 
 	modifierLevel := ast.ModifierDefault
 	tt := p.curToken.Type
+
+	//check if it is a async function
+	var Async bool
+	if tt == token.ASYNC {
+		Async = true
+		p.nextToken() //skip the 'async'
+	}
 	if tt == token.PUBLIC || tt == token.PROTECTED || tt == token.PRIVATE { //modifier
 		p.nextToken() //skip the modifier
 
@@ -2618,10 +2635,10 @@ LABEL:
 		staticFlag = true
 	}
 
-	return p.parseClassSubStmt(modifierLevel, staticFlag, annos, processAnnoClass)
+	return p.parseClassSubStmt(modifierLevel, staticFlag, annos, processAnnoClass, Async)
 }
 
-func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag bool, annos []*ast.AnnotationStmt, processAnnoClass bool) ast.Statement {
+func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag bool, annos []*ast.AnnotationStmt, processAnnoClass bool, Async bool) ast.Statement {
 	var r ast.Statement
 
 	if processAnnoClass { //parse annotation class
@@ -2655,6 +2672,7 @@ func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag b
 	case *ast.FunctionStatement:
 		o.FunctionLiteral.ModifierLevel = modifierLevel
 		o.FunctionLiteral.StaticFlag = staticFlag
+		o.FunctionLiteral.Async = Async
 		o.Annotations = annos
 	}
 
@@ -3246,6 +3264,60 @@ func (p *Parser) parseOrderingExpr() ast.Expression {
 	}
 
 	return exp
+}
+
+//let add = async fn(a, b)  { a + b }
+//let add = async (a, b) => { a + b }
+func (p *Parser) parseAsyncLiteral() ast.Expression {
+	p.nextToken() //skip 'async'
+	if !p.curTokenIs(token.FUNCTION) && !p.curTokenIs(token.LPAREN) {
+		msg := fmt.Sprintf("Syntax Error:%v- async should be followed by a function or lambda, got %s instead.", p.curToken.Pos, p.curToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	fnLiteral := p.parseExpression(LOWEST).(*ast.FunctionLiteral)
+	fnLiteral.Async = true
+
+	return fnLiteral
+}
+
+//async fn add(a, b) { a + b }
+func (p *Parser) parseAsyncStatement() ast.Statement {
+	p.nextToken() //skip 'async'
+	if !p.curTokenIs(token.FUNCTION) {
+		msg := fmt.Sprintf("Syntax Error:%v- async should be followed by a function, got %s instead.", p.curToken.Pos, p.curToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	FnStmt := p.parseFunctionStatement().(*ast.FunctionStatement)
+	FnStmt.FunctionLiteral.Async = true
+
+	return FnStmt
+}
+
+//await add(1, 2)
+//await obj.xxx(params)
+func (p *Parser) parseAwaitExpression() ast.Expression {
+	expr := &ast.AwaitExpr{Token: p.curToken}
+
+	p.nextToken()
+	expr.Call = p.parseExpressionStatement().Expression
+
+	//check call type
+	switch expr.Call.(type) {
+	case *ast.CallExpression:
+		return expr
+	case *ast.MethodCallExpression:
+		return expr
+	default:
+		msg := fmt.Sprintf("Syntax Error:%v- await keyword can only be used on function/method calls!", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	return expr
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {

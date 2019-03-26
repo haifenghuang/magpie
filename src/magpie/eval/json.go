@@ -118,6 +118,9 @@ func (j *Json) UnMarshal(line string, args ...Object) Object {
 	b := []byte(jsonStr.String)
 
 	var val interface{}
+	//Note: if the 'jsonStr' is an array, and if the array's element has hash,
+	//      then, the inner hash will be  unmarshaled un-ordered(i.e. randomly).
+	//      Because the 'json.Unmarshal' function will return randomly.
 	err := json.Unmarshal(b, &val)
 	if err != nil {
 		return NewNil(err.Error())

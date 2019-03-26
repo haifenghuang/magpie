@@ -308,6 +308,16 @@ elseif (RUNTIME_OS == "windows") {
 }
 ```
 
+### async/await异步处理
+Magpie支持`async/await`。
+
+```csharp
+let add = async fn(a, b) { a + b }
+
+result = await add(3, 4)
+println(result)
+```
+
 ### 类
 
 * 简单

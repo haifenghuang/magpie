@@ -1310,7 +1310,7 @@ func evalFunctionStatement(FnStmt *ast.FunctionStatement, scope *Scope) Object {
 }
 
 func evalFunctionLiteral(fl *ast.FunctionLiteral, scope *Scope) Object {
-	fn := &Function{Literal: fl, Variadic: fl.Variadic, Scope: scope}
+	fn := &Function{Literal: fl, Variadic: fl.Variadic, Scope: scope, Async: fl.Async}
 
 	if fl.Values != nil { //check for default values
 		for _, item := range fl.Parameters {
@@ -1449,7 +1449,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 				case *Function:
 					newScope := NewScope(instanceObj.Scope)
 					args := []Object{right}
-					return evalFunctionDirect(method, args, instanceObj, newScope)
+					return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 				case *BuiltinMethod:
 					//do nothing for now
 			}
@@ -2451,12 +2451,12 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 			case *Function:
 				newScope := NewScope(instanceObj.Scope)
 				args := []Object{right}
-				return evalFunctionDirect(method, args, instanceObj, newScope)
+				return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 			case *BuiltinMethod:
 				args := []Object{right}
 				builtinMethod :=&BuiltinMethod{Fn: m.Fn, Instance: instanceObj}
 				aScope := NewScope(instanceObj.Scope)
-				return evalFunctionDirect(builtinMethod, args, instanceObj, aScope)
+				return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 		}
 	}
 	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
@@ -3938,8 +3938,28 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 	}
 
 	f := fn.(*Function)
+	if f.Async && call.Awaited {
+		aChan := make(chan Object, 1)
 
+		go func() {
+			defer close(aChan)
+			aChan <- evalFunctionObj(call, f, scope)
+		}()
+
+		return <- aChan
+	}
+
+	if f.Async {
+		go evalFunctionObj(call, f, scope)
+		return NIL
+	}
+
+	return evalFunctionObj(call, f, scope)
+}
+
+func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object {
 	var thisObj Object
+	var ok bool
 	//check if it's static function
 	thisObj, ok = scope.Get("this")
 	if ok {
@@ -4159,7 +4179,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 
 				switch val.(type) {
 				case *Function: //Function without parameter. e.g. obj.getMonth(), could be called using 'obj.getMonth'
-					return evalFunctionDirect(val, []Object{}, instanceObj, instanceObj.Scope)
+					return evalFunctionDirect(val, []Object{}, instanceObj, instanceObj.Scope, nil)
 				default:
 					return val
 				}
@@ -4206,12 +4226,13 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					case *Function:
 						newScope := NewScope(instanceObj.Scope)
 						args := evalArgs(o.Arguments, newScope)
-						return evalFunctionDirect(method, args, instanceObj, newScope)
+						return evalFunctionDirect(method, args, instanceObj, newScope, o)
+
 					case *BuiltinMethod:
 						builtinMethod :=&BuiltinMethod{Fn: m.Fn, Instance: instanceObj}
 						aScope := NewScope(instanceObj.Scope)
 						args := evalArgs(o.Arguments, aScope)
-						return evalFunctionDirect(builtinMethod, args, instanceObj, aScope)
+						return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 				}
 			}
 			panic(NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type()))
@@ -4309,12 +4330,12 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				switch m := method.(type) {
 					case *Function:
 						args := evalArgs(o.Arguments, scope)
-						return evalFunctionDirect(m, args, nil, newScope)
+						return evalFunctionDirect(m, args, nil, newScope, o)
 					case *BuiltinMethod:
 						builtinMethod :=&BuiltinMethod{Fn: m.Fn, Instance: nil}
 						aScope := NewScope(newScope)
 						args := evalArgs(o.Arguments, aScope)
-						return evalFunctionDirect(builtinMethod, args, nil, aScope)
+						return evalFunctionDirect(builtinMethod, args, nil, aScope, nil)
 				}
 			} else {
 				reportTypoSuggestionsMeth(call.Call.Pos().Sline(), scope, clsObj.Name, fname);
@@ -4745,7 +4766,7 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression) Object {
 				case *Function:
 					newScope := NewScope(instanceObj.Scope)
 					args := []Object{left}
-					return evalFunctionDirect(method, args, instanceObj, newScope)
+					return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 				case *BuiltinMethod:
 					//do nothing for now
 			}
@@ -5119,7 +5140,7 @@ func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 		return args[0]
 	}
 
-	ret := evalFunctionDirect(init, args, instance, instance.Scope);
+	ret := evalFunctionDirect(init, args, instance, instance.Scope, nil);
 	if ret.Type() == ERROR_OBJ {
 		return ret //return the error object
 	}
@@ -5179,7 +5200,7 @@ func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, lin
 	}
 }
 
-func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scope *Scope) Object {
+func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scope *Scope, call *ast.CallExpression) Object {
 	switch fn := fn.(type) {
 	case *Function:
 		fn.Instance = instance
@@ -5216,11 +5237,45 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 			newScope.Set("@_", NewInteger(int64(len(fn.Literal.Parameters))))
 		}
 
+		if fn.Async && call.Awaited {
+			aChan := make(chan Object, 1)
+
+			go func() {
+				defer close(aChan)
+
+				results := Eval(fn.Literal.Body, newScope)
+				if obj, ok := results.(*ReturnValue); ok {
+					// if function returns multiple-values
+					// returns a tuple instead.
+					if len(obj.Values) > 1 {
+						results = &Tuple{Members: obj.Values, IsMulti: true}
+					} else {
+						results = obj.Value
+					}
+				}
+
+				aChan <- results
+			}()
+
+			return <- aChan
+		}
+
+		if fn.Async {
+			go Eval(fn.Literal.Body, newScope)
+			return NIL
+		}
+
 		//newScope.DebugPrint("    ") //debug
 		results := Eval(fn.Literal.Body, newScope)
-		if results.Type() == RETURN_VALUE_OBJ {
-			return results.(*ReturnValue).Value
+		if obj, ok := results.(*ReturnValue); ok {
+			// if function returns multiple-values
+			// returns a tuple instead.
+			if len(obj.Values) > 1 {
+				return &Tuple{Members: obj.Values, IsMulti: true}
+			}
+			return obj.Value
 		}
+
 		return results
 	case *Builtin:
 		return fn.Fn("", args...)
@@ -5462,6 +5517,20 @@ func constructFuncLiteral(value string, expr ast.Expression) *ast.FunctionLitera
 //========================================================
 //               LINQ EVALUATION LOGIC(END)
 //========================================================
+
+func evalAwaitExpression(a *ast.AwaitExpr, scope *Scope) Object {
+	switch fn := a.Call.(type) {
+	case *ast.CallExpression:
+		fn.Awaited = true
+		return evalFunctionCall(fn, scope)
+	case *ast.MethodCallExpression:
+		fn.Call.(*ast.CallExpression).Awaited = true
+		return evalMethodCallExpression(fn, scope)
+	default:
+		//should never reach this line, because the parser will check type call type
+		return NIL
+	}
+}
 
 // Convert a Object to an ast.Expression.
 func obj2Expression(obj Object) ast.Expression {

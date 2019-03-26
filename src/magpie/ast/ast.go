@@ -808,6 +808,9 @@ type FunctionLiteral struct {
 
 	StaticFlag bool
 	ModifierLevel ModifierLevel //for 'class' use
+
+	//If the function is async or not
+	Async      bool
 }
 
 func (fl *FunctionLiteral) Pos() token.Position {
@@ -822,6 +825,10 @@ func (fl *FunctionLiteral) expressionNode()      {}
 func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
+
+	if fl.Async {
+		out.WriteString("async ")
+	}
 
 	out.WriteString(fl.ModifierLevel.String())
 	if fl.StaticFlag {
@@ -1768,6 +1775,7 @@ type CallExpression struct {
 	Token     token.Token
 	Function  Expression
 	Arguments []Expression
+	Awaited   bool // if it is an awaited call
 }
 
 func (ce *CallExpression) Pos() token.Position {
@@ -3367,6 +3375,38 @@ func (q *QueryContinuationExpr) String() string       {
 	out.WriteString(" into ")
 	out.WriteString(q.Var)
 	out.WriteString(q.Expr.String())
+
+	return out.String()
+}
+
+///////////////////////////////////////////////////////////
+//                     AWAIT EXPRESSION                  //
+///////////////////////////////////////////////////////////
+
+//result = await add(1, 2)
+//await hello()
+type AwaitExpr struct {
+	Token token.Token
+	Call  Expression
+}
+
+func (aw *AwaitExpr) Pos() token.Position {
+	return aw.Token.Pos
+}
+
+func (aw *AwaitExpr) End() token.Position {
+	return aw.Call.End()
+}
+
+func (aw *AwaitExpr) expressionNode()       {}
+func (aw *AwaitExpr) TokenLiteral() string { return aw.Token.Literal }
+
+func (aw *AwaitExpr) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(aw.TokenLiteral() + " ")
+	out.WriteString(aw.Call.String())
+	out.WriteString("; ")
 
 	return out.String()
 }

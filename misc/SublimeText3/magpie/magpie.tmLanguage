@@ -384,6 +384,12 @@
 			<string>keyword.control.include.mp</string>
 		</dict>
 		<dict>
+			<key>match</key>
+			<string>\b(async|await)\b</string>
+			<key>name</key>
+			<string>keyword.control.async.mp</string>
+		</dict>
+		<dict>
 			<key>captures</key>
 			<dict>
 				<key>1</key>

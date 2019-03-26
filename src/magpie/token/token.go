@@ -155,6 +155,10 @@ const (
 	BY
 	ASCENDING
 	DESCENDING
+
+	//async & await
+	ASYNC
+	AWAIT
 )
 
 var keywords = map[string]TokenType{
@@ -222,6 +226,10 @@ var keywords = map[string]TokenType{
 	"by":         BY,
 	"ascending":  ASCENDING,
 	"descending": DESCENDING,
+
+	//async & await
+	"async":      ASYNC,
+	"await":      AWAIT,
 }
 
 //for debug & testing
@@ -492,6 +500,11 @@ func (tt TokenType) String() string {
 	case DESCENDING:
 		return "DESCENDING"
 
+	//async & await
+	case ASYNC:
+		return "ASYNC"
+	case AWAIT:
+		return "AWAIT"
 	default:
 		return "UNKNOWN"
 	}

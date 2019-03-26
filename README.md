@@ -311,6 +311,16 @@ elseif (RUNTIME_OS == "windows") {
 }
 ```
 
+### async/await processing
+Magpie support `async/await`.
+
+```csharp
+let add = async fn(a, b) { a + b }
+
+result = await add(3, 4)
+println(result)
+```
+
 ### Class
 
 * Simple

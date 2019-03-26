@@ -15,7 +15,7 @@ hi def link     magpieDeclaration       Type
 " Linq Keywords
 syn keyword     magpieLinq              from where select group into orderby join in on equals by ascending descending
 
-syn keyword     magpieStatement         return let const spawn defer struct enum using
+syn keyword     magpieStatement         return let const spawn defer struct enum using async await
 syn keyword     magpieException         try catch finally throw
 syn keyword     magpieConditional       if else elseif elsif elif unless and or case is
 syn keyword     magpieRepeat            do while for break continue grep map
