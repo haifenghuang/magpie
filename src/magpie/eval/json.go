@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	_ "fmt"
 	_ "reflect"
+	"unicode/utf8"
 )
 
 const (
@@ -115,26 +116,30 @@ func (j *Json) UnMarshal(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "unmarshal", "*String", args[0].Type()))
 	}
 
-	b := []byte(jsonStr.String)
+	in := []byte(jsonStr.String)
+	b := bytes.TrimSpace(in)
+	r, _ := utf8.DecodeRune(b)
 
-	var val interface{}
-	//Note: if the 'jsonStr' is an array, and if the array's element has hash,
-	//      then, the inner hash will be  unmarshaled un-ordered(i.e. randomly).
-	//      Because the 'json.Unmarshal' function will return randomly.
-	err := json.Unmarshal(b, &val)
-	if err != nil {
-		return NewNil(err.Error())
-	}
-
-	switch val.(type) {
-	case map[string]interface{}:
+	if r == '[' { // array
+		a := &Array{}
+		err := a.UnmarshalJSON(b)
+		if err != nil {
+			return NewNil(err.Error())
+		}
+		return a
+	} else if r == '{' { // hash
 		h := NewHash()
 		err := h.UnmarshalJSON(b)
 		if err != nil {
 			return NewNil(err.Error())
 		}
 		return h
-	default:
+	} else { //simple types, e.g. number, string
+		var val interface{}
+		err := json.Unmarshal(b, &val)
+		if err != nil {
+			return NewNil(err.Error())
+		}
 		ret, err := unmarshalJsonObject(val)
 		if err != nil {
 			return NewNil(err.Error())

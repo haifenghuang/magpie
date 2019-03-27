@@ -3,8 +3,8 @@ package eval
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	_ "fmt"
+	_ "errors"
+	"fmt"
 	"magpie/ast"
 	"math"
 	"reflect"
@@ -573,24 +573,40 @@ func (a *Array) MarshalJSON() ([]byte, error) {
 }
 
 func (a *Array) UnmarshalJSON(b []byte) error {
-	if string(b) == "null" {
-		a = &Array{}
-		return nil
-	}
+	//Using Decoder to parse the bytes.
+	in := bytes.TrimSpace(b)
+	dec := json.NewDecoder(bytes.NewReader(in))
 
-	var obj interface{}
-	err := json.Unmarshal(b, &obj)
+	t, err := dec.Token()
 	if err != nil {
-		a = &Array{}
 		return err
 	}
 
-	if _, ok := obj.([]interface{}); !ok {
-		a = &Array{}
-		return errors.New("object is not a array")
+	// must open with a delim token '['
+	if delim, ok := t.(json.Delim); !ok || delim != '[' {
+		return fmt.Errorf("expect JSON object open with '['")
 	}
 
-	ret, err := unmarshalArray(obj.([]interface{}))
-	a = ret.(*Array)
+	a.unmarshalJSON(dec)
+
+	t, err = dec.Token() //'}'
+	if err != nil {
+		return err
+	}
+	if delim, ok := t.(json.Delim); !ok || delim != ']' {
+		return fmt.Errorf("expect JSON object close with ']'")
+	}
+
+	return nil
+}
+
+func (a *Array) unmarshalJSON(dec *json.Decoder) error {
+	for dec.More() { // Loop until it has no more tokens
+		val, err := parseObject(dec)
+		if err != nil {
+			return err
+		}
+		a.Members = append(a.Members, val)
+	}
 	return nil
 }
