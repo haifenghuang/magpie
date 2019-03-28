@@ -7,13 +7,13 @@ fn safeDivision?(a, b) {
 }
 
 op1 = safeDivision?(10, 0)
-if (!op1.isPresent()) {
+if (!op1.isPresent()) { //same as 'if (!op1)'
     println(op1)
 
 }
 
 op2 = safeDivision?(10, 2)
-if (op2.isPresent()) {
+if (op2.isPresent()) { // same as 'if (op2)'
     println(op2)
 
     let val = op2.get()

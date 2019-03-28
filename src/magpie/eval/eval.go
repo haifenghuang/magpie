@@ -3843,6 +3843,11 @@ func IsTrue(obj Object) bool {
 		case GO_OBJ:
 			goObj := obj.(*GoObject)
 			return goObj.obj != nil
+		case OPTIONAL_OBJ:
+			optionalObj := obj.(*Optional)
+			if optionalObj.Value == NIL {
+				return false
+			}
 		}
 		return true
 	}
