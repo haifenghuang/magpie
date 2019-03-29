@@ -1388,15 +1388,36 @@ func (ft *Formatter) Format(s fmt.State, verb rune) {
 		}
 	}
 
-	if string(format) == "%T" {
+	formatStr := string(format)
+	if formatStr == "%T" {
 		t := reflect.TypeOf(ft.Obj)
 		strArr := strings.Split(t.String(), ".") //t.String() = "*eval.xxx"
 		fmt.Fprintf(s, "%s", strArr[1])          //NEED CHECK for "index out of bounds?"
 		return
 	}
 
-	formatStr := string(format)
 	var reset = "\033[0m"
+
+//	//if the float is actual an integer, and you use '%d'
+//	//e.g.
+//	//    f = 20 / 2
+//	//    printf("f = %d\n", f)
+//	// then the result will be 'f = %!d(float64=10)'. but we actually want 'f = 10'.
+//	// For solving this problem, we just convert the float to integer and then print the integer value.
+//	if formatStr == "%d" {
+//		if ft.Obj.Type() == FLOAT_OBJ {
+//			f := ft.Obj.(*Float).Float64
+//			i := int64(f)
+//			if (f == float64(i)) { // if the float is actuall an integer
+//				if REPLColor {
+//					formatStr = "\033[1;" + colorMap["NUMBER"] + "m" + formatStr + reset
+//				}
+//				fmt.Fprintf(s, formatStr, i)
+//				return
+//			}
+//		}
+//	}
+
 	switch obj := ft.Obj.(type) {
 	case *Boolean:
 		if REPLColor {
