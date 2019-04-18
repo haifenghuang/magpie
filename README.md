@@ -23,6 +23,11 @@ Complete language tutorial can be found in [docs](docs)
 ## Example
 
 ```csharp
+async fn add(a, b) { a + b }
+
+result = await add(1, 2)
+println(result)
+
 class Linq {
     static fn TestSimpleLinq() {
         //Prepare Data Source

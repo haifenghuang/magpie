@@ -19,6 +19,11 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 ## 举例
 
 ```csharp
+async fn add(a, b) { a + b }
+
+result = await add(1, 2)
+println(result)
+
 class Linq {
     static fn TestSimpleLinq() {
         //数据源
