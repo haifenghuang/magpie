@@ -23,6 +23,13 @@ Complete language tutorial can be found in [docs](docs)
 ## Example
 
 ```csharp
+// async/await
+async fn add(a, b) { a + b }
+
+result = await add(1, 2)
+println(result)
+
+// linq example
 class Linq {
     static fn TestSimpleLinq() {
         //Prepare Data Source
@@ -34,7 +41,7 @@ class Linq {
             {Name: "Butter", Calories: 200},
         ]
 
-	//Query Data Source
+        //Query Data Source
         ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
 
         //Display
@@ -175,6 +182,12 @@ for (i = 0; i < 5; i++) {  // c-like for, '()' is a must
     if (i > 4) { break }
     if (i == 2) { continue }
     println('i is {i}')
+}
+
+# for x in arr <where expr> {}
+let a = [1,2,3,4]
+for i in a where i % 2 != 0 {
+    println(i)
 }
 ```
 

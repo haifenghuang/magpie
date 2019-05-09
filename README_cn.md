@@ -19,6 +19,13 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 ## 举例
 
 ```csharp
+// async/await
+async fn add(a, b) { a + b }
+
+result = await add(1, 2)
+println(result)
+
+// linq example
 class Linq {
     static fn TestSimpleLinq() {
         //数据源
@@ -30,7 +37,7 @@ class Linq {
             {Name: "Butter", Calories: 200},
         ]
 
-	//检索数据源
+        //检索数据源
         ingredient = from i in ingredients where i.Calories >= 150 orderby i.Name select i
 
         //显示
@@ -176,6 +183,12 @@ for (i = 0; i < 5; i++) {  // 类似C语音的for循环，这里括号'()'是必
     if (i > 4) { break }
     if (i == 2) { continue }
     println('i is {i}')
+}
+
+# for x in arr <where expr> {}
+let a = [1,2,3,4]
+for i in a where i % 2 != 0 {
+    println(i)
 }
 ```
 
