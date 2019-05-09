@@ -229,6 +229,10 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	//linq query expression
 	case *ast.QueryExpr:
 		return evalLinqQueryExpression(node, scope)
+
+	//await expression
+	case *ast.AwaitExpr:
+		return evalAwaitExpression(node, scope)
 	}
 	return nil
 }
