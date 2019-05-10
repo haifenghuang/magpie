@@ -134,7 +134,14 @@ println(opt)
 ### Case-in语句
 
 ```swift
-
+let i = [{"a": 1, "b": 2}, 10]
+let x = [{"a": 1, "b": 2},10]
+case i in {
+    1, 2 { println("i matched 1, 2") }
+    3    { println("i matched 3") }
+    x    { println("i matched x") }
+    else { println("i not matched anything")}
+}
 ```
 
 ### 控制流程
@@ -651,13 +658,13 @@ using (infile = newFile("./file.demo", "r")) {
 
 ## 感谢
 
-* mayoms
+* mayoms：
     本项目基于mayoms的[monkey](https://github.com/mayoms/monkey)解析器。
 
-* ahmetb
+* ahmetb：
     Linq模块基于ahmetb的[linq](https://github.com/ahmetb/go-linq)。
 
-* shopspring
+* shopspring：
    Decimal模块基于shopspring的[decimal](https://github.com/shopspring/decimal)。
 
 ## 安装

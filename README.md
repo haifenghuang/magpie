@@ -657,13 +657,13 @@ so i could put you in the `Credits` sections.
 
 ## Credits
 
-* mayoms
+* mayoms:
     This project is based on mayoms's [monkey](https://github.com/mayoms/monkey) interpreter.
 
-* ahmetb
+* ahmetb：
     Linq module is base on ahmetb's [linq](https://github.com/ahmetb/go-linq)
 
-* shopspring
+* shopspring：
    Decimal module is based on shopspring's [decimal](https://github.com/shopspring/decimal)
 
 ## Installation
