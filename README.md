@@ -11,8 +11,10 @@ Chinese version: [中文](README_cn.md)
 Magpie is a toy language interpreter, written in Go. It has C-style syntax, and is largely
 inspired by Ruby, Python, Perl and c#.
 
-It support the normal control flow, functional programming and object oriented programming?
+It support the normal control flow, functional programming and object oriented programming.
 and also can import golang's module.
+
+It has a built-in documentation generator(mdoc) for generating html document from magpie source.
 
 It also has a REPL with realtime syntax highlighter.
 
