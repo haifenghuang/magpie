@@ -210,6 +210,8 @@ func (t *TcpConnObject) CallMethod(line string, scope *Scope, method string, arg
 		return t.CloseWrite(line, args...)
 	case "read":
 		return t.Read(line, args...)
+	case "read2":
+		return t.Read2(line, args...)
 	case "write":
 		return t.Write(line, args...)
 	case "setDeadline":
@@ -282,6 +284,38 @@ func (t *TcpConnObject) Read(line string, args ...Object) Object {
 	}
 
 	return NewString(string(bytes))
+}
+
+func (t *TcpConnObject) Read2(line string, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	length, ok := args[0].(*Integer) //read length
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type()))
+	}
+
+	data := make([]byte, length.Int64);
+
+	readTotal := 0
+	readBytes := 0
+	var err error
+	for {
+		if readTotal == len(data) {
+			break
+		}
+		if readBytes, err = t.Conn.Read(data[readTotal:]); err != nil {
+			break
+		}
+		readTotal += readBytes
+	}
+
+	if err != nil {
+		return NewNil(err.Error())
+	}
+
+	return NewString(string(data))
 }
 
 func (t *TcpConnObject) Write(line string, args ...Object) Object {
