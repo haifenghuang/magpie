@@ -22,6 +22,22 @@ It also has a REPL with realtime syntax highlighter.
 
 Complete language tutorial can be found in [docs](docs)
 
+## Features
+
+* Class with support for property, indexer & operator overloading
+* await/async for asynchronous programming
+* Builtin support for linq
+* First class function
+* function with Variadic parameters and default values
+* function with multiple return values
+* int, uint, float, bool, array, tuple, hash(all support json marshal & unmarshal)
+* try-catch-finally exception handling
+* Optional Type support(Java 8 like)
+* using statment(C# like)
+* Elixir like pipe operator
+* Syntax-highlight REPL
+* Doc-generation tool `mdoc`
+
 ## Example
 
 ```csharp
