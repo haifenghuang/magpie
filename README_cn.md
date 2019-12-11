@@ -25,11 +25,12 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 * 一级函数(First class function)
 * 多参函数及缺省参数值函数
 * 函数可以有多个返回值
-* int, uint, float, bool, array, tuple, hash(所有均支持json序列化/反序列化)
+* int, uint, float, bool, array, tuple, hash(所有均支持json序列化/反序列化, 所有类型均可以扩展)
 * try-catch-finally异常处理
 * 可选类型支持(类似Java 8的Optional类)
 * using语句(类似C#的using)
 * Elixir的管道操作符(pipe operator)
+* 使用Go语言的方法(RegisterFunctions与RegisterVars)
 * 语法高亮REPL
 * 文档自动生成工具`mdoc`
 

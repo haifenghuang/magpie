@@ -30,11 +30,12 @@ Complete language tutorial can be found in [docs](docs)
 * First class function
 * function with Variadic parameters and default values
 * function with multiple return values
-* int, uint, float, bool, array, tuple, hash(all support json marshal & unmarshal)
+* int, uint, float, bool, array, tuple, hash(all support json marshal & unmarshal, all can be extened)
 * try-catch-finally exception handling
 * Optional Type support(Java 8 like)
 * using statment(C# like)
 * Elixir like pipe operator
+* Using method of Go Package(RegisterFunctions and RegisterVars)
 * Syntax-highlight REPL
 * Doc-generation tool `mdoc`
 
