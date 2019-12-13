@@ -1,4 +1,4 @@
-package eval
+﻿package eval
 
 import (
 	"bytes"
@@ -2097,16 +2097,28 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 	case "*", "~*":
 		if left.Type() == INTEGER_OBJ {
 			integer := left.(*Integer).Int64
+			if (integer <= 0) {
+				return NewString("")
+			}
 			return NewString(strings.Repeat(right.Inspect(), int(integer)))
 		} else if left.Type() == UINTEGER_OBJ {
 			uinteger := left.(*UInteger).UInt64
+			if (uinteger == 0) {
+				return NewString("")
+			}
 			return NewString(strings.Repeat(right.Inspect(), int(uinteger)))
 		}
 		if right.Type() == INTEGER_OBJ {
 			integer := right.(*Integer).Int64
+			if (integer <= 0) {
+				return NewString("")
+			}
 			return NewString(strings.Repeat(left.Inspect(), int(integer)))
 		} else if right.Type() == UINTEGER_OBJ {
 			uinteger := right.(*UInteger).UInt64
+			if (uinteger == 0) {
+				return NewString("")
+			}
 			return NewString(strings.Repeat(left.Inspect(), int(uinteger)))
 		}
 		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
