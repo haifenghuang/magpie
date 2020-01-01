@@ -770,28 +770,36 @@ func (a *ArrayLiteral) String() string {
 	return out.String()
 }
 
-///////////////////////////////////////////////////////////
-//                      RANGE LITERAL(..)                //
-///////////////////////////////////////////////////////////
-//type RangeLiteral struct {
-//	Token    token.Token
-//	StartIdx Expression
-//	EndIdx   Expression
-//}
-//
-//func (r *RangeLiteral) expressionNode()      {}
-//func (r *RangeLiteral) TokenLiteral() string { return r.Token.Literal }
-//func (r *RangeLiteral) String() string {
-//	var out bytes.Buffer
-//
-//	out.WriteString("(")
-//	out.WriteString(r.StartIdx.String())
-//	out.WriteString(" .. ")
-//	out.WriteString(r.EndIdx.String())
-//	out.WriteString(")")
-//
-//	return out.String()
-//}
+/////////////////////////////////////////////////////////
+//                     RANGE LITERAL(..)                //
+/////////////////////////////////////////////////////////
+type RangeLiteral struct {
+	Token    token.Token
+	StartIdx Expression
+	EndIdx   Expression
+}
+
+func (r *RangeLiteral) Pos() token.Position {
+	return r.Token.Pos
+}
+
+func (r *RangeLiteral) End() token.Position {
+	return r.EndIdx.End()
+}
+
+func (r *RangeLiteral) expressionNode()      {}
+func (r *RangeLiteral) TokenLiteral() string { return r.Token.Literal }
+func (r *RangeLiteral) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(r.StartIdx.String())
+	out.WriteString(" .. ")
+	out.WriteString(r.EndIdx.String())
+	out.WriteString(")")
+
+	return out.String()
+}
 
 ///////////////////////////////////////////////////////////
 //                     FUNCTION LITERAL                  //

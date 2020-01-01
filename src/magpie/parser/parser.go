@@ -284,6 +284,7 @@ func (p *Parser) registerAction() {
 	p.registerInfix(token.LPAREN, p.parseCallExpressions)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	p.registerInfix(token.DOT, p.parseMethodCallExpression)
+	p.registerInfix(token.DOTDOT, p.parseRangeLiteralExpression)
 	p.registerInfix(token.QUESTIONM, p.parseTernaryExpression)
 	p.registerInfix(token.COLON, p.parseSliceExpression)
 	p.registerInfix(token.INCREMENT, p.parsePostfixExpression)
@@ -2245,6 +2246,18 @@ func (p *Parser) parseMethodCallExpression(obj ast.Expression) ast.Expression {
 	}
 
 	return methodCall
+}
+
+func (p *Parser) parseRangeLiteralExpression(startIdx ast.Expression) ast.Expression {
+	expression := &ast.RangeLiteral{
+		Token:    p.curToken,
+		StartIdx: startIdx,
+	}
+	precedence := p.curPrecedence()
+	p.nextToken()
+	expression.EndIdx = p.parseExpression(precedence)
+
+	return expression
 }
 
 func (p *Parser) parseTernaryExpression(condition ast.Expression) ast.Expression {

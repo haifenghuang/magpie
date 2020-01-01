@@ -123,6 +123,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalStructLiteral(node, scope)
 	case *ast.EnumLiteral:
 		return evalEnumLiteral(node, scope)
+	case *ast.RangeLiteral:
+		return evalRangeLiteral(node, scope)
 	case *ast.EnumStatement:
 		return evalEnumStatement(node, scope)
 	case *ast.FunctionLiteral:
@@ -1302,6 +1304,14 @@ func evalEnumLiteral(e *ast.EnumLiteral, scope *Scope) Object {
 	}
 	return &Enum{Scope: enumScope}
 }
+
+func evalRangeLiteral(r *ast.RangeLiteral, scope *Scope) Object {
+	startIdx := Eval(r.StartIdx, scope)
+	endIdx := Eval(r.EndIdx, scope)
+
+	return evalRangeExpression(r, startIdx, endIdx, scope)
+}
+
 
 func evalFunctionStatement(FnStmt *ast.FunctionStatement, scope *Scope) Object {
 	fnObj := evalFunctionLiteral(FnStmt.FunctionLiteral, scope)
@@ -2991,83 +3001,7 @@ func evalHashRangeComprehension(hc *ast.HashRangeComprehension, scope *Scope) Ob
 	startIdx := Eval(hc.StartIdx, innerScope)
 	endIdx := Eval(hc.EndIdx, innerScope)
 
-	arr := &Array{}
-
-	switch startIdx.(type) {
-	case *Integer:
-		startVal := startIdx.(*Integer).Int64
-
-		var endVal int64
-		switch o := endIdx.(type) {
-		case *Integer:
-			endVal = o.Int64
-		case *UInteger:
-			endVal = int64(o.UInt64)
-		default:
-			panic(NewError(hc.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ + "|" + UINTEGER_OBJ, endIdx.Type()))
-		}
-
-		var j int64
-		if startVal >= endVal {
-			for j = startVal; j >= endVal; j = j - 1 {
-				arr.Members = append(arr.Members, NewInteger(j))
-			}
-		} else {
-			for j = startVal; j <= endVal; j = j + 1 {
-				arr.Members = append(arr.Members, NewInteger(j))
-			}
-		}
-	case *UInteger:
-		startVal := startIdx.(*UInteger).UInt64
-
-		var endVal uint64
-		switch o := endIdx.(type) {
-		case *Integer:
-			endVal = uint64(o.Int64)
-		case *UInteger:
-			endVal = o.UInt64
-		default:
-			panic(NewError(hc.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ + "|" + UINTEGER_OBJ, endIdx.Type()))
-		}
-
-		var j uint64
-		if startVal >= endVal {
-			for j = startVal; j >= endVal; j = j - 1 {
-				arr.Members = append(arr.Members, NewUInteger(j))
-			}
-		} else {
-			for j = startVal; j <= endVal; j = j + 1 {
-				arr.Members = append(arr.Members, NewUInteger(j))
-			}
-		}
-	case *String:
-		startVal := startIdx.(*String).String
-		if endIdx.Type() != STRING_OBJ {
-			panic(NewError(hc.Pos().Sline(), RANGETYPEERROR, STRING_OBJ, endIdx.Type()))
-		}
-		endVal := endIdx.(*String).String
-
-		//only support single character with lowercase
-		alphabet := "0123456789abcdefghijklmnopqrstuvwxyz"
-
-		//convert to int for easy comparation
-		leftByte := []int32(strings.ToLower(startVal))[0]
-		rightByte := []int32(strings.ToLower(endVal))[0]
-		if leftByte >= rightByte { // z -> a
-			for i := len(alphabet) - 1; i >= 0; i-- {
-				v := int32(alphabet[i])
-				if v <= leftByte && v >= rightByte {
-					arr.Members = append(arr.Members, NewString(string(v)))
-				}
-			}
-		} else { // a -> z
-			for _, v := range alphabet {
-				if v >= leftByte && v <= rightByte {
-					arr.Members = append(arr.Members, NewString(string(v)))
-				}
-			}
-		}
-	}
+	arr := evalRangeExpression(hc, startIdx, endIdx, scope).(*Array)
 
 	ret := NewHash()
 
