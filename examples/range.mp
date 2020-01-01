@@ -12,4 +12,5 @@ println(a2)
 let arr = "a" .. "h"
 println(arr)
 
-
+let arr2 = [1..9, 10, 11]
+println(arr2)
