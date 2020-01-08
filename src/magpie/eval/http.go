@@ -1,4 +1,4 @@
-package eval
+﻿package eval
 
 import (
 	"bytes"
@@ -597,6 +597,8 @@ func (h *HttpRequest) Inspect() string  { return "<httprequest>" }
 func (h *HttpRequest) Type() ObjectType { return HTTPREQUEST_OBJ }
 func (h *HttpRequest) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	switch method {
+	case "method":
+		return h.Method(line, args...)
 	case "header":
 		return h.Header(line, args...)
 	case "write":
@@ -608,6 +610,15 @@ func (h *HttpRequest) CallMethod(line string, scope *Scope, method string, args 
 	}
 	return NIL
 }
+
+func (h *HttpRequest) Method(line string, args ...Object) Object {
+	if len(args) != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	return NewString(h.Request.Method)
+}
+
 
 func (h *HttpRequest) Header(line string, args ...Object) Object {
 	if len(args) != 0 {
