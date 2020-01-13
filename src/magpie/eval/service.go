@@ -7,6 +7,7 @@ import (
 	//	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"magpie/ast"
 	"net/http"
 	"net/url"
@@ -59,10 +60,13 @@ func (s *ServiceObj) CallMethod(line string, scope *Scope, method string, args .
 }
 
 func (s *ServiceObj) Run(line string, args ...Object) Object {
-	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
 	}
 
+	if args[0].(*Boolean).Bool {
+		s.Router.Use(LoggingMiddleware)
+	}
 	http.ListenAndServe(s.Addr, s.Router)
 
 	return NIL
@@ -1951,4 +1955,27 @@ func getAllMethodsForRoute(r *Router, req *http.Request) ([]string, error) {
 	}
 
 	return allMethods, nil
+}
+
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Printf("Request url: %s\n", req.URL)
+
+		fmt.Println("Headers:")
+		for k, v := range req.Header {
+			values := strings.Join(v, ", ")
+			fmt.Printf("\t[%s] = %s\n", k, values)
+		}
+
+		fmt.Println("Body:")
+		b, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			fmt.Println("ERR: ", err)
+			return
+		}
+		fmt.Printf("%s\n\n\n", b)
+		defer req.Body.Close()
+
+		next.ServeHTTP(w, req)
+	})
 }

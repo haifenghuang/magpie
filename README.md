@@ -114,7 +114,7 @@ Linq.TestComplexLinq()
 ## Example2(Rest Service)
 
 ```csharp
-service Hello on "0.0.0.0:8090" {
+service Hello on "0.0.0.0:8090:debug" { //':debug': for debugging request
   @route(url="/authentication/login", methods=["POST"])
   fn login(writer, request) {
     writer.writeJson({ "sessionId": "3d5bd2cA15ef047689" })

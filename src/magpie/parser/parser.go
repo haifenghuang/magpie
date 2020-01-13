@@ -3356,7 +3356,14 @@ func (p *Parser) parseServiceStatement() *ast.ServiceStatement {
 	if !p.expectPeek(token.STRING) { //service address
 		return nil
 	}
-	stmt.Addr = p.curToken.Literal
+
+	stmt.Debug = strings.HasSuffix(p.curToken.Literal, ":debug")
+	if stmt.Debug {
+		stmt.Addr = strings.TrimSuffix(p.curToken.Literal, ":debug")
+	} else {
+		stmt.Addr = p.curToken.Literal
+	}
+
 	p.nextToken()
 
 	stmt.Block = p.parseServiceBody(stmt)

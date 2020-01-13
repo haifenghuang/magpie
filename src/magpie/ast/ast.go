@@ -3431,6 +3431,7 @@ type ServiceStatement struct {
 	Token   token.Token
 	Name    *Identifier //Service name
 	Addr    string
+	Debug   bool
 	Methods map[string]*FunctionStatement //service's methods
 	Block   *BlockStatement               //mainly used for debugging purpose
 

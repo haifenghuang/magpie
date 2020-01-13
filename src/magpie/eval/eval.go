@@ -5414,7 +5414,7 @@ func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
 	}
 
 	fmt.Printf(ServiceHint, svcObj.Addr)
-	svcObj.Run(s.Pos().Sline())
+	svcObj.Run(s.Pos().Sline(), NewBooleanObj(s.Debug))
 	return NIL
 }
 
