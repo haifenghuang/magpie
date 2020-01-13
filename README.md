@@ -709,6 +709,9 @@ so i could put you in the `Credits` sections.
 * shopspring：
    Decimal module is based on shopspring's [decimal](https://github.com/shopspring/decimal)
 
+* gorilla:
+   Service module is based on gorilla's [mux](https://github.com/gorilla/mux)
+
 ## Installation
 
 Just download the repository and run `./run.sh`

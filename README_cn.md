@@ -710,6 +710,9 @@ using (infile = newFile("./file.demo", "r")) {
 * shopspring：
    Decimal模块基于shopspring的[decimal](https://github.com/shopspring/decimal)。
 
+* gorilla:
+   Service模块基于gorilla的[mux](https://github.com/gorilla/mux)
+
 ## 安装
 
 下载此仓库并运行`./run.sh`
