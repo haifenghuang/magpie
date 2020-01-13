@@ -676,6 +676,8 @@ func (h *HttpResponseWriter) CallMethod(line string, scope *Scope, method string
 		return h.WriteHeader(line, args...)
 	case "header":
 		return h.Header(line, args...)
+	case "writeJson":
+		return h.WriteJson(line, args...)
 	default:
 		panic(NewError(line, NOMETHODERROR, method, h.Type()))
 	}
@@ -719,6 +721,42 @@ func (h *HttpResponseWriter) Header(line string, args ...Object) Object {
 	}
 
 	return &HttpHeader{Header: h.Writer.Header()}
+}
+
+func (h *HttpResponseWriter) WriteJson(line string, args ...Object) Object {
+	if len(args) != 1 && len(args) != 2 {
+		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+	}
+
+	payLoadObj, ok := args[0].(*Hash)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "writeJson", "*Hash", args[0].Type()))
+	}
+
+	var statusCodeObj *Integer
+	if len(args) == 2 {
+		statusCodeObj, ok = args[0].(*Integer)
+		if !ok {
+			panic(NewError(line, PARAMTYPEERROR, "second", "writeHeader", "*Integer", args[1].Type()))
+		}
+	} else {
+		statusCodeObj = NewInteger(int64(http.StatusOK))
+	}
+
+	h.Writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+	h.Writer.WriteHeader(int(statusCodeObj.Int64))
+
+	res, err := payLoadObj.MarshalJSON()
+	if err != nil {
+		return NewNil(err.Error())
+	}
+
+	_, err = h.Writer.Write(res)
+	if err != nil {
+		return NewNil(err.Error())
+	}
+
+	return NIL
 }
 
 //HTTP Server object
