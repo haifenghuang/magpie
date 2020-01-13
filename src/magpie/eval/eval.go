@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"bytes"
@@ -47,6 +47,8 @@ var mux sync.Mutex
 
 //REPL with color support
 var REPLColor bool
+
+const ServiceHint = "* Running on %s\n"
 
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
@@ -235,6 +237,10 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	//await expression
 	case *ast.AwaitExpr:
 		return evalAwaitExpression(node, scope)
+
+	//service statement
+	case *ast.ServiceStatement:
+		return evalServiceStatement(node, scope)
 	}
 	return nil
 }
@@ -1317,7 +1323,9 @@ func evalFunctionStatement(FnStmt *ast.FunctionStatement, scope *Scope) Object {
 	fnObj := evalFunctionLiteral(FnStmt.FunctionLiteral, scope)
 	fn := fnObj.(*Function)
 
-	processClassAnnotation(FnStmt.Annotations, scope, FnStmt.Pos().Sline(), fn)
+	if !FnStmt.IsServiceAnno {
+		processClassAnnotation(FnStmt.Annotations, scope, FnStmt.Pos().Sline(), fn)
+	}
 	scope.Set(FnStmt.Name.String(), fnObj) //save to scope
 
 	return fnObj
@@ -5333,6 +5341,81 @@ func evalAwaitExpression(a *ast.AwaitExpr, scope *Scope) Object {
 		//should never reach this line, because the parser will check type call type
 		return NIL
 	}
+}
+
+func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
+	//note: map's is not important
+	var routeMap = map[string]bool{
+		"url":     true,
+		"methods": true,
+		"host":    true,
+		"schemes": true,
+		"headers": true,
+		"queries": true,
+	}
+
+	svcObj := NewService(s.Addr).(*ServiceObj)
+
+	for _, fnStmt := range s.Methods {
+		f := evalFunctionStatement(fnStmt, scope).(*Function)
+		var methodArr *Array
+		var host *String
+		var schemes *String
+		var headers *Hash
+		var queries *Hash
+		var hasUrl bool
+		anno := fnStmt.Annotations[0]
+		for k, v := range anno.Attributes { //for each annotation attribute
+			if _, ok := routeMap[k]; ok {
+				if k == "url" {
+					hasUrl = true
+					val := Eval(v, scope).(*String)
+					//fmt.Printf("key=%s, val=%s, val.Type=%s\n", k, val.Inspect(), val.Type())
+					svcObj.HandleFunc(s.Pos().Sline(), scope, val, f)
+				} else if k == "methods" {
+					methodArr = Eval(v, scope).(*Array)
+				} else if k == "host" {
+					host = Eval(v, scope).(*String)
+				} else if k == "schemes" {
+					schemes = Eval(v, scope).(*String)
+				} else if k == "headers" {
+					headers = Eval(v, scope).(*Hash)
+				} else if k == "queries" {
+					queries = Eval(v, scope).(*Hash)
+				}
+			} else {
+				continue
+			}
+		}
+
+		if !hasUrl {
+			panic(NewError(s.Pos().Sline(), SERVICENOURLERROR, s.Name.Value, fnStmt.Name.Value))
+		}
+
+		if methodArr != nil {
+			svcObj.Methods(s.Pos().Sline(), methodArr.Members...)
+		}
+
+		if host != nil {
+			svcObj.Host(s.Pos().Sline(), host)
+		}
+
+		if schemes != nil {
+			svcObj.Schemes(s.Pos().Sline(), host)
+		}
+
+		if headers != nil {
+			svcObj.Headers(s.Pos().Sline(), headers)
+		}
+
+		if queries != nil {
+			svcObj.Queries(s.Pos().Sline(), queries)
+		}
+	}
+
+	fmt.Printf(ServiceHint, svcObj.Addr)
+	svcObj.Run(s.Pos().Sline())
+	return NIL
 }
 
 //private method for evalate 'a..b' expression, and returns an array object

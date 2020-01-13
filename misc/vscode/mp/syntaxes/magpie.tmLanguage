@@ -355,6 +355,12 @@
 		</dict>
 		<dict>
 			<key>match</key>
+			<string>\b(service)\b</string>
+			<key>name</key>
+			<string>keyword.control.service.mp</string>
+		</dict>
+		<dict>
+			<key>match</key>
 			<string>\b(class|new|property|get|set|default|this|parent|static|public|private|protected|interface)\b</string>
 			<key>name</key>
 			<string>keyword.control.class.mp</string>

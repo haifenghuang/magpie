@@ -159,6 +159,9 @@ const (
 	//async & await
 	ASYNC
 	AWAIT
+
+	//service
+	SERVICE
 )
 
 var keywords = map[string]TokenType{
@@ -230,6 +233,9 @@ var keywords = map[string]TokenType{
 	//async & await
 	"async":      ASYNC,
 	"await":      AWAIT,
+
+	//service
+	"service":    SERVICE,
 }
 
 //for debug & testing
@@ -505,6 +511,9 @@ func (tt TokenType) String() string {
 		return "ASYNC"
 	case AWAIT:
 		return "AWAIT"
+
+	case SERVICE:
+		return "SERVICE"
 	default:
 		return "UNKNOWN"
 	}

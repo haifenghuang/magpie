@@ -56,6 +56,7 @@ const (
 	PARENTNOTANNOTATION
 	OVERRIDEERROR
 	METAOPERATORERROR
+	SERVICENOURLERROR
 	GENERICERROR
 )
 
@@ -111,6 +112,7 @@ var errorType = map[int]string{
 	PARENTNOTANNOTATION:"Annotation(%s)'s Parent(%s) is not annotation.",
 	OVERRIDEERROR:      "Method(%s) of class(%s) must override a superclass method!",
 	METAOPERATORERROR:  "Meta-Operators' item must be Numbers|String!",
+	SERVICENOURLERROR:   "Service(%s)'s function('%s') must have url",
 	GENERICERROR:      "%s",
 }
 

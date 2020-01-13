@@ -871,7 +871,7 @@ type FunctionStatement struct {
 	Name            *Identifier
 	FunctionLiteral *FunctionLiteral
 	Annotations     []*AnnotationStmt
-
+	IsServiceAnno   bool //service annotation(@route) is processed differently
 	//Doc related
 	Doc             *CommentGroup // associated documentation; or nil
 	SrcEndToken     token.Token //used for printing source code
@@ -903,9 +903,13 @@ func (f *FunctionStatement) TokenLiteral() string { return f.Token.Literal }
 func (f *FunctionStatement) String() string {
 	var out bytes.Buffer
 
+	for _, anno := range f.Annotations { //for each annotation
+		out.WriteString(anno.String())
+	}
+
 	out.WriteString(f.FunctionLiteral.ModifierLevel.String())
 
-	out.WriteString("fn ")
+	out.WriteString(" fn ")
 	out.WriteString(f.Name.String())
 
 	params := []string{}
@@ -3415,6 +3419,70 @@ func (aw *AwaitExpr) String() string {
 	out.WriteString(aw.TokenLiteral() + " ")
 	out.WriteString(aw.Call.String())
 	out.WriteString("; ")
+
+	return out.String()
+}
+
+//service servicename on addrs { block }
+///////////////////////////////////////////////////////////
+//                     Service STATEMENT                 //
+///////////////////////////////////////////////////////////
+type ServiceStatement struct {
+	Token   token.Token
+	Name    *Identifier //Service name
+	Addr    string
+	Methods map[string]*FunctionStatement //service's methods
+	Block   *BlockStatement               //mainly used for debugging purpose
+
+	//Doc related
+	Doc         *CommentGroup // associated documentation; or nil
+	SrcEndToken token.Token
+}
+
+func (s *ServiceStatement) Pos() token.Position {
+	return s.Token.Pos
+}
+
+func (s *ServiceStatement) End() token.Position {
+	return s.Block.End()
+}
+
+//Below two methods implements 'Source' interface.
+func (s *ServiceStatement) SrcStart() token.Position {
+	return s.Pos()
+}
+
+func (s *ServiceStatement) SrcEnd() token.Position {
+	ret := s.SrcEndToken.Pos
+	length := utf8.RuneCountInString(s.SrcEndToken.Literal)
+	ret.Offset += length
+	return ret
+}
+
+func (s *ServiceStatement) statementNode()       {}
+func (s *ServiceStatement) TokenLiteral() string { return s.Token.Literal }
+func (s *ServiceStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(s.Token.Literal + " ")
+	out.WriteString(s.Name.String())
+	out.WriteString(" on '")
+	out.WriteString(s.Addr)
+	out.WriteString("' { ")
+	out.WriteString(s.Block.String())
+	out.WriteString(" }")
+
+	return out.String()
+}
+
+func (s *ServiceStatement) Docs() string {
+	var out bytes.Buffer
+
+	out.WriteString(s.Token.Literal + " ")
+	out.WriteString(s.Name.String())
+	out.WriteString(" on '")
+	out.WriteString(s.Addr)
+	out.WriteString("'{ ... }")
 
 	return out.String()
 }

@@ -366,6 +366,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseFunctionStatement()
 	case token.CLASS:
 		return p.parseClassStatement()
+	case token.SERVICE:
+		return p.parseServiceStatement()
 	case token.ENUM:
 		return p.parseEnumStatement()
 	case token.USING:
@@ -3331,6 +3333,137 @@ func (p *Parser) parseAwaitExpression() ast.Expression {
 	}
 
 	return expr
+}
+
+//service name on "addrs" { block }
+func (p *Parser) parseServiceStatement() *ast.ServiceStatement {
+	stmt := &ast.ServiceStatement{
+		Token:   p.curToken,
+		Methods: make(map[string]*ast.FunctionStatement),
+	}
+
+	stmt.Doc = p.lineComment
+
+	if !p.expectPeek(token.IDENT) { //service name
+		return nil
+	}
+	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+	if !p.expectPeek(token.ON) { //service name
+		return nil
+	}
+
+	if !p.expectPeek(token.STRING) { //service address
+		return nil
+	}
+	stmt.Addr = p.curToken.Literal
+	p.nextToken()
+
+	stmt.Block = p.parseServiceBody(stmt)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	stmt.SrcEndToken = p.curToken
+	//fmt.Printf("service statement=%s\n", stmt.String())
+
+	for k, v := range stmt.Methods {
+		annoLen := len(v.Annotations)
+		if annoLen != 1 {
+			msg := fmt.Sprintf("Syntax Error:%v- function(%s)'s annotation count not one", p.curToken.Pos, k)
+			p.errors = append(p.errors, msg)
+			return nil
+		}
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseServiceBody(s *ast.ServiceStatement) *ast.BlockStatement {
+	stmts := &ast.BlockStatement{Token: p.curToken, Statements: []ast.Statement{}}
+
+	p.nextToken() //skip '{'
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmt := p.parseServiceStmt(s)
+		if stmt != nil {
+			stmts.Statements = append(stmts.Statements, stmt)
+		}
+
+		p.nextToken()
+	}
+
+	if p.peekTokenIs(token.EOF) && !p.curTokenIs(token.RBRACE) {
+		pos := p.peekToken.Pos
+		pos.Col += 1
+		msg := fmt.Sprintf("Syntax Error:%v- expected next token to be '}', got EOF instead. Block should end with '}'.", pos)
+		p.errors = append(p.errors, msg)
+	}
+
+	return stmts
+}
+
+func (p *Parser) parseServiceStmt(s *ast.ServiceStatement) ast.Statement {
+	var annos []*ast.AnnotationStmt
+
+	//parse Annotation
+	for p.curTokenIs(token.AT) {
+		anno := &ast.AnnotationStmt{Token: p.curToken, Attributes: map[string]ast.Expression{}}
+
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+		if p.curToken.Literal != "route" {
+			msg := fmt.Sprintf("Syntax Error:%v- expected token to be 'route', got '%s' instead", p.curToken.Pos, p.curToken.Literal)
+			p.errors = append(p.errors, msg)
+			return nil
+		}
+		anno.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		if p.peekTokenIs(token.LPAREN) {
+			p.nextToken()
+		}
+
+		for {
+			if !p.expectPeek(token.IDENT) {
+				return nil
+			}
+			key := p.curToken.Literal
+
+			if !p.expectPeek(token.ASSIGN) {
+				return nil
+			}
+			p.nextToken()
+			value := p.parseExpression(LOWEST)
+			anno.Attributes[key] = value
+			p.nextToken()
+			if !p.curTokenIs(token.COMMA) {
+				break
+			}
+		}
+
+		if !p.curTokenIs(token.RPAREN) {
+			msg := fmt.Sprintf("Syntax Error:%v- expected token to be ')', got '%s' instead", p.curToken.Pos, p.curToken.Type)
+			p.errors = append(p.errors, msg)
+			return nil
+		}
+
+		p.nextToken()
+		annos = append(annos, anno)
+	} //end for
+
+	if p.curToken.Type != token.FUNCTION {
+		msg := fmt.Sprintf("Syntax Error:%v- expected token to be 'fn', got %s instead.", p.curToken.Pos, p.curToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	r := p.parseFunctionStatement().(*ast.FunctionStatement)
+	r.Annotations = annos
+	r.IsServiceAnno = true
+	s.Methods[r.Name.Value] = r
+
+	return r
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
