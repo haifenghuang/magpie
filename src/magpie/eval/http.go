@@ -735,7 +735,7 @@ func (h *HttpResponseWriter) WriteJson(line string, args ...Object) Object {
 
 	var statusCodeObj *Integer
 	if len(args) == 2 {
-		statusCodeObj, ok = args[0].(*Integer)
+		statusCodeObj, ok = args[1].(*Integer)
 		if !ok {
 			panic(NewError(line, PARAMTYPEERROR, "second", "writeHeader", "*Integer", args[1].Type()))
 		}
