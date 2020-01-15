@@ -48,7 +48,7 @@ var mux sync.Mutex
 //REPL with color support
 var REPLColor bool
 
-const ServiceHint = "* Running on %s\n"
+const ServiceHint = "* Running on %s (Press CTRL+C to quit)\n"
 
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
@@ -5219,7 +5219,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			fnObj := evalFunctionLiteral(fl, innerScope)
 			letVar := assignExp.Name.(*ast.Identifier).Value
 			tmpLinq = tmpLinq.Let(line, innerScope, fnObj, NewString(letVar)).(*LinqObj)
-			
+
 		case *ast.FromExpr: // from_clause : FROM identifier IN expression
 			innerFrom := clause
 			tmpLinq = tmpLinq.FromInner(line, innerScope, NewString(innerFrom.Var)).(*LinqObj)
@@ -5311,7 +5311,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 		elementSelector := evalFunctionLiteral(elementFuncLiteral, innerScope)
 		return tmpLinq.GroupBy2(line, innerScope, keySelector, elementSelector)
 	}
-	
+
 	return NIL
 }
 

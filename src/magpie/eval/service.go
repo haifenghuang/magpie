@@ -24,6 +24,7 @@ const (
 type ServiceObj struct {
 	Addr   string
 	Router *Router
+	Route *Route
 }
 
 func NewService(addr string) Object {
@@ -92,7 +93,7 @@ func (s *ServiceObj) HandleFunc(line string, scope *Scope, args ...Object) Objec
 		panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
 	}
 
-	s.Router.HandleFunc(pattern.String, func(w http.ResponseWriter, r *http.Request) {
+	s.Route = s.Router.HandleFunc(pattern.String, func(w http.ResponseWriter, r *http.Request) {
 		ServeService(line, scope, block, w, r)
 	})
 
@@ -114,7 +115,40 @@ func ServeService(line string, scope *Scope, f *Function, w http.ResponseWriter,
 	}
 	s.Set("vars", hash)
 
-	Eval(f.Literal.Body, s)
+	fr := Eval(f.Literal.Body, s) //fr: function result
+	if fr.Type() == NIL_OBJ {
+		return
+	}
+
+	if r, ok := fr.(*ReturnValue); ok {
+		rvs := r.Values
+		if len(rvs) == 1 { // one return value
+			rv := rvs[0]
+			switch rv.(type) {
+			case *Integer:
+				iObj := rv.(*Integer)
+				w.WriteHeader(int(iObj.Int64))
+			case *Hash:
+				hObj := rv.(*Hash)
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.WriteHeader(http.StatusOK)
+				res, err := hObj.MarshalJSON()
+				if err == nil { // no error
+					w.Write(res)
+				}
+			}
+		} else if len(rvs) == 2 {
+			hObj := rvs[0].(*Hash)
+			iObj := rvs[0].(*Integer)
+
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(int(iObj.Int64))
+			res, err := hObj.MarshalJSON()
+			if err == nil { // no error
+				w.Write(res)
+			}
+		}
+	}
 }
 
 func (s *ServiceObj) Methods(line string, args ...Object) Object {
@@ -128,7 +162,7 @@ func (s *ServiceObj) Methods(line string, args ...Object) Object {
 	}
 
 	if len(tmpArr) > 0 {
-		s.Router.Methods(tmpArr...)
+		s.Route.Methods(tmpArr...)
 	}
 
 	return NIL
@@ -144,7 +178,7 @@ func (s *ServiceObj) Host(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "host", "*String", args[0].Type()))
 	}
 
-	s.Router.Host(hostObj.String)
+	s.Route.Host(hostObj.String)
 
 	return NIL
 }
@@ -159,7 +193,7 @@ func (s *ServiceObj) Schemes(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "schemes", "*String", args[0].Type()))
 	}
 
-	s.Router.Schemes(schemesObj.String)
+	s.Route.Schemes(schemesObj.String)
 
 	return NIL
 }
@@ -178,7 +212,7 @@ func (s *ServiceObj) Headers(line string, args ...Object) Object {
 		pair, _ := headersObj.Pairs[hk]
 		k := pair.Key.(*String).String
 		v := pair.Value.(*String).String
-		s.Router.Headers(k, v)
+		s.Route.Headers(k, v)
 	}
 
 	return NIL
@@ -198,7 +232,7 @@ func (s *ServiceObj) Queries(line string, args ...Object) Object {
 		pair, _ := queriesObj.Pairs[hk]
 		k := pair.Key.(*String).String
 		v := pair.Value.(*String).String
-		s.Router.Queries(k, v)
+		s.Route.Queries(k, v)
 	}
 
 	return NIL
@@ -1957,8 +1991,10 @@ func getAllMethodsForRoute(r *Router, req *http.Request) ([]string, error) {
 	return allMethods, nil
 }
 
+// Below code will cause panic(mainly request body handling)
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		//fmt.Printf("* %-7s %s\n", req.Method, req.URL.Path)
 		fmt.Printf("Request url: %s\n", req.URL)
 
 		fmt.Println("Headers:")
@@ -1970,12 +2006,17 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		fmt.Println("Body:")
 		b, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			fmt.Println("ERR: ", err)
+			fmt.Printf("\tBody Read ERR: %s", err)
 			return
 		}
-		fmt.Printf("%s\n\n\n", b)
-		defer req.Body.Close()
+		if len(b) > 0 {
+			fmt.Printf("%s\n\n\n", b)
+		} else {
+			fmt.Printf("\t<NONE>\n\n\n")
+		}
 
+		//must resume the body, or else maybe panic
+ 		req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
 		next.ServeHTTP(w, req)
 	})
 }
