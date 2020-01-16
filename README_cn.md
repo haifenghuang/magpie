@@ -33,6 +33,7 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 * 使用Go语言的方法(RegisterFunctions与RegisterVars)
 * 语法高亮REPL
 * 文档自动生成工具`mdoc`
+* 集成服务(service)处理
 
 ## 举例1(Linq)
 
@@ -111,6 +112,7 @@ Linq.TestComplexLinq()
 ```csharp
 //service Hello on "0.0.0.0:8090" {
 service Hello on "0.0.0.0:8090:debug" { //':debug': for debugging request
+  //'@route'中，你可以使用'url(必须), methods, host, schemes, headers, queries'
   @route(url="/authentication/login", methods=["POST"])
   fn login(writer, request) {
     //writer.writeJson({ sessionId: "3d5bd2cA15ef047689" })
@@ -722,7 +724,7 @@ using (infile = newFile("./file.demo", "r")) {
    Decimal模块基于shopspring的[decimal](https://github.com/shopspring/decimal)。
 
 * gorilla:
-   Service模块基于gorilla的[mux](https://github.com/gorilla/mux)
+   Service模块基于gorilla的[mux](https://github.com/gorilla/mux)。
 
 ## 安装
 

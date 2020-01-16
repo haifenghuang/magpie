@@ -5344,7 +5344,7 @@ func evalAwaitExpression(a *ast.AwaitExpr, scope *Scope) Object {
 }
 
 func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
-	//note: map's is not important
+	//note: map's value is not important
 	var routeMap = map[string]bool{
 		"url":     true,
 		"methods": true,

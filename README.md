@@ -38,6 +38,7 @@ Complete language tutorial can be found in [docs](docs)
 * Using method of Go Package(RegisterFunctions and RegisterVars)
 * Syntax-highlight REPL
 * Doc-generation tool `mdoc`
+* Integrated services processing
 
 ## Example1(Linq)
 
@@ -116,6 +117,7 @@ Linq.TestComplexLinq()
 ```csharp
 //service Hello on "0.0.0.0:8090" {
 service Hello on "0.0.0.0:8090:debug" { //':debug': for debugging request
+  //In '@route', you could use 'url(must), methods, host, schemes, headers, queries'
   @route(url="/authentication/login", methods=["POST"])
   fn login(writer, request) {
     //writer.writeJson({ sessionId: "3d5bd2cA15ef047689" })
