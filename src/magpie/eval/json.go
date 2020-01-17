@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	_ "fmt"
+	"io/ioutil"
+	"os"
 	_ "reflect"
 	"unicode/utf8"
 )
 
 const (
-	JSON_OBJ = "JSON_OBJ"
+	JSON_OBJ  = "JSON_OBJ"
 	json_name = "json"
 )
 
@@ -34,6 +36,12 @@ func (j *Json) CallMethod(line string, scope *Scope, method string, args ...Obje
 		return j.UnMarshal(line, args...)
 	case "indent":
 		return j.Indent(line, args...)
+	case "read": // read from a string
+		return j.Read(line, args...)
+	case "readFile":
+		return j.ReadFile(line, args...)
+	case "writeFile":
+		return j.WriteFile(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, j.Type()))
 }
@@ -175,4 +183,63 @@ func (j *Json) Indent(line string, args ...Object) Object {
 		return NewNil(err.Error())
 	}
 	return NewString(out.String())
+}
+
+func (j *Json) Read(line string, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	strObj, ok := args[0].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*String", args[0].Type()))
+	}
+
+	return j.UnMarshal(line, strObj)
+}
+
+func (j *Json) ReadFile(line string, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	strObj, ok := args[0].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type()))
+	}
+
+	byteValue, err := ioutil.ReadFile(strObj.String)
+	if err != nil {
+		return NewNil(err.Error())
+	}
+
+	return j.UnMarshal(line, NewString(string(byteValue)))
+}
+
+func (j *Json) WriteFile(line string, args ...Object) Object {
+	if len(args) != 2 && len(args) != 3 {
+		panic(NewError(line, ARGUMENTERROR, "2|3", len(args)))
+	}
+
+	fileNameObj, ok := args[0].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "writeFile", "*String", args[0].Type()))
+	}
+
+	permObj, ok := args[2].(*Integer)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "third", "writeFile", "*Integer", args[2].Type()))
+	}
+
+	v := j.Marshal(line, args[1])
+	if v.Type() == NIL_OBJ {
+		return v
+	}
+
+	err := ioutil.WriteFile(fileNameObj.String, []byte(v.(*String).String), os.FileMode(permObj.Int64))
+	if err != nil {
+		return NewFalseObj(err.Error())
+	}
+
+	return TRUE
 }
