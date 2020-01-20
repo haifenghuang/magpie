@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"magpie/ast"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 )
 var (
@@ -76,6 +78,8 @@ func (h *Hash) CallMethod(line string, scope *Scope, method string, args ...Obje
 		return h.Filter(line, scope, args...)
 	case "get":
 		return h.Get(line, args...)
+	case "getPath":
+		return h.GetPath(line, args...)
 	case "keys":
 		return h.Keys(line, args...)
 	case "len":
@@ -183,6 +187,136 @@ func (h *Hash) Get(line string, args ...Object) Object {
 		return hashPair.Value
 	}
 	return NIL
+}
+
+/*
+    Code copied from "go-json-map" with modifications
+
+    document = {
+        one: {
+            "two": {
+                "three": [1, 2, 3,]
+            },
+            "four": {
+                "five": [ 11, 22, 33,]
+            },
+        },
+    }
+	prop = document.getPath("one.two.three[0]")
+	println(prop) // prop => 1
+
+	prop= document.getPath("one.two.three")
+	println(prop) // prop => [1, 2, 3]
+*/
+func (h *Hash) GetPath(line string, args ...Object) Object {
+	if len(args) != 1 && len(args) != 2 {
+		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+	}
+
+	pathObj, ok := args[0].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "getPath", "*String", args[0].Type()))
+	}
+
+	separator := "."
+	if len(args) == 2 {
+		sepObj, ok := args[1].(*String)
+		if !ok {
+			panic(NewError(line, PARAMTYPEERROR, "second", "getPath", "*String", args[1].Type()))
+		}
+		separator = sepObj.String
+	}
+
+	data := make(map[HashKey]Object)
+	for _, hk := range h.Order { //hk:hash key
+		pair, _ := h.Pairs[hk]
+		data[hk] = pair.Value
+	}
+
+	path := pathObj.String
+	err := fmt.Errorf("Property %s does not exist", path)
+	if len(path) == 0 {
+		path = separator
+	}
+
+	levels := strings.Split(path, separator)
+	if len(levels) > 0 && path != separator {
+		path_level_one := levels[0]
+		// If we have a level in path_level_one
+
+		re := regexp.MustCompile(`(\w+[\_]?[\-]?)+\[\d+\]{1}`)
+		if matched := re.FindString(path_level_one); len(matched) > 0 {
+			property_re := regexp.MustCompile(`(\w+[\_]?[\-]?)+`)
+			index_re := regexp.MustCompile(`\[\d+\]{1}`)
+
+			// Get property
+			property := property_re.FindString(path_level_one)
+
+			// Get index
+			index_found := index_re.FindString(path_level_one)
+
+			// If index > 0 - check if this property is array
+			if len(index_found) > 0 {
+				if len(property) > 0 {
+					path_level_one = property
+				}
+				index_found = strings.Trim(index_found, "[]")
+				if index, err := strconv.Atoi(index_found); err == nil {
+					hk := NewString(property).HashKey()
+					if v, ok := data[hk]; ok {
+						if v.Type() == ARRAY_OBJ {
+							arrLenObj := v.(*Array).Len(line)
+							arrLen := arrLenObj.(*Integer).Int64
+							if index >= 0 && int64(index) <  arrLen {
+								value := v.(*Array).Get(line, NewInteger(int64(index)))
+								data[hk] = value
+							} else {
+								err = fmt.Errorf("%s: Index out of bounds(0, %d). got index %d", property, arrLen - 1, index)
+								return NewNil(err.Error())
+							}
+						} else {
+							err = fmt.Errorf("%s: is not an array", property)
+							return NewNil(err.Error())
+						}
+					} else {
+						err = fmt.Errorf("Property %s does not exist", property)
+						return NewNil(err.Error())
+					}
+				} else {
+					err = fmt.Errorf("%s must be of type %s", fmt.Sprintf("%s[%s]", property, index_found), "number")
+					return NewNil(err.Error())
+				}
+			}
+		}
+
+		if len(levels[1:]) >= 1 {
+			hk := NewString(path_level_one).HashKey()
+			if level_one_value, ok := data[hk]; ok {
+				if level_one_value != nil {
+					switch level_one_value.Type() {
+					case HASH_OBJ:
+						tmpHash := level_one_value.(*Hash)
+						p := strings.Join(levels[1:], separator)
+						return tmpHash.GetPath(line, NewString(p), NewString(separator))
+					default:
+						// pass
+					}
+				}
+			} else {
+				err := fmt.Errorf("Property %s does not exist", path_level_one)
+				return NewNil(err.Error())
+			}
+		} else {
+			hk := NewString(path_level_one).HashKey()
+			if v, ok := data[hk]; ok {
+				return v
+			}
+		}
+	} else if path == separator {
+		return h
+	}
+
+	return NewNil(err.Error())
 }
 
 func (h *Hash) Keys(line string, args ...Object) Object {
