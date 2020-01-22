@@ -11,7 +11,7 @@ doc = {
 }
 
 prop = doc.getPath("one.two.three[2]")
-println(prop) // result => 1
+println(prop) // result => 3
 
 prop= doc.getPath("one.two.three")
 println(prop) // result => [1, 2, 3]

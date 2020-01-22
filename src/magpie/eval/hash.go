@@ -234,7 +234,7 @@ func (h *Hash) GetPath(line string, args ...Object) Object {
 	}
 
 	path := pathObj.String
-	err := fmt.Errorf("Property %s does not exist", path)
+	err := fmt.Errorf("Property '%s' does not exist", path)
 	if len(path) == 0 {
 		path = separator
 	}
@@ -279,7 +279,7 @@ func (h *Hash) GetPath(line string, args ...Object) Object {
 							return NewNil(err.Error())
 						}
 					} else {
-						err = fmt.Errorf("Property %s does not exist", property)
+						err = fmt.Errorf("Property '%s' does not exist", property)
 						return NewNil(err.Error())
 					}
 				} else {
@@ -303,7 +303,7 @@ func (h *Hash) GetPath(line string, args ...Object) Object {
 					}
 				}
 			} else {
-				err := fmt.Errorf("Property %s does not exist", path_level_one)
+				err := fmt.Errorf("Property '%s' does not exist", path_level_one)
 				return NewNil(err.Error())
 			}
 		} else {
