@@ -934,38 +934,18 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 func (p *Parser) parseAssignExpression(name ast.Expression) ast.Expression {
 	e := &ast.AssignExpression{Token: p.curToken}
 
-	if n, ok := name.(*ast.Identifier); ok {
-		e.Name = n
-	} else if call, ok := name.(*ast.MethodCallExpression); ok { //might be 'includeModule.a = xxx' or 'aHashObj.key = value'
-		//why not using 'call.String()' directly?
-		//because in the ast code, we may change the 'call.String()'
-		//to include a trailing space for debugging readability.
-		tmpValue := strings.TrimSpace(call.String())
-		e.Name = &ast.Identifier{Token: p.curToken, Value: tmpValue}
-		//p.nextToken()
-		//e.Value = p.parseExpression(LOWEST)
-		//return e
-	} else if indexExp, ok := name.(*ast.IndexExpression); ok {
-		// IndexExpression(Subscript)'s left expression should be an identifier.
-		switch indexExp.Left.(type) {
-		case *ast.Identifier:
-			e.Name = indexExp
-		default:
-			msg := fmt.Sprintf("Syntax Error:%v- Index assignment expects an identifier", indexExp.Left.Pos())
-			p.errors = append(p.errors, msg)
-			return e
-		}
-//	} else if tupleExp, ok := name.(*ast.TupleLiteral); ok {
-//		e.Name = tupleExp
-//	} else if callExp, ok := name.(*ast.CallExpression); ok {
-//		//convert CallExpression to TupleLiteral
-//		e.Name = &ast.TupleLiteral{Token: p.curToken, Members: callExp.Arguments}
-	}else {
-		msg := fmt.Sprintf("Syntax Error:%v- expected assign token to be an identifier, got %s instead", name.Pos(), name.TokenLiteral())
-		p.errors = append(p.errors, msg)
-		return e
-	}
+	// if n, ok := name.(*ast.Identifier); ok { //e.g. a = 10
+	// 	e.Name = n
+	// } else if call, ok := name.(*ast.MethodCallExpression); ok { //might be 'includeModule.a = xxx' or 'aHashObj.key = value'
+	// 	e.Name = call
+	// } else if indexExp, ok := name.(*ast.IndexExpression); ok {
+	// 	//e.g.
+	// 	//    doc = {"one": {"two": {"three": [1, 2, 3,] }}}
+	// 	//    doc["one"]["two"]["three"][2] = 44
+	// 	e.Name = indexExp
+	// }
 
+	e.Name = name
 	p.nextToken()
 	e.Value = p.parseExpression(LOWEST)
 

@@ -899,6 +899,41 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 	}
 
 	if strings.Contains(a.Name.String(), ".") {
+		switch o := a.Name.(type) {
+		case *ast.MethodCallExpression:
+			obj := Eval(o.Object, scope)
+			if obj.Type() == ERROR_OBJ {
+				return obj
+			}
+
+			switch m := obj.(type) {
+			case *Hash:
+				switch c := o.Call.(type) {
+				case *ast.Identifier:
+					//e.g.
+					//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+					//doc.one.two.three = 44
+					m.Push(a.Pos().Sline(), NewString(c.Value), val)
+					return
+				case *ast.IndexExpression:
+					//e.g.
+					//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+					//doc.one.two.three[2] = 44
+					leftVal := m.Get(a.Pos().Sline(), NewString(c.Left.String()))
+					indexVal := Eval(c.Index, scope)
+					switch v := leftVal.(type) {
+					case *Hash:
+						v.Push(a.Pos().Sline(), indexVal, val)
+					case *Array:
+						v.Set(a.Pos().Sline(), indexVal, val)
+					case *Tuple:
+						str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
+						panic(NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type()))
+					}
+					return NIL
+				}
+			}
+		}
 		var aObj Object
 		var ok bool
 
@@ -1040,13 +1075,31 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 	case *ast.Identifier:
 		name = nodeType.Value
 	case *ast.IndexExpression:
-		name = nodeType.Left.(*ast.Identifier).Value
+		switch nodeType.Left.(type) {
+		case *ast.Identifier:
+			name = nodeType.Left.(*ast.Identifier).Value
 
-		//check if it's a class indexer assignment, e.g. 'clsObj[index] = xxx'
-		if aObj, ok := scope.Get(name); ok {
-			if aObj.Type() == INSTANCE_OBJ {
-				return evalClassIndexerAssignExpression(a, aObj, nodeType, val, scope)
+			//check if it's a class indexer assignment, e.g. 'clsObj[index] = xxx'
+			if aObj, ok := scope.Get(name); ok {
+				if aObj.Type() == INSTANCE_OBJ {
+					return evalClassIndexerAssignExpression(a, aObj, nodeType, val, scope)
+				}
 			}
+		case *ast.IndexExpression:
+			leftVal := Eval(nodeType.Left, scope)
+			indexVal := Eval(nodeType.Index, scope)
+			//fmt.Printf("leftVal.Value=%v, leftVal.Type=%T, leftVal=%s\n", leftVal, leftVal, leftVal.Inspect())
+			//fmt.Printf("indexVal.Value=%v, indexVal.Type=%T, indexVal=%s\n", indexVal, indexVal, indexVal.Inspect())
+			switch v := leftVal.(type) {
+			case *Hash:
+				v.Push(a.Pos().Sline(), indexVal, val)
+			case *Array:
+				v.Set(a.Pos().Sline(), indexVal, val)
+			case *Tuple:
+				str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
+				panic(NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type()))
+			}
+			return
 		}
 	}
 
@@ -3975,6 +4028,21 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			o.Function = hashPair.Value.(*Function).Literal
 			//return evalFunctionCall(o, scope)   This is a bug: not 'scope'
 			return evalFunctionCall(o, hashPair.Value.(*Function).Scope) //should be Function's scope
+		case *ast.IndexExpression:
+			//e.g.:
+			//doc = {"one": {"two": { "three": [1, 2, 3,] }}}
+			//printf("doc.one.two.three[2]=%v\n", doc.one.two.three[2])
+			leftVal := m.Get(call.Call.Pos().Sline(), NewString(o.Left.String()))
+			indexVal := Eval(o.Index, scope)
+			switch v := leftVal.(type) {
+			case *Hash:
+				return leftVal
+			case *Array:
+				return v.Get(call.Call.Pos().Sline(), indexVal)
+			case *Tuple:
+				return v.Get(call.Call.Pos().Sline(), indexVal)
+			}
+			return NIL
 		}
 	case *ObjectInstance:
 		instanceObj := m
