@@ -30,7 +30,7 @@ Complete language tutorial can be found in [docs](docs)
 * First class function
 * function with Variadic parameters and default values
 * function with multiple return values
-* int, uint, float, bool, array, tuple, hash(all support json marshal & unmarshal, all can be extened)
+* int, uint, float, bool, array, tuple, hash(all support json marshal & unmarshal, all can be extended)
 * try-catch-finally exception handling
 * Optional Type support(Java 8 like)
 * using statment(C# like)
@@ -316,6 +316,18 @@ hs = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7}
 for k, v in hs where v % 2 == 0 {
     println('{k} : {v}')
 }
+
+doc = {
+    "one": {
+        "two":  { "three": [1, 2, 3], "six":(1,2,3)},
+        "four": { "five":  [11, 22, 33]},
+    },
+}
+doc["one"]["two"]["three"][2] = 44
+printf("doc[one][two][three][2]=%v\n", doc["one"]["two"]["three"][2])
+
+doc.one.four.five = 4
+printf("doc.one.four.five=%v\n", doc.one.four.five)
 ```
 
 ### Tuple

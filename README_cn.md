@@ -324,6 +324,18 @@ hs = {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7}
 for k, v in hs where v % 2 == 0 {
     println('{k} : {v}')
 }
+
+doc = {
+    "one": {
+        "two":  { "three": [1, 2, 3], "six":(1,2,3)},
+        "four": { "five":  [11, 22, 33]},
+    },
+}
+doc["one"]["two"]["three"][2] = 44
+printf("doc[one][two][three][2]=%v\n", doc["one"]["two"]["three"][2])
+
+doc.one.four.five = 4
+printf("doc.one.four.five=%v\n", doc.one.four.five)
 ```
 
 ### 元祖
