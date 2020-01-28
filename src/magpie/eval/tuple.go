@@ -46,6 +46,8 @@ func (t *Tuple) CallMethod(line string, scope *Scope, method string, args ...Obj
 	switch method {
 	case "count":
 		return t.Count(line, args...)
+	case "get":
+		return t.Get(line, args...)
 	case "filter", "grep":
 		return t.Filter(line, scope, args...)
 	case "index":
@@ -113,6 +115,22 @@ func (t *Tuple) Count(line string, args ...Object) Object {
 		}
 	}
 	return NewInteger(int64(count))
+}
+
+func (t *Tuple) Get(line string, args ...Object) Object {
+	if len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	idxObj, ok := args[0].(*Integer)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type()))
+	}
+
+	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(t.Members)) {
+		panic(NewError(line, INDEXERROR, idxObj.Int64))
+	}
+	return t.Members[idxObj.Int64]
 }
 
 func (t *Tuple) Filter(line string, scope *Scope, args ...Object) Object {

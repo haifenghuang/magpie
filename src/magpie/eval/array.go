@@ -39,8 +39,10 @@ func (a *Array) CallMethod(line string, scope *Scope, method string, args ...Obj
 	switch method {
 	case "count":
 		return a.Count(line, args...)
-	case "Get":
+	case "get":
 		return a.Get(line, args...)
+	case "set":
+		return a.Set(line, args...)
 	case "includes":
 		return a.Includes(line, args...)
 	case "filter", "grep":
@@ -138,9 +140,27 @@ func (a *Array) Get(line string, args ...Object) Object {
 	}
 
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
-		return NIL
+		panic(NewError(line, INDEXERROR, idxObj.Int64))
 	}
 	return a.Members[idxObj.Int64]
+}
+
+func (a *Array) Set(line string, args ...Object) Object {
+	if len(args) != 2 {
+		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+	}
+
+	idxObj, ok := args[0].(*Integer)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type()))
+	}
+
+	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
+		panic(NewError(line, INDEXERROR, idxObj.Int64))
+	}
+
+	a.Members[idxObj.Int64] = args[1]
+	return NIL
 }
 
 func (a *Array) Includes(line string, args ...Object) Object {
