@@ -20,7 +20,7 @@ var magpieKeywords = []string{
 	"enum", "defer", "nil","class", "new", "this", "parent", "property", 
 	"get", "set", "static", "public", "private", "protected", "interface", "default",
 	"from", "select", "group", "into", "orderby", "join", "on", "equals", "by", "ascending", "descending",
-	"async", "await",
+	"async", "await", "service",
 }
 
 //Note: we should put the longest operators first.

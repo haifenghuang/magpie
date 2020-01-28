@@ -92,6 +92,7 @@ var keywords = map[string]int{
 	"descending":1,
 	"async":1,
 	"await":1,
+	"service":1,
 }
 
 const (
