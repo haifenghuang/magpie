@@ -5,16 +5,16 @@ fn Person(name, age) {
     self.age = age
 
     //You could also use 'self.getName = fn() { return self.name }'
-    self.getName = () => return self.name
-    self.getAge  = () => return self.age
-    self.message = () => return self.name + ", aged " + str(self.age)
+    self.getName = () => self.name
+    self.getAge  = () => self.age
+    self.message = () => self.name + ", aged " + str(self.age)
 
     self.sets = fn(newName, newAge) {
         self.name = newName
         self.age = newAge
     }
 
-    return self
+    self
 }
 
 p = Person("Bob", 40)
