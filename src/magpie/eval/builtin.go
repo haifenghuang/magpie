@@ -1412,6 +1412,7 @@ func init() {
 		"ord":     ordBuiltin(),
 		"print":   printBuiltin(),
 		"println": printlnBuiltin(),
+		"say":     printlnBuiltin(),
 		"printf":  printfBuiltin(),
 		"type":    typeBuiltin(),
 		"chan":    chanBuiltin(),
