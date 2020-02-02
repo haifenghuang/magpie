@@ -641,6 +641,9 @@ if "abc 123	mnj" =~ ``\d+\t`` {
 ```swift
 // Test pipe operator(|>)
 x = ["hello", "world"] |> strings.join(" ") |> strings.upper() |> strings.lower() |> strings.title()
+
+//same as above
+//x = ["hello", "world"] |> strings.join(" ") |> strings.upper |> strings.lower |> strings.title
 printf("x=<%s>\n", x)
 ```
 

@@ -4831,6 +4831,14 @@ func evalPipeExpression(p *ast.Pipe, scope *Scope) Object {
 	case *ast.MethodCallExpression:
 		// Prepend the left-hand interpreted value
 		// to the function arguments.
+		switch rightFunc.Call.(type) {
+		case *ast.Identifier:
+			//e.g.
+			//x = ["hello", "world"] |> strings.upper    : rightFunc.Call.(type) == *ast.Identifier
+			//x = ["hello", "world"] |> strings.upper()  : rightFunc.Call.(type) == *ast.CallExpression
+			//so here we convert *ast.Identifier to * ast.CallExpression
+			rightFunc.Call = &ast.CallExpression{Token: p.Token, Function: rightFunc.Call}
+		}
 		rightFunc.Call.(*ast.CallExpression).Arguments = append([]ast.Expression{argument}, rightFunc.Call.(*ast.CallExpression).Arguments...)
 		return Eval(rightFunc, scope)
 	case *ast.CallExpression:

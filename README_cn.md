@@ -643,6 +643,9 @@ if "abc 123	mnj" =~ ``\d+\t`` {
 ```swift
 // 管道操作符(|>)
 x = ["hello", "world"] |> strings.join(" ") |> strings.upper() |> strings.lower() |> strings.title()
+
+//same as above
+//x = ["hello", "world"] |> strings.join(" ") |> strings.upper |> strings.lower |> strings.title
 printf("x=<%s>\n", x)
 ```
 
