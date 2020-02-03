@@ -150,7 +150,7 @@ service Hello on "0.0.0.0:8090:debug" { //':debug': for debugging request
 
 ### 基本
 
-```swift
+```csharp
 s1 = "hello, 黄"       // strings are UTF-8 encoded
 三 = 3                 // UTF-8 identifier
 i = 20_000_000         // int
@@ -165,14 +165,14 @@ n = nil
 
 ### 常量
 
-```swift
+```csharp
 const PI = 3.14159
 PI = 3.14 //错误
 ```
 
 ### 枚举
 
-```swift
+```csharp
 LogOption = enum {
     Ldate         = 1 << 0,
     Ltime         = 1 << 1,
@@ -189,7 +189,7 @@ println(opt)
 
 ### Case-in语句
 
-```swift
+```csharp
 let i = [{"a": 1, "b": 2}, 10]
 let x = [{"a": 1, "b": 2},10]
 case i in {
@@ -210,7 +210,7 @@ case i in {
 
 #### if
 
-```swift
+```csharp
 let a, b = 10, 5
 if (a > b) {
     println("a > b")
@@ -257,7 +257,7 @@ for i in a where i % 2 != 0 {
 
 #### while
 
-```swift
+```csharp
 i = 10
 while (i>3) {
     i--
@@ -267,7 +267,7 @@ while (i>3) {
 
 #### do
 
-```swift
+```csharp
 i = 10
 do {
     i--
@@ -277,7 +277,7 @@ do {
 
 #### case-in
 
-```swift
+```csharp
 let i = [{"a": 1, "b": 2}, 10]
 let x = [{"a": 1, "b": 2},10]
 case i in {
@@ -290,7 +290,7 @@ case i in {
 
 ### 数组
 
-```swift
+```csharp
 a = [1,2,3,4]
 for i in a where i % 2 != 0 {
     println(i)
@@ -308,7 +308,7 @@ println("Reversed Array = ", revArr)
 
 ### 哈希
 
-```swift
+```csharp
 hashObj = {
     12     : "twelve",
     true   : 1,
@@ -340,7 +340,7 @@ printf("doc.one.four.five=%v\n", doc.one.four.five)
 
 ### 元祖
 
-```swift
+```csharp
 t = () //等价于't = tuple()'
 
 for i in (1,2,3) {
@@ -348,9 +348,47 @@ for i in (1,2,3) {
 }
 ```
 
+### 转换
+
+```csharp
+// convert to string using str() function
+x = str(10) // convert 10 to string  
+
+// convert to int using int() function
+x1 = int("10")   // x1 = 10
+x2 = +"10" // same as above
+
+y1 = int("0x10") // y1 = 16
+y2 = +"0x10" // same as above
+
+// convert to float using float() funciton
+x = float("10.2")
+
+// convert to array using array() funciton
+x = array("10") // x = ["10"]
+y = array((1, 2, 3)) // convert tuple to array
+
+// convert to tuple using tuple() funciton
+x = tuple("10") // x = ("10",)
+y = tuple([1, 2, 3]) // convert array to tuple
+
+// convert to hash using hash() function
+x = hash(["name", "jack", "age", 20]) // array->hash: x = {"name" : "jack", "age" : 20}
+y = hash(("name", "jack", "age", 20)) // tuple->hash: x = {"name" : "jack", "age" : 20}
+
+// if the above conversion functions have no arguments, they simply return
+// new corresponding types
+i = int()   // i = 0
+f = float() // f = 0.0
+s = str()   // s = ""
+h = hash()  // h = {}
+a = array() // a = []
+t = tuple() // t = ()
+```
+
 ### 函数
 
-```swift
+```csharp
 //带缺省值和多参数
 add = fn(x, y=5, z=7, args...) {
     w = x + y + z
@@ -376,7 +414,7 @@ let (x, y, c, d) = testReturn(10, 20, 30) // d为nil
 
 你可以使用反引号来执行命令(类似Perl)
 
-```swift
+```csharp
 if (RUNTIME_OS == "linux") {
     var = "~"
     out = `ls -la $var`
@@ -416,7 +454,7 @@ println(result)
 
 #### 简单
 
-```swift
+```csharp
 class Animal {
     let name = ""
     fn init(name) {    //'init'是构造方法
@@ -427,14 +465,14 @@ class Animal {
 
 #### 继承
 
-```swift
+```csharp
 class Dog : Animal { //Dog继承于Animal
 }
 ```
 
 #### 操作符重载
 
-```swift
+```csharp
 class Vector {
     let x = 0;
     let y = 0;
@@ -468,7 +506,7 @@ println(v4.String());
 
 #### 属性(类似c#)
 
-```swift
+```csharp
 class Date {
     let month = 7;  // Backing store
     property Month
@@ -504,7 +542,7 @@ dateObj.getDateInfo()
 
 #### 索引器
 
-```swift
+```csharp
 class IndexedNames
 {
     let namelist = []
@@ -568,7 +606,7 @@ for (i = 0; i < namesObj.size; i++)
 
 Magpie中预定义了下面三个对象: `stdin`, `stdout`, `stderr`。分别代表标准输入，标准输出，标准错误。
 
-```swift
+```csharp
 stdout.writeLine("Hello world")
 //和上面效果一样
 fmt.fprintf(stdout, "Hello world\n")
@@ -583,7 +621,7 @@ stdout << "hello " << "world!" << " How are you?" << endl;
 
 ### 异常处理(try-catch-finally)
 
-```swift
+```csharp
 // 注: 仅支持抛出字符串类型的异常
 let exceptStr = "SUMERROR"
 try {
@@ -606,7 +644,7 @@ finally {
 
 ### 可选类型(类似Java 8)
 
-```swift
+```csharp
 fn safeDivision?(a, b) {
     if (b == 0){
         return optional.empty();
@@ -623,7 +661,7 @@ if (!op1.isPresent()) {
 
 ### 正则表达式
 
-```swift
+```csharp
 //字面量: /pattern/.match(str)
 let regex = /\d+\t/.match("abc 123 mnj")
 if (regex) {
@@ -640,7 +678,7 @@ if "abc 123	mnj" =~ ``\d+\t`` {
 
 ### 管道操作符
 
-```swift
+```csharp
 // 管道操作符(|>)
 x = ["hello", "world"] |> strings.join(" ") |> strings.upper() |> strings.lower() |> strings.title()
 
@@ -651,7 +689,7 @@ printf("x=<%s>\n", x)
 
 ### linq
 
-```swift
+```csharp
 let mm = [1,2,3,4,5,6,7,8,9,10]
 result = linq.from(mm).where(x => x % 2 == 0).select(x => x + 2).toSlice()
 
@@ -661,7 +699,7 @@ println('after result={result}')
 
 ### json模块(序列化与反序列化)
 
-```swift
+```csharp
 let hsJson = {"key1" : 10,
               "key2" : "Hello Json %s %s Module",
               "key3" : 15.8912,
@@ -686,7 +724,7 @@ println(arr1Json)
 
 ### 用户自定义操作符
 
-```swift
+```csharp
 //中缀运算符 '=@'接受两个参数
 fn =@(x, y) {
     return x + y * y
@@ -705,7 +743,7 @@ printf("hh=%d\n", hh) // 结果: hh=-10
 
 ### using语句(类似C#)
 
-```swift
+```csharp
 // 这里不需要调用infile.close()
 using (infile = newFile("./file.demo", "r")) {
     if (infile == nil) {

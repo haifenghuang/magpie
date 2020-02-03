@@ -154,7 +154,7 @@ Below demonstrates some features of the Magpie language:
 
 ### Basic
 
-```swift
+```csharp
 s1 = "hello, 黄"       // strings are UTF-8 encoded
 三 = 3                 // UTF-8 identifier
 i = 20_000_000         // int
@@ -169,14 +169,14 @@ n = nil
 
 ### Const
 
-```swift
+```csharp
 const PI = 3.14159
 PI = 3.14 //error
 ```
 
 ### Enum
 
-```swift
+```csharp
 LogOption = enum {
     Ldate         = 1 << 0,
     Ltime         = 1 << 1,
@@ -201,7 +201,7 @@ println(opt)
 
 #### if
 
-```swift
+```csharp
 //if
 let a, b = 10, 5
 if (a > b) {
@@ -225,7 +225,7 @@ if 9.isOdd() {
 
 #### for
 
-```swift
+```csharp
 i = 9
 for { // forever loop
     i = i + 2
@@ -249,7 +249,7 @@ for i in a where i % 2 != 0 {
 
 #### while
 
-```swift
+```csharp
 i = 10
 while (i>3) {
     i--
@@ -259,7 +259,7 @@ while (i>3) {
 
 #### do
 
-```swift
+```csharp
 i = 10
 do {
     i--
@@ -269,7 +269,7 @@ do {
 
 #### case-in
 
-```swift
+```csharp
 let i = [{"a": 1, "b": 2}, 10]
 let x = [{"a": 1, "b": 2},10]
 case i in {
@@ -282,7 +282,7 @@ case i in {
 
 ### Array
 
-```swift
+```csharp
 a = [1,2,3,4]
 for i in a where i % 2 != 0 {
     println(i)
@@ -300,7 +300,7 @@ println("Reversed Array = ", revArr)
 
 ### Hash
 
-```swift
+```csharp
 hashObj = {
     12     : "twelve",
     true   : 1,
@@ -332,12 +332,49 @@ printf("doc.one.four.five=%v\n", doc.one.four.five)
 
 ### Tuple
 
-```swift
+```csharp
 t = () //same as 't = tuple()'
 
 for i in (1,2,3) {
     println(i)
 }
+```
+### Conversion
+
+```csharp
+// convert to string using str() function
+x = str(10) // convert 10 to string  
+
+// convert to int using int() function
+x1 = int("10")   // x1 = 10
+x2 = +"10" // same as above
+
+y1 = int("0x10") // y1 = 16
+y2 = +"0x10" // same as above
+
+// convert to float using float() funciton
+x = float("10.2")
+
+// convert to array using array() funciton
+x = array("10") // x = ["10"]
+y = array((1, 2, 3)) // convert tuple to array
+
+// convert to tuple using tuple() funciton
+x = tuple("10") // x = ("10",)
+y = tuple([1, 2, 3]) // convert array to tuple
+
+// convert to hash using hash() function
+x = hash(["name", "jack", "age", 20]) // array->hash: x = {"name" : "jack", "age" : 20}
+y = hash(("name", "jack", "age", 20)) // tuple->hash: x = {"name" : "jack", "age" : 20}
+
+// if the above conversion functions have no arguments, they simply return
+// new corresponding types
+i = int()   // i = 0
+f = float() // f = 0.0
+s = str()   // s = ""
+h = hash()  // h = {}
+a = array() // a = []
+t = tuple() // t = ()
 ```
 
 ### Function
@@ -346,7 +383,7 @@ for i in (1,2,3) {
 * Variadic parameters
 * Mutiple return values
 
-```swift
+```csharp
 //Function with default values and variadic parameters
 add = fn(x, y=5, z=7, args...) {
     w = x + y + z
@@ -372,7 +409,7 @@ let (x, y, c, d) = testReturn(10, 20, 30) // d is nil
 
 You could use backtick for command execution(like Perl).
 
-```swift
+```csharp
 if (RUNTIME_OS == "linux") {
     var = "~"
     out = `ls -la $var`
@@ -412,7 +449,7 @@ println(result)
 
 #### Simple
 
-```swift
+```csharp
 class Animal {
     let name = ""
     fn init(name) {    //'init' is the constructor
@@ -423,14 +460,14 @@ class Animal {
 
 #### Inheritance
 
-```swift
+```csharp
 class Dog : Animal { //Dog inherits from Animal
 }
 ```
 
 #### Operator overloading
 
-```swift
+```csharp
 class Vector {
     let x = 0;
     let y = 0;
@@ -464,7 +501,7 @@ println(v4.String());
 
 #### Property(like c#)
 
-```swift
+```csharp
 class Date {
     let month = 7;  // Backing store
     property Month
@@ -500,7 +537,7 @@ dateObj.getDateInfo()
 
 #### Indexer
 
-```swift
+```csharp
 class IndexedNames
 {
     let namelist = []
@@ -565,7 +602,7 @@ for (i = 0; i < namesObj.size; i++)
 There are three predefined object for representing standard input, standard output, standard error.
 They are `stdin`, `stdout`, `stderr`.
 
-```swift
+```csharp
 stdout.writeLine("Hello world")
 //same as above
 fmt.fprintf(stdout, "Hello world\n")
@@ -581,7 +618,7 @@ stdout << "hello " << "world!" << " How are you?" << endl;
 
 ### Exception Handling(try-catch-finally)
 
-```swift
+```csharp
 // Note: Only support throw string type
 let exceptStr = "SUMERROR"
 try {
@@ -604,7 +641,7 @@ finally {
 
 ### Optional Type(Java 8 like)
 
-```swift
+```csharp
 fn safeDivision?(a, b) {
     if (b == 0){
         return optional.empty();
@@ -621,7 +658,7 @@ if (!op1.isPresent()) {
 
 ### Regular expression
 
-```swift
+```csharp
 //literal: /pattern/.match(str)
 let regex = /\d+\t/.match("abc 123 mnj")
 if (regex) {
@@ -638,7 +675,7 @@ if "abc 123	mnj" =~ ``\d+\t`` {
 
 ### Pipe Operator
 
-```swift
+```csharp
 // Test pipe operator(|>)
 x = ["hello", "world"] |> strings.join(" ") |> strings.upper() |> strings.lower() |> strings.title()
 
@@ -649,7 +686,7 @@ printf("x=<%s>\n", x)
 
 ### linq
 
-```swift
+```csharp
 let mm = [1,2,3,4,5,6,7,8,9,10]
 result = linq.from(mm).where(x => x % 2 == 0).select(x => x + 2).toSlice()
 
@@ -659,7 +696,7 @@ println('after result={result}')
 
 ### json module(for json marshal & unmarshal)
 
-```swift
+```csharp
 let hsJson = {"key1" : 10,
               "key2" : "Hello Json %s %s Module",
               "key3" : 15.8912,
@@ -684,7 +721,7 @@ println(arr1Json)
 
 ### User Defined Operator
 
-```swift
+```csharp
 //infix operator '=@' which accept two parameters.
 fn =@(x, y) {
     return x + y * y
@@ -703,7 +740,7 @@ printf("hh=%d\n", hh) // result: hh=-10
 
 ### using statement(C# like)
 
-```swift
+```csharp
 // No need for calling infile.close().
 using (infile = newFile("./file.demo", "r")) {
     if (infile == nil) {
