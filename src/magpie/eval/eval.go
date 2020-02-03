@@ -1542,10 +1542,6 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 			var err error
 
 			var content = right.(*String).String
-			if content[len(content)-1] == 'u' {
-				content = content[:len(content)-1]
-			}
-
 			if strings.HasPrefix(content, "0b") {
 				n, err = strconv.ParseInt(content[2:], 2, 64)
 			} else if strings.HasPrefix(content, "0x") {
@@ -1553,6 +1549,10 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 			} else if strings.HasPrefix(content, "0o") {
 				n, err = strconv.ParseInt(content[2:], 8, 64)
 			} else {
+				if len(content) == 0 {
+					content = "0"
+				}
+
 				n, err = strconv.ParseInt(content, 10, 64)
 				if err != nil {
 					// Check if it is a float
