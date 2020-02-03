@@ -241,8 +241,8 @@ func intBuiltin() *Builtin {
 				var err error
 
 				var content = input.String
-				if content[len(content)-1] == 'u' {
-					content = content[:len(content)-1]
+				if len(content) == 0 {
+					return NewInteger(0)
 				}
 
 				if strings.HasPrefix(content, "0b") {
@@ -293,8 +293,8 @@ func uintBuiltin() *Builtin {
 				var err error
 
 				var content = input.String
-				if input.String[len(input.String)-1] == 'u' {
-					content = input.String[:len(input.String)-1]
+				if len(content) == 0 {
+					return NewUInteger(0)
 				}
 				if strings.HasPrefix(content, "0b") {
 					n, err = strconv.ParseUint(content[2:], 2, 64)
@@ -345,6 +345,9 @@ func floatBuiltin() *Builtin {
 				var err error
 				var k int64
 
+				if len(input.String) == 0 {
+					return NewFloat(0)
+				}
 				if strings.HasPrefix(input.String, "0b") {
 					k, err = strconv.ParseInt(input.String[2:], 2, 64)
 					if err == nil {

@@ -746,8 +746,10 @@ func (i *UInteger) UnmarshalJSON(b []byte) error {
 
 	var err error
 
-	if content[len(content)-1] == 'u' {
-		content = content[:len(content)-1]
+	if len(content) == 0 {
+		i.UInt64 = 0
+		i.Valid = true
+		return nil
 	}
 	if strings.HasPrefix(content, "0b") {
 		i.UInt64, err = strconv.ParseUint(content[2:], 2, 64)
