@@ -81,6 +81,7 @@ class Linq {
         file.close()
     }
 
+    /* Code from https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/let-clause */
     static fn TestComplexLinq() {
         //Data Source
         stringList = [
