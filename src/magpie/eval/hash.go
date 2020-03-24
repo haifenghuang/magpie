@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 )
+
 var (
 	errEOS = errors.New("End of slice")
 )
@@ -26,12 +27,12 @@ type HashPair struct {
 }
 
 type Hash struct {
-	Order  []HashKey
+	Order []HashKey
 	Pairs map[HashKey]HashPair
 }
 
 func NewHash() *Hash {
-	return &Hash{Order:[]HashKey{}, Pairs: make(map[HashKey]HashPair)}
+	return &Hash{Order: []HashKey{}, Pairs: make(map[HashKey]HashPair)}
 }
 
 func (h *Hash) iter() bool { return true }
@@ -267,11 +268,11 @@ func (h *Hash) GetPath(line string, args ...Object) Object {
 						if v.Type() == ARRAY_OBJ {
 							arrLenObj := v.(*Array).Len(line)
 							arrLen := arrLenObj.(*Integer).Int64
-							if index >= 0 && int64(index) <  arrLen {
+							if index >= 0 && int64(index) < arrLen {
 								value := v.(*Array).Get(line, NewInteger(int64(index)))
 								data[hk] = value
 							} else {
-								err = fmt.Errorf("%s: Index out of bounds(0, %d). got index %d", property, arrLen - 1, index)
+								err = fmt.Errorf("%s: Index out of bounds(0, %d). got index %d", property, arrLen-1, index)
 								return NewNil(err.Error())
 							}
 						} else {

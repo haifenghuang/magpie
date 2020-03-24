@@ -8,7 +8,7 @@ import (
 
 type RegEx struct {
 	RegExp *regexp.Regexp
-	Value         string
+	Value  string
 }
 
 func (re *RegEx) Inspect() string  { return re.Value }
@@ -294,7 +294,7 @@ func (re *RegEx) NumSubexp(line string, args ...Object) Object {
 	}
 
 	i := re.RegExp.NumSubexp()
-	
+
 	return NewInteger(int64(i))
 }
 
@@ -405,11 +405,11 @@ func (re *RegEx) UnmarshalJSON(b []byte) error {
 
 /* REGEXP OBJECT */
 const (
-	REGEXP_OBJ = "REGEXP_OBJ"
+	REGEXP_OBJ  = "REGEXP_OBJ"
 	regexp_name = "regexp"
 )
 
-type RegExpObj struct{
+type RegExpObj struct {
 	RegExp *regexp.Regexp
 }
 
@@ -420,7 +420,7 @@ func NewRegExpObj() Object {
 	return ret
 }
 
-func (rex *RegExpObj) Inspect() string  {
+func (rex *RegExpObj) Inspect() string {
 	if rex.RegExp == nil {
 		return "Invalid RegExpObj!"
 	}
@@ -793,7 +793,7 @@ func (rex *RegExpObj) NumSubexp(line string, args ...Object) Object {
 	}
 
 	i := rex.RegExp.NumSubexp()
-	
+
 	return NewInteger(int64(i))
 }
 
@@ -933,7 +933,6 @@ func (rex *RegExpObj) SubexpNames(line string, args ...Object) Object {
 	return ret
 }
 
-
 //ReplaceAllStringFunc()'s callback function
 func replFunc(scope *Scope, f *Function, str string) string {
 	s := NewScope(scope)
@@ -955,7 +954,7 @@ func replFunc(scope *Scope, f *Function, str string) string {
 }
 
 func replaceFirstString(re *regexp.Regexp, srcStr, replStr string) string {
-	src  := []byte(srcStr)
+	src := []byte(srcStr)
 	repl := []byte(replStr)
 
 	if m := re.FindSubmatchIndex(src); m != nil {
@@ -971,4 +970,3 @@ func replaceFirstString(re *regexp.Regexp, srcStr, replStr string) string {
 	copy(out, src)
 	return string(out)
 }
-

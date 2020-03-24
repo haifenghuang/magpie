@@ -28,7 +28,7 @@ const (
 type ServiceObj struct {
 	Addr   string
 	Router *Router
-	Route *Route
+	Route  *Route
 }
 
 func NewService(addr string) Object {
@@ -79,8 +79,8 @@ func (s *ServiceObj) Run(line string, args ...Object) Object {
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler: s.Router,
-    }
+		Handler:      s.Router,
+	}
 
 	// Run our server in a goroutine so that it doesn't block.
 	go func() {
@@ -2058,7 +2058,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		}
 
 		//must resume the body, or else maybe panic
- 		req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
+		req.Body = ioutil.NopCloser(bytes.NewBuffer(b))
 		next.ServeHTTP(w, req)
 	})
 }

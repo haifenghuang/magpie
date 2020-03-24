@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	IOUTIL_OBJ = "IOUTIL_OBJ"
+	IOUTIL_OBJ  = "IOUTIL_OBJ"
 	ioutil_name = "ioutil"
 )
 

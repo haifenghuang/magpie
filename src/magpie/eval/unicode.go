@@ -6,22 +6,21 @@ import (
 
 type unicodeFunc func(rune) bool
 
-var funcMap = map[string]unicodeFunc {
-	"IsControl" : unicode.IsControl,
-	"IsDigit"   : unicode.IsDigit,
-	"IsGraphic" : unicode.IsGraphic,
-	"IsLetter"  : unicode.IsLetter,
-	"IsLower"   : unicode.IsLower,
-	"IsMark"    : unicode.IsMark,
-	"IsNumber"  : unicode.IsNumber,
-	"IsPrint"   : unicode.IsPrint,
-	"IsPunct"   : unicode.IsPunct,
-	"IsSpace"   : unicode.IsSpace,
-	"IsSymbol"  : unicode.IsSymbol,
-	"IsTitle"   : unicode.IsTitle,
-	"IsUpper"   : unicode.IsUpper,
+var funcMap = map[string]unicodeFunc{
+	"IsControl": unicode.IsControl,
+	"IsDigit":   unicode.IsDigit,
+	"IsGraphic": unicode.IsGraphic,
+	"IsLetter":  unicode.IsLetter,
+	"IsLower":   unicode.IsLower,
+	"IsMark":    unicode.IsMark,
+	"IsNumber":  unicode.IsNumber,
+	"IsPrint":   unicode.IsPrint,
+	"IsPunct":   unicode.IsPunct,
+	"IsSpace":   unicode.IsSpace,
+	"IsSymbol":  unicode.IsSymbol,
+	"IsTitle":   unicode.IsTitle,
+	"IsUpper":   unicode.IsUpper,
 }
-
 
 func NewUnicodeObj() *UnicodeObj {
 	ret := &UnicodeObj{}
@@ -31,7 +30,7 @@ func NewUnicodeObj() *UnicodeObj {
 }
 
 const (
-	UNICODE_OBJ = "UNICODE_OBJ"
+	UNICODE_OBJ  = "UNICODE_OBJ"
 	unicode_name = "unicode"
 )
 
@@ -141,5 +140,3 @@ func (u *UnicodeObj) checkFunc(name string, line string, args ...Object) Object 
 
 	return FALSE
 }
-
-

@@ -13,7 +13,7 @@ func NewFlagObj() *FlagObj {
 }
 
 const (
-	FLAG_OBJ = "FLAG_OBJ"
+	FLAG_OBJ  = "FLAG_OBJ"
 	flag_name = "flag"
 )
 

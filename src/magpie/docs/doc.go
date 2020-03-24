@@ -5,9 +5,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"magpie/ast"
 	"net/http"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,17 +19,17 @@ import (
 )
 
 var (
-	regexpType = regexp.MustCompile(`^\{(.+)\}$`)
-	regExample = regexp.MustCompile(`@example[\r\n]([^@]+)@[\r\n]`) //@examples
-	regNote    = regexp.MustCompile(`@note[\r\n]([^@]+)@[\r\n]`)    //@note
-	regWarning = regexp.MustCompile(`@warn[\r\n]([^@]+)@[\r\n]`)    //@warn
+	regexpType            = regexp.MustCompile(`^\{(.+)\}$`)
+	regExample            = regexp.MustCompile(`@example[\r\n]([^@]+)@[\r\n]`) //@examples
+	regNote               = regexp.MustCompile(`@note[\r\n]([^@]+)@[\r\n]`)    //@note
+	regWarning            = regexp.MustCompile(`@warn[\r\n]([^@]+)@[\r\n]`)    //@warn
 	regExpShowSourceBegin = regexp.MustCompile(`(<p>SHOWSOURCE_PLACEHOLDER_LINE_BEGIN(.*?)</p>)`)
 
 	//table of contents
 	toc = `<p><div><a id="toc-button" class="toc-button" onclick="toggle_toc()"><span id="btn-text">&#x25BC;</span>&nbsp;Table of Contents</a><div id="table-of-contents" style="display:none;">`
 
 	//PlaceHolder line, used only in html output.
-	PlaceHolderTOC = "<p>__TOC_PLACEHOLDER_LINE_END__</p>"
+	PlaceHolderTOC           = "<p>__TOC_PLACEHOLDER_LINE_END__</p>"
 	PlaceHolderShowSourceEnd = "<p>__SHOWSOURCE_PLACEHOLDER_LINE_END__</p>"
 	//Line number regexp. Mainly for adding line numbers for code blocks.
 	regLinePlaceHolder = regexp.MustCompile(`</pre></div>[\r\n]<p>__LINENUMBER_PLACEHOLDER_LINE__(\d+)</p>`)
@@ -58,16 +58,16 @@ type File struct {
 /* Classes is the documention for a class */
 type Classes struct {
 	Value *Value
-	Props []*Value     //Properties
-	Lets  []*Value     //Let-statements
+	Props []*Value    //Properties
+	Lets  []*Value    //Let-statements
 	Funcs []*Function //Function
 }
 
 /* Classes is the documention for a function */
 type Function struct {
-	Value *Value
-	Params []*FuncInfo
-	Returns[]*FuncInfo
+	Value   *Value
+	Params  []*FuncInfo
+	Returns []*FuncInfo
 }
 
 //function information(@param/@return/@returns part)
@@ -83,10 +83,10 @@ type Value struct {
 	Doc  string //comment
 	Text string //declaration text
 
-	ShowSrc int //should source or not, 1: show
-	Src  string //Source code text
-	SrcLines int //number of lines of `Src`.
-	GenHTML int //1: if generate html-style document
+	ShowSrc  int    //should source or not, 1: show
+	Src      string //Source code text
+	SrcLines int    //number of lines of `Src`.
+	GenHTML  int    //1: if generate html-style document
 }
 
 // Request for github REST API
@@ -99,10 +99,10 @@ type Request struct {
 
 func New(name string, program *ast.Program) *File {
 	var classes []*ast.ClassStatement
-	var enums   []*ast.EnumStatement
-	var lets    []*ast.LetStatement
-	var consts  []*ast.ConstStatement
-	var funcs   []*ast.FunctionStatement
+	var enums []*ast.EnumStatement
+	var lets []*ast.LetStatement
+	var consts []*ast.ConstStatement
+	var funcs []*ast.FunctionStatement
 
 	fh, _ := os.Open(name)
 	defer fh.Close()
@@ -174,8 +174,8 @@ func normalize(doc string) string {
 // HtmlDocGen generates html documentation from a markdown file.
 func HtmlDocGen(content string, file *File) string {
 	buf, err := json.Marshal(Request{
-		Text:string(content),
-		Mode: "gfm",
+		Text:    string(content),
+		Mode:    "gfm",
 		Context: "github/gollum",
 	})
 	if err != nil {
@@ -183,7 +183,7 @@ func HtmlDocGen(content string, file *File) string {
 		return ""
 	}
 
-	resp, err := http.Post("https://api.github.com/markdown","application/json", bytes.NewBuffer(buf))
+	resp, err := http.Post("https://api.github.com/markdown", "application/json", bytes.NewBuffer(buf))
 	if err != nil {
 		fmt.Errorf("Request for github failed, reason:%v\n", err)
 		return ""
@@ -245,50 +245,50 @@ func postProcessingHtml(htmlStr string, file *File) string {
 	//--------------------------------------------
 	for _, enum := range file.Enums {
 		enumName := enum.Name
-		src  := fmt.Sprintf("<h3>%s</h3>", enumName)
+		src := fmt.Sprintf("<h3>%s</h3>", enumName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(enumName), enumName)
 		html = strings.Replace(html, src, dest, -1)
 	}
 	for _, let := range file.Lets {
 		letName := let.Name
-		src  := fmt.Sprintf("<h3>%s</h3>", letName)
+		src := fmt.Sprintf("<h3>%s</h3>", letName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(letName), letName)
 		html = strings.Replace(html, src, dest, -1)
 	}
 	for _, cons := range file.Consts {
 		consName := cons.Name
-		src  := fmt.Sprintf("<h3>%s</h3>", consName)
+		src := fmt.Sprintf("<h3>%s</h3>", consName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(consName), consName)
 		html = strings.Replace(html, src, dest, -1)
 	}
 	for _, fn := range file.Funcs {
 		fnName := fn.Value.Name
-		src  := fmt.Sprintf("<h3>%s</h3>", fnName)
+		src := fmt.Sprintf("<h3>%s</h3>", fnName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(fnName), fnName)
 		html = strings.Replace(html, src, dest, -1)
 	}
 
 	for _, cls := range file.Classes {
 		clsName := cls.Value.Name
-		src  := fmt.Sprintf("<h3>%s</h3>", clsName)
+		src := fmt.Sprintf("<h3>%s</h3>", clsName)
 		dest := fmt.Sprintf(`<h3 id="%s">%s</h3>`, SanitizedAnchorName(clsName), clsName)
 		html = strings.Replace(html, src, dest, -1)
 
 		for _, prop := range cls.Props {
 			propName := prop.Name
-			src  := fmt.Sprintf("<h5>%s</h5>", propName)
+			src := fmt.Sprintf("<h5>%s</h5>", propName)
 			dest := fmt.Sprintf(`<h5 id="%s">%s</h5>`, SanitizedAnchorName(propName), propName)
 			html = strings.Replace(html, src, dest, -1)
 		}
 		for _, let := range cls.Lets {
 			letName := let.Name
-			src  := fmt.Sprintf("<h5>%s</h5>", letName)
+			src := fmt.Sprintf("<h5>%s</h5>", letName)
 			dest := fmt.Sprintf(`<h5 id="%s">%s</h5>`, SanitizedAnchorName(letName), letName)
 			html = strings.Replace(html, src, dest, -1)
 		}
 		for _, fn := range cls.Funcs {
 			fnName := fn.Value.Name
-			src  := fmt.Sprintf("<h5>%s</h5>", fnName)
+			src := fmt.Sprintf("<h5>%s</h5>", fnName)
 			dest := fmt.Sprintf(`<h5 id="%s">%s</h5>`, SanitizedAnchorName(fnName), fnName)
 			html = strings.Replace(html, src, dest, -1)
 		}
@@ -329,7 +329,6 @@ func postProcessingHtml(htmlStr string, file *File) string {
 			html = strings.Replace(html, match[0], buffer.String(), 1)
 		}
 	}
-
 
 	return html
 }
@@ -381,13 +380,13 @@ func sortedClasses(classes []*ast.ClassStatement, fh *os.File) []*Classes {
 		src, lineSrc := genSourceText(c, fh)
 		list[i] = &Classes{
 			Value: &Value{
-				Name:    c.Name.Value,
-				Doc:     preProcessCommentSpecial(c.Doc.Text()),
-				Text:    c.Docs(),
-				ShowSrc: Cfg.ShowSrcComment,
-				Src:     src,
+				Name:     c.Name.Value,
+				Doc:      preProcessCommentSpecial(c.Doc.Text()),
+				Text:     c.Docs(),
+				ShowSrc:  Cfg.ShowSrcComment,
+				Src:      src,
 				SrcLines: lineSrc,
-				GenHTML: Cfg.GenHTML,
+				GenHTML:  Cfg.GenHTML,
 			},
 			Props: sortedProps(props, fh),
 			Lets:  sortedLets(lets, fh),
@@ -398,7 +397,7 @@ func sortedClasses(classes []*ast.ClassStatement, fh *os.File) []*Classes {
 
 	sortBy(
 		func(i, j int) bool { return list[i].Value.Name < list[j].Value.Name },
-		func(i, j int) { 
+		func(i, j int) {
 			list[i].Value, list[j].Value = list[j].Value, list[i].Value
 			list[i].Props, list[j].Props = list[j].Props, list[i].Props
 			list[i].Lets, list[j].Lets = list[j].Lets, list[i].Lets
@@ -415,13 +414,13 @@ func sortedLets(lets []*ast.LetStatement, fh *os.File) []*Value {
 	for _, l := range lets {
 		src, lineSrc := genSourceText(l, fh)
 		list[i] = &Value{
-			Name:    l.Names[0].Value,
-			Doc:     preProcessCommentSpecial(l.Doc.Text()),
-			Text:    l.Docs(),
-			ShowSrc: Cfg.ShowSrcComment,
-			Src:     src,
+			Name:     l.Names[0].Value,
+			Doc:      preProcessCommentSpecial(l.Doc.Text()),
+			Text:     l.Docs(),
+			ShowSrc:  Cfg.ShowSrcComment,
+			Src:      src,
 			SrcLines: lineSrc,
-			GenHTML: Cfg.GenHTML,
+			GenHTML:  Cfg.GenHTML,
 		}
 		i++
 	}
@@ -440,13 +439,13 @@ func sortedConsts(consts []*ast.ConstStatement, fh *os.File) []*Value {
 	for _, c := range consts {
 		src, lineSrc := genSourceText(c, fh)
 		list[i] = &Value{
-			Name:    c.Name.Value,
-			Doc:     preProcessCommentSpecial(c.Doc.Text()),
-			Text:    c.Docs(),
-			ShowSrc: Cfg.ShowSrcComment,
-			Src:     src,
+			Name:     c.Name.Value,
+			Doc:      preProcessCommentSpecial(c.Doc.Text()),
+			Text:     c.Docs(),
+			ShowSrc:  Cfg.ShowSrcComment,
+			Src:      src,
 			SrcLines: lineSrc,
-			GenHTML: Cfg.GenHTML,
+			GenHTML:  Cfg.GenHTML,
 		}
 		i++
 	}
@@ -465,13 +464,13 @@ func sortedEnums(enums []*ast.EnumStatement, fh *os.File) []*Value {
 	for _, e := range enums {
 		src, lineSrc := genSourceText(e, fh)
 		list[i] = &Value{
-			Name:    e.Name.Value,
-			Doc:     preProcessCommentSpecial(e.Doc.Text()),
-			Text:    e.Docs(),
-			ShowSrc: Cfg.ShowSrcComment,
-			Src:     src,
+			Name:     e.Name.Value,
+			Doc:      preProcessCommentSpecial(e.Doc.Text()),
+			Text:     e.Docs(),
+			ShowSrc:  Cfg.ShowSrcComment,
+			Src:      src,
 			SrcLines: lineSrc,
-			GenHTML: Cfg.GenHTML,
+			GenHTML:  Cfg.GenHTML,
 		}
 		i++
 	}
@@ -488,7 +487,7 @@ func sortedFuncs(funcs []*ast.FunctionStatement, fh *os.File) []*Function {
 	list := make([]*Function, len(funcs))
 	i := 0
 	for _, f := range funcs {
-		list[i]= parseFuncComment(f.Name.Value, preProcessCommentSpecial(f.Doc.Text()), f.Docs())
+		list[i] = parseFuncComment(f.Name.Value, preProcessCommentSpecial(f.Doc.Text()), f.Docs())
 		list[i].Value.Src, list[i].Value.SrcLines = genSourceText(f, fh)
 		list[i].Value.ShowSrc = Cfg.ShowSrcComment
 		list[i].Value.GenHTML = Cfg.GenHTML
@@ -513,13 +512,13 @@ func sortedProps(props []*ast.PropertyDeclStmt, fh *os.File) []*Value {
 	for _, p := range props {
 		src, lineSrc := genSourceText(p, fh)
 		list[i] = &Value{
-			Name:    p.Name.Value,
-			Doc:     preProcessCommentSpecial(p.Doc.Text()),
-			Text:    p.Docs(),
-			ShowSrc: Cfg.ShowSrcComment,
-			Src:     src,
-			SrcLines:lineSrc,
-			GenHTML: Cfg.GenHTML,
+			Name:     p.Name.Value,
+			Doc:      preProcessCommentSpecial(p.Doc.Text()),
+			Text:     p.Docs(),
+			ShowSrc:  Cfg.ShowSrcComment,
+			Src:      src,
+			SrcLines: lineSrc,
+			GenHTML:  Cfg.GenHTML,
 		}
 
 		if strings.HasPrefix(p.Name.Value, "this") {
@@ -538,13 +537,13 @@ func sortedProps(props []*ast.PropertyDeclStmt, fh *os.File) []*Value {
 	return list
 }
 
-func parseFuncComment(name string, docComments string, text string) (*Function){
+func parseFuncComment(name string, docComments string, text string) *Function {
 	fn := &Function{
-		Value:&Value{
+		Value: &Value{
 			Name: name,
 			Text: text,
 		},
-		Params : make([]*FuncInfo, 0),
+		Params:  make([]*FuncInfo, 0),
 		Returns: make([]*FuncInfo, 0),
 	}
 
@@ -563,7 +562,7 @@ func parseFuncComment(name string, docComments string, text string) (*Function){
 				fn.Returns = append(fn.Returns, funcReturn)
 			}
 		} else {
-			buffer.WriteString(comment+"\n")
+			buffer.WriteString(comment + "\n")
 		}
 	}
 	fn.Value.Doc = buffer.String()
@@ -572,18 +571,18 @@ func parseFuncComment(name string, docComments string, text string) (*Function){
 }
 
 func parseValue(splitOnSpaces []string) *FuncInfo {
-	name  := ""
+	name := ""
 	types := ""
 	var description bytes.Buffer
 
 	description.WriteString("")
-	ret := &FuncInfo{Name:"", Type:"", Desc:""}
+	ret := &FuncInfo{Name: "", Type: "", Desc: ""}
 	for _, item := range splitOnSpaces {
 		if m := regexpType.FindStringSubmatch(item); m != nil {
 			types = m[1]
 		} else if len(name) == 0 {
 			if len(item) > 0 && item[0] == '`' {
-				name = item[1:len(item)-1]
+				name = item[1 : len(item)-1]
 			} else {
 				name = item
 			}
@@ -592,8 +591,12 @@ func parseValue(splitOnSpaces []string) *FuncInfo {
 		}
 	}
 
-	if (len(name) > 0) { ret.Name = name }
-	if (len(types) > 0) { ret.Type = types }
+	if len(name) > 0 {
+		ret.Name = name
+	}
+	if len(types) > 0 {
+		ret.Type = types
+	}
 	ret.Desc = description.String()
 
 	return ret
@@ -619,7 +622,7 @@ func SanitizedAnchorName(text string) string {
 	return string(anchorName)
 }
 
-/* Process `@example block @` part, and replace this with 
+/* Process `@example block @` part, and replace this with
 ```swift
     block
 ```
@@ -638,7 +641,7 @@ func preProcessCommentSpecial(comments string) string {
 			if Cfg.GenHTML == 1 {
 				lines := strings.Split(match[1], "\n")
 				if len(lines) > 1 {
-					buffer.WriteString(fmt.Sprintf("<p>__LINENUMBER_PLACEHOLDER_LINE__%d</p>\n", len(lines) - 1))
+					buffer.WriteString(fmt.Sprintf("<p>__LINENUMBER_PLACEHOLDER_LINE__%d</p>\n", len(lines)-1))
 				}
 			}
 
@@ -685,7 +688,7 @@ func preProcessCommentSpecial(comments string) string {
 }
 
 func replaceFirstString(re *regexp.Regexp, srcStr, replStr string) string {
-	src  := []byte(srcStr)
+	src := []byte(srcStr)
 	repl := []byte(replStr)
 
 	if m := re.FindSubmatchIndex(src); m != nil {
@@ -707,13 +710,13 @@ func genSourceText(src ast.Source, fh *os.File) (string, int) {
 	tStart := src.SrcStart()
 	tEnd := src.SrcEnd()
 
-	buf := make([]byte, tEnd.Offset - tStart.Offset)
+	buf := make([]byte, tEnd.Offset-tStart.Offset)
 	fh.ReadAt(buf, int64(tStart.Offset))
 
 	return string(buf), tEnd.Line - tStart.Line + 1
 }
 
-func genLineNumberRows(lineCnt string) string{
+func genLineNumberRows(lineCnt string) string {
 	iLineCnt, _ := strconv.Atoi(lineCnt)
 
 	var buffer bytes.Buffer
@@ -726,7 +729,7 @@ func genLineNumberRows(lineCnt string) string{
 }
 
 //convert '[]string' to '[]interface{}'
-func strArr2IntfArr(strArr []string) ([]interface{}) {
+func strArr2IntfArr(strArr []string) []interface{} {
 	var intfArr []interface{}
 	for _, str := range strArr {
 		intfArr = append(intfArr, str)

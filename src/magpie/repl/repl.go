@@ -17,7 +17,7 @@ var magpieKeywords = []string{
 	"elif", "return", "include", "and", "or", "struct", "do", "while",
 	"break", "continue", "for", "in", "where", "grep", "map", "case",
 	"is", "try", "catch", "finally", "throw", "qw", "unless", "spawn",
-	"enum", "defer", "nil","class", "new", "this", "parent", "property", 
+	"enum", "defer", "nil", "class", "new", "this", "parent", "property",
 	"get", "set", "static", "public", "private", "protected", "interface", "default",
 	"from", "select", "group", "into", "orderby", "join", "on", "equals", "by", "ascending", "descending",
 	"async", "await", "service",
@@ -94,7 +94,7 @@ func Start(out io.Writer, color bool) {
 				continue
 			}
 			//check if the `line` variable is ended with '\'
-			if tmpline[len(tmpline)-1:] =="\\" { //the expression/statement has remaining part
+			if tmpline[len(tmpline)-1:] == "\\" { //the expression/statement has remaining part
 				tmplines = append(tmplines, strings.TrimRight(tmpline, "\\"))
 				continue
 			} else {

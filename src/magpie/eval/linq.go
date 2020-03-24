@@ -6,8 +6,8 @@ package eval
 */
 import (
 	_ "fmt"
-	"math"
 	"magpie/ast"
+	"math"
 	"reflect"
 	"regexp"
 	"sort"
@@ -470,7 +470,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(strArr)))}
 
 			for idx, v := range strArr {
-				fieldIndex := NewInteger(int64(idx+1))
+				fieldIndex := NewInteger(int64(idx + 1))
 				hash.Push(line, fieldIndex, NewString(v))
 				//hash.Pairs[fieldIndex.HashKey()] = HashPair{Key: fieldIndex, Value: NewString(v)}
 			}
@@ -514,7 +514,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(fieldArr.(*Array).Members)))}
 
 			for idx, field := range fieldArr.(*Array).Members {
-				fieldIdx := NewInteger(int64(idx+1))
+				fieldIdx := NewInteger(int64(idx + 1))
 				hash.Push(line, fieldIdx, field)
 				//hash.Pairs[fieldIdx.HashKey()] = HashPair{Key: fieldIdx, Value: field}
 			}
@@ -1337,7 +1337,7 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 					innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
 				}
 
-//				innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
+				//				innerLookup[innerKey] = append(innerLookup[innerKey], innerItem)
 			}
 
 			var outerItem Object
@@ -3117,7 +3117,7 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(strArr)))}
 
 			for idx, v := range strArr {
-				fieldIndex := NewInteger(int64(idx+1))
+				fieldIndex := NewInteger(int64(idx + 1))
 				hash.Push(line, fieldIndex, NewString(v))
 				//hash.Pairs[fieldIndex.HashKey()] = HashPair{Key: fieldIndex, Value: NewString(v)}
 			}
@@ -3164,7 +3164,7 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 			//hash.Pairs[nfKey.HashKey()] = HashPair{Key: nfKey, Value: NewInteger(int64(len(fieldArr.(*Array).Members)))}
 
 			for idx, field := range fieldArr.(*Array).Members {
-				fieldIdx := NewInteger(int64(idx+1))
+				fieldIdx := NewInteger(int64(idx + 1))
 				hash.Push(line, fieldIdx, field)
 				//hash.Pairs[fieldIdx.HashKey()] = HashPair{Key: fieldIdx, Value: field}
 			}
@@ -3358,7 +3358,6 @@ func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
 	}}
 }
 
-
 func (lq *LinqObj) FromInner(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
@@ -3391,7 +3390,6 @@ func (lq *LinqObj) Where2(line string, scope *Scope, args ...Object) Object {
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type()))
 	}
-
 
 	s := NewScope(scope)
 
@@ -3468,14 +3466,14 @@ func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 			set := make(map[Object][]Object)
 			setTmp := make(map[Object]bool)
 
-				for _, ok := next(); ok.Bool; _, ok = next() {
-//				s.Set(keySelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
+			for _, ok := next(); ok.Bool; _, ok = next() {
+				//				s.Set(keySelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
 
 				key := Eval(keySelector.Literal.Body, s)
 				if obj, ok1 := key.(*ReturnValue); ok1 {
 					key = obj.Value
 				}
-//				s.Set(elementSelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
+				//				s.Set(elementSelector.Literal.Parameters[0].(*ast.Identifier).Value, item)
 				element := Eval(elementSelector.Literal.Body, s)
 				if obj, ok1 := element.(*ReturnValue); ok1 {
 					element = obj.Value

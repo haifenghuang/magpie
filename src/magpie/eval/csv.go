@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	CSV_OBJ = "CSV_OBJ"
+	CSV_OBJ  = "CSV_OBJ"
 	csv_name = "csv"
 )
 
@@ -15,11 +15,11 @@ var optionsKeyMap = map[string]bool{
 	"Comma": true,
 
 	//used in Reader only
-	"Comment": true,
-	"FieldsPerRecord": true,
-	"LazyQuotes": true,
+	"Comment":          true,
+	"FieldsPerRecord":  true,
+	"LazyQuotes":       true,
 	"TrimLeadingSpace": true,
-	"ReuseRecord": true,
+	"ReuseRecord":      true,
 
 	//used in Writer only
 	"UseCRLF": true,
@@ -29,10 +29,10 @@ type CsvObj struct {
 	Reader     *csv.Reader
 	ReaderFile *os.File
 
-	Writer     *csv.Writer
+	Writer *csv.Writer
 }
 
-func (c *CsvObj) Inspect() string  { return "<" + csv_name + ">"}
+func (c *CsvObj) Inspect() string  { return "<" + csv_name + ">" }
 func (c *CsvObj) Type() ObjectType { return CSV_OBJ }
 
 func (c *CsvObj) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
@@ -60,7 +60,7 @@ func (c *CsvObj) Read(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
-	record, err  := c.Reader.Read()
+	record, err := c.Reader.Read()
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -78,7 +78,7 @@ func (c *CsvObj) ReadAll(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
-	records, err  := c.Reader.ReadAll()
+	records, err := c.Reader.ReadAll()
 	if err != nil {
 		return NewNil(err.Error())
 	}

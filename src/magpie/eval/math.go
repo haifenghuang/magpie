@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MATH_OBJ = "MATH_OBJ"
+	MATH_OBJ  = "MATH_OBJ"
 	math_name = "math"
 )
 

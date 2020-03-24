@@ -472,13 +472,13 @@ func hashBuiltin() *Builtin {
 				newMembers := make([]Object, length)
 				copy(newMembers, input.Members)
 
-				if length % 2 != 0 {
+				if length%2 != 0 {
 					length = length + 1
 					newMembers = append(newMembers, NIL)
 				}
 
 				hash := NewHash()
-				for i := 0; i <= length / 2; {
+				for i := 0; i <= length/2; {
 					if _, ok := newMembers[i].(Hashable); ok {
 						hash.Push(line, newMembers[i], newMembers[i+1])
 						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
@@ -498,13 +498,13 @@ func hashBuiltin() *Builtin {
 				newMembers := make([]Object, length)
 				copy(newMembers, input.Members)
 
-				if length % 2 != 0 {
+				if length%2 != 0 {
 					length = length + 1
 					newMembers = append(newMembers, NIL)
 				}
 
 				hash := NewHash()
-				for i := 0; i <= length / 2; {
+				for i := 0; i <= length/2; {
 					if _, ok := newMembers[i].(Hashable); ok {
 						hash.Push(line, newMembers[i], newMembers[i+1])
 						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
@@ -526,7 +526,7 @@ func decimalBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty decimal(defaults to 0)
-				return &DecimalObj{Number:NewDec(0,0), Valid:true}
+				return &DecimalObj{Number: NewDec(0, 0), Valid: true}
 			}
 			if len(args) != 1 {
 				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
@@ -535,16 +535,16 @@ func decimalBuiltin() *Builtin {
 			case *DecimalObj:
 				return input
 			case *Integer:
-				return &DecimalObj{Number:NewFromFloat(float64(input.Int64)), Valid:true}
+				return &DecimalObj{Number: NewFromFloat(float64(input.Int64)), Valid: true}
 			case *UInteger:
-				return &DecimalObj{Number:NewFromFloat(float64(input.UInt64)), Valid:true}
+				return &DecimalObj{Number: NewFromFloat(float64(input.UInt64)), Valid: true}
 			case *Float:
-				return &DecimalObj{Number:NewFromFloat(input.Float64), Valid:true}
+				return &DecimalObj{Number: NewFromFloat(input.Float64), Valid: true}
 			case *Boolean:
 				if input.Bool {
-					return &DecimalObj{Number:NewFromFloat(1), Valid:true}
+					return &DecimalObj{Number: NewFromFloat(1), Valid: true}
 				}
-				return &DecimalObj{Number:NewFromFloat(0), Valid:true}
+				return &DecimalObj{Number: NewFromFloat(0), Valid: true}
 			case *String:
 				var n float64
 				var err error
@@ -571,7 +571,7 @@ func decimalBuiltin() *Builtin {
 				if err != nil {
 					panic(NewError(line, INPUTERROR, "STRING: "+input.String, "decimal"))
 				}
-				return &DecimalObj{Number:NewFromFloat(n), Valid:true}
+				return &DecimalObj{Number: NewFromFloat(n), Valid: true}
 			}
 			panic(NewError(line, PARAMTYPEERROR, "first", "decimal", "*String|*Integer|*UInteger|*Boolean|*Float|*Decimal", args[0].Type()))
 		},
@@ -739,7 +739,7 @@ func chanBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) == 0 {
-				return &ChanObject{ch:make(chan Object)}
+				return &ChanObject{ch: make(chan Object)}
 			} else if len(args) == 1 {
 				var v int64
 				switch o := args[0].(type) {
@@ -750,7 +750,7 @@ func chanBuiltin() *Builtin {
 				default:
 					panic(NewError(line, PARAMTYPEERROR, "first", "chan", "*Integer|*UInteger", args[0].Type()))
 				}
-				return &ChanObject{ch:make(chan Object, v)}
+				return &ChanObject{ch: make(chan Object, v)}
 			}
 			panic(NewError(line, ARGUMENTERROR, "Not 0|1", len(args)))
 		},
@@ -868,7 +868,7 @@ func newArrayBuiltin() *Builtin {
 			remainingLen := len(remainingArgs)
 
 			var newLen int64 = 0
-			for i := 0 ; i < remainingLen; i++ {
+			for i := 0; i < remainingLen; i++ {
 				if remainingArgs[i].Type() == ARRAY_OBJ {
 					newLen += int64(len(remainingArgs[i].(*Array).Members))
 				} else {
@@ -885,7 +885,7 @@ func newArrayBuiltin() *Builtin {
 				}
 			}
 
-			if (count <= newLen) {
+			if count <= newLen {
 				return ret
 			}
 
@@ -897,7 +897,6 @@ func newArrayBuiltin() *Builtin {
 		},
 	}
 }
-
 
 func dialTCPBuiltin() *Builtin {
 	return &Builtin{
@@ -1325,7 +1324,7 @@ func newCsvReaderBuiltin() *Builtin {
 				return NewNil(err.Error())
 			}
 
-			return &CsvObj{Reader: csv.NewReader(f), ReaderFile:f}
+			return &CsvObj{Reader: csv.NewReader(f), ReaderFile: f}
 		},
 	}
 }
@@ -1397,32 +1396,32 @@ func RegisterBuiltin(name string, f *Builtin) {
 
 func init() {
 	builtins = map[string]*Builtin{
-		"abs":     absBuiltin(),
-		"range":   rangeBuiltin(),
-		"addm":    addmBuiltin(),
-		"chr":     chrBuiltin(),
-		"newFile": newFileBuiltin(),
-		"int":     intBuiltin(),
-		"uint":    uintBuiltin(),
-		"float":   floatBuiltin(),
-		"str":     strBuiltin(),
-		"array":   arrayBuiltin(),
-		"tuple":   tupleBuiltin(),
-		"hash":    hashBuiltin(),
-		"decimal": decimalBuiltin(),
-		"len":     lenBuiltin(),
-		"methods": methodsBuiltin(),
-		"ord":     ordBuiltin(),
-		"print":   printBuiltin(),
-		"println": printlnBuiltin(),
-		"say":     printlnBuiltin(),
-		"printf":  printfBuiltin(),
-		"type":    typeBuiltin(),
-		"chan":    chanBuiltin(),
-		"assert":  assertBuiltin(),
-		"reverse": reverseBuiltin(),
-		"iff":     iffBuiltin(),
-		"newArray":newArrayBuiltin(),
+		"abs":      absBuiltin(),
+		"range":    rangeBuiltin(),
+		"addm":     addmBuiltin(),
+		"chr":      chrBuiltin(),
+		"newFile":  newFileBuiltin(),
+		"int":      intBuiltin(),
+		"uint":     uintBuiltin(),
+		"float":    floatBuiltin(),
+		"str":      strBuiltin(),
+		"array":    arrayBuiltin(),
+		"tuple":    tupleBuiltin(),
+		"hash":     hashBuiltin(),
+		"decimal":  decimalBuiltin(),
+		"len":      lenBuiltin(),
+		"methods":  methodsBuiltin(),
+		"ord":      ordBuiltin(),
+		"print":    printBuiltin(),
+		"println":  printlnBuiltin(),
+		"say":      printlnBuiltin(),
+		"printf":   printfBuiltin(),
+		"type":     typeBuiltin(),
+		"chan":     chanBuiltin(),
+		"assert":   assertBuiltin(),
+		"reverse":  reverseBuiltin(),
+		"iff":      iffBuiltin(),
+		"newArray": newArrayBuiltin(),
 
 		//net
 		"dialTCP":    dialTCPBuiltin(),
@@ -1462,13 +1461,14 @@ func init() {
 		"newCsvWriter": newCsvWriterBuiltin(),
 
 		//class related
-		"is_a"      : instanceOfBuiltin(),
+		"is_a":       instanceOfBuiltin(),
 		"instanceOf": instanceOfBuiltin(),
-		"classOf"   : classOfBuiltin(),
+		"classOf":    classOfBuiltin(),
 	}
 }
 
 const BUILTINMETHOD_OBJ = "BUILTINMETHOD_OBJ"
+
 type BuiltinMethodFunction func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object
 
 type BuiltinMethod struct {

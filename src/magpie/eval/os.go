@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	OS_OBJ = "OS_OBJ"
+	OS_OBJ  = "OS_OBJ"
 	os_name = "os"
 )
 
@@ -683,6 +683,7 @@ func (o *Os) IsExist(line string, args ...Object) Object {
 }
 
 const FILEINFO_OBJ = "FILEINFO_OBJ"
+
 //FileInfo Object
 type FileInfoObj struct {
 	Info os.FileInfo
@@ -751,6 +752,7 @@ func (fi *FileInfoObj) IsDir(line string, args ...Object) Object {
 }
 
 const PIPE_OBJ = "PIPE_OBJ"
+
 //Pipe Object
 type PipeObj struct {
 	Reader *io.PipeReader

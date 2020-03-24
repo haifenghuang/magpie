@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	SORT_OBJ = "SORT_OBJ"
+	SORT_OBJ  = "SORT_OBJ"
 	sort_name = "sort"
 )
 
@@ -423,7 +423,7 @@ func (p IntSlice) Sort() { sort.Sort(p) }
 
 // UIntSlice attaches the methods of Interface to []int, sorting in ascending/descending order.
 type UIntSlice struct {
-	UIntArr    []uint64
+	UIntArr   []uint64
 	SortOrder Ordering
 }
 
@@ -440,7 +440,6 @@ func (p UIntSlice) Less(i, j int) bool {
 
 // Sort is a convenience method.
 func (p UIntSlice) Sort() { sort.Sort(p) }
-
 
 // Float64Slice attaches the methods of Interface to []float64, sorting in ascending/descending order.
 type Float64Slice struct {
@@ -496,10 +495,14 @@ func (p StringSlice) Less(i, j int) bool {
 func (p StringSlice) Sort() { sort.Sort(p) }
 
 // IntsAreSorted tests whether a slice of ints is sorted in ascending/descending order.
-func IntsAreSorted(a []int64, o Ordering) bool { return sort.IsSorted(IntSlice{IntArr: a, SortOrder: o}) }
+func IntsAreSorted(a []int64, o Ordering) bool {
+	return sort.IsSorted(IntSlice{IntArr: a, SortOrder: o})
+}
 
 // UIntsAreSorted tests whether a slice of uints is sorted in ascending/descending order.
-func UIntsAreSorted(a []uint64, o Ordering) bool { return sort.IsSorted(UIntSlice{UIntArr: a, SortOrder: o}) }
+func UIntsAreSorted(a []uint64, o Ordering) bool {
+	return sort.IsSorted(UIntSlice{UIntArr: a, SortOrder: o})
+}
 
 // Float64sAreSorted tests whether a slice of float64s is sorted in ascending/descending order.
 func Float64sAreSorted(a []float64, o Ordering) bool {

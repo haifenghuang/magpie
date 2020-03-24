@@ -1,4 +1,4 @@
-﻿package eval
+package eval
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	HTTP_OBJ = "HTTP_OBJ"
+	HTTP_OBJ       = "HTTP_OBJ"
 	HTTPCLIENT_OBJ = "HTTPCLIENT_OBJ"
 	HTTPSERVER_OBJ = "HTTPSERVER_OBJ"
 
@@ -618,7 +618,6 @@ func (h *HttpRequest) Method(line string, args ...Object) Object {
 
 	return NewString(h.Request.Method)
 }
-
 
 func (h *HttpRequest) Header(line string, args ...Object) Object {
 	if len(args) != 0 {

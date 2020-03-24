@@ -5,7 +5,7 @@ import (
 )
 
 type ChanObject struct {
-	ch chan Object
+	ch   chan Object
 	done bool
 }
 

@@ -1,8 +1,8 @@
 package eval
 
 import (
-	"os"
 	gofmt "fmt"
+	"os"
 )
 
 func NewFmtObj() *FmtObj {
@@ -13,7 +13,7 @@ func NewFmtObj() *FmtObj {
 }
 
 const (
-	FMT_OBJ = "FMT_OBJ"
+	FMT_OBJ  = "FMT_OBJ"
 	fmt_name = "fmt"
 )
 
@@ -202,7 +202,7 @@ func (f *FmtObj) Fprint(line string, args ...Object) Object {
 	var err error
 
 	writer := w.(Writable).IOWriter()
-	if writer == os.Stdout || writer == os.Stderr {  //output to stdout or stderr
+	if writer == os.Stdout || writer == os.Stderr { //output to stdout or stderr
 		format, wrapped := correctPrintResult(false, subArgs...)
 		n, err = gofmt.Printf(format, wrapped...)
 	} else {

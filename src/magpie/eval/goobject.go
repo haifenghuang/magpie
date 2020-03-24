@@ -1,4 +1,5 @@
 package eval
+
 /*
 	NOTE: MOST OF THE REFLECT CODE COME FROM `https://github.com/jxwr/doby`
 	WITH MINOR MODIFICATIONS
@@ -89,7 +90,7 @@ func (gobj *GoObject) CallMethod(line string, scope *Scope, method string, args 
 }
 
 func NewGoObject(obj interface{}) *GoObject {
-	ret := &GoObject{obj:obj}
+	ret := &GoObject{obj: obj}
 
 	val := reflect.ValueOf(obj)
 	if obj != nil && reflect.Indirect(val).IsValid() && val.Kind() > reflect.Invalid && val.Kind() <= reflect.UnsafePointer {
@@ -215,20 +216,20 @@ func (gfn *GoFuncObject) CallMethod(line string, scope *Scope, method string, ar
 	for _, val := range outVals {
 		// Here we only retuns GoObject, See comment of 'RegisterVars'.
 		results = append(results, NewGoObject(val.Interface()))
-//		switch val.Kind() {
-//		case reflect.Bool:
-//			results = append(results, NewBooleanObj(val.Bool()))
-//		case reflect.String:
-//			results = append(results, NewString(val.String()))
-//		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-//			results = append(results, NewInteger(int64(val.Int())))
-//		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-//			results = append(results, NewUInteger(uint64(val.Uint())))
-//		case reflect.Float64, reflect.Float32:
-//			results = append(results, NewFloat(val.Float()))
-//		default:
-//			results = append(results, NewGoObject(val.Interface()))
-//		}
+		//		switch val.Kind() {
+		//		case reflect.Bool:
+		//			results = append(results, NewBooleanObj(val.Bool()))
+		//		case reflect.String:
+		//			results = append(results, NewString(val.String()))
+		//		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		//			results = append(results, NewInteger(int64(val.Int())))
+		//		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		//			results = append(results, NewUInteger(uint64(val.Uint())))
+		//		case reflect.Float64, reflect.Float32:
+		//			results = append(results, NewFloat(val.Float()))
+		//		default:
+		//			results = append(results, NewGoObject(val.Interface()))
+		//		}
 	}
 
 	if len(results) > 1 { // There are multiple return values
@@ -236,7 +237,7 @@ func (gfn *GoFuncObject) CallMethod(line string, scope *Scope, method string, ar
 		return &Tuple{Members: results, IsMulti: true}
 	}
 	return results[0]
-	
+
 	// panic(NewError(line, NOMETHODERROR, method, gfn.Type()))
 }
 
@@ -325,12 +326,12 @@ func RegisterVars(name string, vars map[string]interface{}) {
 		//
 		// The expected result should be '10h0m0s', but we get '5577006791947779410'.
 		// The reason is that 'ParseDuration' returns a `Duration` type, the `Duration`
-		// type's kind is 'reflect.Int64', if we use 'GoValueToObject()' function to 
+		// type's kind is 'reflect.Int64', if we use 'GoValueToObject()' function to
 		// convert `Duration` type to 'Integer' type, then when we print the result, it will
 		// print 5577006791947779410. For it to work as expected, we need to keep the `Duration` as it is
 		// and make no conversion.
 		//SetGlobalObj(name + "." + k, GoValueToObject(v))
-		SetGlobalObj(name + "." + k, NewGoObject(v))
+		SetGlobalObj(name+"."+k, NewGoObject(v))
 	}
 }
 
@@ -343,14 +344,14 @@ func RegisterFunctions(name string, vars map[string]interface{}) {
 	}
 
 	//Replace all '/' to '_'. e.g. math/rand => math_rand
-	newName := strings.Replace(name, "/", "_", -1);
+	newName := strings.Replace(name, "/", "_", -1)
 	SetGlobalObj(newName, hash)
 }
 
 //func RegisterFunctions(name string, vars []interface{}) {
 //	hash := NewHash()
 //	for _, v := range vars {
-//		// In some occasions, below code will introduce panic: 
+//		// In some occasions, below code will introduce panic:
 //		// 		reflect: call of reflect.Value.Pointer on int64 Value
 //		fname := runtime.FuncForPC(reflect.ValueOf(v).Pointer()).Name()
 //		xs := strings.Split(fname, ".")

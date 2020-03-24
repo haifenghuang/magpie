@@ -19,8 +19,8 @@ func NewFilePathObj() *FilePathObj {
 }
 
 const (
-	SKIP_DIR = 1
-	FILEPATH_OBJ = "FILEPATH_OBJ"
+	SKIP_DIR      = 1
+	FILEPATH_OBJ  = "FILEPATH_OBJ"
 	filepath_name = "filepath"
 )
 

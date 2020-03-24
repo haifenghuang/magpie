@@ -14,16 +14,16 @@ import (
 )
 
 var numMap = map[rune]rune{
-'𝟎' :'0', '𝟘' :'0', '𝟢' :'0', '𝟬' :'0', '𝟶' :'0', '０' :'0',
-'𝟏' :'1', '𝟙' :'1', '𝟣' :'1', '𝟭' :'1', '𝟷' :'1', '１' :'1',
-'𝟐' :'2', '𝟚' :'2', '𝟤' :'2', '𝟮' :'2', '𝟸' :'2', '２' :'2',
-'𝟑' :'3', '𝟛' :'3', '𝟥' :'3', '𝟯' :'3', '𝟹' :'3', '３' :'3',
-'𝟒' :'4', '𝟜' :'4', '𝟦' :'4', '𝟰' :'4', '𝟺' :'4', '４' :'4',
-'𝟓' :'5', '𝟝' :'5', '𝟧' :'5', '𝟱' :'5', '𝟻' :'5', '５' :'5',
-'𝟔' :'6', '𝟞' :'6', '𝟨' :'6', '𝟲' :'6', '𝟼' :'6', '６' :'6',
-'𝟕' :'7', '𝟟' :'7', '𝟩' :'7', '𝟳' :'7', '𝟽' :'7', '７' :'7',
-'𝟖' :'8', '𝟠' :'8', '𝟪' :'8', '𝟴' :'8', '𝟾' :'8', '８' :'8',
-'𝟗' :'9', '𝟡' :'9', '𝟫' :'9', '𝟵' :'9', '𝟿' :'9', '９' :'9',
+	'𝟎': '0', '𝟘': '0', '𝟢': '0', '𝟬': '0', '𝟶': '0', '０': '0',
+	'𝟏': '1', '𝟙': '1', '𝟣': '1', '𝟭': '1', '𝟷': '1', '１': '1',
+	'𝟐': '2', '𝟚': '2', '𝟤': '2', '𝟮': '2', '𝟸': '2', '２': '2',
+	'𝟑': '3', '𝟛': '3', '𝟥': '3', '𝟯': '3', '𝟹': '3', '３': '3',
+	'𝟒': '4', '𝟜': '4', '𝟦': '4', '𝟰': '4', '𝟺': '4', '４': '4',
+	'𝟓': '5', '𝟝': '5', '𝟧': '5', '𝟱': '5', '𝟻': '5', '５': '5',
+	'𝟔': '6', '𝟞': '6', '𝟨': '6', '𝟲': '6', '𝟼': '6', '６': '6',
+	'𝟕': '7', '𝟟': '7', '𝟩': '7', '𝟳': '7', '𝟽': '7', '７': '7',
+	'𝟖': '8', '𝟠': '8', '𝟪': '8', '𝟴': '8', '𝟾': '8', '８': '8',
+	'𝟗': '9', '𝟡': '9', '𝟫': '9', '𝟵': '9', '𝟿': '9', '９': '9',
 }
 
 const (
@@ -115,8 +115,8 @@ var precedences = map[token.TokenType]int{
 type Mode uint
 
 const (
-	ParseComments Mode  = 1 << iota // parse comments and add them to AST
-	Trace                           // print a trace of parsed productions
+	ParseComments Mode = 1 << iota // parse comments and add them to AST
+	Trace                          // print a trace of parsed productions
 )
 
 var (
@@ -143,7 +143,7 @@ type Parser struct {
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
 
-	classMap     map[string]bool
+	classMap map[string]bool
 }
 
 type (
@@ -164,7 +164,7 @@ func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 		l:      l,
 		errors: []string{},
 		path:   wd,
-		mode: ParseComments,
+		mode:   ParseComments,
 	}
 	p.l.SetMode(lexer.ScanComments)
 
@@ -304,7 +304,7 @@ func (p *Parser) registerAction() {
 func (p *Parser) ParseProgram() *ast.Program {
 	defer func() {
 		if r := recover(); r != nil {
-				return //Here we just 'return', because the caller will report the errors.
+			return //Here we just 'return', because the caller will report the errors.
 		}
 	}()
 
@@ -359,7 +359,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		//	// assumed to be the beginning of an expression.
 		//	return nil
 		//}
-		
+
 		//Because we need to support operator overloading,like:
 		//     fn +(v) { block }
 		//so we should not use above code
@@ -444,7 +444,6 @@ func (p *Parser) parseClassStatement() *ast.ClassStatement {
 	return stmt
 }
 
-
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
@@ -510,7 +509,7 @@ func (p *Parser) parseCommand() ast.Expression {
 //	}
 //
 //	// NOTE: if previous token is toke.LPAREN, and the current
-//	//       token is token.RPAREN, that is an empty parentheses(e.g. '() => 5'), 
+//	//       token is token.RPAREN, that is an empty parentheses(e.g. '() => 5'),
 //	//       we need to return earlier.
 //	if curToken.Type == token.LPAREN && p.curTokenIs(token.RPAREN) {
 //		return nil
@@ -536,7 +535,7 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	p.nextToken()
 
 	// NOTE: if previous token is toke.LPAREN, and the current
-	//       token is token.RPAREN, that is an empty parentheses, 
+	//       token is token.RPAREN, that is an empty parentheses,
 	//       we need to return earlier.
 	if curToken.Type == token.LPAREN && p.curTokenIs(token.RPAREN) {
 		if p.peekTokenIs(token.FATARROW) { //e.g. '() => 5': this is a short function
@@ -564,21 +563,21 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	return exp
 }
 
-func (p *Parser)parseTupleExpression(tok token.Token, expr ast.Expression) ast.Expression {
+func (p *Parser) parseTupleExpression(tok token.Token, expr ast.Expression) ast.Expression {
 	members := []ast.Expression{expr}
 
 	oldToken := tok
 	for {
 		switch p.curToken.Type {
 		case token.RPAREN:
-			ret := &ast.TupleLiteral{Token: tok, Members: members, RParenToken:p.curToken}
+			ret := &ast.TupleLiteral{Token: tok, Members: members, RParenToken: p.curToken}
 			return ret
 		case token.COMMA:
 			p.nextToken()
 			//For a 1-tuple: "(1,)", the trailing comma is necessary to distinguish it
 			//from the parenthesized expression (1).
-			if p.curTokenIs(token.RPAREN) {  //e.g.  let x = (1,)
-				ret := &ast.TupleLiteral{Token: tok, Members: members, RParenToken:p.curToken}
+			if p.curTokenIs(token.RPAREN) { //e.g.  let x = (1,)
+				ret := &ast.TupleLiteral{Token: tok, Members: members, RParenToken: p.curToken}
 				return ret
 			}
 			members = append(members, p.parseExpression(LOWEST))
@@ -714,7 +713,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 		return stmt
 	}
 
-
 	p.nextToken()
 	for {
 		v := p.parseExpressionStatement().Expression
@@ -809,7 +807,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		if p.curTokenIs(token.CLASS) { //e.g.  let cls = class { block }
 			v = p.parseClassLiteral()
 			if len(stmt.Names) >= i {
-				v.(*ast.ClassLiteral).Name = stmt.Names[i].Value  //get ClassLiteral's class Name
+				v.(*ast.ClassLiteral).Name = stmt.Names[i].Value //get ClassLiteral's class Name
 				p.classMap[stmt.Names[i].Value] = true
 			}
 		} else {
@@ -833,7 +831,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 //let (a,b,c) = tuple|array|hash|function(which return multi-values)
 //Note: funtion's multiple return values are wraped into a tuple.
 func (p *Parser) parseLetStatement2(stmt *ast.LetStatement) *ast.LetStatement {
-	stmt.DestructingFlag = true;
+	stmt.DestructingFlag = true
 
 	//skip 'let'
 	p.nextToken()
@@ -867,9 +865,9 @@ func (p *Parser) parseLetStatement2(stmt *ast.LetStatement) *ast.LetStatement {
 	p.nextToken() //skip the '='
 	v := p.parseExpressionStatement().Expression
 	stmt.Values = append(stmt.Values, v)
-	
+
 	stmt.SrcEndToken = p.curToken
-	return stmt;
+	return stmt
 }
 
 //const a = xxx
@@ -899,7 +897,7 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	expression := &ast.BlockStatement{Token: p.curToken}
 	expression.Statements = []ast.Statement{}
-	p.nextToken()  //skip '{'
+	p.nextToken() //skip '{'
 	for !p.curTokenIs(token.RBRACE) {
 		stmt := p.parseStatement()
 		if stmt != nil {
@@ -912,13 +910,13 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	}
 
 	/*  LONG HIDDEN BUG!
-		NOTE: If we got 'EOF' and current token is not '}', then that means that the block is not ended with a '}', like below:
+	NOTE: If we got 'EOF' and current token is not '}', then that means that the block is not ended with a '}', like below:
 
-			//if.my
-		   if (10 > 2) {
-		       println("10>2")
+		//if.my
+	   if (10 > 2) {
+	       println("10>2")
 
-		Above 'if' expression has no '}', if we do not check below condition, it will evaluate correctly and no problem occurred.
+	Above 'if' expression has no '}', if we do not check below condition, it will evaluate correctly and no problem occurred.
 	*/
 	if p.peekTokenIs(token.EOF) && !p.curTokenIs(token.RBRACE) {
 		pos := p.peekToken.Pos
@@ -984,7 +982,7 @@ func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
 func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) {
 	path := p.path
 
-	fn := filepath.Join(path, importpath + ".my")
+	fn := filepath.Join(path, importpath+".my")
 	f, err := ioutil.ReadFile(fn)
 	if err != nil { //error occurred, maybe the file do not exists.
 		// Check for 'MAGPIE_ROOT' environment variable
@@ -992,7 +990,7 @@ func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) 
 		if len(includeRoot) == 0 { //'MAGPIE_ROOT' environment variable is not set
 			return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.my, %s", p.curToken.Pos, importpath, path)
 		} else {
-			fn = filepath.Join(includeRoot, importpath + ".my")
+			fn = filepath.Join(includeRoot, importpath+".my")
 			e, err := ioutil.ReadFile(fn)
 			if err != nil {
 				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.my, %s", p.curToken.Pos, importpath, includeRoot)
@@ -1003,7 +1001,7 @@ func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) 
 
 	l := lexer.New(fn, string(f))
 	var ps *Parser
-	if p.mode & ParseComments == 0 {
+	if p.mode&ParseComments == 0 {
 		ps = New(l, path)
 	} else {
 		ps = NewWithDoc(l, path)
@@ -1109,7 +1107,7 @@ func (p *Parser) parseCForLoopExpression(curToken token.Token) ast.Expression {
 		p.nextToken()
 	}
 
-	p.nextToken(); //skip ';'
+	p.nextToken() //skip ';'
 	if !p.curTokenIs(token.SEMICOLON) {
 		cond = p.parseExpression(LOWEST)
 		p.nextToken()
@@ -1150,7 +1148,7 @@ func (p *Parser) parseCForLoopExpression(curToken token.Token) ast.Expression {
 		}
 		result = loop
 	} else {
-		loop := &ast.ForLoop{Token: curToken, Init:init, Cond:cond, Update:update}
+		loop := &ast.ForLoop{Token: curToken, Init: init, Cond: cond, Update: update}
 		if isBlock {
 			loop.Block = p.parseBlockStatement()
 		} else {
@@ -1351,7 +1349,6 @@ func (p *Parser) parseUIntegerLiteral() ast.Expression {
 	lit.Value = value
 	return lit
 }
-
 
 func (p *Parser) parseFloatLiteral() ast.Expression {
 	lit := &ast.FloatLiteral{Token: p.curToken}
@@ -1593,7 +1590,7 @@ func (p *Parser) parseIndexExpression(arr ast.Expression) ast.Expression {
 				p.nextToken()
 				parameters = append(parameters, p.parseExpression(LOWEST))
 			}
-			index = &ast.ClassIndexerExpression{Token:oldToken, Parameters:parameters} 
+			index = &ast.ClassIndexerExpression{Token: oldToken, Parameters: parameters}
 		}
 	}
 	indexExp.Index = index
@@ -1613,19 +1610,19 @@ func (p *Parser) parseHashExpression() ast.Expression {
 
 	if p.peekTokenIs(token.RBRACE) { //empty hash
 		p.nextToken()
-		hash := &ast.HashLiteral{Token: curToken, RBraceToken:p.curToken, Order:[]ast.Expression{}}
+		hash := &ast.HashLiteral{Token: curToken, RBraceToken: p.curToken, Order: []ast.Expression{}}
 		hash.Pairs = make(map[ast.Expression]ast.Expression)
 		return hash
 	}
 
-	p.nextToken() //skip the '{'
+	p.nextToken()                       //skip the '{'
 	keyExpr := p.parseExpression(SLICE) //note the precedence,if is LOWEST, then it will be parsed as sliceExpression
 
 	// if hash's key is an identifier, not an string, we treat it as a string.
 	// e.g. h = {Name: "xxx"} => h = {"Name": "xxx"}
 	if key, ok := keyExpr.(*ast.Identifier); ok {
 		//convert *ast.Identifier to *ast.StringLiteral
-		keyExpr = &ast.StringLiteral{Token:key.Token, Value:key.Value}
+		keyExpr = &ast.StringLiteral{Token: key.Token, Value: key.Value}
 	}
 
 	if p.peekTokenIs(token.COLON) { //a hash comprehension
@@ -1635,7 +1632,7 @@ func (p *Parser) parseHashExpression() ast.Expression {
 		valueExpr := p.parseExpression(LOWEST)
 
 		if p.peekTokenIs(token.COMMA) || p.peekTokenIs(token.RBRACE) { // {k1:v1, ...} or {k1:v1}
-			hash := &ast.HashLiteral{Token: curToken, Order:[]ast.Expression{}}
+			hash := &ast.HashLiteral{Token: curToken, Order: []ast.Expression{}}
 			hash.Pairs = make(map[ast.Expression]ast.Expression)
 
 			hash.Pairs[keyExpr] = valueExpr
@@ -1652,7 +1649,7 @@ func (p *Parser) parseHashExpression() ast.Expression {
 				key := p.parseExpression(SLICE)
 				if k, ok := key.(*ast.Identifier); ok {
 					//convert *ast.Identifier to *ast.StringLiteral
-					key = &ast.StringLiteral{Token:k.Token, Value:k.Value}
+					key = &ast.StringLiteral{Token: k.Token, Value: k.Value}
 				}
 
 				if !p.expectPeek(token.COLON) {
@@ -1803,7 +1800,7 @@ func (p *Parser) parseHashMapComprehension(curToken token.Token, key string, key
 		return nil
 	}
 
-	result := &ast.HashMapComprehension{Token: curToken, Key: key, Value: value, X:X, Cond: aCond, KeyExpr:keyExpr, ValExpr:valueExpr}
+	result := &ast.HashMapComprehension{Token: curToken, Key: key, Value: value, X: X, Cond: aCond, KeyExpr: keyExpr, ValExpr: valueExpr}
 	return result
 }
 
@@ -1838,11 +1835,11 @@ func (p *Parser) parseHashListComprehension(curToken token.Token, variable strin
 
 	var result ast.Expression
 	if !isRange {
-		result = &ast.HashComprehension{Token: curToken, Var: variable, Value: aValue1, Cond: aCond, KeyExpr:keyExpr, ValExpr:valueExpr}
+		result = &ast.HashComprehension{Token: curToken, Var: variable, Value: aValue1, Cond: aCond, KeyExpr: keyExpr, ValExpr: valueExpr}
 	} else {
-		result = &ast.HashRangeComprehension{Token: curToken, Var: variable, StartIdx: aValue1, EndIdx: aValue2, Cond: aCond, KeyExpr:keyExpr, ValExpr:valueExpr}
+		result = &ast.HashRangeComprehension{Token: curToken, Var: variable, StartIdx: aValue1, EndIdx: aValue2, Cond: aCond, KeyExpr: keyExpr, ValExpr: valueExpr}
 	}
-	
+
 	return result
 }
 
@@ -1883,8 +1880,8 @@ func (p *Parser) parseArrayExpression() ast.Expression {
 	curToken := p.curToken
 	temp, b, creationCount := p.parseExpressionArrayEx([]ast.Expression{}, token.RBRACKET)
 	if b { //list comprehension or map comprehension
-		p.nextToken() //skip 'for'
-		if !p.expectPeek(token.IDENT) {  //must be an identifier
+		p.nextToken()                   //skip 'for'
+		if !p.expectPeek(token.IDENT) { //must be an identifier
 			return nil
 		}
 
@@ -1938,7 +1935,7 @@ func (p *Parser) parseListComprehension(curToken token.Token, expr ast.Expressio
 	} else {
 		result = &ast.ListRangeComprehension{Token: curToken, Var: variable, StartIdx: aValue1, EndIdx: aValue2, Cond: aCond, Expr: expr}
 	}
-	
+
 	return result
 }
 
@@ -1971,7 +1968,7 @@ func (p *Parser) parseListMapComprehension(curToken token.Token, expr ast.Expres
 		return nil
 	}
 
-	result := &ast.ListMapComprehension{Token: curToken, Key: variable, Value: Value, X:X, Cond: aCond, Expr: expr}
+	result := &ast.ListMapComprehension{Token: curToken, Key: variable, Value: Value, X: X, Cond: aCond, Expr: expr}
 	return result
 }
 
@@ -2009,6 +2006,7 @@ func (p *Parser) parseExpressionArrayEx(a []ast.Expression, closure token.TokenT
 
 	return a, false, nil
 }
+
 // case expr in {
 //    expr,expr { expr }
 //    expr { expr }
@@ -2280,7 +2278,6 @@ func (p *Parser) parseEnumStatement() ast.Statement {
 	enumStmt := &ast.EnumStatement{Token: p.curToken}
 	enumStmt.Doc = p.lineComment
 
-
 	p.nextToken()
 	enumStmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
@@ -2348,7 +2345,6 @@ func (p *Parser) parseEnumExpression() ast.Expression {
 			autoInt++
 		}
 
-
 		str_enum_id := enum_id.(*ast.Identifier).Value
 		if _, ok := idPair[str_enum_id]; ok { //is identifier redeclared?
 			msg := fmt.Sprintf("Syntax Error:%v- Identifier %s redeclared.", p.curToken.Pos, str_enum_id)
@@ -2385,7 +2381,7 @@ func isClassStmtToken(t token.Token) bool {
 	tt := t.Type //tt: token type
 	if tt == token.LET || tt == token.PROPERTY || tt == token.FUNCTION {
 		return true
-	} 
+	}
 
 	if tt == token.PUBLIC || tt == token.PROTECTED || tt == token.PRIVATE { //modifier
 		return true
@@ -2401,7 +2397,6 @@ func isClassStmtToken(t token.Token) bool {
 
 	return false
 }
-
 
 //parse annotation class
 func (p *Parser) parseClassLiteralForAnno() ast.Expression {
@@ -2444,7 +2439,6 @@ func (p *Parser) parseClassLiteralForAnno() ast.Expression {
 	return cls
 }
 
-
 // class : parentClass { block }.
 //e.g. let classname = class : parentClass { block }
 func (p *Parser) parseClassLiteral() ast.Expression {
@@ -2478,7 +2472,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 		//fmt.Printf("In parseClassLiteral, stmt=%s\n", statement.String()) //debugging purpose
 
 		switch s := statement.(type) {
-		case *ast.LetStatement:  //class fields
+		case *ast.LetStatement: //class fields
 			for _, value := range s.Values {
 				switch value.(type) {
 				case *ast.FunctionLiteral:
@@ -2508,7 +2502,7 @@ func (p *Parser) parseClassLiteral() ast.Expression {
 }
 
 func (p *Parser) parseClassBody(processAnnoClass bool) *ast.BlockStatement {
-	stmts := &ast.BlockStatement{Token: p.curToken, Statements:[]ast.Statement{}}
+	stmts := &ast.BlockStatement{Token: p.curToken, Statements: []ast.Statement{}}
 
 	p.nextToken() //skip '{'
 	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
@@ -2537,7 +2531,7 @@ LABEL:
 	//parse Annotation
 	for p.curTokenIs(token.AT) {
 		var tokenIsLParen bool
-		anno := &ast.AnnotationStmt{Token:p.curToken, Attributes:map[string]ast.Expression{}}
+		anno := &ast.AnnotationStmt{Token: p.curToken, Attributes: map[string]ast.Expression{}}
 
 		if !p.expectPeek(token.IDENT) {
 			return nil
@@ -2551,7 +2545,7 @@ LABEL:
 			tokenIsLParen = false
 			p.nextToken()
 		} else { //marker annotation, e.g. @Demo
-			 //only 'property' and 'function' can have annotations
+			//only 'property' and 'function' can have annotations
 			if !p.peekTokenIs(token.FUNCTION) && !p.peekTokenIs(token.PROPERTY) && !p.peekTokenIs(token.AT) && !p.peekTokenIs(token.STATIC) {
 				msg := fmt.Sprintf("Syntax Error:%v- expected token to be 'fn'| 'property'|'static', or another annotation, got '%s' instead", p.peekToken.Pos, p.peekToken.Type)
 				p.errors = append(p.errors, msg)
@@ -2675,7 +2669,7 @@ func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag b
 }
 
 //property xxx { get; set; }
-//property xxx { get; } or 
+//property xxx { get; } or
 //property xxx { set; }
 //property xxx { get {xxx} }
 //property xxx { set {xxx} }
@@ -2683,22 +2677,22 @@ func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag b
 //property this[x] { get {xxx} set {xxx} }
 //property xxx default defaultValue
 //property xxx = defaultValue
-func(p *Parser) parsePropertyDeclStmt(processAnnoClass bool) *ast.PropertyDeclStmt {
-	stmt := &ast.PropertyDeclStmt{Token:p.curToken}
+func (p *Parser) parsePropertyDeclStmt(processAnnoClass bool) *ast.PropertyDeclStmt {
+	stmt := &ast.PropertyDeclStmt{Token: p.curToken}
 	stmt.Doc = p.lineComment
 
-	if !p.expectPeek(token.IDENT) {  //must be an identifier, it's property name
+	if !p.expectPeek(token.IDENT) { //must be an identifier, it's property name
 		return nil
 	}
 	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
-	if processAnnoClass || p.peekTokenIs(token.SEMICOLON) {  //annotation class' property defaults to have both getter and setter.
-		getterToken := token.Token{Pos:p.curToken.Pos, Type:token.GET, Literal:"get"}
-		stmt.Getter = &ast.GetterStmt{Token:getterToken}
+	if processAnnoClass || p.peekTokenIs(token.SEMICOLON) { //annotation class' property defaults to have both getter and setter.
+		getterToken := token.Token{Pos: p.curToken.Pos, Type: token.GET, Literal: "get"}
+		stmt.Getter = &ast.GetterStmt{Token: getterToken}
 		stmt.Getter.Body = &ast.BlockStatement{Statements: []ast.Statement{}}
 
-		setterToken := token.Token{Pos:p.curToken.Pos, Type:token.SET, Literal:"set"}
-		stmt.Setter = &ast.SetterStmt{Token:setterToken}
+		setterToken := token.Token{Pos: p.curToken.Pos, Type: token.SET, Literal: "set"}
+		stmt.Setter = &ast.SetterStmt{Token: setterToken}
 		stmt.Setter.Body = &ast.BlockStatement{Statements: []ast.Statement{}}
 
 		if processAnnoClass {
@@ -2717,14 +2711,14 @@ func(p *Parser) parsePropertyDeclStmt(processAnnoClass bool) *ast.PropertyDeclSt
 	}
 
 	foundIndexer := false
-	thisToken := p.curToken //save the current token for later use
+	thisToken := p.curToken           //save the current token for later use
 	if p.curToken.Literal == "this" { //assume it is a indexer declaration
 		foundIndexer = true
 		if !p.expectPeek(token.LBRACKET) { //e.g. 'property this[index]'
 			return nil
 		}
 
-		if !p.expectPeek(token.IDENT) {  //must be an identifier, it's the index
+		if !p.expectPeek(token.IDENT) { //must be an identifier, it's the index
 			return nil
 		}
 		stmt.Indexes = append(stmt.Indexes, &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal})
@@ -2774,7 +2768,7 @@ func(p *Parser) parsePropertyDeclStmt(processAnnoClass bool) *ast.PropertyDeclSt
 }
 
 func (p *Parser) parseGetter() *ast.GetterStmt {
-	stmt := &ast.GetterStmt{Token:p.curToken}
+	stmt := &ast.GetterStmt{Token: p.curToken}
 	p.nextToken() //skip the 'get' keyword
 
 	switch p.curToken.Type {
@@ -2789,7 +2783,7 @@ func (p *Parser) parseGetter() *ast.GetterStmt {
 }
 
 func (p *Parser) parseSetter() *ast.SetterStmt {
-	stmt := &ast.SetterStmt{Token:p.curToken}
+	stmt := &ast.SetterStmt{Token: p.curToken}
 	p.nextToken() //skip the set keyword
 
 	switch p.curToken.Type {
@@ -2886,7 +2880,7 @@ func (p *Parser) parsePipeExpression(left ast.Expression) ast.Expression {
 // x  => x + 5             left expression is *Identifier
 //()  => 5 + 5             left expression is nil
 func (p *Parser) parseFatArrowFunction(left ast.Expression) ast.Expression {
-	tok := token.Token{Type:token.FUNCTION, Literal:"fn"}
+	tok := token.Token{Type: token.FUNCTION, Literal: "fn"}
 	fn := &ast.FunctionLiteral{Token: tok, Variadic: false}
 	switch exprType := left.(type) {
 	case nil:
@@ -2917,8 +2911,8 @@ func (p *Parser) parseFatArrowFunction(left ast.Expression) ast.Expression {
 		fn.Body = p.parseBlockStatement()
 	} else { //not block, we use parseStatement
 		/* Note here, if we use parseExpressionStatement, then below is not correct:
-		      (x) => return x  //error: no prefix parse functions for 'RETURN' found
-		  so we need to use parseStatement() here
+		    (x) => return x  //error: no prefix parse functions for 'RETURN' found
+		so we need to use parseStatement() here
 		*/
 		fn.Body = &ast.BlockStatement{
 			Statements: []ast.Statement{
@@ -2980,7 +2974,6 @@ func (p *Parser) parseLinqExpression() ast.Expression {
 
 	//query_body
 	queryExpr.QueryBody = p.parseQueryBodyExpression()
-
 
 	if queryExpr.QueryBody.(*ast.QueryBodyExpr).Expr == nil {
 		msg := fmt.Sprintf("Syntax Error:%v- Linq query must be ended with 'select' or 'group'.", p.curToken.Pos)
@@ -3045,7 +3038,7 @@ func (p *Parser) parseQueryBodyExpression() ast.Expression {
 		p.nextToken()
 		queryBodyExpr.QueryContinuation = p.parseQueryContinuationExpression()
 	}
-	
+
 	return queryBodyExpr
 }
 
@@ -3238,7 +3231,7 @@ func (p *Parser) parseOrderByExpression() ast.Expression {
 
 //ordering : expression (ASCENDING | DESCENDING)?
 func (p *Parser) parseOrderingExpr() ast.Expression {
-	exp := &ast.OrderingExpr{IsAscending:true, HasSortOrder: false, Var:p.curToken.Literal}
+	exp := &ast.OrderingExpr{IsAscending: true, HasSortOrder: false, Var: p.curToken.Literal}
 
 	//expression
 	exp.Expr = p.parseExpression(LOWEST)
@@ -3533,7 +3526,7 @@ func (p *Parser) isDocLine(lineNo int) bool {
 		return false
 	}
 
-	lineSlice := FileLines[lineNo-1:lineNo]
+	lineSlice := FileLines[lineNo-1 : lineNo]
 	lineStr := strings.TrimLeft(lineSlice[0], "\t ")
 	if len(lineStr) > 0 {
 		if lineStr[0] == '#' || lineStr[0] == '/' {
@@ -3544,7 +3537,7 @@ func (p *Parser) isDocLine(lineNo int) bool {
 }
 
 //fix position column(for error report)
-func(p *Parser) fixPosCol() token.Position {
+func (p *Parser) fixPosCol() token.Position {
 	pos := p.curToken.Pos
 	if p.curToken.Type == token.STRING || p.curToken.Type == token.ISTRING {
 		pos.Col = pos.Col + len(p.curToken.Literal) + 2 //2: two double/single quote(s)
@@ -3556,11 +3549,11 @@ func(p *Parser) fixPosCol() token.Position {
 }
 
 //DEBUG ONLY
-func(p *Parser) debugToken(message string) {
+func (p *Parser) debugToken(message string) {
 	fmt.Printf("%s, curToken = %s, peekToken = %s\n", message, p.curToken.Literal, p.peekToken.Literal)
 }
 
-func(p *Parser) debugNode(message string, node ast.Node) {
+func (p *Parser) debugNode(message string, node ast.Node) {
 	fmt.Printf("%s, Node = %s\n", message, node.String())
 }
 

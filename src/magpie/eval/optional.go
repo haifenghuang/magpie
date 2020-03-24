@@ -14,7 +14,7 @@ type Optional struct {
 }
 
 func NewOptionalObj() Object {
-	ret := &Optional{Value:NIL}
+	ret := &Optional{Value: NIL}
 	SetGlobalObj(optional_name, ret)
 
 	return ret
@@ -22,7 +22,7 @@ func NewOptionalObj() Object {
 
 func (o *Optional) Inspect() string {
 	if o.Value != NIL {
-		return "Optional["+ o.Value.Inspect() + "]"
+		return "Optional[" + o.Value.Inspect() + "]"
 	}
 	return "Optional.empty"
 }
@@ -84,7 +84,7 @@ func (o *Optional) Of(line string, args ...Object) Object {
 	}
 
 	//returns a new Optional
-	return &Optional{Value:args[0]}
+	return &Optional{Value: args[0]}
 }
 
 //Returns an Optional describing the given value, if non-nil, otherwise returns an empty Optional.
@@ -141,7 +141,7 @@ func (o *Optional) Or(line string, scope *Scope, args ...Object) Object {
 
 	s := NewScope(scope)
 	opt := Eval(supplier.Literal.Body, s) // run the function
-	if opt.Type() != OPTIONAL_OBJ { // the supplier function must return an Optional
+	if opt.Type() != OPTIONAL_OBJ {       // the supplier function must return an Optional
 		panic(NewError(line, GENERICERROR, "The supplier function must return an optional."))
 	}
 	return opt
@@ -219,7 +219,7 @@ func (o *Optional) IfPresent(line string, scope *Scope, args ...Object) Object {
 	s := NewScope(scope)
 	s.Set(action.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 	ret := Eval(action.Literal.Body, s) // run the function
-	
+
 	return ret
 }
 

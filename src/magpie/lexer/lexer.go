@@ -3,11 +3,11 @@ package lexer
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"magpie/token"
 	"strings"
 	"unicode"
 	"unicode/utf8"
-	"fmt"
 )
 
 const bom = 0xFEFF // byte order mark, only permitted as very first character
@@ -20,7 +20,7 @@ type Mode uint
 
 const (
 	ScanComments Mode = 1 << iota // return comments as COMMENT tokens
-	op_chars = ".=+-*/%&,|^~<,>},!?@#$"
+	op_chars          = ".=+-*/%&,|^~<,>},!?@#$"
 )
 
 type Lexer struct {
@@ -30,10 +30,10 @@ type Lexer struct {
 	position     int  //character offset
 	readPosition int  //reading offset
 
-	line         int
-	col          int
+	line int
+	col  int
 
-	Mode         Mode // scanning mode
+	Mode Mode // scanning mode
 }
 
 func New(filename, input string) *Lexer {
@@ -222,7 +222,7 @@ func (l *Lexer) NextToken() token.Token {
 				} else {
 					comment, _ = l.readMultilineComment()
 				}
-				if l.Mode & ScanComments == 0 { //skip comment
+				if l.Mode&ScanComments == 0 { //skip comment
 					return l.NextToken()
 				}
 
@@ -290,16 +290,16 @@ func (l *Lexer) NextToken() token.Token {
 				tok = newToken(token.DOT, l.ch)
 			}
 		case token.COMMENT:
-				comment := l.readComment()
-				if l.Mode & ScanComments == 0 { //skip comment
-					return l.NextToken()
-				}
+			comment := l.readComment()
+			if l.Mode&ScanComments == 0 { //skip comment
+				return l.NextToken()
+			}
 
-				tok.Pos = pos
-				tok.Type = token.COMMENT
-				tok.Literal = comment
-				prevToken = tok
-				return tok
+			tok.Pos = pos
+			tok.Type = token.COMMENT
+			tok.Literal = comment
+			prevToken = tok
+			return tok
 		case token.BITAND:
 			if l.peek() == '=' {
 				tok = token.Token{Type: token.BITAND_A, Literal: string(l.ch) + string(l.peek())}
@@ -344,7 +344,7 @@ func (l *Lexer) NextToken() token.Token {
 			}
 		case token.QUESTIONM:
 			if l.peek() == '?' {
-			tok = token.Token{Type: token.QUESTIONMM, Literal: string(l.ch) + string(l.peek())}
+				tok = token.Token{Type: token.QUESTIONMM, Literal: string(l.ch) + string(l.peek())}
 				l.readNext()
 			} else {
 				tok = newToken(token.QUESTIONM, l.ch)
@@ -438,7 +438,7 @@ func (l *Lexer) readRawString() (string, error) {
 			return "", errors.New("unexpected EOF")
 		}
 
-		if l.ch == 96 && l.peek() == 96{
+		if l.ch == 96 && l.peek() == 96 {
 			l.readNext()
 			l.readNext()
 			break
@@ -587,14 +587,14 @@ eoc:
 }
 
 func (l *Lexer) readIdentifier() string {
-// 	defer func() {
-//		if err := recover(); err != nil {
-// 			fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", err)
-// 		}
-//    }()
+	// 	defer func() {
+	//		if err := recover(); err != nil {
+	// 			fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", err)
+	// 		}
+	//    }()
 
 	position := l.position
-	// Why '?' : Because Magpie support Optional, so it should be good for 
+	// Why '?' : Because Magpie support Optional, so it should be good for
 	// a Optional type to denote it meaning with a '?' like 'isEmpty?'
 
 	// Why '$' : Because Magpie support extend built-in types with 'integer', 'float', etc.
@@ -607,11 +607,11 @@ func (l *Lexer) readIdentifier() string {
 	ret := string(l.input[position:l.position])
 
 	cnt := strings.Count(ret, "?")
-	if  cnt > 1 { //multiple '?'
+	if cnt > 1 { //multiple '?'
 		errStr := fmt.Sprintf("Line[%d]: Identifier() could only contain one '?' character", l.line, ret)
 		panic(errStr)
 	} else if cnt == 1 { //only one '?'
-		if ret[len(ret) - 1:] != "?" {
+		if ret[len(ret)-1:] != "?" {
 			errStr := fmt.Sprintf("Line[%d]: '?' character must be the last character in '%s' identifier", l.line, ret)
 			panic(errStr)
 		}
@@ -733,9 +733,9 @@ func (l *Lexer) readNumber() (string, bool, error) {
 			isUnsigned = true
 			l.readNext()
 		}
-//		if isLetter(l.ch) {
-//			return "", errors.New("identifier starts immediately after numeric literal")
-//		}
+		//		if isLetter(l.ch) {
+		//			return "", errors.New("identifier starts immediately after numeric literal")
+		//		}
 	}
 
 	if isUnsigned {
@@ -845,4 +845,3 @@ func (l *Lexer) getPos() token.Position {
 		Col:      l.col,
 	}
 }
-

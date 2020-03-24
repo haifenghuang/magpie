@@ -66,7 +66,7 @@ const (
 	CONDAND // &&
 	CONDOR  // ||
 
-	AT //@
+	AT  //@
 	CMD // `
 
 	FUNCTION
@@ -215,13 +215,13 @@ var keywords = map[string]TokenType{
 	"using":     USING,
 
 	//linq query
-	"from":       FROM,
+	"from": FROM,
 	//"where":      WHERE,
-	"select":     SELECT,
-	"group":      GROUP,
-	"into":       INTO,
-	"orderby":    ORDERBY,
-	"join":       JOIN,
+	"select":  SELECT,
+	"group":   GROUP,
+	"into":    INTO,
+	"orderby": ORDERBY,
+	"join":    JOIN,
 	//"let":      LET,
 	//"in":       IN,
 	"on":         ON,
@@ -231,11 +231,11 @@ var keywords = map[string]TokenType{
 	"descending": DESCENDING,
 
 	//async & await
-	"async":      ASYNC,
-	"await":      AWAIT,
+	"async": ASYNC,
+	"await": AWAIT,
 
 	//service
-	"service":    SERVICE,
+	"service": SERVICE,
 }
 
 //for debug & testing

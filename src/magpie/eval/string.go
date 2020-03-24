@@ -823,7 +823,7 @@ func (s String) Value() (driver.Value, error) {
 }
 
 const (
-	STRINGS_OBJ = "STRINGS_OBJ"
+	STRINGS_OBJ  = "STRINGS_OBJ"
 	strings_name = "strings"
 )
 

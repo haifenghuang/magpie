@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"magpie/ast"
+	"math"
 	"os"
 	"reflect"
 	"runtime"
@@ -19,8 +19,8 @@ import (
 )
 
 var formatMap = map[int]string{
-    0: "",
-    1: "%v",
+	0: "",
+	1: "%v",
 }
 
 var colorMap = map[string]string{
@@ -226,19 +226,19 @@ func (io *IncludedObject) CallMethod(line string, scope *Scope, method string, a
 }
 
 type Function struct {
-	Literal  *ast.FunctionLiteral
-	Variadic bool
-	Scope    *Scope
-	Instance *ObjectInstance //For use with class functions
+	Literal     *ast.FunctionLiteral
+	Variadic    bool
+	Scope       *Scope
+	Instance    *ObjectInstance //For use with class functions
 	Annotations []*ObjectInstance
 
-	Async      bool
+	Async bool
 }
 
 func (f *Function) Inspect() string  { return f.Literal.String() }
 func (r *Function) Type() ObjectType { return FUNCTION_OBJ }
 
-func (f *Function) classMethod() ast.ModifierLevel { 
+func (f *Function) classMethod() ast.ModifierLevel {
 	return f.Literal.ModifierLevel
 }
 
@@ -247,7 +247,7 @@ func (f *Function) CallMethod(line string, scope *Scope, method string, args ...
 }
 
 type ReturnValue struct {
-	Value Object // for old campatibility
+	Value  Object // for old campatibility
 	Values []Object
 }
 
@@ -422,7 +422,7 @@ func (i *Integer) IsEven(line string, args ...Object) Object {
 	}
 
 	if i.Valid {
-		if i.Int64 % 2 == 0 {
+		if i.Int64%2 == 0 {
 			return TRUE
 		}
 		return FALSE
@@ -436,7 +436,7 @@ func (i *Integer) IsOdd(line string, args ...Object) Object {
 	}
 
 	if i.Valid {
-		if i.Int64 % 2 != 0 {
+		if i.Int64%2 != 0 {
 			return TRUE
 		}
 		return FALSE
@@ -551,7 +551,7 @@ func NewUInteger(i uint64) *UInteger {
 
 type UInteger struct {
 	UInt64 uint64
-	Valid bool
+	Valid  bool
 }
 
 func (i *UInteger) Inspect() string {
@@ -645,7 +645,7 @@ func (i *UInteger) IsEven(line string, args ...Object) Object {
 	}
 
 	if i.Valid {
-		if i.UInt64 % 2 == 0 {
+		if i.UInt64%2 == 0 {
 			return TRUE
 		}
 		return FALSE
@@ -659,7 +659,7 @@ func (i *UInteger) IsOdd(line string, args ...Object) Object {
 	}
 
 	if i.Valid {
-		if i.UInt64 % 2 != 0 {
+		if i.UInt64%2 != 0 {
 			return TRUE
 		}
 		return FALSE
@@ -928,7 +928,7 @@ func (f *Float) Round(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "round", "*Integer|*UInteger", args[0].Type()))
 	}
 
-	format := fmt.Sprintf("%%.%df", precision) //'%.xf', x is the precision, e.g. %.2f
+	format := fmt.Sprintf("%%.%df", precision)    //'%.xf', x is the precision, e.g. %.2f
 	resultStr := fmt.Sprintf(format, f.Float64)   //convert to string
 	ret, err := strconv.ParseFloat(resultStr, 64) //convert string back to float
 	if err != nil {
@@ -1353,7 +1353,6 @@ func hashObj2RawValue(h *Hash) interface{} {
 	return ret
 }
 
-
 //This `Formatter` struct is mainly used to encapsulate golang
 //`fmt` package's `Formatter` interface.
 //When we implement this interface, our `Object` could be directed passed to fmt.Printf(xxx)
@@ -1400,25 +1399,25 @@ func (ft *Formatter) Format(s fmt.State, verb rune) {
 
 	var reset = "\033[0m"
 
-//	//if the float is actual an integer, and you use '%d'
-//	//e.g.
-//	//    f = 20 / 2
-//	//    printf("f = %d\n", f)
-//	// then the result will be 'f = %!d(float64=10)'. but we actually want 'f = 10'.
-//	// For solving this problem, we just convert the float to integer and then print the integer value.
-//	if formatStr == "%d" {
-//		if ft.Obj.Type() == FLOAT_OBJ {
-//			f := ft.Obj.(*Float).Float64
-//			i := int64(f)
-//			if (f == float64(i)) { // if the float is actuall an integer
-//				if REPLColor {
-//					formatStr = "\033[1;" + colorMap["NUMBER"] + "m" + formatStr + reset
-//				}
-//				fmt.Fprintf(s, formatStr, i)
-//				return
-//			}
-//		}
-//	}
+	//	//if the float is actual an integer, and you use '%d'
+	//	//e.g.
+	//	//    f = 20 / 2
+	//	//    printf("f = %d\n", f)
+	//	// then the result will be 'f = %!d(float64=10)'. but we actually want 'f = 10'.
+	//	// For solving this problem, we just convert the float to integer and then print the integer value.
+	//	if formatStr == "%d" {
+	//		if ft.Obj.Type() == FLOAT_OBJ {
+	//			f := ft.Obj.(*Float).Float64
+	//			i := int64(f)
+	//			if (f == float64(i)) { // if the float is actuall an integer
+	//				if REPLColor {
+	//					formatStr = "\033[1;" + colorMap["NUMBER"] + "m" + formatStr + reset
+	//				}
+	//				fmt.Fprintf(s, formatStr, i)
+	//				return
+	//			}
+	//		}
+	//	}
 
 	switch obj := ft.Obj.(type) {
 	case *Boolean:
@@ -1477,11 +1476,11 @@ func (ft *Formatter) Format(s fmt.State, verb rune) {
 }
 
 /*  when you call println/print like below:
-		println("a=", 10)
-		print("a=", 10)
-	the golang will return "a= 10", not "a=10", this is not what we expected.
-	the solution is take from:
-		https://stackoverflow.com/questions/25928991/go-print-without-space-between-items
+	println("a=", 10)
+	print("a=", 10)
+the golang will return "a= 10", not "a=10", this is not what we expected.
+the solution is take from:
+	https://stackoverflow.com/questions/25928991/go-print-without-space-between-items
 */
 func correctPrintResult(needNewLine bool, args ...Object) (string, []interface{}) {
 	l := len(args)
@@ -1504,4 +1503,3 @@ func correctPrintResult(needNewLine bool, args ...Object) (string, []interface{}
 
 	return s, wrapped
 }
-

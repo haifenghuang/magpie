@@ -83,7 +83,6 @@ func (d *DecimalObj) CallMethod(line string, scope *Scope, method string, args .
 	case "floor":
 		return d.Floor(line, args...)
 
-
 	//comparation
 	case "cmp":
 		return d.Cmp(line, args...)
@@ -142,7 +141,7 @@ func (d *DecimalObj) New(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "second", "new", "*Integer", args[1].Type()))
 	}
 
-	return &DecimalObj{Number: NewDec(value.Int64, int32(exp.Int64)), Valid:true}
+	return &DecimalObj{Number: NewDec(value.Int64, int32(exp.Int64)), Valid: true}
 }
 
 func (d *DecimalObj) FromString(line string, args ...Object) Object {
@@ -155,12 +154,12 @@ func (d *DecimalObj) FromString(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "fromString", "*Integer", args[0].Type()))
 	}
 
-	d1,  err := NewFromString(value.String)
+	d1, err := NewFromString(value.String)
 	if err != nil {
 		panic(NewError(line, INVALIDARG))
 	}
 
-	return &DecimalObj{Number:d1, Valid:true}
+	return &DecimalObj{Number: d1, Valid: true}
 }
 
 func (d *DecimalObj) FromFloat(line string, args ...Object) Object {
@@ -170,11 +169,11 @@ func (d *DecimalObj) FromFloat(line string, args ...Object) Object {
 
 	switch input := args[0].(type) {
 	case *Integer:
-		return &DecimalObj{Number:NewFromInt(input.Int64), Valid:true}
+		return &DecimalObj{Number: NewFromInt(input.Int64), Valid: true}
 	case *UInteger:
-		return &DecimalObj{Number:NewFromUInt(input.UInt64), Valid:true}
+		return &DecimalObj{Number: NewFromUInt(input.UInt64), Valid: true}
 	case *Float:
-		return &DecimalObj{Number:NewFromFloat(input.Float64), Valid:true}
+		return &DecimalObj{Number: NewFromFloat(input.Float64), Valid: true}
 	default:
 		panic(NewError(line, PARAMTYPEERROR, "first", "fromFloat", "*Float|*Integer|*UInteger", args[0].Type()))
 	}
@@ -202,7 +201,7 @@ func (d *DecimalObj) FromFloatWithExponent(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "second", "fromFloatWithExponent", "*Integer", args[1].Type()))
 	}
 
-	return &DecimalObj{Number:NewFromFloatWithExponent(value, int32(exp.Int64)), Valid:true}
+	return &DecimalObj{Number: NewFromFloatWithExponent(value, int32(exp.Int64)), Valid: true}
 }
 
 func (d *DecimalObj) Avg(line string, args ...Object) Object {
@@ -223,7 +222,7 @@ func (d *DecimalObj) Avg(line string, args ...Object) Object {
 
 	ret := Avg(first.Number, vals...)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Max(line string, args ...Object) Object {
@@ -244,7 +243,7 @@ func (d *DecimalObj) Max(line string, args ...Object) Object {
 
 	ret := Max(first.Number, vals...)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Min(line string, args ...Object) Object {
@@ -265,7 +264,7 @@ func (d *DecimalObj) Min(line string, args ...Object) Object {
 
 	ret := Min(first.Number, vals...)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Sum(line string, args ...Object) Object {
@@ -286,7 +285,7 @@ func (d *DecimalObj) Sum(line string, args ...Object) Object {
 
 	ret := Sum(first.Number, vals...)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Neg(line string, args ...Object) Object {
@@ -295,7 +294,7 @@ func (d *DecimalObj) Neg(line string, args ...Object) Object {
 	}
 
 	ret := d.Number.Neg()
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Abs(line string, args ...Object) Object {
@@ -305,7 +304,7 @@ func (d *DecimalObj) Abs(line string, args ...Object) Object {
 
 	ret := d.Number.Abs()
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Add(line string, args ...Object) Object {
@@ -335,7 +334,7 @@ func (d *DecimalObj) Add(line string, args ...Object) Object {
 
 	ret := d.Number.Add(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Sub(line string, args ...Object) Object {
@@ -365,7 +364,7 @@ func (d *DecimalObj) Sub(line string, args ...Object) Object {
 
 	ret := d.Number.Sub(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Mul(line string, args ...Object) Object {
@@ -395,7 +394,7 @@ func (d *DecimalObj) Mul(line string, args ...Object) Object {
 
 	ret := d.Number.Mul(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Div(line string, args ...Object) Object {
@@ -425,7 +424,7 @@ func (d *DecimalObj) Div(line string, args ...Object) Object {
 
 	ret := d.Number.Div(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) DivRound(line string, args ...Object) Object {
@@ -460,7 +459,7 @@ func (d *DecimalObj) DivRound(line string, args ...Object) Object {
 
 	ret := d.Number.DivRound(d2, int32(precision.Int64))
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Mod(line string, args ...Object) Object {
@@ -490,7 +489,7 @@ func (d *DecimalObj) Mod(line string, args ...Object) Object {
 
 	ret := d.Number.Mod(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Pow(line string, args ...Object) Object {
@@ -520,7 +519,7 @@ func (d *DecimalObj) Pow(line string, args ...Object) Object {
 
 	ret := d.Number.Pow(d2)
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Ceil(line string, args ...Object) Object {
@@ -530,7 +529,7 @@ func (d *DecimalObj) Ceil(line string, args ...Object) Object {
 
 	ret := d.Number.Ceil()
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Round(line string, args ...Object) Object {
@@ -550,7 +549,7 @@ func (d *DecimalObj) Round(line string, args ...Object) Object {
 
 	ret := d.Number.Round(int32(places))
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Truncate(line string, args ...Object) Object {
@@ -570,7 +569,7 @@ func (d *DecimalObj) Truncate(line string, args ...Object) Object {
 
 	ret := d.Number.Truncate(int32(precision))
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Floor(line string, args ...Object) Object {
@@ -580,7 +579,7 @@ func (d *DecimalObj) Floor(line string, args ...Object) Object {
 
 	ret := d.Number.Floor()
 
-	return &DecimalObj{Number:ret, Valid:true}
+	return &DecimalObj{Number: ret, Valid: true}
 }
 
 func (d *DecimalObj) Cmp(line string, args ...Object) Object {
@@ -613,7 +612,6 @@ func (d *DecimalObj) Equal(line string, args ...Object) Object {
 	}
 	return FALSE
 }
-
 
 func (d *DecimalObj) GreaterThan(line string, args ...Object) Object {
 	if len(args) != 1 {
@@ -863,8 +861,6 @@ func (d *DecimalObj) UnmarshalJSON(b []byte) error {
 	d.Valid = true
 	return d.Number.UnmarshalJSON(b)
 }
-
-
 
 /*============================================================================
 	BELOW IS THE SOURCE OF DECIMAL(https://github.com/shopspring/decimal)

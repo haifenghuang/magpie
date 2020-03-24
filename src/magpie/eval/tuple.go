@@ -14,9 +14,9 @@ import (
 */
 
 type Tuple struct {
-	 // Used in function return values.
-	 // if a function returns multiple values, they will wrap the results into a tuple,
-	 // the flag will be set to true
+	// Used in function return values.
+	// if a function returns multiple values, they will wrap the results into a tuple,
+	// the flag will be set to true
 	IsMulti bool
 	Members []Object
 }
@@ -66,7 +66,7 @@ func (t *Tuple) CallMethod(line string, scope *Scope, method string, args ...Obj
 		return t.First(line, args...)
 	case "last":
 		return t.Last(line, args...)
-	case "tail","rest":
+	case "tail", "rest":
 		return t.Tail(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, t.Type()))
@@ -191,7 +191,7 @@ func (t *Tuple) Map(line string, scope *Scope, args ...Object) Object {
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type()))
 	}
-	
+
 	tuple := &Tuple{}
 	s := NewScope(scope)
 	for _, argument := range t.Members {
@@ -291,7 +291,7 @@ func (t *Tuple) Last(line string, args ...Object) Object {
 	if length == 0 {
 		return NIL
 	}
-	return t.Members[length - 1]
+	return t.Members[length-1]
 }
 
 func (t *Tuple) Tail(line string, args ...Object) Object {
@@ -341,7 +341,7 @@ func (t *Tuple) MarshalJSON() ([]byte, error) {
 
 	var out bytes.Buffer
 
-	out.WriteString("[")  //NOTE HERE: we do not use "(", because json doesn't support tuple
+	out.WriteString("[") //NOTE HERE: we do not use "(", because json doesn't support tuple
 	for idx, v := range t.Members {
 		if idx != 0 {
 			out.WriteString(",")
@@ -354,7 +354,7 @@ func (t *Tuple) MarshalJSON() ([]byte, error) {
 		out.WriteString(res.String())
 	} //end for
 	out.WriteString("]") //NOTE HERE: we do not use "(", because json doesn't support tuple
-	
+
 	return out.Bytes(), nil
 }
 
@@ -362,4 +362,3 @@ func (t *Tuple) MarshalJSON() ([]byte, error) {
 //func (t *Tuple) UnmarshalJSON(b []byte) error {
 //
 //}
-

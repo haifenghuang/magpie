@@ -62,7 +62,7 @@ func NewTimeObj() Object {
 }
 
 const (
-	TIME_OBJ = "TIME_OBJ"
+	TIME_OBJ                     = "TIME_OBJ"
 	builtinDate_goDateTimeLayout = time.RFC1123 // "Mon, 02 Jan 2006 15:04:05 MST"
 	builtinDate_goDateLayout     = "Mon, 02 Jan 2006"
 	builtinDate_goTimeLayout     = "15:04:05 MST"
@@ -74,7 +74,6 @@ func (t *TimeObj) Inspect() string {
 		return v.(*String).String
 	}
 	return "ERROR: Time is null"
-
 
 }
 

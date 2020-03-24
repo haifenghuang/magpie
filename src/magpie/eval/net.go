@@ -18,9 +18,10 @@ const (
 
 //Net Object
 const (
-	NET_OBJ = "NET_OBJ"
+	NET_OBJ  = "NET_OBJ"
 	net_name = "net"
 )
+
 type NetObj struct{}
 
 func NewNetObj() Object {
@@ -296,7 +297,7 @@ func (t *TcpConnObject) Read2(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type()))
 	}
 
-	data := make([]byte, length.Int64);
+	data := make([]byte, length.Int64)
 
 	readTotal := 0
 	readBytes := 0

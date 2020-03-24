@@ -1,8 +1,8 @@
 package eval
 
 import (
-	"magpie/ast"
 	_ "fmt"
+	"magpie/ast"
 )
 
 const (
@@ -12,15 +12,15 @@ const (
 	PROPERTYINFO_OBJ = "PROPERTYINFO_OBJ"
 )
 
-
 type ClassComponentKind byte
+
 const (
 	ClassMemberKind ClassComponentKind = iota
 	ClassMethodKind
 	ClassPropertyKind
+
 //	ClassIndexerKind    //not implemented
 )
-
 
 type ClassMethod interface {
 	Object
@@ -28,12 +28,12 @@ type ClassMethod interface {
 }
 
 type Class struct {
-	Name       string
-	Parent     *Class
-	Members    []*ast.LetStatement
-	Methods    map[string]ClassMethod //BuiltinMethod or Function object
-	Properties map[string]*ast.PropertyDeclStmt
-	Scope      *Scope
+	Name         string
+	Parent       *Class
+	Members      []*ast.LetStatement
+	Methods      map[string]ClassMethod //BuiltinMethod or Function object
+	Properties   map[string]*ast.PropertyDeclStmt
+	Scope        *Scope
 	IsAnnotation bool //true if the class is an annotation class
 }
 
@@ -54,9 +54,9 @@ func (c *Class) IsAnnotationPresent(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
-//	if c.HasAnnotation {
-//		return TRUE
-//	}
+	//	if c.HasAnnotation {
+	//		return TRUE
+	//	}
 	return FALSE
 }
 
@@ -168,15 +168,19 @@ func (c *Class) GetModifierLevel(name string, kind ClassComponentKind) ast.Modif
 }
 
 type ObjectInstance struct {
-	Class  *Class
+	Class *Class
 	Scope *Scope
 }
 
-func (oi *ObjectInstance) Inspect() string  { return "<Instance:" + oi.Class.Name + ">" }
-func (oi *ObjectInstance) Type() ObjectType { return INSTANCE_OBJ }
+func (oi *ObjectInstance) Inspect() string                   { return "<Instance:" + oi.Class.Name + ">" }
+func (oi *ObjectInstance) Type() ObjectType                  { return INSTANCE_OBJ }
 func (oi *ObjectInstance) GetMethod(name string) ClassMethod { return oi.Class.GetMethod(name) }
-func (oi *ObjectInstance) GetProperty(name string) *ast.PropertyDeclStmt { return oi.Class.GetProperty(name) }
-func (oi *ObjectInstance) IsStatic(val string, kind ClassComponentKind) bool { return oi.Class.IsStatic(val, kind) }
+func (oi *ObjectInstance) GetProperty(name string) *ast.PropertyDeclStmt {
+	return oi.Class.GetProperty(name)
+}
+func (oi *ObjectInstance) IsStatic(val string, kind ClassComponentKind) bool {
+	return oi.Class.IsStatic(val, kind)
+}
 func (oi *ObjectInstance) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	panic(NewError(line, NOMETHODERROR, method, oi.Type()))
 }
@@ -195,31 +199,31 @@ var BASE_CLASS = &Class{
 
 //Builtin @Override annotation class
 var OVERRIDE_ANNOCLASS = &Class{
-	Name:    "Override",
-	Parent:  BASE_CLASS,
+	Name:         "Override",
+	Parent:       BASE_CLASS,
 	IsAnnotation: true,
 }
 
 //Builtin @NotNull annotation class
 //The annotated element must not be {@code null}.
 var NOTNULL_ANNOCLASS = &Class{
-	Name:    "NotNull",
-	Parent:  BASE_CLASS,
+	Name:         "NotNull",
+	Parent:       BASE_CLASS,
 	IsAnnotation: true,
 }
 
 //Builtin @NotEmpty annotation class
 //Asserts that the annotated string, tuple, map or array is not null or empty.
 var NOTEMPTY_ANNOCLASS = &Class{
-	Name:    "NotEmpty",
-	Parent:  BASE_CLASS,
+	Name:         "NotEmpty",
+	Parent:       BASE_CLASS,
 	IsAnnotation: true,
 }
 
 func initRootObject() bool {
-	BASE_CLASS.Methods = map[string]ClassMethod {
+	BASE_CLASS.Methods = map[string]ClassMethod{
 		"toString": &BuiltinMethod{
-			Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
 					panic(NewError(line, ARGUMENTERROR, "0", argLen))
@@ -232,45 +236,43 @@ func initRootObject() bool {
 				return NewString(self.Class.Inspect())
 			},
 		},
-		"instanceOf":
-			&BuiltinMethod{
-				Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
-					argLen := len(args)
-					if argLen != 1 {
-						panic(NewError(line, ARGUMENTERROR, "1", argLen))
-					}
+		"instanceOf": &BuiltinMethod{
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+				argLen := len(args)
+				if argLen != 1 {
+					panic(NewError(line, ARGUMENTERROR, "1", argLen))
+				}
 
-					if self == nil {
-						return NIL
-					}
+				if self == nil {
+					return NIL
+				}
 
-					switch class := args[0].(type) {
-					case *String:
-						return nativeBoolToBooleanObject(InstanceOf(class.String, self))
-					case *Class:
-						return nativeBoolToBooleanObject(InstanceOf(class.Name, self))
-					}
+				switch class := args[0].(type) {
+				case *String:
+					return nativeBoolToBooleanObject(InstanceOf(class.String, self))
+				case *Class:
+					return nativeBoolToBooleanObject(InstanceOf(class.Name, self))
+				}
 
-					panic(NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for its argument"))
-				},
+				panic(NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for its argument"))
+			},
 		},
-		"classOf":
-			&BuiltinMethod{
-				Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
-					argLen := len(args)
-					if argLen != 0 {
-						panic(NewError(line, ARGUMENTERROR, "0", argLen))
-					}
+		"classOf": &BuiltinMethod{
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+				argLen := len(args)
+				if argLen != 0 {
+					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+				}
 
-					if self == nil {
-						return NewString("")
-					}
+				if self == nil {
+					return NewString("")
+				}
 
-					return NewString(self.Class.Name)
-				},
+				return NewString(self.Class.Name)
+			},
 		},
-		"hashCode":&BuiltinMethod{
-			Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+		"hashCode": &BuiltinMethod{
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
 					panic(NewError(line, ARGUMENTERROR, "0", argLen))
@@ -288,8 +290,8 @@ func initRootObject() bool {
 				return NewUInteger(v)
 			},
 		},
-		"getMethods":&BuiltinMethod{
-			Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+		"getMethods": &BuiltinMethod{
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
 					panic(NewError(line, ARGUMENTERROR, "0", argLen))
@@ -307,8 +309,8 @@ func initRootObject() bool {
 				return ret
 			},
 		},
-		"getProperties":&BuiltinMethod{
-			Fn:func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
+		"getProperties": &BuiltinMethod{
+			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
 					panic(NewError(line, ARGUMENTERROR, "0", argLen))
@@ -339,7 +341,7 @@ type MethodInfo struct {
 	Scope    *Scope          //Method's scope
 }
 
-func (m *MethodInfo) Inspect() string { return "<method:" + m.Name + ">" }
+func (m *MethodInfo) Inspect() string  { return "<method:" + m.Name + ">" }
 func (m *MethodInfo) Type() ObjectType { return METHODINFO_OBJ }
 
 func (m *MethodInfo) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
@@ -368,14 +370,14 @@ func (m *MethodInfo) Invoke(line string, scope *Scope, args ...Object) Object {
 	method := m.Instance.GetMethod(m.Name)
 	if method != nil {
 		switch meth := method.(type) {
-			case *Function:
-				newScope := NewScope(m.Instance.Scope)
-				newScope.Set("parent", m.Instance.Class.Parent)
-				return evalFunctionDirect(method, args, m.Instance, newScope, nil)
-			case *BuiltinMethod:
-				builtinMethod :=&BuiltinMethod{Fn: meth.Fn, Instance: m.Instance}
-				aScope := NewScope(m.Instance.Scope)
-				return evalFunctionDirect(builtinMethod, args, m.Instance, aScope, nil)
+		case *Function:
+			newScope := NewScope(m.Instance.Scope)
+			newScope.Set("parent", m.Instance.Class.Parent)
+			return evalFunctionDirect(method, args, m.Instance, newScope, nil)
+		case *BuiltinMethod:
+			builtinMethod := &BuiltinMethod{Fn: meth.Fn, Instance: m.Instance}
+			aScope := NewScope(m.Instance.Scope)
+			return evalFunctionDirect(builtinMethod, args, m.Instance, aScope, nil)
 		}
 	}
 
@@ -389,7 +391,7 @@ func (m *MethodInfo) GetAnnotations(line string, args ...Object) Object {
 
 	method := m.Instance.GetMethod(m.Name)
 	ret := &Array{}
-	
+
 	switch o := method.(type) {
 	case *Function:
 		for _, anno := range o.Annotations {
@@ -411,7 +413,7 @@ func (m *MethodInfo) GetAnnotation(line string, args ...Object) Object {
 	}
 
 	method := m.Instance.GetMethod(m.Name)
-	
+
 	switch o := method.(type) {
 	case *Function:
 		for _, anno := range o.Annotations {
@@ -423,7 +425,6 @@ func (m *MethodInfo) GetAnnotation(line string, args ...Object) Object {
 	return NIL
 }
 
-
 //PropertyInfo object
 type PropertyInfo struct {
 	Name     string          //Property name
@@ -431,7 +432,7 @@ type PropertyInfo struct {
 	Scope    *Scope          //Property's scope
 }
 
-func (p *PropertyInfo) Inspect() string { return "<property:" + p.Name + ">" }
+func (p *PropertyInfo) Inspect() string  { return "<property:" + p.Name + ">" }
 func (p *PropertyInfo) Type() ObjectType { return PROPERTYINFO_OBJ }
 
 func (p *PropertyInfo) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
@@ -442,8 +443,8 @@ func (p *PropertyInfo) CallMethod(line string, scope *Scope, method string, args
 		return p.GetAnnotations(line, scope, args...)
 	case "value":
 		return p.Value(line, args...)
-//	case "getAnnotation":
-//		return p.GetAnnotation(line, args...)
+		//	case "getAnnotation":
+		//		return p.GetAnnotation(line, args...)
 	}
 	panic(NewError(line, NOMETHODERROR, method, p.Type()))
 }
@@ -505,7 +506,7 @@ func (p *PropertyInfo) GetAnnotations(line string, scope *Scope, args ...Object)
 //	}
 //
 //	propStmt := p.Instance.GetProperty(m.Name)
-//	
+//
 //	switch o := method.(type) {
 //	case *Function:
 //		for _, anno := range o.Annotations {
@@ -516,8 +517,6 @@ func (p *PropertyInfo) GetAnnotations(line string, scope *Scope, args ...Object)
 //	}
 //	return NIL
 //}
-
-
 
 var _ = initRootObject()
 

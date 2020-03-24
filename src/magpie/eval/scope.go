@@ -7,17 +7,17 @@ import (
 	"sync"
 )
 
-var BuiltinClasses = map[string]*Class {
-	"object"  : BASE_CLASS,
+var BuiltinClasses = map[string]*Class{
+	"object":   BASE_CLASS,
 	"Override": OVERRIDE_ANNOCLASS,
-	"NotNull" : NOTNULL_ANNOCLASS,
+	"NotNull":  NOTNULL_ANNOCLASS,
 	"NotEmpty": NOTEMPTY_ANNOCLASS,
 }
 
 func NewScope(p *Scope) *Scope {
 	s := make(map[string]Object)
 	r := make(map[string]bool)
-	ret := &Scope{store: s, readonly:r, parentScope: p}
+	ret := &Scope{store: s, readonly: r, parentScope: p}
 	if p == nil {
 		ret.CallStack = &CallStack{Frames: []CallFrame{CallFrame{}}} //creat a new empty CallStack
 	} else {

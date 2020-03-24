@@ -71,7 +71,7 @@ func (a *Array) CallMethod(line string, scope *Scope, method string, args ...Obj
 		return a.First(line, args...)
 	case "last":
 		return a.Last(line, args...)
-	case "tail","rest":
+	case "tail", "rest":
 		return a.Tail(line, args...)
 	case "average":
 		return a.Average(line, args...)
@@ -320,7 +320,7 @@ func (a *Array) UnShift(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "1", l))
 	}
 
-	a.Members = append([]Object{args[0]}, a.Members... )
+	a.Members = append([]Object{args[0]}, a.Members...)
 	return a
 }
 
@@ -391,7 +391,7 @@ func (a *Array) Last(line string, args ...Object) Object {
 	if length == 0 {
 		return NIL
 	}
-	return a.Members[length - 1]
+	return a.Members[length-1]
 }
 
 func (a *Array) Tail(line string, args ...Object) Object {
@@ -465,32 +465,32 @@ func (a *Array) Sum(line string, args ...Object) Object {
 
 	return NewFloat(sum)
 
-//	var r float64 = 0
-//
-//	switch a.Members[0].(type) {
-//	case *Integer:
-//		var sum int64 = 0
-//
-//		for _, item := range a.Members {
-//			sum += item.(*Integer).Int64
-//		}
-//
-//		r = float64(sum)
-//	case *UInteger:
-//		var sum uint64 = 0
-//
-//		for _, item := range a.Members {
-//			sum += item.(*UInteger).UInt64
-//		}
-//
-//		r = float64(sum)
-//	case *Float:
-//		for _, item := range a.Members {
-//			r += item.(*Float).Float64
-//		}
-//	}
-//
-//	return NewFloat(r)
+	//	var r float64 = 0
+	//
+	//	switch a.Members[0].(type) {
+	//	case *Integer:
+	//		var sum int64 = 0
+	//
+	//		for _, item := range a.Members {
+	//			sum += item.(*Integer).Int64
+	//		}
+	//
+	//		r = float64(sum)
+	//	case *UInteger:
+	//		var sum uint64 = 0
+	//
+	//		for _, item := range a.Members {
+	//			sum += item.(*UInteger).UInt64
+	//		}
+	//
+	//		r = float64(sum)
+	//	case *Float:
+	//		for _, item := range a.Members {
+	//			r += item.(*Float).Float64
+	//		}
+	//	}
+	//
+	//	return NewFloat(r)
 }
 
 // Min returns the minimum value in a collection of values.
@@ -587,9 +587,9 @@ func getComparer2(data Object) comparer {
 
 //Json marshal handling
 func (a *Array) MarshalJSON() ([]byte, error) {
-//	if len(a.Members) == 0 {
-//		return json.Marshal(nil)
-//	}
+	//	if len(a.Members) == 0 {
+	//		return json.Marshal(nil)
+	//	}
 
 	var out bytes.Buffer
 
