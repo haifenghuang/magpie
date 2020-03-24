@@ -1791,7 +1791,8 @@ type CallExpression struct {
 }
 
 func (ce *CallExpression) Pos() token.Position {
-	return ce.Token.Pos
+	length := utf8.RuneCountInString(ce.Function.String())
+	return token.Position{Line: ce.Token.Pos.Line, Col: ce.Token.Pos.Col - length}
 }
 
 func (ce *CallExpression) End() token.Position {
