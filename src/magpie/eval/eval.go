@@ -5291,7 +5291,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 		case *ast.AssignExpression: //let-clause
 			assignExp := clause
 
-			fl := constructFuncLiteral("", assignExp.Value)
+			fl := constructFuncLiteral("", assignExp.Value, token.ASSIGN, assignExp.Pos())
 			fnObj := evalFunctionLiteral(fl, innerScope)
 			letVar := assignExp.Name.(*ast.Identifier).Value
 			tmpLinq = tmpLinq.Let(line, innerScope, fnObj, NewString(letVar)).(*LinqObj)
@@ -5302,8 +5302,8 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 
 		case *ast.WhereExpr: // where_clause : WHERE expression
 			whereExp := clause
+			fl := constructFuncLiteral("", whereExp.Expr, token.WHERE, whereExp.Pos())
 
-			fl := constructFuncLiteral("", whereExp.Expr)
 			fnObj := evalFunctionLiteral(fl, innerScope)
 			tmpLinq = tmpLinq.Where2(line, innerScope, fnObj).(*LinqObj)
 
@@ -5318,7 +5318,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 				order := orderingExpr.(*ast.OrderingExpr)
 
 				str = order.Var
-				fl := constructFuncLiteral(str, order.Expr)
+				fl := constructFuncLiteral(str, order.Expr, token.ORDERBY, order.Pos())
 				fnObj := evalFunctionLiteral(fl, innerScope)
 
 				if order.IsAscending {
@@ -5353,37 +5353,37 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 	switch queryBodyExpr.Expr.(type) {
 	case *ast.SelectExpr:
 		/*
-		let selectArr = [1,2,3,4,5,6,7,8,9,10]
-		[NORMAL]:
-			result = linq.from(selectArr).select(fn(x) {
-				x = x + 2
-			})
-		<=>
-		[LINQ]:
-			result = from x in selectArr select x + 2
+			let selectArr = [1,2,3,4,5,6,7,8,9,10]
+			[NORMAL]:
+				result = linq.from(selectArr).select(fn(x) {
+					x = x + 2
+				})
+			<=>
+			[LINQ]:
+				result = from x in selectArr select x + 2
 		*/
 		selectExp := queryBodyExpr.Expr.(*ast.SelectExpr)
-		fl := constructFuncLiteral("", selectExp.Expr)
+		fl := constructFuncLiteral("", selectExp.Expr, token.SELECT, selectExp.Pos())
 		fnObj := evalFunctionLiteral(fl, innerScope)
 		return tmpLinq.Select2(line, innerScope, fnObj)
 
 	case *ast.GroupExpr:
 		/*
-		let groupByArr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-		[NORMAL]:
-			result = linq.from(groupByArr).groupBy(
-				fn(v) { return v % 2 == 0 },
-				fn(v) { return v }
-			)
-		<=>
-		[LINQ]:
-			result = from v in groupByArr group v BY v % 2 == 0
+			let groupByArr = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+			[NORMAL]:
+				result = linq.from(groupByArr).groupBy(
+					fn(v) { return v % 2 == 0 },
+					fn(v) { return v }
+				)
+			<=>
+			[LINQ]:
+				result = from v in groupByArr group v BY v % 2 == 0
 		*/
 		groupExp := queryBodyExpr.Expr.(*ast.GroupExpr)
 
-		keyFuncLiteral     := constructFuncLiteral("", groupExp.ByExpr)
-		elementFuncLiteral := constructFuncLiteral("", groupExp.GrpExpr)
-		keySelector     := evalFunctionLiteral(keyFuncLiteral, innerScope)
+		keyFuncLiteral := constructFuncLiteral("", groupExp.ByExpr, token.BY, groupExp.Pos())
+		elementFuncLiteral := constructFuncLiteral("", groupExp.GrpExpr, token.GROUP, groupExp.Pos())
+		keySelector := evalFunctionLiteral(keyFuncLiteral, innerScope)
 		elementSelector := evalFunctionLiteral(elementFuncLiteral, innerScope)
 		return tmpLinq.GroupBy2(line, innerScope, keySelector, elementSelector)
 	}
@@ -5392,12 +5392,14 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 }
 
 //construct a FunctionLiteral for use with linq.xxx() function
-func constructFuncLiteral(value string, expr ast.Expression) *ast.FunctionLiteral {
-	fl := &ast.FunctionLiteral{Parameters:[]ast.Expression{}}
+func constructFuncLiteral(value string, expr ast.Expression, tokenType token.TokenType, pos token.Position) *ast.FunctionLiteral {
+	fl := &ast.FunctionLiteral{Parameters: []ast.Expression{}}
 	if len(value) > 0 {
-		fl.Parameters = append(fl.Parameters, &ast.Identifier{Value:value})
+		fl.Parameters = append(fl.Parameters, &ast.Identifier{Value: value})
 	}
-	fl.Body = &ast.BlockStatement{Statements: []ast.Statement{&ast.ExpressionStatement{Expression: expr}}}
+
+	tok := token.Token{Type: tokenType, Pos: pos}
+	fl.Body = &ast.BlockStatement{Token: tok, Statements: []ast.Statement{&ast.ExpressionStatement{Token: tok, Expression: expr}}}
 
 	return fl
 }

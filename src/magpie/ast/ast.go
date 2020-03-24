@@ -1534,7 +1534,8 @@ type AssignExpression struct {
 }
 
 func (ae *AssignExpression) Pos() token.Position {
-	return ae.Token.Pos
+	//return ae.Token.Pos
+	return ae.Name.Pos()
 }
 
 func (ae *AssignExpression) End() token.Position {
