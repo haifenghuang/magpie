@@ -34,6 +34,7 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 * 语法高亮REPL
 * 文档自动生成工具`mdoc`
 * 集成服务(service)处理
+* 简单调试器
 
 ## 举例1(Linq)
 

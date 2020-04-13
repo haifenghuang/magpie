@@ -39,6 +39,7 @@ Complete language tutorial can be found in [docs](docs)
 * Syntax-highlight REPL
 * Doc-generation tool `mdoc`
 * Integrated services processing
+* Simple debugger
 
 ## Example1(Linq)
 
