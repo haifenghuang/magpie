@@ -829,6 +829,14 @@ func (fl *FunctionLiteral) End() token.Position {
 	return fl.Body.End()
 }
 
+// For debugger use
+func (fl *FunctionLiteral) StmtPos() token.Position {
+	if len(fl.Body.Statements) > 0 {
+		return fl.Body.Statements[0].Pos()
+	}
+	return fl.Token.Pos
+}
+
 func (fl *FunctionLiteral) expressionNode()      {}
 func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 func (fl *FunctionLiteral) String() string {

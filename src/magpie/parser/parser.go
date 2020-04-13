@@ -144,6 +144,9 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]infixParseFn
 
 	classMap map[string]bool
+
+	//for debugger use
+	Functions map[string]*ast.FunctionLiteral
 }
 
 type (
@@ -169,6 +172,7 @@ func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 	p.l.SetMode(lexer.ScanComments)
 
 	p.classMap = make(map[string]bool)
+	p.Functions = make(map[string]*ast.FunctionLiteral)
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -183,6 +187,7 @@ func New(l *lexer.Lexer, wd string) *Parser {
 	}
 
 	p.classMap = make(map[string]bool)
+	p.Functions = make(map[string]*ast.FunctionLiteral)
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -825,6 +830,13 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 
 	stmt.SrcEndToken = p.curToken
+
+	for idx, name := range stmt.Names {
+		if v, ok := stmt.Values[idx].(*ast.FunctionLiteral); ok {
+			p.Functions[name.Value] = v
+		}
+	} //end for
+
 	return stmt
 }
 
@@ -2099,6 +2111,7 @@ func (p *Parser) parseFunctionStatement() ast.Statement {
 	}
 
 	FnStmt.SrcEndToken = p.curToken
+	p.Functions[FnStmt.Name.Value] = FnStmt.FunctionLiteral
 	return FnStmt
 }
 

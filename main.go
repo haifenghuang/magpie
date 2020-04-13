@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 	"regexp"
 	"runtime"
@@ -16,7 +17,7 @@ import (
 	"os"
 )
 
-func runProgram(filename string) {
+func runProgram(debug bool, filename string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err.Error())
@@ -27,7 +28,10 @@ func runProgram(filename string) {
 		fmt.Println("magpie: ", err.Error())
 		os.Exit(1)
 	}
-	l := lexer.New(filename, string(f))
+
+	input := string(f)
+	l := lexer.New(filename, input)
+
 	p := parser.New(l, wd)
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
@@ -38,7 +42,18 @@ func runProgram(filename string) {
 	}
 	scope := eval.NewScope(nil)
 	RegisterGoGlobals()
-	eval.REPLColor = false
+
+	if debug {
+		eval.REPLColor = true
+		Lines := strings.Split(input, "\n")
+		//pre-append an empty line, so the Lines start with 1, not zero.
+		Lines = append([]string{""}, Lines...)
+
+		eval.Dbg = eval.NewDebugger(Lines)
+		eval.Dbg.SetFunctions(p.Functions)
+		eval.Dbg.ShowBanner()
+	}
+
 	eval.Eval(program, scope)
 //	e := eval.Eval(program, scope)
 //	if e.Inspect() != "nil" {
@@ -198,6 +213,16 @@ func main() {
 		fmt.Println("Magpie programming language REPL\n")
 		repl.Start(os.Stdout, true)
 	} else {
-		runProgram(args[0])
+		if len(args) == 2 {
+			if args[0] == "-d" || args[0] == "--debug" { // debug
+				runProgram(true, args[1])
+			} else {
+				fmt.Println("Usage: magpie -d file.mp")
+				os.Exit(1)
+			}
+		} else {
+			runProgram(false, args[0])
+		}
+
 	}
 }

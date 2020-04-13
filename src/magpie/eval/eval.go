@@ -50,6 +50,8 @@ var REPLColor bool
 
 const ServiceHint = "* Running on %s (Press CTRL+C to quit)\n"
 
+var Dbg *Debugger
+
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -83,7 +85,16 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		}
 	}()
 
-	//fmt.Printf("node.Type=%T, node=<%s>\n", node, node.String()) //debugging
+	if Dbg != nil {
+		Dbg.SetNodeAndScope(node, scope)
+
+		if Dbg.CanStop() && (Dbg.Stepping || Dbg.IsBP(node.Pos().Line) || Dbg.IsFunctionBP(node.Pos().Line)) {
+		// if Dbg.CanStop() && (Dbg.Stepping || Dbg.IsBP(node.Pos().Line)) {
+			Dbg.ProcessCommand()
+		}
+	}
+
+	//fmt.Printf("node.Type=%T, node=<%s>, start=%s, end=%s\n", node, node.String(), node.Pos().Line, node.End().Line) //debugging
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, scope)
