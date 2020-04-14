@@ -88,9 +88,13 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	if Dbg != nil {
 		Dbg.SetNodeAndScope(node, scope)
 
-		if Dbg.CanStop() && (Dbg.Stepping || Dbg.IsBP(node.Pos().Line) || Dbg.IsFunctionBP(node.Pos().Line)) {
-		// if Dbg.CanStop() && (Dbg.Stepping || Dbg.IsBP(node.Pos().Line)) {
-			Dbg.ProcessCommand()
+		if Dbg.CanStop() {
+			if Dbg.Stepping {
+				Dbg.ProcessCommand()
+			} else if Dbg.IsBP(node.Pos().Line) {
+				fmt.Printf("\nBreakPoint hit at Line %d\n", node.Pos().Line)
+				Dbg.ProcessCommand()
+			}
 		}
 	}
 

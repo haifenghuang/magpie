@@ -25,9 +25,7 @@ type FuncInfo struct {
 type Debugger struct {
 	SrcLines []string
 
-	//for function breakpoint
 	Functions map[string]*ast.FunctionLiteral
-	FuncLines []*FuncInfo
 
 	//for line number breakpoint
 	Breakpoints map[int]bool
@@ -77,35 +75,6 @@ func (d * Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
 
 func (d * Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
 	d.Functions = functions
-	for fname, node := range d.Functions {
-		fi := &FuncInfo{name:fname, begin: node.StmtPos().Line, end: node.End().Line, enabled: false}
-		d.FuncLines = append(d.FuncLines, fi)
-	}
-
-}
-
-func (d * Debugger) IsFunctionBP(line int) bool {
-	if len(d.FuncLines) == 0 {
-		return false
-	}
-
-	found := false
-	var fi *FuncInfo
-	for _, f := range d.FuncLines {
-		if f.enabled {
-			found = true
-			fi = f
-			break
-		}
-	}
-
-	if found {
-		if line == fi.begin {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (d * Debugger) ShowBanner() {
@@ -126,7 +95,7 @@ func (d *Debugger) ProcessCommand() {
 
 		p := d.Node.Pos()
 
-		fmt.Printf("\n%d\t\t%s", p.Line, d.SrcLines[p.Line])
+		fmt.Printf("%d\t\t%s", p.Line, d.SrcLines[p.Line])
 		fmt.Print("\n(magpie) ")
 
 		fmt.Print("\x1b[1m\x1b[36m")
@@ -162,15 +131,12 @@ func (d *Debugger) ProcessCommand() {
 					}
 				} else {
 					funcName := arr[1]
-					if _, ok := d.Functions[funcName]; !ok {
+					var f *ast.FunctionLiteral
+					var ok bool
+					if f, ok = d.Functions[funcName]; !ok {
 						fmt.Println("Function name not found.")
 					} else {
-						for _, fi := range d.FuncLines {
-							if fi.name == funcName {
-								fi.enabled = true
-								break
-							}
-						}
+						d.AddBP(f.StmtPos().Line)
 					}
 				}
 			}
@@ -189,15 +155,12 @@ func (d *Debugger) ProcessCommand() {
 					}
 				} else {
 					funcName := arr[1]
-					if _, ok := d.Functions[funcName]; !ok {
+					var f *ast.FunctionLiteral
+					var ok bool
+					if f, ok = d.Functions[funcName]; !ok {
 						fmt.Println("Function name not found.")
 					} else {
-						for _, fi := range d.FuncLines {
-							if fi.name == funcName {
-								fi.enabled = false
-								break
-							}
-						}
+						d.DelBP(f.StmtPos().Line)
 					}
 				}
 			}
@@ -248,15 +211,6 @@ func (d *Debugger) ProcessCommand() {
 //Check if node can be stopped, some nodes cannot be stopped, 
 //e.g. 'InfixExpression', 'IntegerLiteral'
 func (d *Debugger) CanStop() bool {
-	//check if function breakpoint is enabled
-	for _, fi := range d.FuncLines {
-		if !fi.enabled {
-			if d.Node.Pos().Line >= fi.begin && d.Node.Pos().Line <= fi.end {
-				return false
-			}
-		}
-	}
-
 	flag := false
 	switch d.Node.(type) {
 	case *ast.LetStatement:
