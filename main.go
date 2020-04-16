@@ -54,6 +54,14 @@ func runProgram(debug bool, filename string) {
 		eval.Dbg.SetFunctions(p.Functions)
 		eval.Dbg.ShowBanner()
 
+		dbgInfosArr := parser.SplitSlice(parser.DebugInfos) //[][]ast.Node
+		eval.Dbg.SetDbgInfos(dbgInfosArr)
+		// for idx, dbgInfos := range dbgInfosArr {
+		// 	for _, dbgInfo := range dbgInfos {
+		// 		fmt.Printf("idx:%d, Line:<%d-%d>, node.Type=%T, node=<%s>\n", idx, dbgInfo.Pos().Line, dbgInfo.End().Line, dbgInfo, dbgInfo.String())
+		// 	}
+		// }
+
 		eval.MsgHandler = message.NewMessageHandler()
 		eval.MsgHandler.AddListener(eval.Dbg)
 

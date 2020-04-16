@@ -9,6 +9,7 @@ import (
 	"magpie/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -119,9 +120,37 @@ const (
 	Trace                          // print a trace of parsed productions
 )
 
+// implement sort interface
+type SortByLine []ast.Node
+func (d SortByLine) Len() int { return len(d) }
+func (d SortByLine) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+func (d SortByLine) Less(i, j int) bool { return d[i].Pos().Line < d[j].Pos().Line }
+
 var (
 	FileLines []string
+	tmpDebugInfos SortByLine
+	DebugInfos SortByLine
 )
+
+//group by ast.Node's line number.
+func SplitSlice(list []ast.Node) [][]ast.Node {
+	sort.Sort(SortByLine(list))
+	returnData := make([][]ast.Node, 0)
+	i:= 0
+	var j int
+	for {
+		if i >= len(list) {
+			break
+		}
+
+		for j = i + 1; j < len(list) && list[i].Pos().Line == list[j].Pos().Line; j++ {}
+
+		returnData = append(returnData, list[i:j])
+		i = j
+	}
+
+	return returnData
+}
 
 type Parser struct {
 	// Tracing/debugging
@@ -337,25 +366,81 @@ func (p *Parser) ParseProgram() *ast.Program {
 		}
 		p.nextToken()
 	}
+
+	for _, n := range tmpDebugInfos {
+		switch n.(type) {
+		case *ast.LetStatement:
+			l := n.(*ast.LetStatement)
+			if !l.InClass {
+				DebugInfos = append(DebugInfos, n)
+			}
+		case *ast.ConstStatement:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ReturnStatement:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.DeferStmt:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.EnumStatement:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.IfExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.UnlessExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.CaseExpr:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.DoLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.WhileLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ForLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ForEverLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ForEachArrayLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ForEachDotRange:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ForEachMapLoop:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.BreakExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.ContinueExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.AssignExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.CallExpression:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.TryStmt:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.SpawnStmt:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.UsingStmt:
+			DebugInfos = append(DebugInfos, n)
+		case *ast.QueryExpr:
+			DebugInfos = append(DebugInfos, n)
+		}
+	}
+
 	return program
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	var ret ast.Statement 
 	switch p.curToken.Type {
 	case token.LET:
-		return p.parseLetStatement(false)
+		ret = p.parseLetStatement(false)
 	case token.CONST:
-		return p.parseConstStatement()
+		ret = p.parseConstStatement()
 	case token.RETURN:
-		return p.parseReturnStatement()
+		ret = p.parseReturnStatement()
 	case token.DEFER:
-		return p.parseDeferStatement()
+		ret = p.parseDeferStatement()
 	case token.SPAWN:
-		return p.parseSpawnStatement()
+		ret = p.parseSpawnStatement()
 	case token.INCLUDE:
 		return p.parseIncludeStatement()
 	case token.THROW:
-		return p.parseThrowStatement()
+		ret = p.parseThrowStatement()
 	case token.FUNCTION:
 		//if p.peekTokenIs(token.IDENT) { //function statement. e.g. 'fn add(x,y) { xxx }'
 		//	return p.parseFunctionStatement()
@@ -374,14 +459,17 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.SERVICE:
 		return p.parseServiceStatement()
 	case token.ENUM:
-		return p.parseEnumStatement()
+		ret = p.parseEnumStatement()
 	case token.USING:
-		return p.parseUsingStatement()
+		ret = p.parseUsingStatement()
 	case token.ASYNC:
 		return p.parseAsyncStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
+
+	tmpDebugInfos = append(tmpDebugInfos, ret)
+	return ret
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
@@ -462,12 +550,14 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
 		infix := p.infixParseFns[p.peekToken.Type]
 		if infix == nil {
+			tmpDebugInfos = append(tmpDebugInfos, leftExp)
 			return leftExp
 		}
 		p.nextToken()
 		leftExp = infix(leftExp)
 	}
 
+	tmpDebugInfos = append(tmpDebugInfos, leftExp)
 	return leftExp
 }
 

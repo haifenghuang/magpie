@@ -18,6 +18,7 @@ const (
 
 type Debugger struct {
 	SrcLines []string
+	DbgInfos  [][]ast.Node
 
 	Functions map[string]*ast.FunctionLiteral
 
@@ -65,6 +66,10 @@ func (d *Debugger) IsBP(line int) bool {
 func (d * Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
 	d.Node = node
 	d.Scope = scope
+}
+
+func (d * Debugger) SetDbgInfos(dbgInfos [][]ast.Node) {
+	d.DbgInfos = dbgInfos
 }
 
 func (d * Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
@@ -121,7 +126,24 @@ func (d *Debugger) ProcessCommand() {
 					if line <= 0 {
 						fmt.Println("Line number must greater than zero.")
 					} else {
-						d.AddBP(line)
+						// check if the breakpoint is valid or not
+						found := false
+						for _, dbgInfos := range d.DbgInfos {
+							for _, dbgInfo := range dbgInfos {
+								if line == dbgInfo.Pos().Line {
+									found = true
+									break
+								}
+							}
+							if found {
+								break
+							}
+						}
+						if found {
+							d.AddBP(line)
+						} else {
+							fmt.Println("Invalid breakpoint!\n")
+						}
 					}
 				} else {
 					funcName := arr[1]
