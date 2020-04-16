@@ -6,6 +6,7 @@ import (
 	"magpie/ast"
 	"magpie/lexer"
 	"magpie/parser"
+	"magpie/message"
 	"os"
 	"strconv"
 	"strings"
@@ -14,13 +15,6 @@ import (
 const (
 	LineStep = 5
 )
-
-type FuncInfo struct {
-	name string
-	enabled bool
-	begin int
-	end   int
-}
 
 type Debugger struct {
 	SrcLines []string
@@ -176,7 +170,7 @@ func (d *Debugger) ProcessCommand() {
 			d.showPrompt = false
 			program := p.ParseProgram()
 			aval := Eval(program, d.Scope)
-			fmt.Printf("%s\n", aval.Inspect())
+			fmt.Printf("%s\n\n", aval.Inspect())
 			d.SrcLines = oldLines
 			d.Node = oldNode
 			d.showPrompt = true
@@ -212,9 +206,11 @@ func (d *Debugger) ProcessCommand() {
 //e.g. 'InfixExpression', 'IntegerLiteral'
 func (d *Debugger) CanStop() bool {
 	flag := false
-	switch d.Node.(type) {
+	switch n := d.Node.(type) {
 	case *ast.LetStatement:
-		flag = true
+		if !n.InClass {
+			flag = true
+		}
 	case *ast.ConstStatement:
 		flag = true
 	case *ast.ReturnStatement:
@@ -264,4 +260,52 @@ func (d *Debugger) CanStop() bool {
 	}
 
 	return flag
+}
+
+func (d *Debugger) MessageReceived(msg message.Message) {
+	ctx := msg.Body.(Context)
+
+	msgType := msg.Type
+	switch (msgType) {
+	case message.EVAL_LINE:
+		line := ctx.N[0].Pos().Line;
+			if d.Stepping {
+			d.ProcessCommand()
+		} else if (d.IsBP(line)) {
+			fmt.Printf("\nBreakpoint hit at line %d\n", line)
+			d.ProcessCommand()
+		}
+
+	case message.CALL:
+		// c := ctx.N[0].(*ast.CallExpression)
+		// fn := c.Function.String()
+		// for funcName, f := range d.Functions {
+		// 	if fn == funcName {
+		// 		fmt.Printf("\nEnter function '%s' at line %d\n", fn, f.StmtPos().Line)
+		// 		break
+		// 	}
+		// }
+	case message.METHOD_CALL:
+		// mc := ctx.N[0].(*ast.MethodCallExpression)
+		// obj := mc.Object.String()
+		// if call, ok := mc.Call.(*ast.CallExpression); ok {
+		// 	fn := call.Function.String()
+		// 	for funcName, f := range d.Functions {
+		// 		if fn == funcName {
+		// 			fmt.Printf("\nEnter function '%s.%s' at line %d\n", obj, fn, f.StmtPos().Line)
+		// 			break
+		// 		}
+		// 	}
+		// }
+
+	case message.RETURN:
+		// r := ctx.N[0].(*ast.ReturnStatement)
+		// line := r.Pos().Line
+		// for funcName, f := range d.Functions {
+		// 	if line >= f.Pos().Line && line <= f.End().Line {
+		// 		fmt.Printf("Function '%s' returns\n\n", funcName)
+		// 		break
+		// 	}
+		// }
+	}
 }

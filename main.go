@@ -13,6 +13,7 @@ import (
 	"magpie/eval"
 	"magpie/lexer"
 	"magpie/parser"
+	"magpie/message"
 	"magpie/repl"
 	"os"
 )
@@ -52,6 +53,10 @@ func runProgram(debug bool, filename string) {
 		eval.Dbg = eval.NewDebugger(Lines)
 		eval.Dbg.SetFunctions(p.Functions)
 		eval.Dbg.ShowBanner()
+
+		eval.MsgHandler = message.NewMessageHandler()
+		eval.MsgHandler.AddListener(eval.Dbg)
+
 	}
 
 	eval.Eval(program, scope)

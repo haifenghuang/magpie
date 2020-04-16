@@ -1322,6 +1322,10 @@ type LetStatement struct {
 
 	//destructuring assigment flag
 	DestructingFlag bool
+
+	//For debugger use, If the LetStatement is in a class declaration,
+	//we do not want the debugger to stop at it.
+	InClass bool //true if the LetStatement is in a Class declaration
 }
 
 func (ls *LetStatement) Pos() token.Position {

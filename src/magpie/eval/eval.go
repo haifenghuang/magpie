@@ -6,6 +6,7 @@ import (
 	"magpie/ast"
 	_ "magpie/lexer"
 	"magpie/token"
+	"magpie/message"
 	"math"
 	"os"
 	"os/exec"
@@ -51,6 +52,12 @@ var REPLColor bool
 const ServiceHint = "* Running on %s (Press CTRL+C to quit)\n"
 
 var Dbg *Debugger
+var MsgHandler *message.MessageHandler
+
+type Context struct {
+	N []ast.Node //N: node
+	S *Scope   //S: Scope
+}
 
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
@@ -87,14 +94,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 
 	if Dbg != nil {
 		Dbg.SetNodeAndScope(node, scope)
-
 		if Dbg.CanStop() {
-			if Dbg.Stepping {
-				Dbg.ProcessCommand()
-			} else if Dbg.IsBP(node.Pos().Line) {
-				fmt.Printf("\nBreakPoint hit at Line %d\n", node.Pos().Line)
-				Dbg.ProcessCommand()
-			}
+			MsgHandler.SendMessage(message.Message{Type:message.EVAL_LINE, Body:Context{N: []ast.Node{node}, S: scope}})
 		}
 	}
 
@@ -111,6 +112,9 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	case *ast.ConstStatement:
 		return evalConstStatement(node, scope)
 	case *ast.ReturnStatement:
+		if Dbg != nil {
+			MsgHandler.SendMessage(message.Message{Type:message.RETURN, Body:Context{N: []ast.Node{node}, S: scope}})
+		}
 		return evalReturnStatement(node, scope)
 	case *ast.DeferStmt:
 		return evalDeferStatement(node, scope)
@@ -172,8 +176,14 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	case *ast.BlockStatement:
 		return evalBlockStatements(node.Statements, scope)
 	case *ast.CallExpression:
+		if Dbg != nil {
+			MsgHandler.SendMessage(message.Message{Type:message.CALL, Body:Context{N: []ast.Node{node}, S: scope}})
+		}
 		return evalFunctionCall(node, scope)
 	case *ast.MethodCallExpression:
+		if Dbg != nil {
+			MsgHandler.SendMessage(message.Message{Type:message.METHOD_CALL, Body:Context{N: []ast.Node{node}, S: scope}})
+		}
 		return evalMethodCallExpression(node, scope)
 	case *ast.IndexExpression:
 		return evalIndexExpression(node, scope)

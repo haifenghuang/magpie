@@ -343,7 +343,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
 	case token.LET:
-		return p.parseLetStatement()
+		return p.parseLetStatement(false)
 	case token.CONST:
 		return p.parseConstStatement()
 	case token.RETURN:
@@ -770,8 +770,8 @@ func (p *Parser) parseContinueExpression() ast.Expression {
 //let a,b,c = 1,2,3 (with assignment)
 //let a; (without assignment, 'a' is assumed to be 'nil')
 //let (a,b,c) = tuple|array|hash
-func (p *Parser) parseLetStatement() *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken}
+func (p *Parser) parseLetStatement(inClass bool) *ast.LetStatement {
+	stmt := &ast.LetStatement{Token: p.curToken, InClass : inClass}
 	stmt.Doc = p.lineComment
 
 	if p.peekTokenIs(token.LPAREN) {
@@ -2653,7 +2653,7 @@ func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag b
 	} else {
 		switch p.curToken.Type {
 		case token.LET:
-			r = p.parseLetStatement()
+			r = p.parseLetStatement(true)
 		case token.PROPERTY:
 			r = p.parsePropertyDeclStmt(processAnnoClass)
 		case token.FUNCTION:
