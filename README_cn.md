@@ -8,9 +8,9 @@ English version: [English](README.md)
 
 ## 概述
 
-Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl和C#.
+Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl和C#。
 支持常用的控制流程，函数式编程和面向对象编程，也能够导入go语言的模块。
-它自带一个文档生成工具(mdoc)，用来从magpie源码中生成文档(html).
+它自带一个文档生成工具(mdoc)，用来从magpie源码中生成文档(html)。它自带一个可以用来体验的调试器。
 同时它还包括一个实时语法高亮的REPL。
 
 ## 文档

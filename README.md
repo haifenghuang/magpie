@@ -16,6 +16,8 @@ and also can import golang's module.
 
 It has a built-in documentation generator(mdoc) for generating html document from magpie source.
 
+It has a simple debugger which you can experience with it.
+
 It also has a REPL with realtime syntax highlighter.
 
 ## Documention
