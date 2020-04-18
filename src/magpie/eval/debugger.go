@@ -16,9 +16,16 @@ const (
 	LineStep = 5
 )
 
+type DbgInfo struct {
+	line int     //node's begin line
+	count int    //counts of the same line
+	entered bool //true if the same line has been evaluated.
+}
+
 type Debugger struct {
 	SrcLines []string
-	DbgInfos  [][]ast.Node
+	DbgInfos  []*DbgInfo
+
 
 	Functions map[string]*ast.FunctionLiteral
 
@@ -69,7 +76,9 @@ func (d * Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
 }
 
 func (d * Debugger) SetDbgInfos(dbgInfos [][]ast.Node) {
-	d.DbgInfos = dbgInfos
+	for _, inf := range dbgInfos {
+		d.DbgInfos = append(d.DbgInfos, &DbgInfo{line: inf[0].Pos().Line, count: len(inf), entered: false})
+	}
 }
 
 func (d * Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
@@ -94,14 +103,39 @@ func (d *Debugger) ProcessCommand() {
 
 		p := d.Node.Pos()
 
-		fmt.Printf("%d\t\t%s", p.Line, d.SrcLines[p.Line])
+		/* check if same line has been executed, if so, we need not to show the same line more than once. e.g.
+			  println(len("Program end."))
+		   Above line have two CallExpressions(println & len),
+		   so when we press next, it will show the same line again. we want to avoid this
+		*/
+		found := false
+		for _, inf := range d.DbgInfos {
+			if p.Line == inf.line {
+				if inf.count > 1 && inf.entered {
+					found = true
+					break
+				}
+			}
+		}
+		if found {
+			break
+		}
+
+		fmt.Printf("\n%d\t\t%s", p.Line, d.SrcLines[p.Line])
 		fmt.Print("\n(magpie) ")
 
 		fmt.Print("\x1b[1m\x1b[36m")
 
+		for _, inf := range d.DbgInfos {
+			if p.Line == inf.line {
+				inf.entered = true
+				break
+			}
+		}
+
 		reader := bufio.NewReader(os.Stdin)
 		command, _ := reader.ReadString('\n')
-		command = strings.Trim(command, "\r\n")
+		command = strings.TrimSpace(command)
 		if command == "" && d.prevCommand != "" {
 			command = d.prevCommand
 		}
@@ -128,12 +162,10 @@ func (d *Debugger) ProcessCommand() {
 					} else {
 						// check if the breakpoint is valid or not
 						found := false
-						for _, dbgInfos := range d.DbgInfos {
-							for _, dbgInfo := range dbgInfos {
-								if line == dbgInfo.Pos().Line {
-									found = true
-									break
-								}
+						for _, dbgInfo := range d.DbgInfos {
+							if line == dbgInfo.line {
+								found = true
+								break
 							}
 							if found {
 								break
@@ -191,7 +223,7 @@ func (d *Debugger) ProcessCommand() {
 			oldNode := d.Node
 			d.showPrompt = false
 			program := p.ParseProgram()
-			aval := Eval(program, d.Scope)
+			aval := Eval(program, NewScope(d.Scope))
 			fmt.Printf("%s\n\n", aval.Inspect())
 			d.SrcLines = oldLines
 			d.Node = oldNode
@@ -291,7 +323,7 @@ func (d *Debugger) MessageReceived(msg message.Message) {
 	switch (msgType) {
 	case message.EVAL_LINE:
 		line := ctx.N[0].Pos().Line;
-			if d.Stepping {
+		if d.Stepping {
 			d.ProcessCommand()
 		} else if (d.IsBP(line)) {
 			fmt.Printf("\nBreakpoint hit at line %d\n", line)

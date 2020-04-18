@@ -28,5 +28,14 @@ if (a > 12) {
     printMe("a < 12")
 }
 
-println("Program end.")
+println(len("Hello World"))
 
+let x = 5 let y = "good"
+let add = fn(x, y) {
+    return x + y
+}
+
+sum = add(10, 5)
+printf("x=%d, len(%s)=%d, 10+5=%d\n", x, y, strings.len(y), sum)
+
+println("Program end.")
