@@ -1210,10 +1210,9 @@ func evalReturnStatement(r *ast.ReturnStatement, scope *Scope) Object {
 	// for old campatibility
 	if len(ret.Values) > 0 {
 		ret.Value = ret.Values[0]
-		return ret
 	}
 
-	return NIL
+	return ret
 }
 
 func evalDeferStatement(d *ast.DeferStmt, scope *Scope) Object {
