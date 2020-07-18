@@ -334,6 +334,9 @@ doc = {
         "four": { "five":  [11, 22, 33]},
     },
 }
+
+// 和下面的语句效果相同
+//doc[one][two][three][2] = 44
 doc["one"]["two"]["three"][2] = 44
 printf("doc[one][two][three][2]=%v\n", doc["one"]["two"]["three"][2])
 

@@ -1,4 +1,4 @@
-package eval
+﻿package eval
 
 import (
 	"bytes"
@@ -4461,7 +4461,17 @@ func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scop
 }
 
 func evalHashKeyIndex(hash *Hash, ie *ast.IndexExpression, scope *Scope) Object {
-	key := Eval(ie.Index, scope)
+	var key Object
+	switch ie.Index.(type) {
+	case *ast.Identifier:
+		/* if the key is an identifier, we assume it's a string without quote.
+		   for example: hash[a] ==> hash["a"]
+		*/
+		key = NewString(ie.Index.String())
+	default:
+		key = Eval(ie.Index, scope)
+	}
+
 	if key.Type() == ERROR_OBJ {
 		return key
 	}
