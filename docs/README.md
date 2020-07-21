@@ -1170,6 +1170,10 @@ let hs = {"key1": 12, "key2": "HHF", "key3": false}
 println("Source Hash =", hs)
 revHash = reverse(hs)
 println("Reverse Hash =", revHash)
+
+# if the hash key is a string, you can omit the quotes
+let hs2 = {key1:12, key2:"HHF", key3:false}
+println(hash[key1]) # result：12
 ```
 
 ### Tuple

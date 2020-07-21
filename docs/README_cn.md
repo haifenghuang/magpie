@@ -1173,9 +1173,14 @@ println(values)
 
 ```swift
 let hs = {"key1":12, "key2":"HHF", "key3":false}
+
 println("Source Hash =", hs)
 revHash = reverse(hs)
 println("Reverse Hash =", revHash)
+
+# 如果哈希中的Key是字符串，则双引号可以省略
+let hs2 = {key1:12, key2:"HHF", key3:false}
+println(hash[key1]) # 结果：12
 ```
 
 ### 元祖(Tuple)
