@@ -354,6 +354,32 @@ for i in (1,2,3) {
 }
 ```
 
+### 正则表达式
+
+在magpie中，你可以使用以下的几种方式来表示正则表达式：
+
+* 正则表达式字面量
+* 'regexp'模块
+* =&#126; and !&#126; 操作符(类似perl)
+
+```swift
+//使用正则表达式字面量( /pattern/.match(str) )
+let regex = /\d+\t/.match("abc 123	mnj")
+if (regex) { println("regex matched using regular expression literal") }
+
+//使用'regexp'模块
+if regexp.compile(``\d+\t``).match("abc 123	mnj") {
+    println("regex matched using 'regexp' module")
+}
+
+//使用 '=~'(str =~ pattern)
+if "abc 123	mnj" =~ ``\d+\t`` {
+    println("regex matched using '=~'")
+}else {
+    println("regex not matched using '=~'")
+}
+```
+
 ### 转换
 
 ```csharp

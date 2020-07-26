@@ -346,6 +346,33 @@ for i in (1,2,3) {
     println(i)
 }
 ```
+
+### Regular expression
+
+In magpie, regard to regular expression, you could use:
+
+* Regular expression literal
+* 'regexp' module
+* =&#126; and !&#126; operators(like perl's)
+
+```swift
+//Use regular expression literal( /pattern/.match(str) )
+let regex = /\d+\t/.match("abc 123	mnj")
+if (regex) { println("regex matched using regular expression literal") }
+
+//Use 'regexp' module
+if regexp.compile(``\d+\t``).match("abc 123	mnj") {
+    println("regex matched using 'regexp' module")
+}
+
+//Use '=~'(str =~ pattern)
+if "abc 123	mnj" =~ ``\d+\t`` {
+    println("regex matched using '=~'")
+}else {
+    println("regex not matched using '=~'")
+}
+```
+
 ### Conversion
 
 ```csharp
