@@ -109,24 +109,22 @@ func Start(out io.Writer, color bool) {
 					fmt.Fprintln(&buf, line)
 					for {
 						if line, err := l.Prompt(CONT_PROMPT); err == nil {
-							if tmpline := strings.TrimSpace(line); tmpline == "" {
-								break
-							}
 							fmt.Fprintln(&buf, line)
+
+							text := string(buf.Bytes())
+							lex := lexer.New("", text)
+							p := parser.New(lex, wd)
+							program := p.ParseProgram()
+							if len(p.Errors()) == 0 { // no error
+								eval.Eval(program, scope)
+								l.AppendHistory(strings.Replace(text, "\n", "", -1))
+								break
+							} else {
+								continue
+							}
 						}
 					}
-					text := string(buf.Bytes())
-					lex := lexer.New("", text)
-					p := parser.New(lex, wd)
-					program := p.ParseProgram()
-					if len(p.Errors()) == 0 { // no error
-						eval.Eval(program, scope)
-						l.AppendHistory(strings.Replace(text, "\n", "", -1))
-						continue
-					} else {
-						printParserErrors(out, p.Errors())
-						continue
-					}
+
 				}
 			}
 		}
