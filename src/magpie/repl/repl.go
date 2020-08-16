@@ -1,6 +1,8 @@
 package repl
 
 import (
+	"bytes"
+	"fmt"
 	"io"
 	"magpie/eval"
 	"magpie/lexer"
@@ -47,6 +49,7 @@ var colors = map[liner.Category]string{
 }
 
 const PROMPT = "magpie>> "
+const CONT_PROMPT = "... " // continue prompt
 
 func Start(out io.Writer, color bool) {
 	history := filepath.Join(os.TempDir(), ".magpie_history")
@@ -78,7 +81,7 @@ func Start(out io.Writer, color bool) {
 		os.Exit(1)
 	}
 
-	var tmplines []string
+	// var tmplines []string
 	for {
 		if line, err := l.Prompt(PROMPT); err == nil {
 			if line == "exit" || line == "quit" {
@@ -90,33 +93,42 @@ func Start(out io.Writer, color bool) {
 			}
 
 			tmpline := strings.TrimSpace(line)
-			if len(tmpline) == 0 { //empty line
-				continue
-			}
-			//check if the `line` variable is ended with '\'
-			if tmpline[len(tmpline)-1:] == "\\" { //the expression/statement has remaining part
-				tmplines = append(tmplines, strings.TrimRight(tmpline, "\\"))
+			if len(tmpline) == 0 || tmpline[0] == '#' { //empty line or single comment line
 				continue
 			} else {
-				tmplines = append(tmplines, line)
+				//check if the line is a valid expression or statement
+				lex := lexer.New("", tmpline)
+				p := parser.New(lex, wd)
+				program := p.ParseProgram()
+				if len(p.Errors()) == 0 { // no error
+					eval.Eval(program, scope)
+					l.AppendHistory(tmpline)
+					continue
+				} else {
+					var buf bytes.Buffer
+					fmt.Fprintln(&buf, line)
+					for {
+						if line, err := l.Prompt(CONT_PROMPT); err == nil {
+							if tmpline := strings.TrimSpace(line); tmpline == "" {
+								break
+							}
+							fmt.Fprintln(&buf, line)
+						}
+					}
+					text := string(buf.Bytes())
+					lex := lexer.New("", text)
+					p := parser.New(lex, wd)
+					program := p.ParseProgram()
+					if len(p.Errors()) == 0 { // no error
+						eval.Eval(program, scope)
+						l.AppendHistory(strings.Replace(text, "\n", "", -1))
+						continue
+					} else {
+						printParserErrors(out, p.Errors())
+						continue
+					}
+				}
 			}
-
-			resultLine := strings.Join(tmplines, "")
-			l.AppendHistory(resultLine)
-			tmplines = nil // clear the array
-
-			lex := lexer.New("", resultLine)
-			p := parser.New(lex, wd)
-			program := p.ParseProgram()
-			if len(p.Errors()) != 0 {
-				printParserErrors(out, p.Errors())
-				continue
-			}
-
-			eval.Eval(program, scope)
-			//e := eval.Eval(program, scope)
-			//io.WriteString(out, e.Inspect())
-			//io.WriteString(out, "\n")
 		}
 	}
 }
