@@ -2191,7 +2191,16 @@ func (p *Parser) parseFunctionStatement() ast.Statement {
 	FnStmt := &ast.FunctionStatement{Token: p.curToken}
 	FnStmt.Doc = p.lineComment
 
-	p.nextToken()
+	/* why below 'if'? please see below code:
+			1. fn add(x, y) { x + y }
+			2. fn(x, y) { x + y }(2, 3)
+		for the second one, we have no identifier, so we need
+		not advance to the next token. 
+	*/
+	if !p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+	}
+
 	FnStmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 
 	FnStmt.FunctionLiteral = p.parseFunctionLiteral().(*ast.FunctionLiteral)
