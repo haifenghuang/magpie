@@ -127,6 +127,12 @@ func Start(out io.Writer, color bool) {
 
 				}
 			}
+		} else if err == liner.ErrPromptAborted { //CTRL-C pressed
+			if f, err := os.Create(history); err == nil {
+					l.WriteHistory(f)
+					f.Close()
+				}
+			break
 		}
 	}
 }
