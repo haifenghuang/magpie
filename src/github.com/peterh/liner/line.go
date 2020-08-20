@@ -1181,21 +1181,21 @@ func (s *State) tooNarrow(prompt string) (string, error) {
 
 /*Below functions are for syntax highlight */
 func (s *State) RegisterKeywords(keywords []string) {
-	if ! s.useColor {
+	if !s.useColor {
 		return
 	}
 	s.highlighter.RegisterKeywords(keywords)
 }
 
 func (s *State) RegisterOperators(operators []string) {
-	if ! s.useColor {
+	if !s.useColor {
 		return
 	}
 	s.highlighter.RegisterOperators(operators)
 }
 
-func (s *State) RegisterColors(category map[Category]string) {
-	if ! s.useColor {
+func (s *State) RegisterColors(category map[Category]Color) {
+	if !s.useColor {
 		return
 	}
 	s.highlighter.RegisterColors(category)

@@ -1,50 +1,63 @@
 package liner
 
 import (
+	"errors"
 	"io"
 	"os"
-	"errors"
 	"strings"
 	"unicode"
 )
 
-const (
-	COLOR_NOCOLOR = ""
-	COLOR_RESET  = "\x1b[0m"
-	COLOR_BRIGHT = "\x1b[1m"
+type Color uint8
 
-	COLOR_BLACK   = "\x1b[30m"
-	COLOR_RED     = "\x1b[31m"
-	COLOR_GREEN   = "\x1b[32m"
-	COLOR_YELLOW  = "\x1b[33m"
-	COLOR_BLUE    = "\x1b[34m"
-	COLOR_MAGENTA = "\x1b[35m"
-	COLOR_CYAN    = "\x1b[36m"
-	COLOR_WHITE   = "\x1b[37m"
+const (
+	COLOR_BLACK Color = iota
+	COLOR_BLUE
+	COLOR_GREEN
+	COLOR_CYAN
+	COLOR_RED
+	COLOR_MAGENTA
+	COLOR_YELLOW
+	COLOR_WHITE
+	//for non-windows platforms
+	COLOR_RESET = "\x1b[0m"
 )
 
 type Category int
 
 const (
-	NumberType Category = iota //number. e.g. 10, 10.5
-	IdentType                  //identifier. e.g. name, age
-	KeywordType                //keywords.  e.g. if, else
-	StringType                 //string. e.g. "hello", 'hello'
-	CommentType                // comment. e.g. #xxxx
-	OperatorType               // operators. e.g. ++, --, +-
+	NumberType   Category = iota //number. e.g. 10, 10.5
+	IdentType                    //identifier. e.g. name, age
+	KeywordType                  //keywords.  e.g. if, else
+	StringType                   //string. e.g. "hello", 'hello'
+	CommentType                  // comment. e.g. #xxxx
+	OperatorType                 // operators. e.g. ++, --, +-
 )
+
+var colorsMap map[Color]string
+
+// Use for non-windows platforms
+func ColorToString(c Color) string {
+	if str, ok := colorsMap[c]; ok {
+		return str
+	}
+	return ""
+}
 
 type Highlighter struct {
 	input  []rune //the source we need to highlight
 	pos    int
 	length int
 
-	keywords      map[string]int       //keywords
-	category      map[Category]string  //color categories
+	keywords map[string]int     //keywords
+	category map[Category]Color //color categories
 
 	//operators
 	operatorChars string
 	operatorArr   []string
+
+	isWinConsole bool
+	textAttr     int16
 }
 
 func NewHighlighter() *Highlighter {
@@ -54,16 +67,29 @@ func NewHighlighter() *Highlighter {
 
 	h.keywords = make(map[string]int)
 
-	h.category = make(map[Category]string)
+	h.category = make(map[Category]Color)
 	//default values(NO COLOR)
-	h.category[NumberType]   = COLOR_NOCOLOR
-	h.category[IdentType]    = COLOR_NOCOLOR
-	h.category[KeywordType]  = COLOR_NOCOLOR
-	h.category[StringType]   = COLOR_NOCOLOR
-	h.category[CommentType]  = COLOR_NOCOLOR
-	h.category[OperatorType] = COLOR_NOCOLOR
+	// h.category[NumberType] = COLOR_NOCOLOR
+	// h.category[IdentType] = COLOR_NOCOLOR
+	// h.category[KeywordType] = COLOR_NOCOLOR
+	// h.category[StringType] = COLOR_NOCOLOR
+	// h.category[CommentType] = COLOR_NOCOLOR
+	// h.category[OperatorType] = COLOR_NOCOLOR
 
-
+	h.isWinConsole = isInwinConsole()
+	if h.isWinConsole {
+		colorsMap = map[Color]string{
+			COLOR_BLACK:   "\x1b[30m",
+			COLOR_BLUE:    "\x1b[34m",
+			COLOR_GREEN:   "\x1b[32m",
+			COLOR_CYAN:    "\x1b[36m",
+			COLOR_RED:     "\x1b[31m",
+			COLOR_MAGENTA: "\x1b[35m",
+			COLOR_YELLOW:  "\x1b[33m",
+			COLOR_WHITE:   "\x1b[37m",
+		}
+		h.textAttr = getConsoleTextAttr()
+	}
 	return h
 }
 
@@ -84,10 +110,10 @@ func (h *Highlighter) RegisterOperators(operators []string) {
 	for _, v := range operators {
 		h.operatorArr = append(h.operatorArr, v)
 	}
-	h.operatorChars = strings.Join(operators,"")
+	h.operatorChars = strings.Join(operators, "")
 }
 
-func (h *Highlighter) RegisterColors(category map[Category]string) {
+func (h *Highlighter) RegisterColors(category map[Category]Color) {
 	h.category = category
 }
 
@@ -123,7 +149,9 @@ func (h *Highlighter) processString(ch rune) error {
 	ret = append(ret, ch)
 
 	for {
-		if h.next() == 0 { goto end }
+		if h.next() == 0 {
+			goto end
+		}
 		if h.input[h.pos] == 0 {
 			return errors.New("unexpected EOF")
 		}
@@ -141,13 +169,7 @@ func (h *Highlighter) processString(ch rune) error {
 	ret = append(ret, ch)
 
 end:
-	str := h.category[StringType] + string(ret)
-	if h.category[StringType] != COLOR_NOCOLOR {
-		str += COLOR_RESET
-	}
-
-	io.WriteString(os.Stdout, str)
-
+	h.writeColoredOutput(string(ret), h.category[StringType])
 	return nil
 }
 
@@ -155,26 +177,29 @@ func (h *Highlighter) processComment(ch rune) {
 	var ret []rune
 	if ch == '#' {
 		ret = append(ret, ch)
-		if h.next() == 0 { goto end }
+		if h.next() == 0 {
+			goto end
+		}
 	} else {
 		ret = append(ret, ch)
 		ret = append(ret, ch)
-		if h.next() == 0 { goto end }
-		if h.next() == 0 { goto end }
+		if h.next() == 0 {
+			goto end
+		}
+		if h.next() == 0 {
+			goto end
+		}
 	}
 
 	for h.peek(0) != '\n' && h.peek(0) != 0 {
 		ret = append(ret, h.input[h.pos])
-		if h.next() == 0 { goto end }
+		if h.next() == 0 {
+			goto end
+		}
 	}
 
 end:
-	str := h.category[CommentType] + string(ret)
-	if h.category[CommentType] != COLOR_NOCOLOR {
-		str += COLOR_RESET
-	}
-
-	io.WriteString(os.Stdout, str)
+	h.writeColoredOutput(string(ret), h.category[CommentType])
 }
 
 //process operator
@@ -186,27 +211,27 @@ func (h *Highlighter) processOperator() {
 		}
 	}
 
-	for _, operator := range(h.operatorArr) {
+	for _, operator := range h.operatorArr {
 		aLen := len(operator)
 
 		var str string
-		if (h.pos + aLen < h.length) {
+		if h.pos+aLen < h.length {
 			str = string(h.input[h.pos : h.pos+aLen])
 		} else {
 			str = string(h.input[h.pos:])
 		}
 
 		if strings.HasPrefix(str, operator) {
-			if h.next() == 0 { goto end }
+			if h.next() == 0 {
+				goto end
+			}
 			if aLen == 2 {
-				if h.next() == 0 { goto end }
+				if h.next() == 0 {
+					goto end
+				}
 			}
-end:
-			strOut := h.category[OperatorType] + operator
-			if h.category[OperatorType] != COLOR_NOCOLOR {
-				strOut += COLOR_RESET
-			}
-			io.WriteString(os.Stdout, strOut)
+		end:
+			h.writeColoredOutput(operator, h.category[OperatorType])
 			break
 		} //end if
 	} //end for
@@ -224,17 +249,9 @@ func (h *Highlighter) processIdentifier() {
 	text := string(h.input[pos:h.pos])
 
 	if _, ok := h.keywords[text]; ok {
-		str := h.category[KeywordType] + text
-		if h.category[KeywordType] != COLOR_NOCOLOR {
-			str += COLOR_RESET
-		}
-		io.WriteString(os.Stdout, str)
+		h.writeColoredOutput(text, h.category[KeywordType])
 	} else {
-		str := h.category[IdentType] + text
-		if h.category[IdentType] != COLOR_NOCOLOR {
-			str += COLOR_RESET
-		}
-		io.WriteString(os.Stdout, str)
+		h.writeColoredOutput(text, h.category[IdentType])
 	}
 }
 
@@ -243,48 +260,66 @@ func (h *Highlighter) processNumber() error {
 	var ch rune = h.input[h.pos]
 
 	ret = append(ret, ch)
-	if h.next() == 0 { goto end	}
+	if h.next() == 0 {
+		goto end
+	}
 
 	if ch == '0' && (h.input[h.pos] == 'x' || h.input[h.pos] == 'b' || h.input[h.pos] == 'o') { //support '0x'(hex) and '0b'(bin) and '0o'(octal)
 		savedCh := h.input[h.pos]
 		ret = append(ret, h.input[h.pos])
-		if h.next() == 0 { goto end }
+		if h.next() == 0 {
+			goto end
+		}
 		if savedCh == 'x' {
 			for isHex(h.input[h.pos]) || h.input[h.pos] == '_' {
 				if h.input[h.pos] == '_' {
 					ret = append(ret, h.input[h.pos])
-					if h.next() == 0 { goto end	}
+					if h.next() == 0 {
+						goto end
+					}
 					continue
 				}
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 			}
 		} else if savedCh == 'b' {
 			for isBin(h.input[h.pos]) || h.input[h.pos] == '_' {
 				if h.input[h.pos] == '_' {
 					ret = append(ret, h.input[h.pos])
-					if h.next() == 0 { goto end	}
+					if h.next() == 0 {
+						goto end
+					}
 					continue
 				}
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 			}
 		} else if savedCh == 'o' {
 			for isOct(h.input[h.pos]) || h.input[h.pos] == '_' {
 				if h.input[h.pos] == '_' {
 					ret = append(ret, h.input[h.pos])
-					if h.next() == 0 { goto end	}
+					if h.next() == 0 {
+						goto end
+					}
 					continue
 				}
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 			}
 		}
 	} else {
 		for isDigit(h.input[h.pos]) || h.input[h.pos] == '.' || h.input[h.pos] == '_' {
 			if h.input[h.pos] == '_' {
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 				continue
 			}
 
@@ -298,50 +333,58 @@ func (h *Highlighter) processNumber() error {
 			} //end if
 
 			ret = append(ret, h.input[h.pos])
-			if h.next() == 0 { goto end	}
+			if h.next() == 0 {
+				goto end
+			}
 		}
 
 		if h.input[h.pos] == 'e' || h.input[h.pos] == 'E' {
 			ret = append(ret, h.input[h.pos])
-			if h.next() == 0 { goto end	}
+			if h.next() == 0 {
+				goto end
+			}
 			if isDigit(h.input[h.pos]) || h.input[h.pos] == '+' || h.input[h.pos] == '-' {
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 				for isDigit(h.input[h.pos]) || h.input[h.pos] == '.' || h.input[h.pos] == '_' {
 					if h.input[h.pos] == '_' {
 						ret = append(ret, h.input[h.pos])
-						if h.next() == 0 { goto end	}
+						if h.next() == 0 {
+							goto end
+						}
 						continue
 					}
 					ret = append(ret, h.input[h.pos])
-					if h.next() == 0 { goto end	}
+					if h.next() == 0 {
+						goto end
+					}
 				}
 			}
 			for isDigit(h.input[h.pos]) || h.input[h.pos] == '.' || h.input[h.pos] == '_' {
 				if h.input[h.pos] == '_' {
 					ret = append(ret, h.input[h.pos])
-					if h.next() == 0 { goto end	}
+					if h.next() == 0 {
+						goto end
+					}
 					continue
 				}
 				ret = append(ret, h.input[h.pos])
-				if h.next() == 0 { goto end	}
+				if h.next() == 0 {
+					goto end
+				}
 			}
 		}
 	}
 
 end:
-	str := h.category[NumberType] + string(ret)
-	if h.category[NumberType] != COLOR_NOCOLOR {
-		str += COLOR_RESET
-	}
-
-	io.WriteString(os.Stdout, str)
-
+	h.writeColoredOutput(string(ret), h.category[NumberType])
 	return nil
 }
 
 func (h *Highlighter) processNormal() {
-//	str := COLOR_WHITE + string(h.input[h.pos]) + COLOR_RESET
+	//	str := COLOR_WHITE + string(h.input[h.pos]) + COLOR_RESET
 	io.WriteString(os.Stdout, string(h.input[h.pos]))
 }
 
@@ -380,4 +423,15 @@ func (h *Highlighter) peek(relativePos int) rune {
 	}
 
 	return h.input[position]
+}
+
+func (h *Highlighter) writeColoredOutput(str string, color Color) {
+	if h.isWinConsole {
+		setConsoleTextAttr(uint16(color))
+		io.WriteString(os.Stdout, str)
+		setConsoleTextAttr(uint16(h.textAttr))
+	} else {
+		text := ColorToString(color) + str + COLOR_RESET
+		io.WriteString(os.Stdout, text)
+	}
 }

@@ -1,3 +1,5 @@
+// +build windows
+
 package liner
 
 import (
@@ -18,6 +20,7 @@ var (
 	procSetConsoleCursorPosition      = kernel32.NewProc("SetConsoleCursorPosition")
 	procGetConsoleScreenBufferInfo    = kernel32.NewProc("GetConsoleScreenBufferInfo")
 	procFillConsoleOutputCharacter    = kernel32.NewProc("FillConsoleOutputCharacterW")
+	procSetTextAttribute              = kernel32.NewProc("SetConsoleTextAttribute")
 )
 
 // These names are from the Win32 api, so they use underscores (contrary to
@@ -307,6 +310,10 @@ func (s *State) stopPrompt() {
 	s.defaultMode.ApplyMode()
 }
 
+func (s *State) IsInwinConsole() bool {
+	return isInwinConsole()
+}
+
 // TerminalSupported returns true because line editing is always
 // supported on Windows.
 func TerminalSupported() bool {
@@ -340,4 +347,32 @@ func TerminalMode() (ModeApplier, error) {
 		err = nil
 	}
 	return mode, err
+}
+
+func isInwinConsole() bool {
+	if procGetConsoleScreenBufferInfo == nil {
+		return false
+	}
+
+	var sbi consoleScreenBufferInfo
+	ret, _, _ := procGetConsoleScreenBufferInfo.Call(uintptr(syscall.Stdout), uintptr(unsafe.Pointer(&sbi)))
+	return ret != 0
+}
+
+func getConsoleTextAttr() int16 {
+	var sbi consoleScreenBufferInfo
+	procGetConsoleScreenBufferInfo.Call(uintptr(syscall.Stdout), uintptr(unsafe.Pointer(&sbi)))
+
+	return sbi.wAttributes
+}
+
+func setConsoleTextAttr(attr uint16) (n int, err error) {
+	ret, _, err := procSetTextAttribute.Call(uintptr(syscall.Stdout), uintptr(attr))
+
+	// if success, err.Error() is equals "The operation completed successfully."
+	if err != nil && err.Error() == "The operation completed successfully." {
+		err = nil // set as nil
+	}
+
+	return int(ret), err
 }

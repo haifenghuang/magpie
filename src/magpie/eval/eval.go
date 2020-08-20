@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"magpie/ast"
 	_ "magpie/lexer"
-	"magpie/token"
 	"magpie/message"
+	"magpie/token"
 	"math"
 	"os"
 	"os/exec"
@@ -56,7 +56,7 @@ var MsgHandler *message.MessageHandler
 
 type Context struct {
 	N []ast.Node //N: node
-	S *Scope   //S: Scope
+	S *Scope     //S: Scope
 }
 
 func Eval(node ast.Node, scope *Scope) (val Object) {
@@ -65,7 +65,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 			switch r := r.(type) {
 			case *Error:
 				//if panic is a Error Object, print its contents
-				fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", r.Error())
+				//fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", r.Error()) //only for non-windows terminal
+				fmt.Fprintf(os.Stderr, "%s\n", r.Error())
 				//debug.PrintStack() //debug only
 
 				//WHY return NIL? if we do not return 'NIL', we may get something like below:
@@ -95,7 +96,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	if Dbg != nil {
 		Dbg.SetNodeAndScope(node, scope)
 		if Dbg.CanStop() {
-			MsgHandler.SendMessage(message.Message{Type:message.EVAL_LINE, Body:Context{N: []ast.Node{node}, S: scope}})
+			MsgHandler.SendMessage(message.Message{Type: message.EVAL_LINE, Body: Context{N: []ast.Node{node}, S: scope}})
 		}
 	}
 
@@ -113,7 +114,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalConstStatement(node, scope)
 	case *ast.ReturnStatement:
 		if Dbg != nil {
-			MsgHandler.SendMessage(message.Message{Type:message.RETURN, Body:Context{N: []ast.Node{node}, S: scope}})
+			MsgHandler.SendMessage(message.Message{Type: message.RETURN, Body: Context{N: []ast.Node{node}, S: scope}})
 		}
 		return evalReturnStatement(node, scope)
 	case *ast.DeferStmt:
@@ -177,12 +178,12 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalBlockStatements(node.Statements, scope)
 	case *ast.CallExpression:
 		if Dbg != nil {
-			MsgHandler.SendMessage(message.Message{Type:message.CALL, Body:Context{N: []ast.Node{node}, S: scope}})
+			MsgHandler.SendMessage(message.Message{Type: message.CALL, Body: Context{N: []ast.Node{node}, S: scope}})
 		}
 		return evalFunctionCall(node, scope)
 	case *ast.MethodCallExpression:
 		if Dbg != nil {
-			MsgHandler.SendMessage(message.Message{Type:message.METHOD_CALL, Body:Context{N: []ast.Node{node}, S: scope}})
+			MsgHandler.SendMessage(message.Message{Type: message.METHOD_CALL, Body: Context{N: []ast.Node{node}, S: scope}})
 		}
 		return evalMethodCallExpression(node, scope)
 	case *ast.IndexExpression:

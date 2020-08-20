@@ -40,12 +40,13 @@ var magpieOperators = []string{
 	",", "?", ":", ";",
 }
 
-var colors = map[liner.Category]string{
+var colors = map[liner.Category]liner.Color{
 	liner.NumberType:   liner.COLOR_YELLOW,
 	liner.KeywordType:  liner.COLOR_MAGENTA,
 	liner.StringType:   liner.COLOR_CYAN,
 	liner.CommentType:  liner.COLOR_GREEN,
 	liner.OperatorType: liner.COLOR_RED,
+	liner.IdentType:    liner.COLOR_WHITE,
 }
 
 const PROMPT = "magpie>> "
@@ -71,7 +72,7 @@ func Start(out io.Writer, color bool) {
 		f.Close()
 	}
 
-	if color {
+	if color && !l.IsInwinConsole() {
 		eval.REPLColor = true
 	}
 	scope := eval.NewScope(nil)
@@ -129,9 +130,9 @@ func Start(out io.Writer, color bool) {
 			}
 		} else if err == liner.ErrPromptAborted { //CTRL-C pressed
 			if f, err := os.Create(history); err == nil {
-					l.WriteHistory(f)
-					f.Close()
-				}
+				l.WriteHistory(f)
+				f.Close()
+			}
 			break
 		}
 	}
