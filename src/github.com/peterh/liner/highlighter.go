@@ -78,6 +78,8 @@ func NewHighlighter() *Highlighter {
 
 	h.isWinConsole = isInwinConsole()
 	if h.isWinConsole {
+		h.textAttr = getConsoleTextAttr()
+	} else {
 		colorsMap = map[Color]string{
 			COLOR_BLACK:   "\x1b[30m",
 			COLOR_BLUE:    "\x1b[34m",
@@ -88,7 +90,6 @@ func NewHighlighter() *Highlighter {
 			COLOR_YELLOW:  "\x1b[33m",
 			COLOR_WHITE:   "\x1b[37m",
 		}
-		h.textAttr = getConsoleTextAttr()
 	}
 	return h
 }
