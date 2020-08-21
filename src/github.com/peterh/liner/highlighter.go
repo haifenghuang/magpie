@@ -19,8 +19,6 @@ const (
 	COLOR_MAGENTA
 	COLOR_YELLOW
 	COLOR_WHITE
-	//for non-windows platforms
-	COLOR_RESET = "\x1b[0m"
 )
 
 type Category int
@@ -34,16 +32,6 @@ const (
 	OperatorType                 // operators. e.g. ++, --, +-
 )
 
-var colorsMap map[Color]string
-
-// Use for non-windows platforms
-func ColorToString(c Color) string {
-	if str, ok := colorsMap[c]; ok {
-		return str
-	}
-	return ""
-}
-
 type Highlighter struct {
 	input  []rune //the source we need to highlight
 	pos    int
@@ -56,8 +44,7 @@ type Highlighter struct {
 	operatorChars string
 	operatorArr   []string
 
-	isWinConsole bool
-	textAttr     int16
+	textAttr int16
 }
 
 func NewHighlighter() *Highlighter {
@@ -76,20 +63,7 @@ func NewHighlighter() *Highlighter {
 	// h.category[CommentType] = COLOR_NOCOLOR
 	// h.category[OperatorType] = COLOR_NOCOLOR
 
-	h.isWinConsole = isInwinConsole()
-	if h.isWinConsole {
-		colorsMap = map[Color]string{
-			COLOR_BLACK:   "\x1b[30m",
-			COLOR_BLUE:    "\x1b[34m",
-			COLOR_GREEN:   "\x1b[32m",
-			COLOR_CYAN:    "\x1b[36m",
-			COLOR_RED:     "\x1b[31m",
-			COLOR_MAGENTA: "\x1b[35m",
-			COLOR_YELLOW:  "\x1b[33m",
-			COLOR_WHITE:   "\x1b[37m",
-		}
-		h.textAttr = getConsoleTextAttr()
-	}
+	initHighlighter(h)
 	return h
 }
 
@@ -423,15 +397,4 @@ func (h *Highlighter) peek(relativePos int) rune {
 	}
 
 	return h.input[position]
-}
-
-func (h *Highlighter) writeColoredOutput(str string, color Color) {
-	if h.isWinConsole {
-		setConsoleTextAttr(uint16(color))
-		io.WriteString(os.Stdout, str)
-		setConsoleTextAttr(uint16(h.textAttr))
-	} else {
-		text := ColorToString(color) + str + COLOR_RESET
-		io.WriteString(os.Stdout, text)
-	}
 }

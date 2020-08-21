@@ -1200,3 +1200,7 @@ func (s *State) RegisterColors(category map[Category]Color) {
 	}
 	s.highlighter.RegisterColors(category)
 }
+
+func (s *State) IsInwinConsole() bool {
+	return isInwinConsole()
+}

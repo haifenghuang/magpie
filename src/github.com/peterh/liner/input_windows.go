@@ -137,7 +137,7 @@ const (
 	vk_f11    = 0x7a
 	vk_f12    = 0x7b
 	bKey      = 0x42
-	dKey      = 0x44 
+	dKey      = 0x44
 	fKey      = 0x46
 	yKey      = 0x59
 )
@@ -310,10 +310,6 @@ func (s *State) stopPrompt() {
 	s.defaultMode.ApplyMode()
 }
 
-func (s *State) IsInwinConsole() bool {
-	return isInwinConsole()
-}
-
 // TerminalSupported returns true because line editing is always
 // supported on Windows.
 func TerminalSupported() bool {
@@ -347,32 +343,4 @@ func TerminalMode() (ModeApplier, error) {
 		err = nil
 	}
 	return mode, err
-}
-
-func isInwinConsole() bool {
-	if procGetConsoleScreenBufferInfo == nil {
-		return false
-	}
-
-	var sbi consoleScreenBufferInfo
-	ret, _, _ := procGetConsoleScreenBufferInfo.Call(uintptr(syscall.Stdout), uintptr(unsafe.Pointer(&sbi)))
-	return ret != 0
-}
-
-func getConsoleTextAttr() int16 {
-	var sbi consoleScreenBufferInfo
-	procGetConsoleScreenBufferInfo.Call(uintptr(syscall.Stdout), uintptr(unsafe.Pointer(&sbi)))
-
-	return sbi.wAttributes
-}
-
-func setConsoleTextAttr(attr uint16) (n int, err error) {
-	ret, _, err := procSetTextAttribute.Call(uintptr(syscall.Stdout), uintptr(attr))
-
-	// if success, err.Error() is equals "The operation completed successfully."
-	if err != nil && err.Error() == "The operation completed successfully." {
-		err = nil // set as nil
-	}
-
-	return int(ret), err
 }

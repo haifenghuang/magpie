@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 export GOPATH=$(pwd)
 
 # format each go file
@@ -8,14 +8,26 @@ export GOPATH=$(pwd)
 #	go fmt $file > /dev/null
 #done
 
-echo ""
+interpreter_name=magpie
 
-# run: ./magpie demo.my or ./magpie
-echo "Building REPL...(magpie)"
-go build -o magpie main.go
+# cross-compiling
+platforms=("windows/amd64" "linux/amd64" "darwin/amd64")
+for platform in "${platforms[@]}"
+do
+    platform_split=(${platform//\// })
+    GOOS=${platform_split[0]}
+    GOARCH=${platform_split[1]}
+    output_name=$interpreter_name'-'$GOOS'-'$GOARCH
+    if [ $GOOS = "windows" ]; then
+        output_name+='.exe'
+    fi
 
-echo "Building REPL(win)...(magpie.exe)"
-GOOS=windows go build -o magpie.exe main.go
+    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name main.go
+    if [ $? -ne 0 ]; then
+        echo 'An error has occurred! Aborting the script execution...'
+        exit 1
+    fi
+done
 
 echo "Building mdoc...(mdoc)"
 go build -o mdoc mdoc.go
