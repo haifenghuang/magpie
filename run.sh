@@ -22,6 +22,7 @@ do
         output_name+='.exe'
     fi
 
+    echo "Building ${interpreter_name}...($output_name)"
     env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name main.go
     if [ $? -ne 0 ]; then
         echo 'An error has occurred! Aborting the script execution...'
