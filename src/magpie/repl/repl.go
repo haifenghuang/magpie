@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"magpie/ast"
 	"magpie/eval"
 	"magpie/lexer"
 	"magpie/parser"
@@ -83,6 +84,9 @@ func Start(out io.Writer, color bool) {
 	}
 
 	// var tmplines []string
+	var lex *lexer.Lexer
+	var p *parser.Parser
+	var program *ast.Program
 	for {
 		if line, err := l.Prompt(PROMPT); err == nil {
 			if line == "exit" || line == "quit" {
@@ -98,14 +102,32 @@ func Start(out io.Writer, color bool) {
 				continue
 			} else {
 				//check if the line is a valid expression or statement
-				lex := lexer.New("", tmpline)
-				p := parser.New(lex, wd)
-				program := p.ParseProgram()
+				lex = lexer.New("", tmpline)
+				p = parser.New(lex, wd)
+				program = p.ParseProgram()
 				if len(p.Errors()) == 0 { // no error
 					eval.Eval(program, scope)
 					l.AppendHistory(tmpline)
 					continue
 				} else {
+					if program == nil {
+						printParserErrors(out, p.Errors())
+						continue
+					} else if len(program.Statements) == 0 { //it's an 'include' statement
+						var errFlag bool
+						for _, include := range program.Includes {
+							if include.Program == nil { // error
+								errFlag = true
+								break
+							}
+						}
+
+						if errFlag {
+							printParserErrors(out, p.Errors())
+						}
+						continue
+					}
+
 					var buf bytes.Buffer
 					fmt.Fprintln(&buf, line)
 					for {
@@ -113,9 +135,9 @@ func Start(out io.Writer, color bool) {
 							fmt.Fprintln(&buf, line)
 
 							text := string(buf.Bytes())
-							lex := lexer.New("", text)
-							p := parser.New(lex, wd)
-							program := p.ParseProgram()
+							lex = lexer.New("", text)
+							p = parser.New(lex, wd)
+							program = p.ParseProgram()
 							if len(p.Errors()) == 0 { // no error
 								eval.Eval(program, scope)
 								l.AppendHistory(strings.Replace(text, "\n", "", -1))

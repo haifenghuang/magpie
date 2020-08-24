@@ -1076,6 +1076,7 @@ func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
 	program, err := p.getIncludedStatements(includePath)
 	if err != nil {
 		p.errors = append(p.errors, err.Error())
+		return stmt
 	}
 	stmt.Program = program
 	return stmt
