@@ -122,28 +122,30 @@ const (
 
 // implement sort interface
 type SortByLine []ast.Node
-func (d SortByLine) Len() int { return len(d) }
+
+func (d SortByLine) Len() int           { return len(d) }
 func (d SortByLine) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
 func (d SortByLine) Less(i, j int) bool { return d[i].Pos().Line < d[j].Pos().Line }
 
 var (
-	FileLines []string
+	FileLines     []string
 	tmpDebugInfos SortByLine
-	DebugInfos SortByLine
+	DebugInfos    SortByLine
 )
 
 //group by ast.Node's line number.
 func SplitSlice(list []ast.Node) [][]ast.Node {
 	sort.Sort(SortByLine(list))
 	returnData := make([][]ast.Node, 0)
-	i:= 0
+	i := 0
 	var j int
 	for {
 		if i >= len(list) {
 			break
 		}
 
-		for j = i + 1; j < len(list) && list[i].Pos().Line == list[j].Pos().Line; j++ {}
+		for j = i + 1; j < len(list) && list[i].Pos().Line == list[j].Pos().Line; j++ {
+		}
 
 		returnData = append(returnData, list[i:j])
 		i = j
@@ -425,7 +427,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
-	var ret ast.Statement 
+	var ret ast.Statement
 	switch p.curToken.Type {
 	case token.LET:
 		ret = p.parseLetStatement(false)
@@ -861,7 +863,7 @@ func (p *Parser) parseContinueExpression() ast.Expression {
 //let a; (without assignment, 'a' is assumed to be 'nil')
 //let (a,b,c) = tuple|array|hash
 func (p *Parser) parseLetStatement(inClass bool) *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken, InClass : inClass}
+	stmt := &ast.LetStatement{Token: p.curToken, InClass: inClass}
 	stmt.Doc = p.lineComment
 
 	if p.peekTokenIs(token.LPAREN) {
@@ -878,6 +880,15 @@ func (p *Parser) parseLetStatement(inClass bool) *ast.LetStatement {
 		}
 		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 		stmt.Names = append(stmt.Names, name)
+
+		if !p.peekTokenIs(token.ASSIGN) && !p.curTokenIs(token.SEMICOLON) && !p.peekTokenIs(token.COMMA) {
+			if p.peekTokenIs(token.SEMICOLON) {
+				p.nextToken()
+			}
+			stmt.SrcEndToken = p.curToken
+			return stmt
+
+		}
 
 		p.nextToken()
 		if p.curTokenIs(token.ASSIGN) || p.curTokenIs(token.SEMICOLON) {
@@ -2193,10 +2204,10 @@ func (p *Parser) parseFunctionStatement() ast.Statement {
 	FnStmt.Doc = p.lineComment
 
 	/* why below 'if'? please see below code:
-			1. fn add(x, y) { x + y }
-			2. fn(x, y) { x + y }(2, 3)
-		for the second one, we have no identifier, so we need
-		not advance to the next token. 
+		1. fn add(x, y) { x + y }
+		2. fn(x, y) { x + y }(2, 3)
+	for the second one, we have no identifier, so we need
+	not advance to the next token.
 	*/
 	if !p.peekTokenIs(token.LPAREN) {
 		p.nextToken()
