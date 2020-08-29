@@ -145,9 +145,10 @@ func Start(out io.Writer, color bool) {
 							} else {
 								continue
 							}
+						} else if err == liner.ErrPromptAborted { //CTRL-C pressed
+							break
 						}
 					}
-
 				}
 			}
 		} else if err == liner.ErrPromptAborted { //CTRL-C pressed
