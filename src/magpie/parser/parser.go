@@ -578,6 +578,13 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		Left:     left,
 	}
 	precedence := p.curPrecedence()
+
+	// if the token is '**', we process it specially. e.g. 3 ** 2 ** 3 = 3 ** (2 ** 3)
+	// i.e. Exponent operator '**'' has right-to-left associativity
+	if p.curTokenIs(token.POWER) {
+		precedence-- 
+	}
+
 	p.nextToken()
 	expression.Right = p.parseExpression(precedence)
 
