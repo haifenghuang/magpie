@@ -139,8 +139,10 @@ func (a *Array) Get(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type()))
 	}
 
+	// if out-of-bounds, return NIL
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
-		panic(NewError(line, INDEXERROR, idxObj.Int64))
+		return NIL
+		//panic(NewError(line, INDEXERROR, idxObj.Int64))
 	}
 	return a.Members[idxObj.Int64]
 }
@@ -156,7 +158,11 @@ func (a *Array) Set(line string, args ...Object) Object {
 	}
 
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
-		panic(NewError(line, INDEXERROR, idxObj.Int64))
+		oldLen := int64(len(a.Members))
+		for i := oldLen; i <= idxObj.Int64; i++ {
+			a.Members = append(a.Members, NIL)
+		}
+		//panic(NewError(line, INDEXERROR, idxObj.Int64))
 	}
 
 	a.Members[idxObj.Int64] = args[1]
