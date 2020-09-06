@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"unicode/utf8"
 )
 
@@ -267,6 +268,21 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	//service statement
 	case *ast.ServiceStatement:
 		return evalServiceStatement(node, scope)
+
+	//date time object
+	case *ast.DateTimeExpr:
+		if node.Pattern == nil {
+			return &TimeObj{Tm: time.Now(), Valid: true}
+		}
+
+		is := evalInterpolatedString(node.Pattern, scope).(*InterpolatedString)
+		var err error
+		dt := &TimeObj{Valid:true}
+		dt.Tm, err = time.Parse(builtinDate_Normal, is.String.String)
+		if err != nil {
+			dt.Valid = false
+		}
+		return dt
 	}
 	return nil
 }
@@ -1876,6 +1892,8 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		return evalArrayInfixExpression(node, left, right, scope)
 	case (left.Type() == TUPLE_OBJ || right.Type() == TUPLE_OBJ):
 		return evalTupleInfixExpression(node, left, right, scope)
+	case (left.Type() ==TIME_OBJ || right.Type() == TIME_OBJ):
+		return evalTimeInfixExpression(node, left, right)
 	case left.Type() == STRING_OBJ && right.Type() == STRING_OBJ:
 		return evalStringInfixExpression(node, left, right)
 	case (left.Type() == STRING_OBJ || right.Type() == STRING_OBJ):
@@ -2186,6 +2204,78 @@ func evalStringInfixExpression(node *ast.InfixExpression, left Object, right Obj
 		return nativeBoolToBooleanObject(l.String >= r.String)
 	}
 	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+}
+
+func evalTimeTimeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
+	l := left.(*TimeObj)
+	r := right.(*TimeObj)
+
+	var b bool
+	switch node.Operator {
+	case "==":
+		b = l.Tm.Equal(r.Tm)
+		return NewBooleanObj(b)
+	case "!=":
+		b = !l.Tm.Equal(r.Tm)
+		return NewBooleanObj(b)
+	case "<":
+		b = l.Tm.Before(r.Tm)
+		return NewBooleanObj(b)
+	case "<=":
+		b = l.Tm.Equal(r.Tm) || l.Tm.Before(r.Tm)
+		return NewBooleanObj(b)
+	case ">":
+		b = l.Tm.After(r.Tm)
+		return NewBooleanObj(b)
+	case ">=":
+		b = l.Tm.Equal(r.Tm) || l.Tm.After(r.Tm)
+		return NewBooleanObj(b)
+	}
+	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+}
+
+
+/*
+	The Duration String support "YMDhms":
+		Y:Year    M:Month    D:Day
+		h:hour    m:Minute   s:Second
+
+	let dt1 = dt/2018-01-01 12:01:00/ + "-12m"
+
+*/
+func evalTimeStringInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
+	l := left.(*TimeObj)
+	r := right.(*String)
+
+	switch node.Operator {
+	case "+":
+		timeObj, err := ParseDuration(l, r.String)
+		if err != nil {
+			msg := fmt.Sprintf("Invalid string duration '%s'", r.String)
+			panic(NewError(node.Pos().Sline(), GENERICERROR, msg))
+		}
+		return timeObj
+	}
+
+	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+
+}
+
+/*
+    let dt1 = dt/2018-01-01 12:01:00/
+    let dt2 = dt/2019-01-01 12:01:00/
+    pringln(dt1 <= dt2) # result: true
+*/
+func evalTimeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
+	if left.Type() == TIME_OBJ && right.Type() == TIME_OBJ {
+		return evalTimeTimeInfixExpression(node, left, right)
+	}
+
+	if left.Type() == TIME_OBJ && right.Type() == STRING_OBJ {
+		return evalTimeStringInfixExpression(node, left, right)
+	}
+
+	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
 }
 
 func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
@@ -5714,6 +5804,8 @@ func equal(isWholeMatch bool, lhsV, rhsV Object) bool {
 			matched, _ := regexp.MatchString(rightStr, leftStr)
 			return matched
 		}
+	} else if lhsV.Type() == TIME_OBJ && rhsV.Type() == TIME_OBJ {
+		return lhsV.(*TimeObj).Tm.Equal(rhsV.(*TimeObj).Tm)
 	} else {
 		r := reflect.DeepEqual(lhsV, rhsV)
 		if r {

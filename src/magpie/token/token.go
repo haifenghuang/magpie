@@ -10,6 +10,7 @@ const (
 	INT   //int literal
 	UINT  //unsigned int
 	FLOAT //float literal
+	DATETIME //datetime
 
 	EQ         // ==
 	NEQ        // !=
@@ -251,6 +252,8 @@ func (tt TokenType) String() string {
 		return "UINT"
 	case FLOAT:
 		return "FLOAT"
+	case DATETIME:
+		return "DATETIME"
 	case EQ:
 		return "=="
 	case NEQ:

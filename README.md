@@ -29,6 +29,7 @@ Complete language tutorial can be found in [docs](docs)
 * Class with support for property, indexer & operator overloading
 * await/async for asynchronous programming
 * Builtin support for linq
+* Builtin support for datetime literal
 * First class function
 * function with Variadic parameters and default values
 * function with multiple return values
@@ -168,6 +169,7 @@ b = true               // bool
 a = [1, "2"]           // array
 h = {"a": 1, "b": 2}   // hash
 t = (1,2,3)            // tuple
+dt = dt/2018-01-01 12:01:00/  //datetime literal
 n = nil
 ```
 

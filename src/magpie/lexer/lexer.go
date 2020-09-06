@@ -374,9 +374,7 @@ func (l *Lexer) readRunesToken() token.Token {
 		tok.Type = token.EOF
 		return tok
 	case isLetter(l.ch):
-		tok.Literal = l.readIdentifier()
-		tok.Type = token.LookupIdent(tok.Literal)
-		return tok
+		return l.readIdentifier()
 	case isDigit(l.ch):
 		literal, isUnsigned, _ := l.readNumber()
 		if strings.Contains(literal, ".") {
@@ -413,7 +411,7 @@ func (l *Lexer) readRunesToken() token.Token {
 			}
 		}
 	case isSingleQuote(l.ch):
-		if s, err := l.readInterpString(); err == nil {
+		if s, err := l.readInterpString(l.ch); err == nil {
 			tok.Type = token.ISTRING
 			tok.Literal = s
 			return tok
@@ -490,13 +488,13 @@ eos:
 	return string(ret), nil
 }
 
-func (l *Lexer) readInterpString() (string, error) {
+func (l *Lexer) readInterpString(r rune) (string, error) {
 	start := l.position + 1
 	var out bytes.Buffer
 	pos := "0"[0]
 	for {
 		l.readNext()
-		if isSingleQuote(l.ch) {
+		if l.ch == r {
 			l.readNext()
 			break
 		}
@@ -550,6 +548,33 @@ func (l *Lexer) NextInterpToken() token.Token {
 	return tok
 }
 
+// for date-time literal handling
+func (l *Lexer) NextInterpToken2() token.Token {
+	var tok token.Token
+	for {
+		if l.ch == '{' {
+			if l.peek() == '}' {
+				continue
+			}
+			tok = newToken(token.LBRACE, l.ch)
+			break
+		}
+		if l.ch == 0 {
+			tok.Type = token.EOF
+			tok.Literal = ""
+			break
+		}
+		if l.ch == '/' {
+			tok = newToken(token.DATETIME, l.ch)
+			break
+		}
+		l.readNext()
+	}
+	l.readNext()
+	tok.Pos = l.getPos()
+	return tok
+}
+
 func (l *Lexer) readCommand(r rune) (string, error) {
 	var ret []rune
 eoc:
@@ -586,7 +611,7 @@ eoc:
 	return string(ret), nil
 }
 
-func (l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() token.Token {
 	// 	defer func() {
 	//		if err := recover(); err != nil {
 	// 			fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", err)
@@ -594,6 +619,18 @@ func (l *Lexer) readIdentifier() string {
 	//    }()
 
 	position := l.position
+	if l.ch == 'd' {
+		if l.peek() == 't' { //It's a datetime token
+			l.readNext()
+			if l.peek() == '/' {
+				l.readNext()
+				if s, err := l.readInterpString(l.ch); err == nil {
+					return token.Token{Type: token.DATETIME, Literal: s}
+				}
+			}
+		}
+	}
+
 	// Why '?' : Because Magpie support Optional, so it should be good for
 	// a Optional type to denote it meaning with a '?' like 'isEmpty?'
 
@@ -617,7 +654,10 @@ func (l *Lexer) readIdentifier() string {
 		}
 	}
 
-	return ret
+	var tok token.Token
+	tok.Literal = ret
+	tok.Type = token.LookupIdent(tok.Literal)
+	return tok
 }
 
 func (l *Lexer) readRegExLiteral() (literal string) {

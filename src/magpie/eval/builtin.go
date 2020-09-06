@@ -1097,6 +1097,39 @@ func newTimeBuiltin() *Builtin {
 	}
 }
 
+/* accept a timestamp(second & nanosecond), and convert it to a TimeObj */
+func unixTimeBuiltin() *Builtin {
+	return &Builtin{
+		Fn: func(line string, args ...Object) Object {
+			if len(args) != 1 && len(args) != 2 {
+				panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+			}
+
+			var ok bool
+			var second *Integer
+			var nsecond *Integer
+			if len(args) == 1 {
+				second, ok = args[0].(*Integer)
+				if !ok {
+					panic(NewError(line, PARAMTYPEERROR, "first", "unixTime", "*Integer", args[0].Type()))
+				}
+			}
+
+			if len(args) == 2 {
+				nsecond, ok = args[1].(*Integer)
+				if !ok {
+					panic(NewError(line, PARAMTYPEERROR, "second", "unixTime", "*Integer", args[1].Type()))
+				}
+			}
+
+			if len(args) == 1 {
+				return &TimeObj{Tm: time.Unix(second.Int64, 0), Valid: true}
+			}
+			return &TimeObj{Tm: time.Unix(second.Int64, nsecond.Int64), Valid: true}
+		},
+	}
+}
+
 //func Date(year int, month Month, day, hour, min, sec, nsec int, loc int)
 func newDateBuiltin() *Builtin {
 	return &Builtin{
@@ -1436,6 +1469,7 @@ func init() {
 		//time
 		"newTime": newTimeBuiltin(),
 		"newDate": newDateBuiltin(),
+		"unixTime": unixTimeBuiltin(),
 
 		//sync
 		"newCond":      newCondBuiltin(),

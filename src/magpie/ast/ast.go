@@ -3498,6 +3498,39 @@ func (s *ServiceStatement) Docs() string {
 }
 
 ///////////////////////////////////////////////////////////
+//                   DateTime Expression                 //
+///////////////////////////////////////////////////////////
+type DateTimeExpr struct {
+	Token   token.Token
+	Pattern *InterpolatedString // pattern string
+}
+
+func (dt *DateTimeExpr) Pos() token.Position {
+	return dt.Token.Pos
+}
+
+func (dt *DateTimeExpr) End() token.Position {
+	return dt.Pattern.End()
+	// length := len(dt.Pattern)
+	// pos := dt.Token.Pos
+	// return token.Position{Filename: pos.Filename, Line: pos.Line, Col: pos.Col + length}
+}
+
+func (dt *DateTimeExpr) expressionNode()      {}
+func (dt *DateTimeExpr) TokenLiteral() string { return dt.Token.Literal }
+
+func (dt *DateTimeExpr) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(dt.TokenLiteral() + "/")
+	out.WriteString(dt.Pattern.String())
+	out.WriteString("/")
+
+	return out.String()
+}
+
+
+///////////////////////////////////////////////////////////
 //                       COMMENTS                        //
 ///////////////////////////////////////////////////////////
 

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strings"
+	"strconv"
 	"time"
 )
 
@@ -66,6 +68,7 @@ const (
 	builtinDate_goDateTimeLayout = time.RFC1123 // "Mon, 02 Jan 2006 15:04:05 MST"
 	builtinDate_goDateLayout     = "Mon, 02 Jan 2006"
 	builtinDate_goTimeLayout     = "15:04:05 MST"
+	builtinDate_Normal           = "2006-01-02 15:04:05"
 )
 
 func (t *TimeObj) Inspect() string {
@@ -73,7 +76,7 @@ func (t *TimeObj) Inspect() string {
 		v := t.ToStr("")
 		return v.(*String).String
 	}
-	return "ERROR: Time is null"
+	return "ERROR: Time is invalid"
 
 }
 
@@ -241,7 +244,7 @@ func (t *TimeObj) ToStr(line string, args ...Object) Object {
 	}
 
 	if len(args) == 0 {
-		return NewString(t.Tm.Local().Format(builtinDate_goDateTimeLayout))
+		return NewString(t.Tm.Format(builtinDate_Normal))
 	}
 
 	fmtStr, ok := args[0].(*String)
@@ -249,7 +252,7 @@ func (t *TimeObj) ToStr(line string, args ...Object) Object {
 		panic(NewError(line, PARAMTYPEERROR, "first", "toStr", "*String", args[0].Type()))
 	}
 
-	return NewString(t.Tm.Local().Format(fmtStr.String))
+	return NewString(t.Tm.Format(fmtStr.String))
 
 }
 
@@ -298,7 +301,7 @@ func (t *TimeObj) ToDateStr(line string, args ...Object) Object {
 		return NIL
 	}
 
-	return NewString(t.Tm.Local().Format(builtinDate_goDateLayout))
+	return NewString(t.Tm.Format(builtinDate_goDateLayout))
 }
 
 func (t *TimeObj) ToTimeStr(line string, args ...Object) Object {
@@ -310,19 +313,19 @@ func (t *TimeObj) ToTimeStr(line string, args ...Object) Object {
 		return NIL
 	}
 
-	return NewString(t.Tm.Local().Format(builtinDate_goTimeLayout))
+	return NewString(t.Tm.Format(builtinDate_goTimeLayout))
 }
 
 func (t *TimeObj) Year(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Year()))
+	return NewInteger(int64(t.Tm.Year()))
 }
 
 func (t *TimeObj) FullYear(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Year()))
+	return NewInteger(int64(t.Tm.Year()))
 }
 
 func (t *TimeObj) Month(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Month()))
+	return NewInteger(int64(t.Tm.Month()))
 }
 
 func (t *TimeObj) Date(line string, args ...Object) Object {
@@ -330,7 +333,7 @@ func (t *TimeObj) Date(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
-	year, month, day := t.Tm.Local().Date()
+	year, month, day := t.Tm.Date()
 	arr := &Array{}
 	arr.Members = append(arr.Members, NewInteger(int64(year)))
 	arr.Members = append(arr.Members, NewInteger(int64(month)))
@@ -340,7 +343,7 @@ func (t *TimeObj) Date(line string, args ...Object) Object {
 }
 
 func (t *TimeObj) YearDay(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().YearDay()))
+	return NewInteger(int64(t.Tm.YearDay()))
 }
 
 func (t *TimeObj) WeekDay(line string, args ...Object) Object {
@@ -352,19 +355,19 @@ func (t *TimeObj) Day(line string, args ...Object) Object {
 }
 
 func (t *TimeObj) Hours(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Hour()))
+	return NewInteger(int64(t.Tm.Hour()))
 }
 
 func (t *TimeObj) Minutes(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Minute()))
+	return NewInteger(int64(t.Tm.Minute()))
 }
 
 func (t *TimeObj) Seconds(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Second()))
+	return NewInteger(int64(t.Tm.Second()))
 }
 
 func (t *TimeObj) Milliseconds(line string, args ...Object) Object {
-	return NewInteger(int64(t.Tm.Local().Nanosecond() / (100 * 100 * 100)))
+	return NewInteger(int64(t.Tm.Nanosecond() / (100 * 100 * 100)))
 }
 
 func (t *TimeObj) SetValid(line string, args ...Object) Object {
@@ -514,8 +517,13 @@ func (t *TimeObj) Equal(line string, args ...Object) Object {
 }
 
 func (t *TimeObj) Format(line string, args ...Object) Object {
-	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	if len(args) != 0 && len(args) != 1 {
+		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+	}
+
+	if len(args) == 0 {
+		str := t.Tm.Format(builtinDate_Normal)
+		return NewString(str)
 	}
 
 	layout, ok := args[0].(*String)
@@ -716,4 +724,52 @@ func epochToTime(value float64) (tm time.Time, err error) {
 
 func timeToEpoch(time time.Time) float64 {
 	return float64(time.UnixNano() / (1000 * 1000))
+}
+
+
+//ParseDuration with support for Y(year), M(month) and D(day)
+func ParseDuration(t *TimeObj, s string) (*TimeObj, error) {
+	result := &TimeObj{Tm: t.Tm, Valid: true}
+
+	s, years, err := splitDuration(s, "Y")
+	if err != nil {
+		return result, err
+	}
+
+	s, months, err := splitDuration(s, "M")
+	if err != nil {
+		return result, err
+	}
+
+	s, days, err := splitDuration(s, "D")
+	if err != nil {
+		return result, err
+	}
+
+	if s == "" {
+		result.Tm = result.Tm.AddDate(years, months, days)
+		return result , nil
+	}
+
+	little, err := time.ParseDuration(s)
+	if err != nil {
+		fmt.Println(err)
+		return result, err
+	}
+
+	result.Tm = result.Tm.Add(little)
+	return result, nil
+}
+
+func splitDuration(s string, delim string) (string, int, error) {
+	elems := strings.Split(s, delim)
+	if len(elems) == 2 {
+		i64, err := strconv.ParseInt(elems[0], 10, 64)
+		if err != nil {
+			return "", 0, err
+		}
+		return elems[len(elems)-1], int(i64), nil
+	}
+
+	return s, 0, nil
 }

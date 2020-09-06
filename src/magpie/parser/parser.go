@@ -280,6 +280,9 @@ func (p *Parser) registerAction() {
 	p.registerPrefix(token.ASYNC, p.parseAsyncLiteral)
 	p.registerPrefix(token.AWAIT, p.parseAwaitExpression)
 
+	//datetime literal
+	p.registerPrefix(token.DATETIME, p.parseDateTime)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -3445,6 +3448,35 @@ func (p *Parser) parseAwaitExpression() ast.Expression {
 	return expr
 }
 
+// dt/2018-01-01T12:01:00/, dt//, dt/2018-01-01 12:01:00/, ...
+func (p *Parser)parseDateTime() ast.Expression {
+	expr := &ast.DateTimeExpr{Token: p.curToken}
+
+	if p.curToken.Literal == "" { //e.g. dtime = dt//
+		return expr
+	}
+
+	is := &ast.InterpolatedString{Token: p.curToken, Value: p.curToken.Literal, ExprMap: make(map[byte]ast.Expression)}
+
+	key := "0"[0]
+	for {
+		if p.curTokenIs(token.LBRACE) {
+			p.nextToken()
+			expr := p.parseExpression(LOWEST)
+			is.ExprMap[key] = expr
+			key++
+		}
+
+		p.nextInterpToken2()
+		if p.curTokenIs(token.DATETIME) {
+			break
+		}
+	}
+
+	expr.Pattern = is
+	return expr
+}
+
 //service name on "addrs" { block }
 func (p *Parser) parseServiceStatement() *ast.ServiceStatement {
 	stmt := &ast.ServiceStatement{
@@ -3635,6 +3667,12 @@ func (p *Parser) nextToken() {
 
 func (p *Parser) nextInterpToken() {
 	p.curToken = p.l.NextInterpToken()
+	p.peekToken = p.l.NextToken()
+}
+
+// for date-time literal use
+func (p *Parser) nextInterpToken2() {
+	p.curToken = p.l.NextInterpToken2()
 	p.peekToken = p.l.NextToken()
 }
 
