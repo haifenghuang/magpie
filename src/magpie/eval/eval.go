@@ -10,11 +10,9 @@ import (
 	"math"
 	"os"
 	"os/exec"
-	"path"
 	"reflect"
 	"regexp"
 	"runtime"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -60,37 +58,29 @@ type Context struct {
 	S *Scope     //S: Scope
 }
 
+func PanicToError(p interface{}) error {
+	switch e := p.(type) {
+	case *Error: //Error Object defined in errors.go file
+		return fmt.Errorf(e.Inspect())
+	case error:
+		return e
+	case string:
+		return fmt.Errorf(e)
+	case fmt.Stringer:
+		return fmt.Errorf(e.String())
+	default:
+		return fmt.Errorf("Unknown error type (%T)", e)
+	}
+}
+
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
 		if r := recover(); r != nil {
-			switch r := r.(type) {
-			case *Error:
-				//if panic is a Error Object, print its contents
-				//fmt.Fprintf(os.Stderr, "\x1b[31m%s\x1b[0m\n", r.Error()) //only for non-windows terminal
-				fmt.Fprintf(os.Stderr, "%s\n", r.Error())
-				//debug.PrintStack() //debug only
-
-				//WHY return NIL? if we do not return 'NIL', we may get something like below:
-				//    PANIC=runtime error: invalid memory address or nil pointer
-				val = NIL
-				return
-			case runtime.Error:
-				const msgFmt = "%s:%d %s(): A panic occured, but was recovered; Details: %+v;\n\t*** Stack Trace ***\n\t%s*** End Stack Trace ***\n"
-				funcName, filename, lineNum := "Unknown Function", "Unknown File", -1
-				var programCounter uintptr
-				var isKnownFunc bool
-				var depth int = 4
-				if programCounter, filename, lineNum, isKnownFunc = runtime.Caller(depth); isKnownFunc {
-					filename = path.Base(filename)
-					funcName = path.Base(runtime.FuncForPC(programCounter).Name())
-				}
-				prettyStack := bytes.Join(bytes.Split(debug.Stack(), []byte{'\n'})[6:], []byte{'\n', '\t'})
-				fmt.Errorf(msgFmt, filename, lineNum, funcName, r, prettyStack)
-				//fmt.Println(r.Error())
-				//panic(r)
-				val = NIL
-				return
-			}
+			err := PanicToError(r)
+			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+			//WHY return NIL? if we do not return 'NIL', we may get something like below:
+			//    PANIC=runtime error: invalid memory address or nil pointer
+			val = NIL
 		}
 	}()
 
@@ -101,7 +91,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		}
 	}
 
-	//fmt.Printf("node.Type=%T, node=<%s>, start=%s, end=%s\n", node, node.String(), node.Pos().Line, node.End().Line) //debugging
+	//fmt.Printf("node.Type=%T, node=<%s>, start=%d, end=%d\n", node, node.String(), node.Pos().Line, node.End().Line) //debugging
 	switch node := node.(type) {
 	case *ast.Program:
 		return evalProgram(node, scope)

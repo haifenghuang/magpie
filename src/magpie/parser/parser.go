@@ -1069,6 +1069,19 @@ func (p *Parser) parseAssignExpression(name ast.Expression) ast.Expression {
 	e.Name = name
 	p.nextToken()
 	e.Value = p.parseExpression(LOWEST)
+	switch v := e.Value.(type) {
+	case *ast.InfixExpression:
+		/*
+		   e.g. In a '*.mp' file, you only have below line:
+		        c = 1 -
+		   and nothing more, then we assume it's a syntax error
+		*/
+		if v.Right == nil {
+			msg := fmt.Sprintf("Syntax Error:%v- No right part of infix-expression", p.curToken.Pos)
+			p.errors = append(p.errors, msg)
+			return nil
+		}
+	}
 
 	return e
 }
