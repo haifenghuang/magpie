@@ -1157,7 +1157,12 @@ func initGlobalObj() {
 	SetGlobalObj("stdin", &FileObject{File: os.Stdin})
 	SetGlobalObj("stdout", &FileObject{File: os.Stdout})
 	SetGlobalObj("stderr", &FileObject{File: os.Stderr})
-	SetGlobalObj("endl", NewString("\n"))
+
+	if runtime.GOOS == "windows" {
+		SetGlobalObj("endl", NewString("\n"))
+	} else {
+		SetGlobalObj("endl", NewString("\r\n"))
+	}
 
 	//runtime
 	SetGlobalObj("RUNTIME_ARCH", NewString(runtime.GOARCH)) //running program's architecture target: one of 386, amd64, arm, s390x, and so on
