@@ -1873,9 +1873,21 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 	//return [1,2,3]"45"(that is a string)
 	switch {
 	case node.Operator == "and" || node.Operator == "&&":
-		return nativeBoolToBooleanObject(objectToNativeBoolean(left) && objectToNativeBoolean(right))
+		leftCond := objectToNativeBoolean(left)
+		if  leftCond == false {
+			return FALSE
+		}
+
+		rightCond := objectToNativeBoolean(right)
+		return nativeBoolToBooleanObject(leftCond && rightCond)
 	case node.Operator == "or" || node.Operator == "||":
-		return nativeBoolToBooleanObject(objectToNativeBoolean(left) || objectToNativeBoolean(right))
+		leftCond := objectToNativeBoolean(left)
+		if leftCond == true {
+			return TRUE
+		}
+
+		rightCond := objectToNativeBoolean(right)
+		return nativeBoolToBooleanObject(leftCond || rightCond)
 	case leftIsNum && rightIsNum:
 		return evalNumberInfixExpression(node, left, right)
 	case (left.Type() == ARRAY_OBJ || right.Type() == ARRAY_OBJ):
