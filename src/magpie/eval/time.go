@@ -746,14 +746,13 @@ func ParseDuration(t *TimeObj, s string) (*TimeObj, error) {
 		return result, err
 	}
 
+	result.Tm = result.Tm.AddDate(years, months, days)
 	if s == "" {
-		result.Tm = result.Tm.AddDate(years, months, days)
 		return result , nil
 	}
 
 	little, err := time.ParseDuration(s)
 	if err != nil {
-		fmt.Println(err)
 		return result, err
 	}
 

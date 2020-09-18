@@ -27,8 +27,14 @@ println(dt5)
 let dt6 = dt/2018-01-01 12:01:00/.addDate(1, 2, 3) //add 1 year, two months and three days.
 println(dt6)
 
-let dt7 = dt/2018-01-01 12:01:00/.addDate(1, 2, 3).add(time.SECOND * 10) //add 1 year, two months, three days and 10 seconds
-println(dt7)
+let dt71 = dt/2018-01-01 12:01:00/.addDate(1, 2, 3).add(time.SECOND * 10) //add 1 year, two months, three days and 10 seconds
+printf("dt71 = %v\n", dt71)
+
+//same result as 'dt71'
+let dt72 = dt/2018-01-01 12:01:00/ + "1Y2M3D10s" //add 1 year, two months, three days and 10 seconds
+printf("dt72 = %v\n", dt72)
+//same resutl as above
+//printf("dt72 = %s\n", dt72.toStr()) //use 'toStr()' method to convert datetime to string.
 
 let dt8 = dt/2018-01-01 12:01:00/.unix() //convert datetiem to timestamp
 println(dt8)
