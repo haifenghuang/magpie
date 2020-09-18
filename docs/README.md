@@ -358,19 +358,11 @@ let (j, k, l) = {"j": 50, "l": "good"}
 
 ```
 
-Note however, if you do not use the keyword `let`, you could not do multiple variable assignments.
-Below code is not correct：
-
-```swift
-//Error, multiple variable assignments must be use `let` keyword
-a, b, c = 1, "hello world", [1,2,3]
-```
-
 Note：Starting from Magpie 5.0，when the decalared variable already exists, it's value will be overwritten:
 
 ```swift
 let x, y = 10, 20;
-let x, y = y, x //Swap the value of x and y
+x, y = y, x //Swap the value of x and y
 printf("x=%v, y=%v\n", x, y)  //result: x=20, y=10
 ```
 `let` also support the placeholder(_), when assigned a value, it will just ignore it.

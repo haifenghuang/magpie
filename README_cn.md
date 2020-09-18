@@ -441,7 +441,7 @@ println(z(3,4)) //结果 :17
 fn testReturn(a, b, c, d=40) {
     return a, b, c, d
 }
-let (x, y, c, d) = testReturn(10, 20, 30) // d为nil
+let (x, y, c, d) = testReturn(10, 20, 30) // d为40
 ```
 
 ### 命令执行

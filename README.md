@@ -438,7 +438,7 @@ println(z(3,4)) //result :17
 fn testReturn(a, b, c, d=40) {
     return a, b, c, d
 }
-let (x, y, c, d) = testReturn(10, 20, 30) // d is nil
+let (x, y, c, d) = testReturn(10, 20, 30) // d is 40
 ```
 
 ### Command Execution
