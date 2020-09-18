@@ -1331,7 +1331,12 @@ func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
 	val, ok := scope.Get(i.String())
 	if !ok {
 		if val, ok = includeScope.Get(i.String()); !ok {
-			reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
+			/* We do not report Typo-Suggestions, because we support hash's key with bare word. e.g.
+			       h = {A: "xxxx"} // we want to treat it as h = {"A": "xxxx"}
+			   Here, the hash's key is a bare word, so, it will report that key 'A' is not defined.
+			*/
+			return NIL
+			//reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
 		}
 	}
 	if i, ok := val.(*InterpolatedString); ok {
@@ -1349,6 +1354,20 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 	for _, key := range hl.Order {
 		value, _ := hl.Pairs[key]
 		k := Eval(key, innerScope)
+		if k.Type() == NIL_OBJ { //key is not defined
+			switch key.(type) {
+			case *ast.Identifier: //It's an identifier, so it's a bare word.
+				/* e.g. h = {A: "xxxx"}
+				  Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
+				  is an identifier, so we need to threat it as string. that is, we want it to become:
+				      h = {"A": "xxxx"}
+				*/
+				t := key.(*ast.Identifier).Value
+				k = NewString(t)
+				innerScope.Set(t, k)
+			}
+		}
+
 		if k.Type() == ERROR_OBJ {
 			return k
 		}

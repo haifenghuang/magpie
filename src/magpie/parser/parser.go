@@ -1755,13 +1755,6 @@ func (p *Parser) parseHashExpression() ast.Expression {
 	p.nextToken()                       //skip the '{'
 	keyExpr := p.parseExpression(SLICE) //note the precedence,if is LOWEST, then it will be parsed as sliceExpression
 
-	// if hash's key is an identifier, not an string, we treat it as a string.
-	// e.g. h = {Name: "xxx"} => h = {"Name": "xxx"}
-	if key, ok := keyExpr.(*ast.Identifier); ok {
-		//convert *ast.Identifier to *ast.StringLiteral
-		keyExpr = &ast.StringLiteral{Token: key.Token, Value: key.Value}
-	}
-
 	if p.peekTokenIs(token.COLON) { //a hash comprehension
 		p.nextToken() //skip current token
 		p.nextToken() //skip the ':'
