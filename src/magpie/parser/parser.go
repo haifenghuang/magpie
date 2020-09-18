@@ -891,6 +891,10 @@ func (p *Parser) parseLetStatement(inClass bool, nextFlag bool) *ast.LetStatemen
 
 	stmt.Doc = p.lineComment
 
+	if p.peekTokenIs(token.LPAREN) {
+		return p.parseLetStatement2(stmt)
+	}
+
 	//parse left hand side of the assignment
 	for {
 		if nextFlag {
@@ -965,6 +969,48 @@ func (p *Parser) parseLetStatement(inClass bool, nextFlag bool) *ast.LetStatemen
 		}
 	} //end for
 
+	return stmt
+}
+
+//let (a,b,c) = tuple|array|hash|function(which return multi-values)
+//Note: funtion's multiple return values are wraped into a tuple.
+func (p *Parser) parseLetStatement2(stmt *ast.LetStatement) *ast.LetStatement {
+	stmt.DestructingFlag = true
+
+	//skip 'let'
+	p.nextToken()
+	//skip '('
+	p.nextToken()
+
+	//parse left hand side of the assignment
+	for {
+		if !p.curTokenIs(token.IDENT) && !p.curTokenIs(token.UNDERSCORE) {
+			msg := fmt.Sprintf("Syntax Error:%v- expected token to be identifier|underscore, got %s instead.", p.curToken.Pos, p.curToken.Type)
+			p.errors = append(p.errors, msg)
+			return stmt
+		}
+		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		stmt.Names = append(stmt.Names, name)
+
+		p.nextToken() //skip identifier
+		if p.curTokenIs(token.RPAREN) {
+			break
+		}
+		p.nextToken() //skip ','
+	}
+
+	p.nextToken() //skip the ')'
+	if !p.curTokenIs(token.ASSIGN) {
+		msg := fmt.Sprintf("Syntax Error:%v- expected token to be '=', got %s instead.", p.curToken.Pos, p.curToken.Type)
+		p.errors = append(p.errors, msg)
+		return stmt
+	}
+
+	p.nextToken() //skip the '='
+	v := p.parseExpressionStatement().Expression
+	stmt.Values = append(stmt.Values, v)
+
+	stmt.SrcEndToken = p.curToken
 	return stmt
 }
 
