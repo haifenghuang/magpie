@@ -3284,10 +3284,11 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 			return valueResult
 		}
 
-		if hashable, ok := keyResult.(Hashable); ok {
-			ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
+		if _, ok := keyResult.(Hashable); ok {
+			ret.Push(mc.Pos().Sline(), keyResult, valueResult)
+			//ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
 		} else {
-			panic(NewError("", KEYERROR, keyResult.Type()))
+			panic(NewError(mc.Pos().Sline(), KEYERROR, keyResult.Type()))
 		}
 	}
 
