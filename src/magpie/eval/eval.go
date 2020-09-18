@@ -1359,7 +1359,7 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 			case *ast.Identifier: //It's an identifier, so it's a bare word.
 				/* e.g. h = {A: "xxxx"}
 				  Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
-				  is an identifier, so we need to threat it as string. that is, we want it to become:
+				  is an identifier, so we need to treat it as string. that is, we want it to become:
 				      h = {"A": "xxxx"}
 				*/
 				t := key.(*ast.Identifier).Value

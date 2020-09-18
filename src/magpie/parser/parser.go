@@ -471,7 +471,7 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseAsyncStatement()
 	case token.IDENT:
 		//if the current token is an 'identifier' and next token is a ',', 
-		//then we think it's a multiple assignment, but we threat it as a 'let' statement.
+		//then we think it's a multiple assignment, but we treat it as a 'let' statement.
 		//otherwise, we just fallthrough.
 		if p.peekTokenIs(token.COMMA) {
 			return p.parseLetStatement(false, false)
