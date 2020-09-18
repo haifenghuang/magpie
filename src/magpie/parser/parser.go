@@ -433,7 +433,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	var ret ast.Statement
 	switch p.curToken.Type {
 	case token.LET:
-		ret = p.parseLetStatement(false)
+		ret = p.parseLetStatement(false, true)
 	case token.CONST:
 		ret = p.parseConstStatement()
 	case token.RETURN:
@@ -469,6 +469,14 @@ func (p *Parser) parseStatement() ast.Statement {
 		ret = p.parseUsingStatement()
 	case token.ASYNC:
 		return p.parseAsyncStatement()
+	case token.IDENT:
+		//if the current token is an 'identifier' and next token is a ',', 
+		//then we think it's a multiple assignment, but we threat it as a 'let' statement.
+		//otherwise, we just fallthrough.
+		if p.peekTokenIs(token.COMMA) {
+			return p.parseLetStatement(false, false)
+		}
+		fallthrough
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -871,18 +879,25 @@ func (p *Parser) parseContinueExpression() ast.Expression {
 
 //let a,b,c = 1,2,3 (with assignment)
 //let a; (without assignment, 'a' is assumed to be 'nil')
-//let (a,b,c) = tuple|array|hash
-func (p *Parser) parseLetStatement(inClass bool) *ast.LetStatement {
-	stmt := &ast.LetStatement{Token: p.curToken, InClass: inClass}
-	stmt.Doc = p.lineComment
-
-	if p.peekTokenIs(token.LPAREN) {
-		return p.parseLetStatement2(stmt)
+func (p *Parser) parseLetStatement(inClass bool, nextFlag bool) *ast.LetStatement {
+	var stmt *ast.LetStatement
+	if !nextFlag {
+		//construct a dummy 'let' token
+		tok := token.Token{Pos: p.curToken.Pos, Type: token.LET, Literal: "let"}
+		stmt = &ast.LetStatement{Token: tok, InClass: inClass}
+	} else {
+		stmt = &ast.LetStatement{Token: p.curToken, InClass: inClass}
 	}
+
+	stmt.Doc = p.lineComment
 
 	//parse left hand side of the assignment
 	for {
-		p.nextToken()
+		if nextFlag {
+			p.nextToken()
+		}
+		nextFlag = true
+
 		if !p.curTokenIs(token.IDENT) && !p.curTokenIs(token.UNDERSCORE) {
 			msg := fmt.Sprintf("Syntax Error:%v- expected token to be identifier|underscore, got %s instead.", p.curToken.Pos, p.curToken.Type)
 			p.errors = append(p.errors, msg)
@@ -943,53 +958,13 @@ func (p *Parser) parseLetStatement(inClass bool) *ast.LetStatement {
 	stmt.SrcEndToken = p.curToken
 
 	for idx, name := range stmt.Names {
-		if v, ok := stmt.Values[idx].(*ast.FunctionLiteral); ok {
-			p.Functions[name.Value] = v
+		if idx < len(stmt.Values) {
+			if v, ok := stmt.Values[idx].(*ast.FunctionLiteral); ok {
+				p.Functions[name.Value] = v
+			}
 		}
 	} //end for
 
-	return stmt
-}
-
-//let (a,b,c) = tuple|array|hash|function(which return multi-values)
-//Note: funtion's multiple return values are wraped into a tuple.
-func (p *Parser) parseLetStatement2(stmt *ast.LetStatement) *ast.LetStatement {
-	stmt.DestructingFlag = true
-
-	//skip 'let'
-	p.nextToken()
-	//skip '('
-	p.nextToken()
-
-	//parse left hand side of the assignment
-	for {
-		if !p.curTokenIs(token.IDENT) && !p.curTokenIs(token.UNDERSCORE) {
-			msg := fmt.Sprintf("Syntax Error:%v- expected token to be identifier|underscore, got %s instead.", p.curToken.Pos, p.curToken.Type)
-			p.errors = append(p.errors, msg)
-			return stmt
-		}
-		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-		stmt.Names = append(stmt.Names, name)
-
-		p.nextToken() //skip identifier
-		if p.curTokenIs(token.RPAREN) {
-			break
-		}
-		p.nextToken() //skip ','
-	}
-
-	p.nextToken() //skip the ')'
-	if !p.curTokenIs(token.ASSIGN) {
-		msg := fmt.Sprintf("Syntax Error:%v- expected token to be '=', got %s instead.", p.curToken.Pos, p.curToken.Type)
-		p.errors = append(p.errors, msg)
-		return stmt
-	}
-
-	p.nextToken() //skip the '='
-	v := p.parseExpressionStatement().Expression
-	stmt.Values = append(stmt.Values, v)
-
-	stmt.SrcEndToken = p.curToken
 	return stmt
 }
 
@@ -2780,7 +2755,7 @@ func (p *Parser) parseClassSubStmt(modifierLevel ast.ModifierLevel, staticFlag b
 	} else {
 		switch p.curToken.Type {
 		case token.LET:
-			r = p.parseLetStatement(true)
+			r = p.parseLetStatement(true, true)
 		case token.PROPERTY:
 			r = p.parsePropertyDeclStmt(processAnnoClass)
 		case token.FUNCTION:
