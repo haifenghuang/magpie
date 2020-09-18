@@ -1300,21 +1300,9 @@ func evalArrayLiteral(a *ast.ArrayLiteral, scope *Scope) Object {
 		return &Array{Members: evalArgs(a.Members, scope)}
 	}
 
-	count := Eval(a.CreationCount, scope)
-	if count.Type() != INTEGER_OBJ && count.Type() != UINTEGER_OBJ {
-		panic(NewError(a.Pos().Sline(), GENERICERROR, "Array initialization must be 'int' type."))
-	}
-
-	var val int64
-	if count.Type() == INTEGER_OBJ {
-		val = count.(*Integer).Int64
-	} else {
-		val = int64(count.(*UInteger).UInt64)
-	}
-
 	var i int64
 	ret := &Array{}
-	for i = 0; i < val; i++ {
+	for i = 0; i < a.CreationCount.Value; i++ {
 		ret.Members = append(ret.Members, NIL)
 	}
 

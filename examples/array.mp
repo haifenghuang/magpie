@@ -14,9 +14,8 @@ for i in arr1 where /^\d+/.match(i) {
 }
 
 //create an array with 10 elements(default is nil)
-//Note: only support integer literal or single variable.
+//Note: only support integer literal.
 let count = 10
-let arr2=[]count //same as 'let arr2=[]10
 arr2[5] = 12
 println(arr2)
 

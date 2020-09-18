@@ -731,7 +731,7 @@ func (rel *RegExLiteral) String() string       { return rel.Value }
 type ArrayLiteral struct {
 	Token         token.Token
 	Members       []Expression
-	CreationCount Expression
+	CreationCount *IntegerLiteral
 }
 
 func (a *ArrayLiteral) Pos() token.Position {

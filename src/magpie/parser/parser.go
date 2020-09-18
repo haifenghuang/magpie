@@ -2109,19 +2109,13 @@ func (p *Parser) parseListMapComprehension(curToken token.Token, expr ast.Expres
 	return result
 }
 
-func (p *Parser) parseExpressionArrayEx(a []ast.Expression, closure token.TokenType) ([]ast.Expression, bool, ast.Expression) {
+func (p *Parser) parseExpressionArrayEx(a []ast.Expression, closure token.TokenType) ([]ast.Expression, bool, *ast.IntegerLiteral) {
 	if p.peekTokenIs(closure) {
 		p.nextToken()
-		if p.peekTokenIs(token.INT) || p.peekTokenIs(token.IDENT) {
-			var creationCount ast.Expression
+		if p.peekTokenIs(token.INT) {
 			p.nextToken()
-			if p.curTokenIs(token.INT) {
-				creationCount = p.parseIntegerLiteral()
-			} else {
-				creationCount = p.parseIdentifier()
-			}
-			
-			return a, false, creationCount
+			creationCount := p.parseIntegerLiteral()
+			return a, false, creationCount.(*ast.IntegerLiteral)
 		}
 		return a, false, nil
 	}
