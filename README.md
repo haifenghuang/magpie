@@ -348,6 +348,59 @@ for i in (1,2,3) {
     println(i)
 }
 ```
+### datetime literal
+
+```csharp
+let month = "01"
+let dt0 = dt/2018-{month}-01 12:01:00/
+println(dt0)
+
+let dt1 = dt/2018-01-01 12:01:00/.addDate(1, 2, 3).add(time.SECOND * 10) //add 1 year, two months, three days and 10 seconds
+printf("dt1 = %v\n", dt1)
+
+/* 'datetime literal' + string:
+     string support 'YMDhms' where
+       Y:Year    M:Month    D:Day
+       h:hour    m:minute   s:second
+
+*/
+//same result as 'dt1'
+let dt2 = dt/2018-01-01 12:01:00/ + "1Y2M3D10s" //add 1 year, two months, three days and 10 seconds
+printf("dt2 = %v\n", dt2)
+//same resutl as above
+//printf("dt2 = %s\n", dt2.toStr()) //use 'toStr()' method to convert datetime to string.
+
+let dt3 = dt/2019-01-01 12:01:00/
+//you could also use strftiem() to convert time object to string. below code converts time object to 'yyyy/mm/dd hh:mm:ss'
+format = dt3.strftime("%Y/%m/%d %T")
+println(dt3.toStr(format))
+
+////////////////////////////////
+// time object to timestamp
+////////////////////////////////
+println(dt3.unix()) //to timestamp(UTC)
+println(dt3.unixNano()) //to timestamp(UTC)
+println(dt3.unixLocal()) //to timestamp(LOCAL)
+println(dt3.unixLocalNano()) //to timestamp(LOCAL)
+
+////////////////////////////////
+// timestamp to time object
+////////////////////////////////
+timestampUTC = dt3.unix()      //to timestamp(UTC)
+println(unixTime(timestampUTC)) //timestamp to time
+
+timestampLocal = dt3.unixLocal() //to timestamp(LOCAL)
+println(unixTime(timestampLocal)) //timestamp to time
+
+////////////////////////////////
+// datetime comparation
+////////////////////////////////
+//two datetime literals could be compared using '>', '>=', '<', '<=' and '=='
+let dt4 = dt/2018-01-01 12:01:00/
+let dt5 = dt/2019-01-01 12:01:00/
+
+println(dt4 <= dt5) //returns true
+```
 
 ### Regular expression
 

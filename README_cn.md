@@ -22,7 +22,7 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 * 类:支持属性，索引器和操作符重载
 * 支持await/async的异步编程
 * 内置linq支持
-* 内置日期时间字面量支持
+* 内置日期时间字面量
 * 一级函数(First class function)
 * 多参函数及缺省参数值函数
 * 函数可以有多个返回值
@@ -354,6 +354,59 @@ t = () //等价于't = tuple()'
 for i in (1,2,3) {
     println(i)
 }
+```
+### datetime 字面量
+
+```csharp
+let month = "01"
+let dt0 = dt/2018-{month}-01 12:01:00/
+println(dt0)
+
+let dt1 = dt/2018-01-01 12:01:00/.addDate(1, 2, 3).add(time.SECOND * 10) //日期加1年，2个月，3天，10秒
+printf("dt1 = %v\n", dt1)
+
+/* 'datetime字面量' + 字符串:
+     字符串支持'YMDhms'形式
+       Y:年    M:月    D:日
+       h:小时  m:分钟  s:秒
+
+*/
+//和'dt1'的结果相同
+let dt2 = dt/2018-01-01 12:01:00/ + "1Y2M3D10s" //日期加1年，2个月，3天，10秒
+printf("dt2 = %v\n", dt2)
+//和上面的结果一样
+//printf("dt2 = %s\n", dt2.toStr()) //使用 'toStr()' 方法将detime转换为字符串.
+
+let dt3 = dt/2019-01-01 12:01:00/
+//也可以用strtime()方法将日期时间转换成字符串，下面例子将日期时间转换成'yyyy/mm/dd hh:mm:ss'格式
+format = dt3.strftime("%Y/%m/%d %T")
+println(dt3.toStr(format))
+
+////////////////////////////////
+// 日期时间转换成时间戳
+////////////////////////////////
+println(dt3.unix()) //to timestamp(UTC)
+println(dt3.unixNano()) //to timestamp(UTC)
+println(dt3.unixLocal()) //to timestamp(LOCAL)
+println(dt3.unixLocalNano()) //to timestamp(LOCAL)
+
+////////////////////////////////
+// 时间戳转换为日期时间
+////////////////////////////////
+timestampUTC = dt3.unix()      //to timestamp(UTC)
+println(unixTime(timestampUTC)) //timestamp to time
+
+timestampLocal = dt3.unixLocal() //to timestamp(LOCAL)
+println(unixTime(timestampLocal)) //timestamp to time
+
+////////////////////////////////
+// 日期时间比较
+////////////////////////////////
+//两个日期时间对象可以使用'>', '>=', '<', '<=' and '=='相互比较
+let dt4 = dt/2018-01-01 12:01:00/
+let dt5 = dt/2019-01-01 12:01:00/
+
+println(dt4 <= dt5) //返回true
 ```
 
 ### 正则表达式
