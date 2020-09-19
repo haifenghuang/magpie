@@ -60,6 +60,24 @@ func NewTimeObj() Object {
 	SetGlobalObj(time_name+".MINUTE", NewInteger(int64(time.Minute)))
 	SetGlobalObj(time_name+".HOUR", NewInteger(int64(time.Hour)))
 
+	//layout constant used in time.Format() method
+    SetGlobalObj(time_name+".ANSIC",      NewString("Mon Jan _2 15:04:05 2006"))
+    SetGlobalObj(time_name+"UnixDate",    NewString("Mon Jan _2 15:04:05 MST 2006"))
+    SetGlobalObj(time_name+"RubyDate",    NewString("Mon Jan 02 15:04:05 -0700 2006"))
+    SetGlobalObj(time_name+"RFC822",      NewString("02 Jan 06 15:04 MST"))
+    SetGlobalObj(time_name+"RFC822Z",     NewString("02 Jan 06 15:04 -0700")) // RFC822 with numeric zone
+    SetGlobalObj(time_name+"RFC850",      NewString("Monday, 02-Jan-06 15:04:05 MST"))
+    SetGlobalObj(time_name+"RFC1123",     NewString("Mon, 02 Jan 2006 15:04:05 MST"))
+    SetGlobalObj(time_name+"RFC1123Z",    NewString("Mon, 02 Jan 2006 15:04:05 -0700")) // RFC1123 with numeric zone
+    SetGlobalObj(time_name+"RFC3339",     NewString("2006-01-02T15:04:05Z07:00"))
+    SetGlobalObj(time_name+"RFC3339Nano", NewString("2006-01-02T15:04:05.999999999Z07:00"))
+    SetGlobalObj(time_name+"Kitchen",     NewString("3:04PM"))
+    // Handy time stamps.
+    SetGlobalObj(time_name+"Stamp",       NewString("Jan _2 15:04:05"))
+    SetGlobalObj(time_name+"StampMilli",  NewString("Jan _2 15:04:05.000"))
+    SetGlobalObj(time_name+"StampMicro",  NewString("Jan _2 15:04:05.000000"))
+    SetGlobalObj(time_name+"StampNano",   NewString("Jan _2 15:04:05.000000000"))
+
 	return ret
 }
 
