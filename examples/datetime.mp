@@ -43,3 +43,25 @@ println(dt8)
 let dt9 = dt/2018-01-01 12:01:00/.unix() //convert datetiem to timestamp
 let timeStr = unixTime(dt9).format() //convert timestamp to datetime string
 println(timeStr)
+
+let dt10 = dt/2019-01-01 12:01:00/
+//convert to yyyy/mm/dd hh:mm:ss
+format = dt10.strftime("%Y/%m/%d %T")
+println(dt10.toStr(format))
+
+////////////////////////////////
+// time object to timestamp
+////////////////////////////////
+println(dt10.unix()) //to timestamp(UTC)
+println(dt10.unixNano()) //to timestamp(UTC)
+println(dt10.unixLocal()) //to timestamp(LOCAL)
+println(dt10.unixLocalNano()) //to timestamp(LOCAL)
+
+////////////////////////////////
+// timestamp to time object
+////////////////////////////////
+timestampUTC = dt10.unix()      //to timestamp(UTC)
+println(unixTime(timestampUTC)) //timestamp to time
+
+timestampLocal = dt10.unixLocal() //to timestamp(LOCAL)
+println(unixTime(timestampLocal)) //timestamp to time

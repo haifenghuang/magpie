@@ -88,10 +88,14 @@ func (t *TimeObj) CallMethod(line string, scope *Scope, method string, args ...O
 		return t.UTC(line, args...)
 	case "local":
 		return t.Local(line, args...)
-	case "unix":
+	case "unix": //to timestamp(UTC)
 		return t.Unix(line, args...)
-	case "unixNano":
+	case "unixNano": //to timestamp(UTC)
 		return t.UnixNano(line, args...)
+	case "unixLocal": //to timestamp(Local)
+		return t.UnixLocal(line, args...)
+	case "unixLocalNano"://to timestamp(Local)
+		return t.UnixLocalNano(line, args...)
 	case "fromEpoch":
 		return t.FromEpoch(line, args...)
 	case "toEpoch":
@@ -178,14 +182,44 @@ func (t *TimeObj) Local(line string, args ...Object) Object {
 	return t
 }
 
+//to timestamp(UTC)
 func (t *TimeObj) Unix(line string, args ...Object) Object {
 	ret := t.Tm.Unix()
 	return NewInteger(ret)
 }
 
+//to timestamp(UTC)
 func (t *TimeObj) UnixNano(line string, args ...Object) Object {
 	ret := t.Tm.UnixNano()
 	return NewInteger(ret)
+}
+
+//to timestamp(LOCAL)
+func (t *TimeObj) UnixLocal(line string, args ...Object) Object {
+	if len(args) != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	s := t.Tm.Format(builtinDate_Normal)
+	loc, _ := time.LoadLocation("Local") //get local timezone
+	theTime, _ := time.ParseInLocation(builtinDate_Normal, s, loc) //convert to time.time
+	sr := theTime.Unix()
+
+	return NewInteger(sr)
+}
+
+//to timestamp(LOCAL)
+func (t *TimeObj) UnixLocalNano(line string, args ...Object) Object {
+	if len(args) != 0 {
+		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	s := t.Tm.Format(builtinDate_Normal)
+	loc, _ := time.LoadLocation("Local") //get local timezone
+	theTime, _ := time.ParseInLocation(builtinDate_Normal, s, loc) //convert to time.time
+	sr := theTime.UnixNano()
+
+	return NewInteger(sr)
 }
 
 func (t *TimeObj) FromEpoch(line string, args ...Object) Object {
