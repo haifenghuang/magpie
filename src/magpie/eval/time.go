@@ -191,23 +191,39 @@ func (t *TimeObj) CallMethod(line string, scope *Scope, method string, args ...O
 }
 
 func (t *TimeObj) UTC(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	t.Tm = t.Tm.UTC()
 	return t
 }
 
 func (t *TimeObj) Local(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	t.Tm = t.Tm.Local()
 	return t
 }
 
 //to timestamp(UTC)
 func (t *TimeObj) Unix(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	ret := t.Tm.Unix()
 	return NewInteger(ret)
 }
 
 //to timestamp(UTC)
 func (t *TimeObj) UnixNano(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	ret := t.Tm.UnixNano()
 	return NewInteger(ret)
 }
@@ -216,6 +232,10 @@ func (t *TimeObj) UnixNano(line string, args ...Object) Object {
 func (t *TimeObj) UnixLocal(line string, args ...Object) Object {
 	if len(args) != 0 {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	s := t.Tm.Format(builtinDate_Normal)
@@ -232,6 +252,10 @@ func (t *TimeObj) UnixLocalNano(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	s := t.Tm.Format(builtinDate_Normal)
 	loc, _ := time.LoadLocation("Local") //get local timezone
 	theTime, _ := time.ParseInLocation(builtinDate_Normal, s, loc) //convert to time.time
@@ -243,6 +267,10 @@ func (t *TimeObj) UnixLocalNano(line string, args ...Object) Object {
 func (t *TimeObj) FromEpoch(line string, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	aType := args[0].Type()
@@ -369,20 +397,36 @@ func (t *TimeObj) ToTimeStr(line string, args ...Object) Object {
 }
 
 func (t *TimeObj) Year(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Year()))
 }
 
 func (t *TimeObj) FullYear(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Year()))
 }
 
 func (t *TimeObj) Month(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Month()))
 }
 
 func (t *TimeObj) Date(line string, args ...Object) Object {
 	if len(args) != 0 {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	year, month, day := t.Tm.Date()
@@ -395,30 +439,58 @@ func (t *TimeObj) Date(line string, args ...Object) Object {
 }
 
 func (t *TimeObj) YearDay(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.YearDay()))
 }
 
 func (t *TimeObj) WeekDay(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewString(t.Tm.Weekday().String())
 }
 
 func (t *TimeObj) Day(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Day()))
 }
 
 func (t *TimeObj) Hours(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Hour()))
 }
 
 func (t *TimeObj) Minutes(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Minute()))
 }
 
 func (t *TimeObj) Seconds(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Second()))
 }
 
 func (t *TimeObj) Milliseconds(line string, args ...Object) Object {
+	if t.Valid == false {
+		return NIL
+	}
+
 	return NewInteger(int64(t.Tm.Nanosecond() / (100 * 100 * 100)))
 }
 
@@ -447,6 +519,10 @@ func (t *TimeObj) Add(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	duration, ok := args[0].(*Integer)
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "add", "*Integer", args[0].Type()))
@@ -459,6 +535,10 @@ func (t *TimeObj) Add(line string, args ...Object) Object {
 func (t *TimeObj) AddDate(line string, args ...Object) Object {
 	if len(args) != 3 {
 		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	years, ok := args[0].(*Integer)
@@ -485,6 +565,10 @@ func (t *TimeObj) After(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
 	}
 
+	if t.Valid == false {
+		return FALSE
+	}
+
 	tmObj, ok := args[0].(*TimeObj)
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "after", "*TimeObj", args[0].Type()))
@@ -500,6 +584,10 @@ func (t *TimeObj) After(line string, args ...Object) Object {
 func (t *TimeObj) AppendFormat(line string, args ...Object) Object {
 	if len(args) != 2 {
 		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	s, ok := args[0].(*String)
@@ -521,6 +609,10 @@ func (t *TimeObj) Before(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
 	}
 
+	if t.Valid == false {
+		return FALSE
+	}
+
 	tmObj, ok := args[0].(*TimeObj)
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "before", "*TimeObj", args[0].Type()))
@@ -538,6 +630,10 @@ func (t *TimeObj) Clock(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	hour, min, sec := t.Tm.Clock()
 	arr := &Array{}
 	arr.Members = append(arr.Members, NewInteger(int64(hour)))
@@ -550,6 +646,10 @@ func (t *TimeObj) Clock(line string, args ...Object) Object {
 func (t *TimeObj) Equal(line string, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	if t.Valid == false {
+		return FALSE
 	}
 
 	tmObj, ok := args[0].(*TimeObj)
@@ -573,6 +673,10 @@ func (t *TimeObj) Format(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	if len(args) == 0 {
 		str := t.Tm.Format(builtinDate_Normal)
 		return NewString(str)
@@ -592,6 +696,10 @@ func (t *TimeObj) ISOWeek(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	year, week := t.Tm.ISOWeek()
 	arr := &Array{}
 	arr.Members = append(arr.Members, NewInteger(int64(year)))
@@ -605,6 +713,10 @@ func (t *TimeObj) IsZero(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
 	}
 
+	if t.Valid == false {
+		return FALSE
+	}
+
 	b := t.Tm.IsZero()
 	if b {
 		return TRUE
@@ -615,6 +727,10 @@ func (t *TimeObj) IsZero(line string, args ...Object) Object {
 func (t *TimeObj) Round(line string, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	duration, ok := args[0].(*Integer)
@@ -631,6 +747,10 @@ func (t *TimeObj) Sub(line string, args ...Object) Object {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
 	}
 
+	if t.Valid == false {
+		return NIL
+	}
+
 	tmObj, ok := args[0].(*TimeObj)
 	if !ok {
 		panic(NewError(line, PARAMTYPEERROR, "first", "sub", "*TimeObj", args[0].Type()))
@@ -643,6 +763,10 @@ func (t *TimeObj) Sub(line string, args ...Object) Object {
 func (t *TimeObj) Truncate(line string, args ...Object) Object {
 	if len(args) != 1 {
 		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	}
+
+	if t.Valid == false {
+		return NIL
 	}
 
 	duration, ok := args[0].(*Integer)
