@@ -2077,23 +2077,23 @@ please see following examples:
 ```swift
 //hash comprehension (from hash)
 z1 = { v:k for k,v in {"key1": 10, "key2": 20, "key3": 30}} //reverse key-value pair
-println(z1) // result: {10 : "key1", 20 : "key2", 30 : "key3"}. Order may differ
+println(z1) // result: {10 : "key1", 20 : "key2", 30 : "key3"}
 
 //hash comprehension (from array)
 z2 = {x:x**2 for x in [1,2,3]}
-println(z2) // result: {1 : 1, 2 : 4, 3 : 9}. Order may differ
+println(z2) // result: {1 : 1, 2 : 4, 3 : 9}
 
 //hash comprehension (from .. range)
 z3 = {x:x**2 for x in 5..7}
-println(z3) // result: {5 : 25, 6 : 36, 7 : 49}. Order may differ
+println(z3) // result: {5 : 25, 6 : 36, 7 : 49}
 
 //hash comprehension (from string)
 z4 = {x:x.upper() for x in "hi"}
-println(z4) // result: {"h" : "H", "i" : "I"}. Order may differ
+println(z4) // result: {"h" : "H", "i" : "I"}
 
 //hash comprehension (from tuple)
 z5 = {x+1:x+2 for x in (1,2,3)}
-println(z5) // result: {4 : 5, 2 : 3, 3 : 4}. Order may differ
+println(z5) // result: {4 : 5, 2 : 3, 3 : 4}
 ```
 
 ### grep and map

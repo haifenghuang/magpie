@@ -2064,23 +2064,23 @@ Magpie同时也支持哈希推导。
 ```swift
 //哈希推导 (from hash)
 z1 = { v:k for k,v in {"key1":10, "key2":20, "key3":30}} //reverse key-value pair
-println(z1) // 结果: {10 : "key1", 20 : "key2", 30 : "key3"}, 顺序可能不同
+println(z1) // 结果: {10 : "key1", 20 : "key2", 30 : "key3"}
 
 //哈希推导 (from array)
 z2 = {x:x**2 for x in [1,2,3]}
-println(z2) // 结果: {1 : 1, 2 : 4, 3 : 9}, 顺序可能不同
+println(z2) // 结果: {1 : 1, 2 : 4, 3 : 9}
 
 //哈希推导 (from .. range)
 z3 = {x:x**2 for x in 5..7}
-println(z3) // 结果: {5 : 25, 6 : 36, 7 : 49}, 顺序可能不同
+println(z3) // 结果: {5 : 25, 6 : 36, 7 : 49}
 
 //哈希推导 (from string)
 z4 = {x:x.upper() for x in "hi"}
-println(z4) // 结果: {"h" : "H", "i" : "I"}, 顺序可能不同
+println(z4) // 结果: {"h" : "H", "i" : "I"}
 
 //哈希推导 (from tuple)
 z5 = {x+1:x+2 for x in (1,2,3)}
-println(z5) // 结果: {4 : 5, 2 : 3, 3 : 4}, 顺序可能不同
+println(z5) // 结果: {4 : 5, 2 : 3, 3 : 4}
 ```
 
 ### Grep和map
