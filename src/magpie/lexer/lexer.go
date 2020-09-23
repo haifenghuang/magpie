@@ -490,6 +490,7 @@ eos:
 
 func (l *Lexer) readInterpString(r rune) (string, error) {
 	start := l.position + 1
+	newStart := start
 	var out bytes.Buffer
 	pos := "0"[0]
 	for {
@@ -503,6 +504,7 @@ func (l *Lexer) readInterpString(r rune) (string, error) {
 			return "", err
 		}
 		if l.ch == 123 {
+			newStart = l.position
 			if l.peek() != 125 {
 				out.WriteRune(l.ch)
 				for l.ch != 125 || l.ch == 0 {
@@ -518,7 +520,7 @@ func (l *Lexer) readInterpString(r rune) (string, error) {
 	}
 	l.position = start - 1
 	l.readPosition = start
-	l.ch = l.input[start]
+	l.ch = l.input[newStart]
 	return out.String(), nil
 }
 
