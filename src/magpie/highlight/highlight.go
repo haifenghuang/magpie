@@ -37,8 +37,6 @@ var keywords = map[string]int{
 	"false":      1,
 	"if":         1,
 	"else":       1,
-	"elsif":      1,
-	"elseif":     1,
 	"elif":       1,
 	"return":     1,
 	"include":    1,

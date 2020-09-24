@@ -1642,7 +1642,7 @@ func (p *Parser) parseConditionalExpressions(ie *ast.IfExpression) []*ast.IfCond
 	ic := []*ast.IfConditionExpr{p.parseConditionalExpression()}
 
 	//else-if
-	for p.peekTokenIs(token.ELSEIF) || p.peekTokenIs(token.ELSIF) || p.peekTokenIs(token.ELIF) || p.peekTokenIs(token.ELSE) { //could be 'elseif' or 'elsif' or 'elif', or 'else'
+	for p.peekTokenIs(token.ELIF) || p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 
 		if p.curTokenIs(token.ELSE) {

@@ -386,14 +386,14 @@ class RequestHandler {
           if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
             printf("Property '%s' is not valid!\n", p.name)
           }
-        } elseif anno.instanceOf(NoSpaceValidator) {
+        } elif anno.instanceOf(NoSpaceValidator) {
           for c in p.value {
             if c == " " || c == "\t" {
               printf("Property '%s' is not valid!\n", p.name)
               break
             }
           }
-        } elseif anno.instanceOf(DepartmentValidator) {
+        } elif anno.instanceOf(DepartmentValidator) {
           found = false
           for d in anno.Department {
             if p.value == d {

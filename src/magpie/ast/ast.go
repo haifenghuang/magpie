@@ -420,7 +420,7 @@ func (i *Identifier) String() string       { return i.Value }
 
 type IfExpression struct {
 	Token       token.Token
-	Conditions  []*IfConditionExpr //if or elseif part
+	Conditions  []*IfConditionExpr //if or elif part
 	Alternative Node               //else part(BlockStatement or single ExpressionStatement)
 }
 
@@ -447,7 +447,7 @@ func (ifex *IfExpression) String() string {
 		if i == 0 {
 			out.WriteString("if ")
 		} else {
-			out.WriteString("elseif ")
+			out.WriteString("elif ")
 		}
 		out.WriteString(c.String())
 	}

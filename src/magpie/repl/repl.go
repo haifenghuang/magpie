@@ -16,7 +16,7 @@ import (
 )
 
 var magpieKeywords = []string{
-	"fn", "let", "true", "false", "if", "else", "elsif", "elseif",
+	"fn", "let", "true", "false", "if", "else",
 	"elif", "return", "include", "and", "or", "struct", "do", "while",
 	"break", "continue", "for", "in", "where", "grep", "map", "case",
 	"is", "try", "catch", "finally", "throw", "qw", "unless", "spawn",

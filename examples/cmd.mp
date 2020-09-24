@@ -3,7 +3,7 @@ if (RUNTIME_OS == "linux") {
 	out = `ls -la $var`
 	println(out)
 }
-elseif (RUNTIME_OS == "windows") {
+elif (RUNTIME_OS == "windows") {
 	out = `dir`
 	println(out)
 

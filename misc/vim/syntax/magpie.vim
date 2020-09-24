@@ -17,7 +17,7 @@ syn keyword     magpieLinq              from where select group into orderby joi
 
 syn keyword     magpieStatement         return let const spawn defer struct enum using async await service
 syn keyword     magpieException         try catch finally throw
-syn keyword     magpieConditional       if else elseif elsif elif unless and or case is
+syn keyword     magpieConditional       if else elif unless and or case is
 syn keyword     magpieRepeat            do while for break continue grep map
 syn keyword     magpieBranch            break continue
 syn keyword     magpieClass             class new property get set default this parent static public private protected interface

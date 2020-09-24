@@ -49,7 +49,7 @@ for method in testObj.getMethods() {
       if anno.Enabled {
         method.invoke()
       }
-    } elseif anno.instanceOf(Demo) {
+    } elif anno.instanceOf(Demo) {
       printf("ANNO NAME=%s, \n", anno)
     }
   }
@@ -95,7 +95,7 @@ for method in testObj.getMethods() {
 //          if a.LogLevel == Logger.INFO {
 //            println("Performing INFO log for \"" + m.getName() + "\" method: ")
 //            printf("calculation result = %v\n\n", m.invoke(2,3))
-//          } elseif (a.LogLevel == Logger.DEBUG) {
+//          } elif (a.LogLevel == Logger.DEBUG) {
 //            println("Performing DEBUG log for \"" + m.getName() + "\" method")
 //            printf("calculation result = %d\n\n", m.invoke(10,5))
 //          }
@@ -237,14 +237,14 @@ for method in testObj.getMethods() {
 //          if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
 //            printf("Property '%s' is not valid!\n", p.name)
 //          }
-//        } elseif anno.instanceOf(NoSpaceValidator) {
+//        } elif anno.instanceOf(NoSpaceValidator) {
 //          for c in p.value {
 //            if c == " " || c == "\t" {
 //              printf("Property '%s' is not valid!\n", p.name)
 //              break
 //            }
 //          }
-//        } elseif anno.instanceOf(DepartmentValidator) {
+//        } elif anno.instanceOf(DepartmentValidator) {
 //          found = false
 //          for d in anno.Department {
 //            if p.value == d {

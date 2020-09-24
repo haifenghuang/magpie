@@ -121,14 +121,14 @@ class RequestHandler {
           if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
             printf("Property '%s' is not valid!\n", p.name)
           }
-        } elseif anno.instanceOf(NoSpaceValidator) {
+        } elif anno.instanceOf(NoSpaceValidator) {
           for c in p.value {
             if c == " " || c == "\t" {
               printf("Property '%s' is not valid!\n", p.name)
               break
             }
           }
-        } elseif anno.instanceOf(DepartmentValidator) {
+        } elif anno.instanceOf(DepartmentValidator) {
           found = false
           for d in anno.Department {
             if p.value == d {
@@ -386,7 +386,7 @@ Keywords are predefined, reserved identifiers that have special meanings to the 
 * fn
 * let const
 * true false nil
-* if elsif elseif elif else
+* if elif else
 * unless
 * return
 * include
@@ -557,7 +557,7 @@ Below talbe give an example of meta-operator and their meanings:(only `~+` is sh
 
 ### Control flow
 
-* if/if-else/if-elif-else/if-elsif-else/if-elseif-else/if-else if-else
+* if/if-else/if-elif-else/
 * unless/unless-else
 * for/for-in
 * while
@@ -571,7 +571,7 @@ let a, b = 10, 5
 if (a > b) {
     println("a > b")
 }
-elseif a == b { // could also use 'elsif', 'elseif' or 'elif'
+elif a == b {
     println("a = b")
 }
 else {
@@ -1382,7 +1382,7 @@ if (RUNTIME_OS == "linux") {
 	out = `ls -la $var`
 	println(out)
 }
-elseif (RUNTIME_OS == "windows") {
+elif (RUNTIME_OS == "windows") {
 	out = `dir`
 	println(out)
 
@@ -1553,7 +1553,7 @@ class Vector {
     fn +(v) { //overloading '+'
         if (type(v) == "INTEGER" {
             return new Vector(x + v, y + v);
-        } elseif v.is_a(Vector) {
+        } elif v.is_a(Vector) {
             return new Vector(x + v.x, y + v.y);
         }
         return nil;
@@ -1833,14 +1833,14 @@ class RequestHandler {
           if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
             printf("Property '%s' is not valid!\n", p.name)
           }
-        } elseif anno.instanceOf(NoSpaceValidator) {
+        } elif anno.instanceOf(NoSpaceValidator) {
           for c in p.value {
             if c == " " || c == "\t" {
               printf("Property '%s' is not valid!\n", p.name)
               break
             }
           }
-        } elseif anno.instanceOf(DepartmentValidator) {
+        } elif anno.instanceOf(DepartmentValidator) {
           found = false
           for d in anno.Department {
             if p.value == d {
@@ -2959,7 +2959,7 @@ There are some other things i plan to do:
 * Improve this document with more explanation of the language.
 * Rewrite the demo program for better understanding of the language.
 * Rewrite the 'include' module logic.
-* ~~Add support for if-elseif-else expression~~.
+* ~~Add support for if-elif-else expression~~.
 
 ## License
 

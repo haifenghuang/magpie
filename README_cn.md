@@ -220,7 +220,7 @@ let a, b = 10, 5
 if (a > b) {
     println("a > b")
 }
-elseif a == b {
+elif a == b {
     println("a = b")
 }
 else {
@@ -507,7 +507,7 @@ if (RUNTIME_OS == "linux") {
     out = `ls -la $var`
     println(out)
 }
-elseif (RUNTIME_OS == "windows") {
+elif (RUNTIME_OS == "windows") {
     out = `dir`
     println(out)
 
@@ -571,7 +571,7 @@ class Vector {
     fn +(v) { //重载'+'运算符
         if (type(v) == "INTEGER" {
             return new Vector(x + v, y + v);
-        } elseif v.is_a(Vector) {
+        } elif v.is_a(Vector) {
             return new Vector(x + v.x, y + v.y);
         }
         return nil;

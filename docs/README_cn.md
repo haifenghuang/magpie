@@ -124,14 +124,14 @@ class RequestHandler {
           if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
             printf("Property '%s' is not valid!\n", p.name)
           }
-        } elseif anno.instanceOf(NoSpaceValidator) {
+        } elif anno.instanceOf(NoSpaceValidator) {
           for c in p.value {
             if c == " " || c == "\t" {
               printf("Property '%s' is not valid!\n", p.name)
               break
             }
           }
-        } elseif anno.instanceOf(DepartmentValidator) {
+        } elif anno.instanceOf(DepartmentValidator) {
           found = false
           for d in anno.Department {
             if p.value == d {
@@ -391,7 +391,7 @@ PI = 3.14 //error
 * fn
 * let const
 * true false nil
-* if elsif elseif elif else
+* if elif else
 * unless
 * return
 * include
@@ -563,7 +563,7 @@ println(value2) //结果：2HELLO2
 
 ### 控制流程
 
-* if/if-else/if-elif-else/if-elsif-else/if-elseif-else/if-else if-else
+* if/if-else/if-elif-else
 * unless/unless-else
 * for/for-in
 * while
@@ -577,7 +577,7 @@ let a, b = 10, 5
 if (a > b) {
     println("a > b")
 }
-elseif a == b { // 也可以使用'elsif', 'elseif'和'elif'
+elif a == b {
     println("a = b")
 }
 else {
@@ -1382,7 +1382,7 @@ if (RUNTIME_OS == "linux") {
 	out = `ls -la $var`
 	println(out)
 }
-elseif (RUNTIME_OS == "windows") {
+elif (RUNTIME_OS == "windows") {
 	out = `dir`
 	println(out)
 
@@ -1553,7 +1553,7 @@ class Vector {
     fn +(v) { //重载'+'
         if (type(v) == "INTEGER" {
             return new Vector(x + v, y + v);
-        } elseif v.is_a(Vector) {
+        } elif v.is_a(Vector) {
             return new Vector(x + v.x, y + v.y);
         }
         return nil;
@@ -1835,14 +1835,14 @@ class RequestHandler {
           if len(p.value) > anno.MaxLength || len(p.value) < anno.MinLength {
             printf("Property '%s' is not valid!\n", p.name)
           }
-        } elseif anno.instanceOf(NoSpaceValidator) {
+        } elif anno.instanceOf(NoSpaceValidator) {
           for c in p.value {
             if c == " " || c == "\t" {
               printf("Property '%s' is not valid!\n", p.name)
               break
             }
           }
-        } elseif anno.instanceOf(DepartmentValidator) {
+        } elif anno.instanceOf(DepartmentValidator) {
           found = false
           for d in anno.Department {
             if p.value == d {

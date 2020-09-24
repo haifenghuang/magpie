@@ -371,7 +371,7 @@ println()
 for i in result.toSlice() { //convert it to an array
 	if i.key() == "Google" {
 		println("Google: ", i.value()[0])
-	} elseif i.key() == "Intel" {
+	} elif i.key() == "Intel" {
 		println("intel: ", i.value()[0])
 	} else {
 		println("Microsoft: ", i.value()[0])

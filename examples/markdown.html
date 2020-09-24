@@ -401,14 +401,14 @@ RequestHandler class is responsible for processing the annotation.
 <span class="pl-c"></span>          <span class="pl-k">if</span> <span class="pl-c1">len</span>(p.<span class="pl-c1">value</span>) <span class="pl-k">&gt;</span> anno.<span class="pl-smi">MaxLength</span> <span class="pl-k">||</span> <span class="pl-c1">len</span>(p.<span class="pl-c1">value</span>) <span class="pl-k">&lt;</span> anno.<span class="pl-smi">MinLength</span> {
             <span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>Property '%s' is not valid!<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, p.<span class="pl-smi">name</span>)
           }
-        } elseif anno.<span class="pl-c1">instanceOf</span>(NoSpaceValidator) {
+        } elif anno.<span class="pl-c1">instanceOf</span>(NoSpaceValidator) {
           <span class="pl-k">for</span> c <span class="pl-k">in</span> p.<span class="pl-c1">value</span> {
             <span class="pl-k">if</span> c <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span> <span class="pl-k">||</span> c <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-cce">\t</span><span class="pl-pds">"</span></span> {
               <span class="pl-c1">printf</span>(<span class="pl-s"><span class="pl-pds">"</span>Property '%s' is not valid!<span class="pl-cce">\n</span><span class="pl-pds">"</span></span>, p.<span class="pl-smi">name</span>)
               <span class="pl-k">break</span>
             }
           }
-        } elseif anno.<span class="pl-c1">instanceOf</span>(DepartmentValidator) {
+        } elif anno.<span class="pl-c1">instanceOf</span>(DepartmentValidator) {
           found <span class="pl-k">=</span> <span class="pl-c1">false</span>
           <span class="pl-k">for</span> d <span class="pl-k">in</span> anno.<span class="pl-smi">Department</span> {
             <span class="pl-k">if</span> p.<span class="pl-c1">value</span> <span class="pl-k">==</span> d {

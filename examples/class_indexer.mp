@@ -87,7 +87,7 @@ class StudentIdentifications
                     }
                 }
                 return "Unknown Student";
-            } elseif type(item) == "STRING" {
+            } elif type(item) == "STRING" {
                 for (i = 0; i < len(fullnames); i++) {
                     if (item == fullnames[i]) {
                         return studentIDs[i];

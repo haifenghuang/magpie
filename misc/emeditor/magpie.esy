@@ -44,8 +44,6 @@ case
 throw
 try
 while
-elseif
-elsif
 elif
 let
 const

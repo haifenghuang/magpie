@@ -18,7 +18,7 @@ class Vector {
 		if (type(v) == "INTEGER") {
 			return new Vector(x+v, y+v, z+v);
 		}
-		elseif v.is_a(Vector) {
+		elif v.is_a(Vector) {
 			return new Vector(x+v.x, y+v.y, z+v.z);
 		}
 		return nil;
