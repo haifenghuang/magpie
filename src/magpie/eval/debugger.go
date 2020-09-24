@@ -309,6 +309,8 @@ func (d *Debugger) CanStop() bool {
 		flag = true
 	case *ast.QueryExpr:
 		flag = true
+	case *ast.ServiceStatement:
+		flag = true
 	default:
 		flag = false
 	}
