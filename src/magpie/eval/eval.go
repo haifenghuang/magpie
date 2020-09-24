@@ -4028,6 +4028,15 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 		}
 		return obj.Value
 	}
+
+	/* If the function call do not end in a 'return' statement. e.g.
+	    let add = fn(x, y) {
+	        x + y // not 'return x + y'
+	    }
+	    We need to send EVAL_LINE to the debugger, so we can step into this line,
+	    or else we cannot step into it.
+	*/
+	MsgHandler.SendMessage(message.Message{Type: message.EVAL_LINE, Body: Context{N: []ast.Node{call}, S: newScope}})
 	return r
 }
 
