@@ -4585,10 +4585,15 @@ func evalHashKeyIndex(hash *Hash, ie *ast.IndexExpression, scope *Scope) Object 
 	var key Object
 	switch ie.Index.(type) {
 	case *ast.Identifier:
-		/* if the key is an identifier, we assume it's a string without quote.
-		   for example: hash[a] ==> hash["a"]
-		*/
-		key = NewString(ie.Index.String())
+		//check if the identfier is in scope
+		if k, ok := scope.Get(ie.Index.String()); ok {
+			return hash.Get(ie.Pos().Sline(), k)
+		} else {
+			/* not in scope, we assume it's a string without quote.
+			   for example: hash[a] ==> hash["a"]
+			*/
+			key = NewString(ie.Index.String())
+		}
 	default:
 		key = Eval(ie.Index, scope)
 	}
