@@ -13,6 +13,12 @@ import (
 const bom = 0xFEFF // byte order mark, only permitted as very first character
 var prevToken token.Token
 
+var macroMap = map[string]token.TokenType{
+	"#define": token.DEFINE,
+	"#ifdef":  token.IFDEF_MACRO,
+	"#else":   token.ELSE_MACRO,
+}
+
 // A mode value is a set of flags (or 0).
 // They control scanner behavior.
 //
@@ -218,7 +224,7 @@ func (l *Lexer) NextToken() token.Token {
 			if l.peek() == '/' || l.peek() == '*' {
 				var comment string
 				if l.peek() == '/' {
-					comment = l.readComment()
+					comment, _ = l.readComment()
 				} else {
 					comment, _ = l.readMultilineComment()
 				}
@@ -290,16 +296,24 @@ func (l *Lexer) NextToken() token.Token {
 				tok = newToken(token.DOT, l.ch)
 			}
 		case token.COMMENT:
-			comment := l.readComment()
-			if l.Mode&ScanComments == 0 { //skip comment
-				return l.NextToken()
+			comment, isMacro := l.readComment()
+			if isMacro == 0 {
+				if l.Mode&ScanComments == 0 { //skip comment
+					return l.NextToken()
+				}
+				tok.Pos = pos
+				tok.Type = token.COMMENT
+				tok.Literal = comment
+				prevToken = tok
+				return tok
+			} else {
+				tok.Pos = pos
+				tok.Type = macroMap[comment]
+				tok.Literal = comment
+				prevToken = tok
+				return tok
 			}
 
-			tok.Pos = pos
-			tok.Type = token.COMMENT
-			tok.Literal = comment
-			prevToken = tok
-			return tok
 		case token.BITAND:
 			if l.peek() == '=' {
 				tok = token.Token{Type: token.BITAND_A, Literal: string(l.ch) + string(l.peek())}
@@ -819,12 +833,19 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func (l *Lexer) readComment() string {
+func (l *Lexer) readComment() (string, int) {
 	position := l.position
 	for l.ch != '\n' && l.ch != 0 {
 		l.readNext()
+
+		tmp := string(l.input[position:l.position])
+		if len(tmp) >= 5 {
+			if _, ok := macroMap[tmp]; ok {
+				return tmp, 1
+			}
+		}
 	}
-	return string(l.input[position:l.position])
+	return string(l.input[position:l.position]), 0
 }
 
 func (l *Lexer) readMultilineComment() (string, error) {

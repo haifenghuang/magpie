@@ -178,6 +178,9 @@ type Parser struct {
 
 	//for debugger use
 	Functions map[string]*ast.FunctionLiteral
+
+	//macro defines
+	defines map[string]bool
 }
 
 type (
@@ -204,6 +207,8 @@ func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 
 	p.classMap = make(map[string]bool)
 	p.Functions = make(map[string]*ast.FunctionLiteral)
+	p.defines = make(map[string]bool)
+
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -219,6 +224,8 @@ func New(l *lexer.Lexer, wd string) *Parser {
 
 	p.classMap = make(map[string]bool)
 	p.Functions = make(map[string]*ast.FunctionLiteral)
+	p.defines = make(map[string]bool)
+
 	p.registerAction()
 	p.nextToken()
 	p.nextToken()
@@ -389,6 +396,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 			DebugInfos = append(DebugInfos, n)
 		case *ast.IfExpression:
 			DebugInfos = append(DebugInfos, n)
+		case *ast.IfMacroStatement:
+			DebugInfos = append(DebugInfos, n)
 		case *ast.UnlessExpression:
 			DebugInfos = append(DebugInfos, n)
 		case *ast.CaseExpr:
@@ -469,6 +478,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		ret = p.parseUsingStatement()
 	case token.ASYNC:
 		return p.parseAsyncStatement()
+	case token.DEFINE:
+		return p.parseDefineStatement()
+	case token.IFDEF_MACRO:
+		ret = p.parseIfMacroStatement()
 	case token.IDENT:
 		//if the current token is an 'identifier' and next token is a ',', 
 		//then we think it's a multiple assignment, but we treat it as a 'let' statement.
@@ -1602,33 +1615,41 @@ func (p *Parser) parseMapExprExpression(tok token.Token) ast.Expression {
 	return me
 }
 
-//func (p *Parser) parseIfExpression() ast.Expression {
-//	expression := &ast.IfExpression{Token: p.curToken}
-//
-//	if p.peekTokenIs(token.LPAREN) {
-//		p.nextToken()
-//	}
-//	p.nextToken()
-//	expression.Condition = p.parseExpression(LOWEST)
-//
-//	if p.peekTokenIs(token.RPAREN) {
-//		p.nextToken()
-//	}
-//
-//	if !p.expectPeek(token.LBRACE) {
-//		return nil
-//	}
-//
-//	expression.Consequence = p.parseBlockStatement()
-//	if p.peekTokenIs(token.ELSE) {
-//		p.nextToken()
-//		if p.expectPeek(token.LBRACE) {
-//			expression.Alternative = p.parseBlockStatement()
-//		}
-//	}
-//
-//	return expression
-//}
+// #ifdef xxx { block-statements } #else { block-statements }
+func (p *Parser) parseIfMacroStatement() *ast.IfMacroStatement {
+	stmt := &ast.IfMacroStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.IDENT) { //macro name
+		pos := p.fixPosCol()
+		msg := fmt.Sprintf("Syntax Error:%v- expected next token to be 'IDENT', got %s instead", pos, p.peekToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	stmt.ConditionStr = p.curToken.Literal
+
+	if _, ok := p.defines[p.curToken.Literal]; ok {
+		tok := token.Token{Type: token.TRUE, Literal: "true"}
+		stmt.Condition = &ast.Boolean{Token: tok, Value: true}
+	} else {
+		tok := token.Token{Type: token.FALSE, Literal: "false"}
+		stmt.Condition = &ast.Boolean{Token: tok, Value: false}
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Consequence = p.parseBlockStatement()
+	if p.peekTokenIs(token.ELSE_MACRO) {
+		p.nextToken()
+		if p.expectPeek(token.LBRACE) {
+			stmt.Alternative = p.parseBlockStatement()
+		}
+	}
+
+	return stmt
+}
 
 func (p *Parser) parseIfExpression() ast.Expression {
 	ie := &ast.IfExpression{Token: p.curToken}
@@ -3469,7 +3490,7 @@ func (p *Parser) parseAwaitExpression() ast.Expression {
 	return expr
 }
 
-// dt/2018-01-01T12:01:00/, dt//, dt/2018-01-01 12:01:00/, ...
+// dt//, dt/2018-01-01 12:01:00/, ...
 func (p *Parser)parseDateTime() ast.Expression {
 	expr := &ast.DateTimeExpr{Token: p.curToken}
 
@@ -3496,6 +3517,20 @@ func (p *Parser)parseDateTime() ast.Expression {
 
 	expr.Pattern = is
 	return expr
+}
+
+//define macro
+func (p *Parser)parseDefineStatement() ast.Statement {
+	if !p.expectPeek(token.IDENT) { //macro name
+		pos := p.fixPosCol()
+		msg := fmt.Sprintf("Syntax Error:%v- expected next token to be 'IDENT', got %s instead", pos, p.peekToken.Type)
+		p.errors = append(p.errors, msg)
+		return nil
+	}
+
+	p.defines[p.curToken.Literal] = true
+
+	return nil
 }
 
 //service name on "addrs" { block }

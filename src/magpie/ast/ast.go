@@ -375,48 +375,42 @@ func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 func (i *Identifier) String() string       { return i.Value }
 
 ///////////////////////////////////////////////////////////
-//                         IFELSE                        //
+//                IFELSE MACRO  STATEMENT                //
 ///////////////////////////////////////////////////////////
-//type IfExpression struct {
-//	Token       token.Token
-//	Condition   Expression
-//	Consequence *BlockStatement
-//	Alternative *BlockStatement
-//}
-//
-//func (ifex *IfExpression) Pos() token.Position {
-//	return ifex.Token.Pos
-//}
-//
-//func (ifex *IfExpression) End() token.Position {
-//	if ifex.Alternative != nil {
-//		return ifex.Alternative.End()
-//	}
-//	return ifex.Consequence.End()
-//}
-//
-//func (ifex *IfExpression) expressionNode()      {}
-//func (ifex *IfExpression) TokenLiteral() string { return ifex.Token.Literal }
-//
-//func (ifex *IfExpression) String() string {
-//	var out bytes.Buffer
-//
-//	out.WriteString("if ")
-//	out.WriteString("(")
-//	out.WriteString(ifex.Condition.String())
-//	out.WriteString(")")
-//	out.WriteString(" { ")
-//	out.WriteString(ifex.Consequence.String())
-//	out.WriteString(" }")
-//	if ifex.Alternative != nil {
-//		out.WriteString(" else ")
-//		out.WriteString(" { ")
-//		out.WriteString(ifex.Alternative.String())
-//		out.WriteString(" }")
-//	}
-//
-//	return out.String()
-//}
+type IfMacroStatement struct {
+	Token       token.Token
+	Condition   Expression
+	ConditionStr string
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (ifex *IfMacroStatement) Pos() token.Position {
+	return ifex.Token.Pos
+}
+
+func (ifex *IfMacroStatement) End() token.Position {
+	if ifex.Alternative != nil {
+		return ifex.Alternative.End()
+	}
+	return ifex.Consequence.End()
+}
+
+func (ifex *IfMacroStatement) statementNode()      {}
+func (ifex *IfMacroStatement) TokenLiteral() string { return ifex.Token.Literal }
+
+func (ifex *IfMacroStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("#ifdef ")
+	out.WriteString(ifex.ConditionStr + " ")
+	out.WriteString(ifex.Consequence.String())
+	if ifex.Alternative != nil {
+		out.WriteString(" #else ")
+		out.WriteString(ifex.Alternative.String())
+	}
+	return out.String()
+}
 
 type IfExpression struct {
 	Token       token.Token

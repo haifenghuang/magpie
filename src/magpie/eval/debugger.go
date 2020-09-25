@@ -275,6 +275,8 @@ func (d *Debugger) CanStop() bool {
 		flag = true
 	case *ast.IfExpression:
 		flag = true
+	case *ast.IfMacroStatement:
+		flag = true
 	case *ast.UnlessExpression:
 		flag = true
 	case *ast.CaseExpr:

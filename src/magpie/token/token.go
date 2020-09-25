@@ -161,6 +161,11 @@ const (
 
 	//service
 	SERVICE
+
+	//macors
+	DEFINE
+	IFDEF_MACRO
+	ELSE_MACRO
 )
 
 var keywords = map[string]TokenType{
@@ -509,6 +514,15 @@ func (tt TokenType) String() string {
 
 	case SERVICE:
 		return "SERVICE"
+
+	//macors
+	case DEFINE:
+		return "#define"
+	case IFDEF_MACRO:
+		return "#ifdef"
+	case ELSE_MACRO:
+		return "#else"
+
 	default:
 		return "UNKNOWN"
 	}

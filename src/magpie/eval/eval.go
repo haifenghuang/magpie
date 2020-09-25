@@ -163,6 +163,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalPostfixExpression(left, node)
 	case *ast.IfExpression:
 		return evalIfExpression(node, scope)
+	case *ast.IfMacroStatement:
+		return evalIfMacroStatement(node, scope)
 	case *ast.UnlessExpression:
 		return evalUnlessExpression(node, scope)
 	case *ast.BlockStatement:
@@ -2682,20 +2684,20 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
 }
 
-// IF expressions, if (evaluates to boolean) True: { Block Statement } Optional Else: {Block Statement}
-//func evalIfExpression(ie *ast.IfExpression, scope *Scope) Object {
-//	condition := Eval(ie.Condition, scope)
-//	if condition.Type() == ERROR_OBJ {
-//		return condition
-//	}
-//
-//	if IsTrue(condition) {
-//		return evalBlockStatements(ie.Consequence.Statements, scope)
-//	} else if ie.Alternative != nil {
-//		return evalBlockStatements(ie.Alternative.Statements, scope)
-//	}
-//	return NIL
-//}
+// IF macro statement: #ifdef xxx { block-statements } #else { block-statements }
+func evalIfMacroStatement(im *ast.IfMacroStatement, scope *Scope) Object {
+	condition := Eval(im.Condition, scope)
+	if condition.Type() == ERROR_OBJ {
+		return condition
+	}
+
+	if IsTrue(condition) {
+		return evalBlockStatements(im.Consequence.Statements, scope)
+	} else if im.Alternative != nil {
+		return evalBlockStatements(im.Alternative.Statements, scope)
+	}
+	return NIL
+}
 
 func evalIfExpression(ie *ast.IfExpression, scope *Scope) Object {
 	//eval "if/else-if" part
