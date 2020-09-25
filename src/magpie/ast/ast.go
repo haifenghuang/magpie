@@ -91,7 +91,7 @@ func (bs *BlockStatement) End() token.Position {
 	return token.Position{Line: bs.RBraceToken.Pos.Line, Col: bs.RBraceToken.Pos.Col + 1}
 }
 
-func (bs *BlockStatement) expressionNode()      {}
+func (bs *BlockStatement) statementNode()      {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 
 func (bs *BlockStatement) String() string {

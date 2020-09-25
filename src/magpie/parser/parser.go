@@ -482,6 +482,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseDefineStatement()
 	case token.IFDEF_MACRO:
 		ret = p.parseIfMacroStatement()
+	case token.LBRACE:
+		return p.parseBlockStatement()
 	case token.IDENT:
 		//if the current token is an 'identifier' and next token is a ',', 
 		//then we think it's a multiple assignment, but we treat it as a 'let' statement.
