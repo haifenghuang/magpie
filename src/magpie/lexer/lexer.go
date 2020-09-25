@@ -841,7 +841,9 @@ func (l *Lexer) readComment() (string, int) {
 		tmp := string(l.input[position:l.position])
 		if len(tmp) >= 5 {
 			if _, ok := macroMap[tmp]; ok {
-				return tmp, 1
+				if unicode.IsSpace(l.ch) || l.ch == '\n' {
+					return tmp, 1
+				}
 			}
 		}
 	}
