@@ -4036,7 +4036,9 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 	    We need to send EVAL_LINE to the debugger, so we can step into this line,
 	    or else we cannot step into it.
 	*/
-	MsgHandler.SendMessage(message.Message{Type: message.EVAL_LINE, Body: Context{N: []ast.Node{call}, S: newScope}})
+	if Dbg != nil {
+		MsgHandler.SendMessage(message.Message{Type: message.EVAL_LINE, Body: Context{N: []ast.Node{call}, S: newScope}})
+	}
 	return r
 }
 
