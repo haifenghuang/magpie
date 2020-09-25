@@ -1627,14 +1627,7 @@ func (p *Parser) parseIfMacroStatement() *ast.IfMacroStatement {
 	}
 
 	stmt.ConditionStr = p.curToken.Literal
-
-	if _, ok := p.defines[p.curToken.Literal]; ok {
-		tok := token.Token{Type: token.TRUE, Literal: "true"}
-		stmt.Condition = &ast.Boolean{Token: tok, Value: true}
-	} else {
-		tok := token.Token{Type: token.FALSE, Literal: "false"}
-		stmt.Condition = &ast.Boolean{Token: tok, Value: false}
-	}
+	_, stmt.Condition = p.defines[p.curToken.Literal];
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil

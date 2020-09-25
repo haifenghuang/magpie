@@ -2686,12 +2686,7 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 
 // IF macro statement: #ifdef xxx { block-statements } #else { block-statements }
 func evalIfMacroStatement(im *ast.IfMacroStatement, scope *Scope) Object {
-	condition := Eval(im.Condition, scope)
-	if condition.Type() == ERROR_OBJ {
-		return condition
-	}
-
-	if IsTrue(condition) {
+	if im.Condition {
 		return evalBlockStatements(im.Consequence.Statements, scope)
 	} else if im.Alternative != nil {
 		return evalBlockStatements(im.Alternative.Statements, scope)

@@ -379,7 +379,7 @@ func (i *Identifier) String() string       { return i.Value }
 ///////////////////////////////////////////////////////////
 type IfMacroStatement struct {
 	Token       token.Token
-	Condition   Expression
+	Condition   bool
 	ConditionStr string
 	Consequence *BlockStatement
 	Alternative *BlockStatement
