@@ -36,6 +36,7 @@ Magpie是一个用go语言写的解析器. 语法借鉴了C, Ruby, Python, Perl�
 * 文档自动生成工具`mdoc`
 * 集成服务(service)处理
 * 简单调试器
+* 简单宏处理
 
 ## 举例1(Linq)
 
@@ -471,6 +472,32 @@ s = str()   // s = ""
 h = hash()  // h = {}
 a = array() // a = []
 t = tuple() // t = ()
+```
+### 简单宏处理
+
+```csharp
+#define DEBUG
+
+// only support two below format:
+//    1. #ifdef xxx { body }
+//    2. #ifdef xxx { body } #else { body }, here only one '#else' is supported'.
+#ifdef DEBUG2
+{
+    add = fn(x, y) { x + y }
+    printf("add = %d\n", add(1, 2))
+}
+#else
+{
+    sub = fn(x, y) { x - y }
+    printf("sub = %d\n", sub(3, 1))
+}
+
+#define TESTING
+#ifdef TESTING
+{
+    add = fn(x, y) { x + y }
+    printf("add = %d\n", add(1, 2))
+}
 ```
 
 ### 函数

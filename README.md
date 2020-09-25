@@ -43,6 +43,7 @@ Complete language tutorial can be found in [docs](docs)
 * Doc-generation tool `mdoc`
 * Integrated services processing
 * Simple debugger
+* Simple Macro processing
 
 ## Example1(Linq)
 
@@ -348,6 +349,7 @@ for i in (1,2,3) {
     println(i)
 }
 ```
+
 ### datetime literal
 
 ```csharp
@@ -464,6 +466,33 @@ s = str()   // s = ""
 h = hash()  // h = {}
 a = array() // a = []
 t = tuple() // t = ()
+```
+
+### Simple Macro Processing
+
+```csharp
+#define DEBUG
+
+// only support two below format:
+//    1. #ifdef xxx { body }
+//    2. #ifdef xxx { body } #else { body }, here only one '#else' is supported'.
+#ifdef DEBUG2
+{
+    add = fn(x, y) { x + y }
+    printf("add = %d\n", add(1, 2))
+}
+#else
+{
+    sub = fn(x, y) { x - y }
+    printf("sub = %d\n", sub(3, 1))
+}
+
+#define TESTING
+#ifdef TESTING
+{
+    add = fn(x, y) { x + y }
+    printf("add = %d\n", add(1, 2))
+}
 ```
 
 ### Function
