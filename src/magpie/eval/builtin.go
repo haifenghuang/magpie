@@ -724,6 +724,37 @@ func printfBuiltin() *Builtin {
 	}
 }
 
+func sprintfBuiltin() *Builtin {
+	return &Builtin{
+		Fn: func(line string, args ...Object) Object {
+			if len(args) < 1 {
+				panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+			}
+
+			formatObj, ok := args[0].(*String)
+			if !ok {
+				panic(NewError(line, PARAMTYPEERROR, "first", "sprintf", "*String", args[0].Type()))
+			}
+
+			subArgs := args[1:]
+			wrapped := make([]interface{}, len(subArgs))
+			for i, v := range subArgs {
+				wrapped[i] = &Formatter{Obj: v}
+			}
+
+			formatStr := formatObj.String
+			if len(subArgs) == 0 {
+				if REPLColor {
+					formatStr = "\033[1;" + colorMap["STRING"] + "m" + formatStr + "\033[0m"
+				}
+			}
+			out := fmt.Sprintf(formatStr, wrapped...)
+
+			return NewString(out)
+		},
+	}
+}
+
 func typeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
@@ -1449,6 +1480,7 @@ func init() {
 		"println":  printlnBuiltin(),
 		"say":      printlnBuiltin(),
 		"printf":   printfBuiltin(),
+		"sprintf":  sprintfBuiltin(),
 		"type":     typeBuiltin(),
 		"chan":     chanBuiltin(),
 		"assert":   assertBuiltin(),
