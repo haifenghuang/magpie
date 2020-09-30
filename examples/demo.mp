@@ -449,3 +449,10 @@ fmt.printf("i=[%05d, %X], b=[%t], f=[%.5f], s=[%-15s]\n", i, i, b, f, s)
 
 let sp = fmt.sprintf("i=[%05d, %X], b=[%t], f=[%.5f], s=[%-15s]\n", i, i, b, f, s)
 fmt.printf("sp=%s", sp)
+
+#Testing builtin method sscanf
+//you must give them default values, so magpie can figure their types.
+let name = "" //magpie knows it's a string
+let age = 1   //magpie knows it's an int
+sscanf("Kim is 22 years old", "%s is %d years old", name, age)
+printf("name=%s, age=%d\n", name, age)

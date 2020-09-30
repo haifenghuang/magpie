@@ -755,6 +755,60 @@ func sprintfBuiltin() *Builtin {
 	}
 }
 
+func sscanfBuiltin() *Builtin {
+	return &Builtin{
+		Fn: func(line string, args ...Object) Object {
+			if len(args) < 2 {
+				panic(NewError(line, ARGUMENTERROR, ">=2", len(args)))
+			}
+
+			strObj, ok := args[0].(*String)
+			if !ok {
+				panic(NewError(line, PARAMTYPEERROR, "first", "sscanf", "*String", args[0].Type()))
+			}
+
+			formatObj, ok := args[1].(*String)
+			if !ok {
+				panic(NewError(line, PARAMTYPEERROR, "second", "sscanf", "*String", args[1].Type()))
+			}
+
+			subArgs := args[2:]
+			values := make([]interface{}, len(subArgs))
+
+			for i, v := range subArgs {
+				switch input := v.(type) {
+				case *Integer:
+					values[i] = &input.Int64
+				case *Float:
+					values[i] = &input.Float64
+				case *Boolean:
+					values[i] = &input.Bool
+				case *String:
+					values[i] = &input.String
+				}
+			}
+
+			formatStr := formatObj.String
+			if len(subArgs) == 0 {
+				if REPLColor {
+					formatStr = "\033[1;" + colorMap["STRING"] + "m" + formatStr + "\033[0m"
+				}
+			}
+
+			_, err := fmt.Sscanf(strObj.String, formatStr, values...)
+			if err != nil { //error
+				return NewNil(err.Error())
+			}
+
+			//convert go's interface{} back to magpie's Object
+			for i, _ := range subArgs {
+				subArgs[i], _ = unmarshalJsonObject(values[i])
+			}
+			return NIL
+		},
+	}
+}
+
 func typeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
@@ -1481,6 +1535,7 @@ func init() {
 		"say":      printlnBuiltin(),
 		"printf":   printfBuiltin(),
 		"sprintf":  sprintfBuiltin(),
+		"sscanf":   sscanfBuiltin(),
 		"type":     typeBuiltin(),
 		"chan":     chanBuiltin(),
 		"assert":   assertBuiltin(),
