@@ -1814,11 +1814,6 @@ func (p *Parser) parseHashExpression() ast.Expression {
 
 			for !p.curTokenIs(token.RBRACE) {
 				key := p.parseExpression(SLICE)
-				if k, ok := key.(*ast.Identifier); ok {
-					//convert *ast.Identifier to *ast.StringLiteral
-					key = &ast.StringLiteral{Token: k.Token, Value: k.Value}
-				}
-
 				if !p.expectPeek(token.COLON) {
 					return nil
 				}
