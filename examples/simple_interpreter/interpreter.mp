@@ -33,6 +33,7 @@ const RBRACE    = "}"
 const LBRAKET   = "["
 const RBRAKET   = "]"
 const COLON     = ":"
+const DOT       = "."
 
 // Keywords
 const FUNCTION = "FUNCTION"
@@ -194,6 +195,8 @@ fn nextToken() {
 		tok = newToken(COLON, lex_ch)
 	} elif lex_ch == "\"" {
 		tok = newToken(STRING, readString())
+	} elif lex_ch == "." {
+		tok = newToken(DOT, lex_ch)
 	} elif lex_ch == 0 {
 		tok = newToken(EOF, "")
 	} else {
@@ -224,23 +227,24 @@ fn nextToken() {
 */
 
 //AST node type
-const ProgramNode             = "Program"
-const IdentifierNode          = "Identifier"
-const LetStatementNode        = "LetStatement"
-const ReturnStatementNode     = "ReturnStatement"
-const ExpressionStatementNode = "ExpressionStatement"
-const IntegerLiteralNode      = "IntegerLiteral"
-const PrefixExpressionNode    = "PrefixExpression"
-const InfixExpressionNode     = "InfixExpression"
-const BooleanNode             = "Boolean"
-const IfExpressionNode        = "IfExpression"
-const BlockStatementNode      = "BlockStatement"
-const FunctionLiteralNode     = "FunctionLiteral"
-const CallExpressionNode      = "CallExpression"
-const StringLiteralNode       = "StringLiteral"
-const ArrayLiteralNode        = "ArrayLiteral"
-const IndexExpressionNode     = "IndexExpression"
-const HashLiteralNode         = "HashLiteral"
+const ProgramNode              = "Program"
+const IdentifierNode           = "Identifier"
+const LetStatementNode         = "LetStatement"
+const ReturnStatementNode      = "ReturnStatement"
+const ExpressionStatementNode  = "ExpressionStatement"
+const IntegerLiteralNode       = "IntegerLiteral"
+const PrefixExpressionNode     = "PrefixExpression"
+const InfixExpressionNode      = "InfixExpression"
+const BooleanNode              = "Boolean"
+const IfExpressionNode         = "IfExpression"
+const BlockStatementNode       = "BlockStatement"
+const FunctionLiteralNode      = "FunctionLiteral"
+const CallExpressionNode       = "CallExpression"
+const MethodCallExpressionNode = "MethodCallExpression"
+const StringLiteralNode        = "StringLiteral"
+const ArrayLiteralNode         = "ArrayLiteral"
+const IndexExpressionNode      = "IndexExpression"
+const HashLiteralNode          = "HashLiteral"
 
 fn Ast_Program(statements) {
 	let self = {"Statements": statements, "Type": ProgramNode}
@@ -437,6 +441,15 @@ fn Ast_CallExpression(tok, function, arguments) {
 	return self
 }
 
+fn Ast_MethodCallExpression(tok, obj, call) {
+	let self = {"Token": tok, "Object": obj, "Call": call, "Type": MethodCallExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+	self["String"] = obj["String"] + "." + call["String"]
+
+	return self
+}
+
 fn Ast_StringLiteral(tok, value) {
 	let self = {"Token": tok, "Value": value, "Type": StringLiteralNode}
 
@@ -524,6 +537,7 @@ precedences = {
 	SLASH:    PRODUCT,
 	ASTERISK: PRODUCT,
 	LPAREN:   CALL,
+	DOT:      CALL,
 	LBRAKET:  INDEX,
 }
 
@@ -667,6 +681,9 @@ fn parseExpression(precedence) {
 		} elif parser_peekToken["type"] == LPAREN {
 			parser_nextToken()
 			leftExp = parseCallExpression(leftExp)
+		} elif parser_peekToken["type"] == DOT {
+			parser_nextToken()
+			leftExp = parseMethodCallExpression(leftExp)
 		} elif parser_peekToken["type"] == LBRAKET {
 			parser_nextToken()
 			leftExp = parseIndexExpression(leftExp)
@@ -824,6 +841,21 @@ fn parseCallExpression(function) {
 	return Ast_CallExpression(curToken, function, arguments)
 }
 
+fn parseMethodCallExpression(obj) {
+	let curToken = parser_curToken
+
+	parser_nextToken()
+	let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
+
+	let call
+	if !peekTokenIs(LPAREN) {
+		call = parseExpression(LOWEST)
+	} else {
+		parser_nextToken()
+		call = parseCallExpression(name)
+	}
+	return Ast_MethodCallExpression(curToken, obj, call)
+}
 
 fn parseStringLiteral() {
 	return Ast_StringLiteral(parser_curToken, parser_curToken["literal"])
@@ -1005,32 +1037,84 @@ const ARRAY_OBJ        = "ARRAY"
 const HASH_OBJ         = "HASH"
 
 /* Every Object should have below properties:
-    "Type":      Object Type
-    "Inspect":   Mainly for debug
+    "Type":       Object Type
+    "Inspect":    Mainly for debug
+    "CallMethod": Object method which has the following prototype
+         (scope, methodName, methodArgs) -> Object"
 */
 
 fn IntegerObj(value) {
-	return {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value}
+	let self = {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value}
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "next" {
+			return Integer_Next(value)
+
+		} elif methodName == "prev" {
+			return Integer_Prev(value)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, INTEGER_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn Integer_Next(value) {
+	return IntegerObj(value + 1)
+}
+
+fn Integer_Prev(value) {
+	return IntegerObj(value - 1)
 }
 
 fn BooleanObj(value) {
-	return {"Type": BOOLEAN_OBJ, "Inspect": sprintf("%t", value), "Value": value}
+	let self = {"Type": BOOLEAN_OBJ, "Inspect": sprintf("%t", value), "Value": value}
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "toYesNo" {
+			return Boolean_ToYesNo(value)
+
+		} elif methodName == "toTrueFalse" {
+			return Boolean_ToTrueFalse(value)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, BOOLEAN_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn Boolean_ToYesNo(value) {
+	if value {
+		return StringObj("yes")
+	}
+	return StringObj("no")
+}
+
+fn Boolean_ToTrueFalse(value) {
+	if value {
+		return StringObj("true")
+	}
+	return StringObj("false")
 }
 
 fn NilObj() {
-	return {"Type": NIL_OBJ, "Inspect": "nil"}
+	return {"Type": NIL_OBJ, "Inspect": "nil", "CallMethod": nil}
 }
 
 fn ReturnObj(value) {
-	return {"Type": RETURN_VALUE_OBJ, "Inspect": value["Inspect"], "Value": value}
+	return {"Type": RETURN_VALUE_OBJ, "Inspect": value["Inspect"], "Value": value, "CallMethod": nil}
 }
 
 fn ErrorObj(message) {
-	return {"Type": ERROR_OBJ, "Inspect": "Runtime Error:" + message, "Message": message}
+	return {"Type": ERROR_OBJ, "Inspect": "Runtime Error:" + message, "Message": message, "CallMethod": nil}
 }
 
 fn FunctionObj(parameters, body, scope) {
-	let self = {"Type": FUNCTION_OBJ, "Parameters": parameters, "Body": body, "Scope": scope}
+	let self = {"Type": FUNCTION_OBJ, "Parameters": parameters, "Body": body, "Scope": scope, "CallMethod": nil}
 
 	let str = ""
 
@@ -1051,15 +1135,97 @@ fn FunctionObj(parameters, body, scope) {
 }
 
 fn StringObj(value) {
-	return {"Type": STRING_OBJ, "Inspect": value, "Value": value}
+	let self = {"Type": STRING_OBJ, "Inspect": value, "Value": value}
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "upper" {
+			return String_Upper(value)
+
+		} elif methodName == "lower" {
+			return String_Lower(value)
+		} elif methodName == "trim" {
+			return String_Trim(value)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, BOOLEAN_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn String_Lower(value) {
+	return StringObj(value.lower())
+}
+
+fn String_Upper(value) {
+	return StringObj(value.upper())
+}
+
+fn String_Trim(value) {
+	return StringObj(value.trim())
 }
 
 fn BuiltinObj(builtinFn) {
-	return {"Type": BUILTIN_OBJ, "Inspect": "<builtin>", "BuiltinFn": builtinFn}
+	return {"Type": BUILTIN_OBJ, "Inspect": "<builtin>", "BuiltinFn": builtinFn, "CallMethod": nil}
 }
 
 fn ArrayObj(elements) {
 	let self = {"Type": ARRAY_OBJ, "Elements": elements}
+
+	//recalculate "Inspect"
+	let str = ""
+
+	let items = []
+	for elem in self["Elements"] {
+		items.push(elem["Inspect"])
+	}
+
+	str += "["
+	str += strings.join(items, ", ")
+	str += "]"
+	self["Inspect"] = str
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "push" {
+			let arg0 = methodArgs[0]
+			Array_Push(self, scope, arg0)
+		} elif methodName == "pop" {
+			Array_Pop(self, scope)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, ARRAY_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn Array_Push(self, scope, arg) {
+	let elements = self["Elements"]
+
+	elements.push(arg)
+	self["Elements"] = elements
+
+	//recalculate "Inspect"
+	let str = ""
+
+	let items = []
+	for elem in elements {
+		items.push(elem["Inspect"])
+	}
+
+	str += "["
+	str += strings.join(items, ", ")
+	str += "]"
+	self["Inspect"] = str
+}
+
+fn Array_Pop(self, scope) {
+	let elements = self["Elements"]
+
+	elements.pop()
+	self["Elements"] = elements
 
 	let str = ""
 
@@ -1072,8 +1238,6 @@ fn ArrayObj(elements) {
 	str += strings.join(items, ", ")
 	str += "]"
 	self["Inspect"] = str
-
-	return self
 }
 
 fn HashPair(key, value) {
@@ -1084,7 +1248,7 @@ fn HashObj(pairs) {
 	//Pairs map[HashKey]HashPair
 	//Here I use obj["Inspect"] as the hash key.
 
-	let self = {"Type": HASH_OBJ, "Pairs": pairs}
+	let self = {"Type": HASH_OBJ, "Pairs": pairs, "CallMethod": nil}
 
 	let str = ""
 
@@ -1119,9 +1283,9 @@ fn lenBuiltin(args) {
 	let arg0 = args[0]
 	let arg0Type = arg0["Type"]
 	if arg0Type == ARRAY_OBJ {
-		return IntegerObj(len(arg["Elements"]))
+		return IntegerObj(len(arg0["Elements"]))
 	} elif arg0Type == STRING_OBJ {
-			return IntegerObj(len(arg["Value"]))
+			return IntegerObj(len(arg0["Value"]))
 	}
 
 	let msg2 = sprintf("argument to `len` not supported, got %s", arg0Type)
@@ -1230,6 +1394,8 @@ fn Eval(node, scope) {
 		}
 
 		return applyFunction(call_fn, call_args)
+	} elif nodeType == MethodCallExpressionNode {
+		return evalMethodCallExpression(node, scope)
 	} elif nodeType == StringLiteralNode {
 		return StringObj(node["Value"])
 	} elif nodeType == ArrayLiteralNode {
@@ -1488,6 +1654,25 @@ fn evalHashLiteral(node, scope) {
 	return HashObj(pairs)
 }
 
+fn evalMethodCallExpression(node, scope) {
+	let obj = Eval(node["Object"], scope)
+
+	let call = node["Call"]
+	let methName = call["Function"]["String"]
+
+	if obj["CallMethod"] == nil {
+		let msg = sprintf("undefined method '%s' for object %s", methName, obj["Type"])
+		return  ErrorObj(msg)
+	}
+
+	//arguments
+	let args = []
+	for v in call["Arguments"] {
+		args.push(Eval(v, scope))
+	}
+	return obj["CallMethod"](scope, methName, args)
+}
+
 fn isTruthy(obj) {
 	if obj == NIL {
 		return false
@@ -1572,6 +1757,8 @@ fn unwrapReturnValue(obj) {
 	let ten = 10
 	println("five = ", five)
 	println("ten = ", ten)
+	println("six = ", five.next())
+	println("nine = ", ten.prev())
 
 	let fifteen = five + ten
 	println("fifteen = ", fifteen)
@@ -1586,9 +1773,20 @@ fn unwrapReturnValue(obj) {
 	println(arr)
 	println("arr[1] = ", arr[1])
 
+	arr.push(3)
+	println("new arr = ", arr)
+	println("new arr length = ", len(arr))
+	arr.pop()
+	println("new arr2 = ", arr)
+	println("new arr2 length = ", len(arr))
+
 	let h = {"Name": "HHF", "Age": 43}
 	println(h)
 	println("h[Age] = ", h["Age"])
+
+	let strHello = "Hello World"
+	println(strHello.lower())
+	println(strHello.upper())
 	``
 
 	/* lexer */
