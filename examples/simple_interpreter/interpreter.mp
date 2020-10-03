@@ -1173,25 +1173,13 @@ fn BuiltinObj(builtinFn) {
 fn ArrayObj(elements) {
 	let self = {"Type": ARRAY_OBJ, "Elements": elements}
 
-	//recalculate "Inspect"
-	let str = ""
-
-	let items = []
-	for elem in self["Elements"] {
-		items.push(elem["Inspect"])
-	}
-
-	str += "["
-	str += strings.join(items, ", ")
-	str += "]"
-	self["Inspect"] = str
+	Array_Inspect(self)
 
 	self["CallMethod"] = fn (scope, methodName, methodArgs) {
 		if methodName == "push" {
-			let arg0 = methodArgs[0]
-			Array_Push(self, scope, arg0)
+			return Array_Push(self, scope, methodArgs)
 		} elif methodName == "pop" {
-			Array_Pop(self, scope)
+			return Array_Pop(self, scope)
 		} else {
 			let msg = sprintf("undefined method '%s' for object %s", methodName, ARRAY_OBJ)
 			return ErrorObj(msg)
@@ -1201,17 +1189,13 @@ fn ArrayObj(elements) {
 	return self
 }
 
-fn Array_Push(self, scope, arg) {
-	let elements = self["Elements"]
+fn Array_Inspect(self) {
+	let elems = self["Elements"]
 
-	elements.push(arg)
-	self["Elements"] = elements
-
-	//recalculate "Inspect"
 	let str = ""
 
 	let items = []
-	for elem in elements {
+	for elem in elems {
 		items.push(elem["Inspect"])
 	}
 
@@ -1221,23 +1205,27 @@ fn Array_Push(self, scope, arg) {
 	self["Inspect"] = str
 }
 
+
+fn Array_Push(self, scope, methodArgs) {
+	let arg = methodArgs[0]
+
+	let elements = self["Elements"]
+	elements.push(arg)
+
+	//recalculate 'Inspect'
+	Array_Inspect(self)
+
+	return self
+}
+
 fn Array_Pop(self, scope) {
 	let elements = self["Elements"]
-
 	elements.pop()
-	self["Elements"] = elements
 
-	let str = ""
+	//recalculate 'Inspect'
+	Array_Inspect(self)
 
-	let items = []
-	for elem in elements {
-		items.push(elem["Inspect"])
-	}
-
-	str += "["
-	str += strings.join(items, ", ")
-	str += "]"
-	self["Inspect"] = str
+	return self
 }
 
 fn HashPair(key, value) {
@@ -1248,7 +1236,32 @@ fn HashObj(pairs) {
 	//Pairs map[HashKey]HashPair
 	//Here I use obj["Inspect"] as the hash key.
 
-	let self = {"Type": HASH_OBJ, "Pairs": pairs, "CallMethod": nil}
+	let self = {"Type": HASH_OBJ, "Pairs": pairs}
+
+	Hash_Inspect(self)
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "exists" || methodName == "has" {
+			return Hash_Exists(self, scope, methodArgs)
+		} elif methodName == "push" {
+			return Hash_Push(self, scope, methodArgs)
+		} elif methodName == "pop" {
+			return Hash_Pop(self, scope, methodArgs)
+		} elif methodName == "keys" {
+			return Hash_Keys(self, scope)
+		} elif methodName == "values" {
+			return Hash_Values(self, scope)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, HASH_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn Hash_Inspect(self) {
+	let pairs = self["Pairs"]
 
 	let str = ""
 
@@ -1264,8 +1277,74 @@ fn HashObj(pairs) {
 	str += strings.join(pairsArr, ", ")
 	str += "}"
 	self["Inspect"] = str
+}
+
+fn Hash_Exists(self, scope, methodArgs) {
+	let arg0 = methodArgs[0]
+	let pairs = self["Pairs"]
+
+	for notUsed, pair in pairs {
+		let k = pair["Key"]
+		if k["Inspect"] == arg0["Inspect"] {
+			return TRUE
+		}
+ 	}
+	return FALSE
+}
+
+
+fn Hash_Push(self, scope, methodArgs) {
+	let pairs = self["Pairs"]
+
+	let arg0 = methodArgs[0]
+	let arg1 = methodArgs[1]
+
+	let key =  arg0["Inspect"]
+	pairs[key] = HashPair(arg0, arg1)
+
+	//recalculate 'Inspect'
+	Hash_Inspect(self)
 
 	return self
+}
+
+fn Hash_Pop(self, scope, methodArgs) {
+	let key = methodArgs[0]
+
+	let pairs = self["Pairs"]
+	for notUsed, pair in pairs {
+		let k = pair["Key"]
+		if k["Inspect"] == key["Inspect"] {
+			pairs.pop(k["Inspect"])
+
+			//recalculate 'Inspect'
+			Hash_Inspect(self)
+
+			return pair["Value"]
+		}
+ 	}
+
+	return NilObj()
+}
+
+fn Hash_Keys(self, scope) {
+	let keys = []
+
+	let pairs = self["Pairs"]
+	for notUsed, pair in pairs {
+		keys.push(pair["Key"])
+	}
+	return ArrayObj(keys)
+}
+
+fn Hash_Values(self, scope) {
+	let values = []
+
+	let pairs = self["Pairs"]
+	for notUsed, pair in pairs {
+		values.push(pair["Value"])
+	}
+	return ArrayObj(values)
 }
 
 
@@ -1783,6 +1862,14 @@ fn unwrapReturnValue(obj) {
 	let h = {"Name": "HHF", "Age": 43}
 	println(h)
 	println("h[Age] = ", h["Age"])
+	println(h.keys())
+	println(h.values())
+	println(h.exists("Name"))
+
+	h.push("Height", "164cm")
+	println(h)
+	println(h.pop("Name"))
+	println(h)
 
 	let strHello = "Hello World"
 	println(strHello.lower())
