@@ -1,64 +1,70 @@
 ////////////////////////////////////////////////
 //                 TOKEN
 ////////////////////////////////////////////////
-const ILLEGAL = "ILLEGAL"
-const EOF     = "EOF"
+const TOKEN_ILLEGAL = "ILLEGAL"
+const TOKEN_EOF     = "EOF"
 
 // Identifiers + literals
-const IDENT  = "IDENT" // add, foobar, x, y, ...
-const INT    = "INT"   // 1343456
-const STRING = "STRING"
+const TOKEN_IDENT  = "IDENT" // add, foobar, x, y, ...
+const TOKEN_INT    = "INT"   // 1343456
+const TOKEN_STRING = "STRING"
 
 // Operators
-const ASSIGN   = "="
-const PLUS     = "+"
-const MINUS    = "-"
-const BANG     = "!"
-const ASTERISK = "*"
-const SLASH    = "/"
+const TOKEN_ASSIGN   = "="
+const TOKEN_PLUS     = "+"
+const TOKEN_MINUS    = "-"
+const TOKEN_BANG     = "!"
+const TOKEN_ASTERISK = "*"
+const TOKEN_SLASH    = "/"
 
-const LT = "<"
-const GT = ">"
+const TOKEN_LT = "<"
+const TOKEN_GT = ">"
 
-const EQ     = "=="
-const NOT_EQ = "!="
+const TOKEN_EQ     = "=="
+const TOKEN_NOT_EQ = "!="
 
 // Delimiters
-const COMMA     = ","
-const SEMICOLON = ";"
-const LPAREN    = "("
-const RPAREN    = ")"
-const LBRACE    = "{"
-const RBRACE    = "}"
-const LBRAKET   = "["
-const RBRAKET   = "]"
-const COLON     = ":"
-const DOT       = "."
+const TOKEN_COMMA     = ","
+const TOKEN_SEMICOLON = ";"
+const TOKEN_LPAREN    = "("
+const TOKEN_RPAREN    = ")"
+const TOKEN_LBRACE    = "{"
+const TOKEN_RBRACE    = "}"
+const TOKEN_LBRAKET   = "["
+const TOKEN_RBRAKET   = "]"
+const TOKEN_COLON     = ":"
+const TOKEN_DOT       = "."
 
 // Keywords
-const FUNCTION = "FUNCTION"
-const LET      = "LET"
-const TRUE     = "TRUE"
-const FALSE    = "FALSE"
-const IF       = "IF"
-const ELSE     = "ELSE"
-const RETURN   = "RETURN"
+const TOKEN_FUNCTION = "FUNCTION"
+const TOKEN_LET      = "LET"
+const TOKEN_TRUE     = "TRUE"
+const TOKEN_FALSE    = "FALSE"
+const TOKEN_IF       = "IF"
+const TOKEN_ELSE     = "ELSE"
+const TOKEN_RETURN   = "RETURN"
+const TOKEN_WHILE    = "WHILE"
+const TOKEN_BREAK    = "BREAK"
+const TOKEN_CONTINUE = "CONTINUE"
 
 keywords = {
-	"fn":     FUNCTION,
-	"let":    LET,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
+	"fn":       TOKEN_FUNCTION,
+	"let":      TOKEN_LET,
+	"true":     TOKEN_TRUE,
+	"false":    TOKEN_FALSE,
+	"if":       TOKEN_IF,
+	"else":     TOKEN_ELSE,
+	"return":   TOKEN_RETURN,
+	"while":    TOKEN_WHILE,
+	"break":    TOKEN_BREAK,
+	"continue": TOKEN_CONTINUE
 }
 
 fn lookupIdent(ident) {
 	if keywords.exists(ident) {
 		return keywords[ident]
 	}
-	return IDENT
+	return TOKEN_IDENT
 }
 
 fn newToken(t, ch) {
@@ -151,63 +157,63 @@ fn nextToken() {
 		if peekChar() == "=" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(EQ, ch + lex_ch)
+			tok = newToken(TOKEN_EQ, ch + lex_ch)
 		} else {
-			tok = newToken(ASSIGN, lex_ch)
+			tok = newToken(TOKEN_ASSIGN, lex_ch)
 		}
 	} elif lex_ch == "+" {
-		tok = newToken(PLUS, lex_ch)
+		tok = newToken(TOKEN_PLUS, lex_ch)
 	} elif lex_ch == "-" {
-		tok = newToken(MINUS, lex_ch)
+		tok = newToken(TOKEN_MINUS, lex_ch)
 	} elif lex_ch == "!" {
 		if peekChar() == "=" {
 			c = lex_ch
 			readChar()
-			tok = newToken(NOT_EQ, c + lex_ch)
+			tok = newToken(TOKEN_NOT_EQ, c + lex_ch)
 		} else {
-			tok = newToken(BANG, lex_ch)
+			tok = newToken(TOKEN_BANG, lex_ch)
 		}
 	} elif lex_ch == "/" {
-		tok = newToken(SLASH, lex_ch)
+		tok = newToken(TOKEN_SLASH, lex_ch)
 	} elif lex_ch == "*" {
-		tok = newToken(ASTERISK, lex_ch)
+		tok = newToken(TOKEN_ASTERISK, lex_ch)
 	} elif lex_ch == "<" {
-		tok = newToken(LT, lex_ch)
+		tok = newToken(TOKEN_LT, lex_ch)
 	} elif lex_ch == ">" {
-		tok = newToken(GT, lex_ch)
+		tok = newToken(TOKEN_GT, lex_ch)
 	} elif lex_ch == ";" {
-		tok = newToken(SEMICOLON, lex_ch)
+		tok = newToken(TOKEN_SEMICOLON, lex_ch)
 	} elif lex_ch == "(" {
-		tok = newToken(LPAREN, lex_ch)
+		tok = newToken(TOKEN_LPAREN, lex_ch)
 	} elif lex_ch == ")" {
-		tok = newToken(RPAREN, lex_ch)
+		tok = newToken(TOKEN_RPAREN, lex_ch)
 	} elif lex_ch == "," {
-		tok = newToken(COMMA, lex_ch)
+		tok = newToken(TOKEN_COMMA, lex_ch)
 	} elif lex_ch == "{" {
-		tok = newToken(LBRACE, lex_ch)
+		tok = newToken(TOKEN_LBRACE, lex_ch)
 	} elif lex_ch == "}" {
-		tok = newToken(RBRACE, lex_ch)
+		tok = newToken(TOKEN_RBRACE, lex_ch)
 	} elif lex_ch == "[" {
-		tok = newToken(LBRAKET, lex_ch)
+		tok = newToken(TOKEN_LBRAKET, lex_ch)
 	} elif lex_ch == "]" {
-		tok = newToken(RBRAKET, lex_ch)
+		tok = newToken(TOKEN_RBRAKET, lex_ch)
 	} elif lex_ch == ":" {
-		tok = newToken(COLON, lex_ch)
+		tok = newToken(TOKEN_COLON, lex_ch)
 	} elif lex_ch == "\"" {
-		tok = newToken(STRING, readString())
+		tok = newToken(TOKEN_STRING, readString())
 	} elif lex_ch == "." {
-		tok = newToken(DOT, lex_ch)
+		tok = newToken(TOKEN_DOT, lex_ch)
 	} elif lex_ch == 0 {
-		tok = newToken(EOF, "")
+		tok = newToken(TOKEN_EOF, "")
 	} else {
 		if isLetter(lex_ch) {
 			lit = readIdentifier()
 			typ = lookupIdent(lit)
 			return newToken(typ, lit)
 		} else if isDigit(lex_ch) {
-			return newToken(INT, readNumber())
+			return newToken(TOKEN_INT, readNumber())
 		} else {
-			tok = newToken(ILLEGAL, lex_ch)
+			tok = newToken(TOKEN_ILLEGAL, lex_ch)
 		}
 	}
 
@@ -245,6 +251,10 @@ const StringLiteralNode        = "StringLiteral"
 const ArrayLiteralNode         = "ArrayLiteral"
 const IndexExpressionNode      = "IndexExpression"
 const HashLiteralNode          = "HashLiteral"
+const WhileExpressionNode      = "WhileExpression"
+const BreakExpressionNode      = "BreakExpression"
+const ContinueExpressionNode   = "ContinueExpression"
+const AssignExpressionNode     = "AssignExpression"
 
 fn Ast_Program(statements) {
 	let self = {"Statements": statements, "Type": ProgramNode}
@@ -511,7 +521,42 @@ fn Ast_HashLiteral(tok, pairs) {
 	return self
 }
 
+fn Ast_WhileExpression(tok, condition, block) {
+	let self = {"Token": tok, "Condition":  condition, "Block": block, "Type": WhileExpressionNode}
 
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = "while "
+	str += condition["String"]
+	str += "{ "
+	str += block["String"]
+	str += " }"
+	self["String"] = str
+
+	return self
+}
+
+fn Ast_BreakExpression(tok) {
+	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": BreakExpressionNode}
+}
+
+
+fn Ast_ContinueExpression(tok) {
+	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": ContinueExpressionNode}
+}
+
+fn Ast_AssignExpression(tok, name, value) {
+	let self = {"Token": tok, "Name":  name, "Value": value, "Type": AssignExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = name["String"]
+	str += " = "
+	str += value["String"]
+	self["String"] = str
+
+	return self
+}
 
 ////////////////////////////////////////////////
 //                 PARSER
@@ -519,31 +564,35 @@ fn Ast_HashLiteral(tok, pairs) {
 
 const NONE         = 0
 const LOWEST       = 1
-const EQUALS       = 2  // ==
-const LESSGREATER  = 3  // > or <
-const SUM          = 4  // +
-const PRODUCT      = 5  // *
-const PREFIX       = 6  // -X or !X
-const CALL         = 7  // myFunction(X)
-const INDEX        = 8  // array[index]
+const ASSIGN       = 2
+const EQUALS       = 3  // ==
+const LESSGREATER  = 4  // > or <
+const SUM          = 5  // +
+const PRODUCT      = 6  // *
+const PREFIX       = 7  // -X or !X
+const CALL         = 8  // myFunction(X)
+const INDEX        = 9  // array[index]
 
 precedences = {
-	EQ:       EQUALS,
-	NOT_EQ:   EQUALS,
-	LT:       LESSGREATER,
-	GT:       LESSGREATER,
-	PLUS:     SUM,
-	MINUS:    SUM,
-	SLASH:    PRODUCT,
-	ASTERISK: PRODUCT,
-	LPAREN:   CALL,
-	DOT:      CALL,
-	LBRAKET:  INDEX,
+	TOKEN_ASSIGN:   ASSIGN,
+	TOKEN_EQ:       EQUALS,
+	TOKEN_NOT_EQ:   EQUALS,
+	TOKEN_LT:       LESSGREATER,
+	TOKEN_GT:       LESSGREATER,
+	TOKEN_PLUS:     SUM,
+	TOKEN_MINUS:    SUM,
+	TOKEN_SLASH:    PRODUCT,
+	TOKEN_ASTERISK: PRODUCT,
+	TOKEN_LPAREN:   CALL,
+	TOKEN_DOT:      CALL,
+	TOKEN_LBRAKET:  INDEX,
 }
 
 let parser_Errors = []
-let parser_curToken = newToken(ILLEGAL, "")
-let parser_peekToken = newToken(ILLEGAL, "")
+let parser_curToken = newToken(TOKEN_ILLEGAL, "")
+let parser_peekToken = newToken(TOKEN_ILLEGAL, "")
+
+let isInLoop = false
 
 fn Parser_Errors() {
 	return parser_Errors
@@ -565,7 +614,7 @@ fn ParseProgram() {
 
 	let statements = []
 
-	while parser_curToken["type"] != EOF {
+	while parser_curToken["type"] != TOKEN_EOF {
 		let stmt = parseStatement()
 		if stmt != nil {
 			statements.push(stmt)
@@ -577,9 +626,9 @@ fn ParseProgram() {
 }
 
 fn parseStatement() {
-	if parser_curToken["type"] == LET {
+	if parser_curToken["type"] == TOKEN_LET {
 		return parseLetStatement()
-	} elif parser_curToken["type"] == RETURN {
+	} elif parser_curToken["type"] == TOKEN_RETURN {
 		return parseReturnStatement()
 	} else {
 		return parseExpressionStatement()
@@ -588,20 +637,20 @@ fn parseStatement() {
 
 fn parseLetStatement() {
 	let curToken = parser_curToken
-	if !expectPeek(IDENT) {
+	if !expectPeek(TOKEN_IDENT) {
 		return nil
 	}
 
 	let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
 
-	if !expectPeek(ASSIGN) {
+	if !expectPeek(TOKEN_ASSIGN) {
 		return nil
 	}
 
 	parser_nextToken()
 
 	let value = parseExpression(LOWEST)
-	if peekTokenIs(SEMICOLON) {
+	if peekTokenIs(TOKEN_SEMICOLON) {
 		parser_nextToken()
 	}
 
@@ -615,7 +664,7 @@ fn parseReturnStatement() {
 
 	let returnValue = parseExpression(LOWEST)
 
-	if peekTokenIs(SEMICOLON) {
+	if peekTokenIs(TOKEN_SEMICOLON) {
 		parser_nextToken()
 	}
 
@@ -627,7 +676,7 @@ fn parseExpressionStatement() {
 
 	let expr = parseExpression(LOWEST)
 
-	if peekTokenIs(SEMICOLON) {
+	if peekTokenIs(TOKEN_SEMICOLON) {
 		parser_nextToken()
 	}
 
@@ -639,54 +688,70 @@ fn parseExpression(precedence) {
 	let leftExp
 
 	//prefix expression
-	if parser_curToken["type"] == IDENT {
+	if parser_curToken["type"] == TOKEN_IDENT {
 		leftExp = parseIdentifier()
-	} elif parser_curToken["type"] == INT {
+	} elif parser_curToken["type"] == TOKEN_INT {
 		leftExp = parseIntegerLiteral()
-	} elif parser_curToken["type"] == BANG {
+	} elif parser_curToken["type"] == TOKEN_BANG {
 		leftExp = parsePrefixExpression()
-	} elif parser_curToken["type"] == MINUS {
+	} elif parser_curToken["type"] == TOKEN_MINUS {
 		leftExp = parsePrefixExpression()
-	} elif parser_curToken["type"] == TRUE {
+	} elif parser_curToken["type"] == TOKEN_TRUE {
 		leftExp = parseBoolean()
-	} elif parser_curToken["type"] == FALSE {
+	} elif parser_curToken["type"] == TOKEN_FALSE {
 		leftExp = parseBoolean()
-	} elif parser_curToken["type"] == LPAREN {
+	} elif parser_curToken["type"] == TOKEN_LPAREN {
 		leftExp = parseGroupedExpression()
-	} elif parser_curToken["type"] == IF {
+	} elif parser_curToken["type"] == TOKEN_IF {
 		leftExp = parseIfExpression()
-	} elif parser_curToken["type"] == FUNCTION {
+	} elif parser_curToken["type"] == TOKEN_FUNCTION {
 		leftExp = parseFunctionLiteral()
-	} elif parser_curToken["type"] == STRING {
+	} elif parser_curToken["type"] == TOKEN_STRING {
 		leftExp = parseStringLiteral()
-	} elif parser_curToken["type"] == LBRAKET {
+	} elif parser_curToken["type"] == TOKEN_LBRAKET {
 		leftExp = parseArrayLiteral()
-	} elif parser_curToken["type"] == LBRACE {
+	} elif parser_curToken["type"] == TOKEN_LBRACE {
 		leftExp = parseHashLiteral()
-	} 
-	else {
+	} elif parser_curToken["type"] == TOKEN_WHILE {
+		leftExp = parseWhileExpression()
+	} elif parser_curToken["type"] == TOKEN_BREAK {
+		if isInLoop {
+			leftExp = parseBreakExpression()	
+		} else {
+			leftExp = parseBreakWithoutLoopContext()
+		}
+	} elif parser_curToken["type"] == TOKEN_CONTINUE {
+		if isInLoop {
+			leftExp = parseContinueExpression()
+		} else {
+			leftExp = parseContinueWithoutLoopContext()
+		}
+	} else {
 		noPrefixParseFnError(parser_curToken["type"])
 		return nil
 	}
 
 	while !peekTokenIs(SEMICOLON) && precedence < peekPrecedence() {
 		//infix expression
-		if parser_peekToken["type"] == PLUS || parser_peekToken["type"] == MINUS ||
-		   parser_peekToken["type"] == SLASH || parser_peekToken["type"] == ASTERISK ||
-		   parser_peekToken["type"] == EQ || parser_peekToken["type"] == NOT_EQ ||
-		   parser_peekToken["type"] == LT || parser_peekToken["type"] == GT {
+		if parser_peekToken["type"] == TOKEN_PLUS || parser_peekToken["type"] == TOKEN_MINUS ||
+		   parser_peekToken["type"] == TOKEN_SLASH || parser_peekToken["type"] == TOKEN_ASTERISK ||
+		   parser_peekToken["type"] == TOKEN_EQ || parser_peekToken["type"] == TOKEN_NOT_EQ ||
+		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT {
 
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
-		} elif parser_peekToken["type"] == LPAREN {
+		} elif parser_peekToken["type"] == TOKEN_LPAREN {
 			parser_nextToken()
 			leftExp = parseCallExpression(leftExp)
-		} elif parser_peekToken["type"] == DOT {
+		} elif parser_peekToken["type"] == TOKEN_DOT {
 			parser_nextToken()
 			leftExp = parseMethodCallExpression(leftExp)
-		} elif parser_peekToken["type"] == LBRAKET {
+		} elif parser_peekToken["type"] == TOKEN_LBRAKET {
 			parser_nextToken()
 			leftExp = parseIndexExpression(leftExp)
+		} elif parser_peekToken["type"] == TOKEN_ASSIGN {
+			parser_nextToken()
+			leftExp = parseAssignExpression(leftExp)
 		} else {
 			return leftExp
 		}
@@ -724,7 +789,7 @@ fn parseInfixExpression(left) {
 }
 
 fn parseBoolean() {
-	let val = curTokenIs(TRUE)
+	let val = curTokenIs(TOKEN_TRUE)
 	return Ast_Boolean(parser_curToken, val)
 }
 
@@ -732,7 +797,7 @@ fn parseGroupedExpression() {
 	parser_nextToken()
 	let exp = parseExpression(LOWEST)
 
-	if !expectPeek(RPAREN) {
+	if !expectPeek(TOKEN_RPAREN) {
 		return nil
 	}
 
@@ -742,28 +807,28 @@ fn parseGroupedExpression() {
 fn parseIfExpression() {
 	let curToken = parser_curToken
 
-	if !expectPeek(LPAREN) {
+	if !expectPeek(TOKEN_LPAREN) {
 		return nil
 	}
 
 	parser_nextToken()
 	let condition = parseExpression(LOWEST)
 
-	if !expectPeek(RPAREN) {
+	if !expectPeek(TOKEN_RPAREN) {
 		return nil
 	}
 
-	if !expectPeek(LBRACE) {
+	if !expectPeek(TOKEN_LBRACE) {
 		return nil
 	}
 
 	let consequence = parseBlockStatement()
 
 	let alternative = nil
-	if peekTokenIs(ELSE) {
+	if peekTokenIs(TOKEN_ELSE) {
 		parser_nextToken()
 
-		if !expectPeek(LBRACE) {
+		if !expectPeek(TOKEN_LBRACE) {
 			return nil
 		}
 
@@ -778,7 +843,7 @@ fn parseBlockStatement() {
 	parser_nextToken()
 
 	let statements = []
-	while !curTokenIs(RBRACE) {
+	while !curTokenIs(TOKEN_RBRACE) {
 		let stmt = parseStatement()
 		if stmt != nil {
 			statements.push(stmt)
@@ -792,13 +857,13 @@ fn parseBlockStatement() {
 fn parseFunctionLiteral() {
 	let curToken = parser_curToken
 
-	if !expectPeek(LPAREN) {
+	if !expectPeek(TOKEN_LPAREN) {
 		return nil
 	}
 
 	let parameters = parseFunctionParameters()
 
-	if !expectPeek(LBRACE) {
+	if !expectPeek(TOKEN_LBRACE) {
 		return nil
 	}
 
@@ -810,7 +875,7 @@ fn parseFunctionLiteral() {
 fn parseFunctionParameters() {
 	let identifiers = []
 
-	if peekTokenIs(RPAREN) {
+	if peekTokenIs(TOKEN_RPAREN) {
 		parser_nextToken()
 		return identifiers
 	}
@@ -819,14 +884,14 @@ fn parseFunctionParameters() {
 	let ident = Ast_Identifier(parser_curToken, parser_curToken["literal"])
 	identifiers.push(ident)
 
-	while peekTokenIs(COMMA) {
+	while peekTokenIs(TOKEN_COMMA) {
 		parser_nextToken()
 		parser_nextToken()
 		let ident2 = Ast_Identifier(parser_curToken, parser_curToken["literal"])
 		identifiers.push(ident2)
 	}
 
-	if !expectPeek(RPAREN) {
+	if !expectPeek(TOKEN_RPAREN) {
 		return nil
 	}
 
@@ -836,7 +901,7 @@ fn parseFunctionParameters() {
 fn parseCallExpression(function) {
 	let curToken = parser_curToken
 
-	let arguments = parseExpressionList(RPAREN)
+	let arguments = parseExpressionList(TOKEN_RPAREN)
 
 	return Ast_CallExpression(curToken, function, arguments)
 }
@@ -848,7 +913,7 @@ fn parseMethodCallExpression(obj) {
 	let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
 
 	let call
-	if !peekTokenIs(LPAREN) {
+	if !peekTokenIs(TOKEN_LPAREN) {
 		call = parseExpression(LOWEST)
 	} else {
 		parser_nextToken()
@@ -864,7 +929,7 @@ fn parseStringLiteral() {
 fn parseArrayLiteral() {
 	let curToken = parser_curToken
 
-	let elements = parseExpressionList(RBRAKET)
+	let elements = parseExpressionList(TOKEN_RBRAKET)
 
 	return Ast_ArrayLiteral(curToken, elements)
 }
@@ -881,7 +946,7 @@ fn parseExpressionList(end) {
 	let exp = parseExpression(LOWEST)
 	lst.push(exp)
 
-	while peekTokenIs(COMMA) {
+	while peekTokenIs(TOKEN_COMMA) {
 		parser_nextToken()
 		parser_nextToken()
 		let exp2 = parseExpression(LOWEST)
@@ -901,7 +966,7 @@ fn parseIndexExpression(left) {
 	parser_nextToken()
 	let index = parseExpression(LOWEST)
 
-	if !expectPeek(RBRAKET) {
+	if !expectPeek(TOKEN_RBRAKET) {
 		return nil
 	}
 
@@ -912,11 +977,11 @@ fn parseHashLiteral() {
 	let curToken = parser_curToken
 
 	let pairs = {}
-	while !peekTokenIs(RBRACE) {
+	while !peekTokenIs(TOKEN_RBRACE) {
 		parser_nextToken()
 
 		let key = parseExpression(LOWEST)
-		if !expectPeek(COLON) {
+		if !expectPeek(TOKEN_COLON) {
 			return nil
 		}
 
@@ -926,20 +991,81 @@ fn parseHashLiteral() {
 		let keyStr = key["String"]
 		pairs[keyStr] = value
 
-		if peekTokenIs(RBRACE) {
+		if peekTokenIs(TOKEN_RBRACE) {
 			break
 		}
 
-		if !expectPeek(COMMA) {
+		if !expectPeek(TOKEN_COMMA) {
 			return nil
 		}
 	}
 
-	if !expectPeek(RBRACE) {
+	if !expectPeek(TOKEN_RBRACE) {
 		return nil
 	}
 
 	return Ast_HashLiteral(curToken, pairs)
+}
+
+fn parseWhileExpression() {
+	let curToken = parser_curToken
+
+	isInLoop = true
+
+	parser_nextToken()
+	let exprStmt = parseExpressionStatement()
+	let condition = exprStmt["Expression"]
+
+	if peekTokenIs(TOKEN_RPAREN) {
+		parser_nextToken()
+	}
+
+	let block = nil
+	if peekTokenIs(TOKEN_LBRACE) {
+		parser_nextToken()
+		block = parseBlockStatement()
+	} else {
+		let msg = sprintf("Syntax Error: while loop must be followed by a '{'.")
+		parser_Errors.push(msg)
+		return nil
+	}
+
+	isInLoop = false
+
+	return Ast_WhileExpression(curToken, condition, block)
+}
+
+fn parseBreakWithoutLoopContext() {
+	let msg = sprintf("Syntax Error: 'break' outside of loop context")
+	parser_Errors.push(msg)
+
+	return parseBreakExpression()
+}
+
+fn parseBreakExpression() {
+	return Ast_BreakExpression(parser_curToken)
+}
+
+fn parseContinueWithoutLoopContext() {
+	let msg = sprintf("Syntax Error: 'continue' outside of loop context")
+	p.errors = append(p.errors, msg)
+
+	return parseContinueExpression()
+}
+
+fn parseContinueExpression() {
+	return Ast_ContinueExpression(parser_curToken)
+}
+
+fn parseAssignExpression(left) {
+	let curToken = parser_curToken
+
+	let name = left
+
+	parser_nextToken()
+	let value = parseExpression(LOWEST)
+
+	return Ast_AssignExpression(curToken, name, value)
 }
 
 fn curTokenIs(t) {
@@ -1021,6 +1147,23 @@ fn SetIntoScope(scope, name, val) {
 }
 
 
+fn ResetScope(scope, name, val) {
+	let store = scope["store"]
+	let obj = store[name]
+	if obj != nil {
+		store[name] = val
+	}
+
+	if obj == nil {
+		let outer = scope["outer"]
+		if outer != nil {
+			return ResetScope(outer, name, val)
+		}
+	}
+
+	return val
+}
+
 ////////////////////////////////////////////////
 //                 OBJECT
 ////////////////////////////////////////////////
@@ -1035,6 +1178,8 @@ const STRING_OBJ       = "STRING"
 const BUILTIN_OBJ      = "BUILTIN"
 const ARRAY_OBJ        = "ARRAY"
 const HASH_OBJ         = "HASH"
+const BREAK_OBJ        = "BREAK"
+const CONTINUE_OBJ     = "CONTINUE"
 
 /* Every Object should have below properties:
     "Type":       Object Type
@@ -1348,6 +1493,17 @@ fn Hash_Values(self, scope) {
 }
 
 
+fn BreakObj() {
+	return {"Type": BREAK_OBJ, "Inspect": "break", "CallMethod": nil}
+}
+
+fn ContinueObj() {
+	return {"Type": CONTINUE_OBJ, "Inspect": "continue", "CallMethod": nil}
+}
+
+
+
+
 ////////////////////////////////////////////////
 //                 BUILTINS
 ////////////////////////////////////////////////
@@ -1402,6 +1558,8 @@ const builtins = {
 const NIL  = NilObj()
 const TRUE  = BooleanObj(true)
 const FALSE = BooleanObj(false)
+const BREAK = BreakObj()
+const CONTINUE = ContinueObj()
 
 /* Evaluator entry point */
 fn Eval(node, scope) {
@@ -1495,6 +1653,14 @@ fn Eval(node, scope) {
 		return evalIndexExpression(idx_left, idx_index)
 	} elif nodeType == HashLiteralNode {
 		return evalHashLiteral(node, scope)
+	} elif nodeType == WhileExpressionNode {
+		return evalWhileExpression(node, scope)
+	} elif nodeType == BreakExpressionNode {
+		return BREAK
+	} elif nodeType == ContinueExpressionNode {
+		return CONTINUE
+	} elif nodeType == AssignExpressionNode {
+		return evalAssignExpression(node, scope)
 	}
 
 	return nil
@@ -1503,7 +1669,7 @@ fn Eval(node, scope) {
 // Private functions from here
 
 fn evalProgram(program, scope) {
-	let result
+	let result = NIL
 
 	for statement in program["Statements"] {
 		result = Eval(statement, scope)
@@ -1529,6 +1695,10 @@ fn evalBlockStatement(block, scope) {
 			let rt = result["Type"]
 			if rt == RETURN_VALUE_OBJ || rt == ERROR_OBJ {
 				return result
+			}
+
+			if rt == BREAK_OBJ || rt == CONTINUE_OBJ {
+				return
 			}
 		}
 	}
@@ -1608,13 +1778,13 @@ fn evalIntegerInfixExpression(operator, left, right) {
 	} elif operator == "/" {
 		return IntegerObj(leftVal / rightVal)
 	} elif operator == "<" {
-		return IntegerObj(leftVal < rightVal)
+		return nativeBoolToBooleanObject(leftVal < rightVal)
 	} elif operator == ">" {
-		return IntegerObj(leftVal > rightVal)
+		return nativeBoolToBooleanObject(leftVal > rightVal)
 	} elif operator == "==" {
-		return IntegerObj(leftVal == rightVal)
+		return nativeBoolToBooleanObject(leftVal == rightVal)
 	} elif operator == "!=" {
-		return IntegerObj(leftVal != rightVal)
+		return nativeBoolToBooleanObject(leftVal != rightVal)
 	}
 
 	let msg = sprintf("unknown operator: %s %s %s", left["Type"], operator, right["Type"])
@@ -1752,6 +1922,64 @@ fn evalMethodCallExpression(node, scope) {
 	return obj["CallMethod"](scope, methName, args)
 }
 
+fn evalWhileExpression(node, scope) {
+	let innerScope = NewEnclosedScope(scope)
+
+	let condition = Eval(node["Condition"], innerScope)
+	if condition["Type"] == ERROR_OBJ {
+		return condition
+	}
+
+	let result = NIL
+	while isTruthy(condition) {
+		result = Eval(node["Block"], innerScope)
+		if result["Type"] == ERROR_OBJ {
+			return result
+		}
+
+		if result["Type"] == BREAK_OBJ {
+			break
+		}
+
+		if result["Type"] == CONTINUE_OBJ {
+			continue
+		}
+
+		if result["Type"] == RETURN_VALUE_OBJ {
+			if result["Value"] != nil {
+				return result
+			}
+			break
+		}
+
+		condition = Eval(node["Condition"], innerScope)
+		if condition["Type"] == ERROR_OBJ {
+			return condition
+		}
+	}
+
+	if result == nil || result["Type"] == BREAK_OBJ || result["Type"] == CONTINUE_OBJ {
+		return NIL
+	}
+
+	return result
+}
+
+fn evalAssignExpression(node, scope) {
+	let val = Eval(node["Value"], scope)
+	if val["Type"] != ERROR_OBJ {
+		let name = node["Name"]
+		let v = ResetScope(scope, name["String"], val)
+		if v != nil {
+			return v
+		}
+
+		let msg = sprintf("unknown identifier: '%s' is not defined", name["String"])
+		return  ErrorObj(msg)
+	}
+	return val
+}
+
 fn isTruthy(obj) {
 	if obj == NIL {
 		return false
@@ -1874,6 +2102,15 @@ fn unwrapReturnValue(obj) {
 	let strHello = "Hello World"
 	println(strHello.lower())
 	println(strHello.upper())
+
+	let i = 10
+	println("i = ", i)
+	while (i > 3) {
+    	i = i - 1
+    	if (i == 7) { continue }
+    	if (i == 5) { break }
+    	println(i)
+	}
 	``
 
 	/* lexer */
@@ -1882,7 +2119,7 @@ fn unwrapReturnValue(obj) {
 /* for debugging : print each tokens */
 //	do {
 //		n = nextToken()
-//		if n["type"] == EOF {
+//		if n["type"] == TOKEN_EOF {
 //			break
 //		} else {
 //			printf("{token.%s, \"%s\"}\n", n["type"], n["literal"])
