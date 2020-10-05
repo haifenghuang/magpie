@@ -20,6 +20,8 @@ It has a simple debugger which you can experience with it.
 
 It also has a REPL with realtime syntax highlighter.
 
+I also made a simple programming language written using `magpie`.
+
 ## Documention
 
 Complete language tutorial can be found in [docs](docs)
