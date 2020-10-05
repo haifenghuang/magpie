@@ -2068,11 +2068,19 @@ fn evalIndexExpression(left, index) {
 }
 
 fn evalArrayIndexExpression(arr, index) {
-	let max = len(arr["Elements"]) - 1
+	let length = len(arr["Elements"])
 	let idx = index["Value"]
 
-	if idx < 0 || idx > max {
+	if idx > length - 1 {
 		return NIL
+	}
+
+	if idx < 0 {
+		idx = length + idx
+		if idx > length - 1 || idx < 0 {
+			let msg = sprintf("index error: '%d' out of range", idx)
+			return  ErrorObj(msg)
+		}
 	}
 
 	let item = arr["Elements"]
@@ -2345,6 +2353,8 @@ fn unwrapReturnValue(obj) {
 	let arr = [1, 2]
 	println(arr)
 	println("arr[1] = ", arr[1])
+	println("arr[-1] = ", arr[-1])
+	println("arr[-2] = ", arr[-2])
 
 	arr.push(3)
 	println("new arr = ", arr)
