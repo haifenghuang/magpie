@@ -1712,7 +1712,7 @@ fn Eval(node, scope) {
 	} elif nodeType == PostfixExpressionNode {
 		let p_left = Eval(node["Left"], scope)
 		if p_left["Type"] == ERROR_OBJ {
-			return left
+			return p_left
 		}
 		return evalPostfixExpression(node["Operator"], p_left)
 	}
@@ -2009,14 +2009,19 @@ fn evalMethodCallExpression(node, scope) {
 fn evalWhileExpression(node, scope) {
 	let innerScope = NewEnclosedScope(scope)
 
-	let condition = Eval(node["Condition"], innerScope)
-	if condition["Type"] == ERROR_OBJ {
-		return condition
-	}
-
 	let result = NIL
-	while isTruthy(condition) {
+	for  {
+		let condition = Eval(node["Condition"], innerScope)
+		if condition["Type"] == ERROR_OBJ {
+			return condition
+		}
+
+		if !isTruthy(condition) {
+			return NIL
+		}
+
 		result = Eval(node["Block"], innerScope)
+
 		if result["Type"] == ERROR_OBJ {
 			return result
 		}
@@ -2034,11 +2039,6 @@ fn evalWhileExpression(node, scope) {
 				return result
 			}
 			break
-		}
-
-		condition = Eval(node["Condition"], innerScope)
-		if condition["Type"] == ERROR_OBJ {
-			return condition
 		}
 	}
 
@@ -2100,6 +2100,7 @@ fn evalDecrementPostfixOperatorExpression(left) {
 	let returnVal = IntegerObj(left_value)
 	left["Value"] = left_value - 1
 	left["Inspect"] = sprintf("%d", left_value - 1)
+
 	return returnVal
 }
 
@@ -2228,11 +2229,10 @@ fn unwrapReturnValue(obj) {
 
 	let i = 10
 	println("i = ", i)
-	while (i > 3) {
-    	i--
-    	if (i == 7) { continue }
-    	if (i == 5) { break }
-    	println(i)
+	while (i-- > 3) {
+		if (i == 7) { continue }
+		if (i == 5) { break }
+		println(i)
 	}
 	``
 
