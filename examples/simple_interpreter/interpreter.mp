@@ -2061,10 +2061,33 @@ fn evalIndexExpression(left, index) {
 		return evalArrayIndexExpression(left, index)
 	} elif left["Type"] == HASH_OBJ {
 		return evalHashIndexExpression(left, index)
+	} elif left["Type"] == STRING_OBJ && index["Type"] == INTEGER_OBJ {
+		return evalStringIndexExpression(left, index)
 	}
 
 	let msg = sprintf("index operator not supported: %s", left["Type"])
 	return  ErrorObj(msg)
+}
+
+fn evalStringIndexExpression(left, index) {
+	let l = left["Value"]
+	let length = len(l)
+	let idx = index["Value"]
+
+	if idx > length - 1 {
+		let msg = sprintf("index error: '%d' out of range", idx)
+		return  ErrorObj(msg)
+	}
+
+	if idx < 0 {
+		idx = length + idx
+		if idx > length - 1 || idx < 0 {
+			let msg2 = sprintf("index error: '%d' out of range", idx)
+			return  ErrorObj(msg2)
+		}
+	}
+
+	return StringObj(l[idx])
 }
 
 fn evalArrayIndexExpression(arr, index) {
@@ -2072,14 +2095,15 @@ fn evalArrayIndexExpression(arr, index) {
 	let idx = index["Value"]
 
 	if idx > length - 1 {
-		return NIL
+		let msg = sprintf("index error: '%d' out of range", idx)
+		return  ErrorObj(msg)
 	}
 
 	if idx < 0 {
 		idx = length + idx
 		if idx > length - 1 || idx < 0 {
-			let msg = sprintf("index error: '%d' out of range", idx)
-			return  ErrorObj(msg)
+			let msg2 = sprintf("index error: '%d' out of range", idx)
+			return  ErrorObj(msg2)
 		}
 	}
 
@@ -2410,6 +2434,9 @@ fn unwrapReturnValue(obj) {
 	println("5 - 3 = ", sub(5, 3))
 
 	println("5 * 3 = ", fn(x, y) { x * y}(5, 3))
+
+	let s = "Hello World"
+	println("s[4] = ", s[4], ", s[-2] = ", s[-2])
 	``
 
 	/* lexer */
