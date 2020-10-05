@@ -16,6 +16,8 @@ const TOKEN_MINUS    = "-"
 const TOKEN_BANG     = "!"
 const TOKEN_ASTERISK = "*"
 const TOKEN_SLASH    = "/"
+const TOKEN_INCREMENT= "++"
+const TOKEN_DECREMENT= "--"
 
 const TOKEN_LT = "<"
 const TOKEN_GT = ">"
@@ -149,7 +151,7 @@ fn readString() {
 	return lex_input[position : lex_position]
 }
 
-fn nextToken() {
+fn lex_nextToken() {
 	let tok
 	skipWhitespace()
 
@@ -162,9 +164,21 @@ fn nextToken() {
 			tok = newToken(TOKEN_ASSIGN, lex_ch)
 		}
 	} elif lex_ch == "+" {
-		tok = newToken(TOKEN_PLUS, lex_ch)
+		if peekChar() == "+" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_INCREMENT, ch + lex_ch)
+		} else {
+			tok = newToken(TOKEN_PLUS, lex_ch)
+		}
 	} elif lex_ch == "-" {
-		tok = newToken(TOKEN_MINUS, lex_ch)
+		if peekChar() == "-" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_DECREMENT, ch + lex_ch)
+		} else {
+			tok = newToken(TOKEN_MINUS, lex_ch)				
+		}
 	} elif lex_ch == "!" {
 		if peekChar() == "=" {
 			c = lex_ch
@@ -255,6 +269,7 @@ const WhileExpressionNode      = "WhileExpression"
 const BreakExpressionNode      = "BreakExpression"
 const ContinueExpressionNode   = "ContinueExpression"
 const AssignExpressionNode     = "AssignExpression"
+const PostfixExpressionNode    = "PostfixExpression"
 
 fn Ast_Program(statements) {
 	let self = {"Statements": statements, "Type": ProgramNode}
@@ -558,13 +573,29 @@ fn Ast_AssignExpression(tok, name, value) {
 	return self
 }
 
+fn Ast_PostfixExpression(tok, left, operator) {
+	let self = {"Token": tok, "Operator": operator, "Left": left,"Type": PostfixExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = "( "
+	str += left["String"]
+	str += " " + operator + " "
+	str += ")"
+	self["String"] = str
+	return self
+}
+
+
+
+
 ////////////////////////////////////////////////
 //                 PARSER
 ////////////////////////////////////////////////
 
 const NONE         = 0
 const LOWEST       = 1
-const ASSIGN       = 2
+const ASSIGN       = 2  // =
 const EQUALS       = 3  // ==
 const LESSGREATER  = 4  // > or <
 const SUM          = 5  // +
@@ -572,6 +603,7 @@ const PRODUCT      = 6  // *
 const PREFIX       = 7  // -X or !X
 const CALL         = 8  // myFunction(X)
 const INDEX        = 9  // array[index]
+const INCREMENT    = 10 // ++, --
 
 precedences = {
 	TOKEN_ASSIGN:   ASSIGN,
@@ -586,6 +618,8 @@ precedences = {
 	TOKEN_LPAREN:   CALL,
 	TOKEN_DOT:      CALL,
 	TOKEN_LBRAKET:  INDEX,
+	TOKEN_INCREMENT:INCREMENT,
+	TOKEN_DECREMENT:INCREMENT,
 }
 
 let parser_Errors = []
@@ -604,7 +638,7 @@ fn debugToken(msg) {
 
 fn parser_nextToken() {
 	parser_curToken = parser_peekToken
-	parser_peekToken = nextToken()
+	parser_peekToken = lex_nextToken()
 }
 
 /* Parser entry point */
@@ -696,6 +730,10 @@ fn parseExpression(precedence) {
 		leftExp = parsePrefixExpression()
 	} elif parser_curToken["type"] == TOKEN_MINUS {
 		leftExp = parsePrefixExpression()
+	} elif parser_curToken["type"] == TOKEN_INCREMENT {
+		leftExp = parsePrefixExpression()
+	} elif parser_curToken["type"] == TOKEN_DECREMENT {
+		leftExp = parsePrefixExpression()
 	} elif parser_curToken["type"] == TOKEN_TRUE {
 		leftExp = parseBoolean()
 	} elif parser_curToken["type"] == TOKEN_FALSE {
@@ -752,6 +790,12 @@ fn parseExpression(precedence) {
 		} elif parser_peekToken["type"] == TOKEN_ASSIGN {
 			parser_nextToken()
 			leftExp = parseAssignExpression(leftExp)
+		} elif parser_peekToken["type"] == TOKEN_INCREMENT {
+			parser_nextToken()
+			leftExp = parsePostfixExpression(leftExp)
+		} elif parser_peekToken["type"] == TOKEN_DECREMENT {
+			parser_nextToken()
+			leftExp = parsePostfixExpression(leftExp)
 		} else {
 			return leftExp
 		}
@@ -1066,6 +1110,10 @@ fn parseAssignExpression(left) {
 	let value = parseExpression(LOWEST)
 
 	return Ast_AssignExpression(curToken, name, value)
+}
+
+fn parsePostfixExpression(left) {
+	return Ast_PostfixExpression(parser_curToken, left, parser_curToken["literal"])
 }
 
 fn curTokenIs(t) {
@@ -1661,6 +1709,12 @@ fn Eval(node, scope) {
 		return CONTINUE
 	} elif nodeType == AssignExpressionNode {
 		return evalAssignExpression(node, scope)
+	} elif nodeType == PostfixExpressionNode {
+		let p_left = Eval(node["Left"], scope)
+		if p_left["Type"] == ERROR_OBJ {
+			return left
+		}
+		return evalPostfixExpression(node["Operator"], p_left)
 	}
 
 	return nil
@@ -1719,6 +1773,10 @@ fn evalPrefixExpression(operator, right) {
 		return evalBangOperatorExpression(right)
 	} elif operator =="-" {
 		return evalMinusPrefixOperatorExpression(right)
+	} elif operator == "++" {
+		return evalIncrementPrefixOperatorExpression(right)
+	} elif operator == "--" {
+		return evalDecrementPrefixOperatorExpression(right)
 	}
 
 	let msg = sprintf("unknown operator: %s%s", operator, right["Type"])
@@ -1746,6 +1804,32 @@ fn evalMinusPrefixOperatorExpression(right) {
 
 	let value = right["Value"]
 	return IntegerObj(-value)
+}
+
+fn evalIncrementPrefixOperatorExpression(right) {
+	if right["Type"] != INTEGER_OBJ {
+		let msg = sprintf("unsupported operator for prefix expression:'++' and type: %s", right["Type"])
+		return ErrorObj(msg)
+	}
+
+	let value = right["Value"]
+	right["Value"] = value + 1
+	right["Inspect"] = sprintf("%d", value + 1)
+
+	return IntegerObj(value + 1)
+}
+
+fn evalDecrementPrefixOperatorExpression(right) {
+	if right["Type"] != INTEGER_OBJ {
+		let msg = sprintf("unsupported operator for prefix expression:'--' and type: %s", right["Type"])
+		return ErrorObj(msg)
+	}
+
+	let value = right["Value"]
+	right["Value"] = value - 1
+	right["Inspect"] = sprintf("%d", value - 1)
+
+	return IntegerObj(value - 1)
 }
 
 fn evalInfixExpression(operator, left, right) {
@@ -1980,6 +2064,45 @@ fn evalAssignExpression(node, scope) {
 	return val
 }
 
+
+fn evalPostfixExpression(operator, left) {
+	if operator == "++" {
+		return evalIncrementPostfixOperatorExpression(left)
+	} elif operator == "--" {
+		return evalDecrementPostfixOperatorExpression(left)
+	}
+
+	let msg = sprintf("unsupported operator for postfix expression:'%s' and type: %s", operator, left["Type"])
+	return ErrorObj(msg)
+
+}
+
+fn evalIncrementPostfixOperatorExpression(left) {
+	if left["Type"] != INTEGER_OBJ {
+		let msg = sprintf("unsupported operator for post expression:'++' and type: %s", left["Type"])
+		return ErrorObj(msg)
+	}
+
+	let left_value = left["Value"]
+	let returnVal = IntegerObj(left_value)
+	left["Value"] = left_value + 1
+	left["Inspect"] = sprintf("%d", left_value + 1)
+	return returnVal
+}
+
+fn evalDecrementPostfixOperatorExpression(left) {
+	if left["Type"] != INTEGER_OBJ {
+		let msg = sprintf("unsupported operator for post expression:'--' and type: %s", left["Type"])
+		return ErrorObj(msg)
+	}
+
+	let left_value = left["Value"]
+	let returnVal = IntegerObj(left_value)
+	left["Value"] = left_value - 1
+	left["Inspect"] = sprintf("%d", left_value - 1)
+	return returnVal
+}
+
 fn isTruthy(obj) {
 	if obj == NIL {
 		return false
@@ -2106,7 +2229,7 @@ fn unwrapReturnValue(obj) {
 	let i = 10
 	println("i = ", i)
 	while (i > 3) {
-    	i = i - 1
+    	i--
     	if (i == 7) { continue }
     	if (i == 5) { break }
     	println(i)
