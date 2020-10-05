@@ -20,7 +20,9 @@ const TOKEN_INCREMENT= "++"
 const TOKEN_DECREMENT= "--"
 
 const TOKEN_LT = "<"
+const TOKEN_LE = "<="
 const TOKEN_GT = ">"
+const TOKEN_GE = ">="
 
 const TOKEN_EQ     = "=="
 const TOKEN_NOT_EQ = "!="
@@ -181,9 +183,9 @@ fn lex_nextToken() {
 		}
 	} elif lex_ch == "!" {
 		if peekChar() == "=" {
-			c = lex_ch
+			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_NOT_EQ, c + lex_ch)
+			tok = newToken(TOKEN_NOT_EQ, ch + lex_ch)
 		} else {
 			tok = newToken(TOKEN_BANG, lex_ch)
 		}
@@ -192,9 +194,21 @@ fn lex_nextToken() {
 	} elif lex_ch == "*" {
 		tok = newToken(TOKEN_ASTERISK, lex_ch)
 	} elif lex_ch == "<" {
-		tok = newToken(TOKEN_LT, lex_ch)
+		if peekChar() == "=" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_LE, ch + lex_ch)
+		} else {
+			tok = newToken(TOKEN_LT, lex_ch)
+		}
 	} elif lex_ch == ">" {
-		tok = newToken(TOKEN_GT, lex_ch)
+		if peekChar() == "=" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_GE, ch + lex_ch)
+		} else {
+			tok = newToken(TOKEN_GT, lex_ch)
+		}
 	} elif lex_ch == ";" {
 		tok = newToken(TOKEN_SEMICOLON, lex_ch)
 	} elif lex_ch == "(" {
@@ -610,7 +624,9 @@ precedences = {
 	TOKEN_EQ:       EQUALS,
 	TOKEN_NOT_EQ:   EQUALS,
 	TOKEN_LT:       LESSGREATER,
+	TOKEN_LE:       LESSGREATER,
 	TOKEN_GT:       LESSGREATER,
+	TOKEN_GE:       LESSGREATER,
 	TOKEN_PLUS:     SUM,
 	TOKEN_MINUS:    SUM,
 	TOKEN_SLASH:    PRODUCT,
@@ -774,7 +790,8 @@ fn parseExpression(precedence) {
 		if parser_peekToken["type"] == TOKEN_PLUS || parser_peekToken["type"] == TOKEN_MINUS ||
 		   parser_peekToken["type"] == TOKEN_SLASH || parser_peekToken["type"] == TOKEN_ASTERISK ||
 		   parser_peekToken["type"] == TOKEN_EQ || parser_peekToken["type"] == TOKEN_NOT_EQ ||
-		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT {
+		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT ||
+		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE {
 
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
@@ -1863,8 +1880,12 @@ fn evalIntegerInfixExpression(operator, left, right) {
 		return IntegerObj(leftVal / rightVal)
 	} elif operator == "<" {
 		return nativeBoolToBooleanObject(leftVal < rightVal)
+	} elif operator == "<=" {
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
 	} elif operator == ">" {
 		return nativeBoolToBooleanObject(leftVal > rightVal)
+	} elif operator == ">=" {
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
 	} elif operator == "==" {
 		return nativeBoolToBooleanObject(leftVal == rightVal)
 	} elif operator == "!=" {
@@ -2233,6 +2254,11 @@ fn unwrapReturnValue(obj) {
 		if (i == 7) { continue }
 		if (i == 5) { break }
 		println(i)
+	}
+
+	let x = 3
+	if (x >= 3 ) {
+		println("OK")
 	}
 	``
 
