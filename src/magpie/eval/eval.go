@@ -2772,13 +2772,17 @@ func evalDoLoopExpression(dl *ast.DoLoop, scope *Scope) Object {
 func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
 	innerScope := NewScope(scope)
 
-	condition := Eval(wl.Condition, innerScope)
-	if condition.Type() == ERROR_OBJ {
-		return condition
-	}
-
 	var result Object
-	for IsTrue(condition) {
+	for {
+		condition := Eval(wl.Condition, innerScope)
+		if condition.Type() == ERROR_OBJ {
+			return condition
+		}
+
+		if !IsTrue(condition) {
+			return NIL
+		}
+
 		result = Eval(wl.Block, innerScope)
 		if result.Type() == ERROR_OBJ {
 			return result
@@ -2810,10 +2814,6 @@ func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
 				return v
 			}
 			break
-		}
-		condition = Eval(wl.Condition, innerScope)
-		if condition.Type() == ERROR_OBJ {
-			return condition
 		}
 	}
 
