@@ -50,6 +50,8 @@ const TOKEN_RETURN   = "RETURN"
 const TOKEN_WHILE    = "WHILE"
 const TOKEN_BREAK    = "BREAK"
 const TOKEN_CONTINUE = "CONTINUE"
+const TOKEN_AND      = "AND"
+const TOKEN_OR       = "OR"
 
 keywords = {
 	"fn":       TOKEN_FUNCTION,
@@ -61,7 +63,9 @@ keywords = {
 	"return":   TOKEN_RETURN,
 	"while":    TOKEN_WHILE,
 	"break":    TOKEN_BREAK,
-	"continue": TOKEN_CONTINUE
+	"continue": TOKEN_CONTINUE,
+	"and":      TOKEN_AND,
+	"or":       TOKEN_OR,
 }
 
 fn lookupIdent(ident) {
@@ -610,17 +614,21 @@ fn Ast_PostfixExpression(tok, left, operator) {
 const NONE         = 0
 const LOWEST       = 1
 const ASSIGN       = 2  // =
-const EQUALS       = 3  // ==
-const LESSGREATER  = 4  // > or <
-const SUM          = 5  // +
-const PRODUCT      = 6  // *
-const PREFIX       = 7  // -X or !X
-const CALL         = 8  // myFunction(X)
-const INDEX        = 9  // array[index]
-const INCREMENT    = 10 // ++, --
+const COND_OR      = 3  // or
+const COND_AND     = 4  // and
+const EQUALS       = 5  // ==
+const LESSGREATER  = 6  // > or <
+const SUM          = 7  // +
+const PRODUCT      = 8  // *
+const PREFIX       = 9  // -X or !X
+const CALL         = 10 // myFunction(X)
+const INDEX        = 11 // array[index]
+const INCREMENT    = 12 // ++, --
 
 precedences = {
 	TOKEN_ASSIGN:   ASSIGN,
+	TOKEN_OR:       COND_OR,
+	TOKEN_AND:      COND_AND,
 	TOKEN_EQ:       EQUALS,
 	TOKEN_NOT_EQ:   EQUALS,
 	TOKEN_LT:       LESSGREATER,
@@ -791,7 +799,8 @@ fn parseExpression(precedence) {
 		   parser_peekToken["type"] == TOKEN_SLASH || parser_peekToken["type"] == TOKEN_ASTERISK ||
 		   parser_peekToken["type"] == TOKEN_EQ || parser_peekToken["type"] == TOKEN_NOT_EQ ||
 		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT ||
-		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE {
+		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE ||
+		   parser_peekToken["type"] == TOKEN_AND || parser_peekToken["type"] == TOKEN_OR {
 
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
@@ -1785,6 +1794,25 @@ fn nativeBoolToBooleanObject(input) {
 	return FALSE
 }
 
+fn objectToNativeBoolean(o) {
+	let obj = o
+
+	if obj["Type"] == RETURN_VALUE_OBJ {
+		obj = r.Value
+	}
+
+	if obj["Type"] == INTEGER_OBJ {
+		if obj["Value"] == 0 {
+			return false
+		}
+		return true
+	} elif obj["Type"] == BOOLEAN_OBJ {
+		return obj["Value"]
+	}
+
+	return true
+}
+
 fn evalPrefixExpression(operator, right) {
 	if operator == "!" {
 		return evalBangOperatorExpression(right)
@@ -1850,7 +1878,24 @@ fn evalDecrementPrefixOperatorExpression(right) {
 }
 
 fn evalInfixExpression(operator, left, right) {
-	if left["Type"] == INTEGER_OBJ && right["Type"] == INTEGER_OBJ {
+	if operator == "and" || operator == "or" {
+		if operator == "and" {
+			let leftCond = objectToNativeBoolean(left)
+			if  leftCond == false {
+				return FALSE
+			}
+			let rightCond = objectToNativeBoolean(right)
+			return nativeBoolToBooleanObject(leftCond && rightCond)
+		} elif operator == "or" {
+			let leftCond = objectToNativeBoolean(left)
+			if leftCond == true {
+				return TRUE
+			}
+
+			let rightCond = objectToNativeBoolean(right)
+			return nativeBoolToBooleanObject(leftCond || rightCond)
+		}
+	} elif left["Type"] == INTEGER_OBJ && right["Type"] == INTEGER_OBJ {
 		return evalIntegerInfixExpression(operator, left, right)
 	} elif operator == "==" {
 		return nativeBoolToBooleanObject(left == right)
@@ -1870,6 +1915,7 @@ fn evalInfixExpression(operator, left, right) {
 fn evalIntegerInfixExpression(operator, left, right) {
 	let leftVal = left["Value"]
 	let rightVal = right["Value"]
+
 	if operator == "+" {
 		return IntegerObj(leftVal + rightVal)
 	} elif operator == "-" {
@@ -2134,6 +2180,13 @@ fn isTruthy(obj) {
 		return false
 	}
 
+	if obj["Type"] == INTEGER_OBJ {
+		if obj["Value"] == 0 {
+			return false
+		}
+		return true
+	}
+
 	return true
 }
 
@@ -2259,6 +2312,20 @@ fn unwrapReturnValue(obj) {
 	let x = 3
 	if (x >= 3 ) {
 		println("OK")
+	} else {
+		println("NOT OK")
+	}
+
+	let m = 10
+	let n = 20
+	if (m >= 10 and n <= 20) {
+		println("m >= 10 and n <= 20")
+	}
+	if (m < 10 or n >= 10) {
+		println("m < 10 and n >= 20")
+	}
+	if (m) {
+		println("m > 0")
 	}
 	``
 
