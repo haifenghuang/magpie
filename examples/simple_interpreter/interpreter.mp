@@ -276,6 +276,7 @@ const InfixExpressionNode      = "InfixExpression"
 const BooleanNode              = "Boolean"
 const IfExpressionNode         = "IfExpression"
 const BlockStatementNode       = "BlockStatement"
+const FunctionStatementNode    = "FunctionStatement"
 const FunctionLiteralNode      = "FunctionLiteral"
 const CallExpressionNode       = "CallExpression"
 const MethodCallExpressionNode = "MethodCallExpression"
@@ -442,6 +443,31 @@ fn Ast_BlockStatement(tok, statements) {
 	return self
 }
 
+fn Ast_FunctionStatement(tok, name, functionLiteral) {
+	let self = {"Token": tok, "Name": name, "FunctionLiteral": functionLiteral, "Type": FunctionStatementNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+
+	let str = "fn "
+	str += name["String"]
+
+	let params = []
+	for param in functionLiteral["Parameters"] {
+		params.push(param["String"])
+	}
+
+	str += " ("
+	str += strings.join(params, ", ")
+	str += ") "
+	str += "{ "
+
+	str += functionLiteral["Body"]["String"]
+	str += " }"
+
+	return self
+}
+
 fn Ast_FunctionLiteral(tok, parameters, body) {
 	let self = {"Token": tok, "Parameters": parameters, "Body": body, "Type": FunctionLiteralNode}
 
@@ -457,7 +483,9 @@ fn Ast_FunctionLiteral(tok, parameters, body) {
 	str += "("
 	str += strings.join(params, ", ")
 	str += ") "
+	str += "{ "
 	str += body["String"]
+	str += " }"
 	self["String"] = str
 
 	return self
@@ -688,6 +716,8 @@ fn parseStatement() {
 		return parseLetStatement()
 	} elif parser_curToken["type"] == TOKEN_RETURN {
 		return parseReturnStatement()
+	} elif parser_curToken["type"] == TOKEN_FUNCTION {
+		return parseFunctionStatement()
 	} else {
 		return parseExpressionStatement()
 	}
@@ -922,6 +952,30 @@ fn parseBlockStatement() {
     }
 
 	return Ast_BlockStatement(curToken, statements)
+}
+
+fn parseFunctionStatement() {
+	let curToken = parser_curToken
+
+	/* why below 'if'? please see below code:
+		1. fn add(x, y) { x + y }
+		2. fn(x, y) { x + y }(2, 3)
+	for the second one, we have no identifier, so we need
+	not advance to the next token.
+	*/
+	if !peekTokenIs(TOKEN_LPAREN) {
+		parser_nextToken()
+	}
+
+	let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
+
+	let functionLiteral = parseFunctionLiteral()
+
+	if peekTokenIs(TOKEN_SEMICOLON) {
+		parser_nextToken
+	}
+
+	return Ast_FunctionStatement(curToken, name, functionLiteral)
 }
 
 fn parseFunctionLiteral() {
@@ -1690,9 +1744,9 @@ fn Eval(node, scope) {
 	} elif nodeType == IdentifierNode {
 		return evalIdentifier(node, scope)
 	} elif nodeType == FunctionLiteralNode {
-		let fn_params = node["Parameters"]
-		let fn_body   = node["Body"]
-		return FunctionObj(fn_params, fn_body, scope)
+		return evalFunctionLiteral(node, scope)
+	} elif nodeType == FunctionStatementNode {
+		return evalFunctionStatement(node, scope)
 	} elif nodeType == CallExpressionNode {
 		let call_fn = Eval(node["Function"], scope)
 		if isError(call_fn) {
@@ -2171,6 +2225,20 @@ fn evalDecrementPostfixOperatorExpression(left) {
 	return returnVal
 }
 
+fn evalFunctionLiteral(node, scope) {
+	let fn_params = node["Parameters"]
+	let fn_body   = node["Body"]
+	return FunctionObj(fn_params, fn_body, scope)
+}
+
+fn evalFunctionStatement(node, scope) {
+	let fnObj = evalFunctionLiteral(node["FunctionLiteral"], scope)
+
+	SetIntoScope(scope, node["Name"]["Value"], fnObj) //save to scope
+
+	return fnObj
+}
+
 fn isTruthy(obj) {
 	if obj == NIL {
 		return false
@@ -2327,6 +2395,11 @@ fn unwrapReturnValue(obj) {
 	if (m) {
 		println("m > 0")
 	}
+
+	fn sub(x, y) { x - y }
+	println("5 - 3 = ", sub(5, 3))
+
+	println("5 * 3 = ", fn(x, y) { x * y}(5, 3))
 	``
 
 	/* lexer */
