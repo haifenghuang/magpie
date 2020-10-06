@@ -175,6 +175,13 @@ n = nil
 ```csharp
 const PI = 3.14159
 PI = 3.14 //错误
+
+const TOKEN_TYPE (
+    INT,    //缺省为0
+    DOUBLE,
+    STRING
+)
+let i = INT
 ```
 
 ### 枚举

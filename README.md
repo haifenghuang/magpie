@@ -181,6 +181,13 @@ n = nil
 ```csharp
 const PI = 3.14159
 PI = 3.14 //error
+
+const TOKEN_TYPE (
+    INT,    //default to 0
+    DOUBLE,
+    STRING
+)
+let i = INT
 ```
 
 ### Enum
