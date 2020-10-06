@@ -47,6 +47,8 @@ const TOKEN_FALSE    = "FALSE"
 const TOKEN_IF       = "IF"
 const TOKEN_ELSE     = "ELSE"
 const TOKEN_RETURN   = "RETURN"
+const TOKEN_FOR      = "FOR"
+const TOKEN_IN       = "IN"
 const TOKEN_WHILE    = "WHILE"
 const TOKEN_BREAK    = "BREAK"
 const TOKEN_CONTINUE = "CONTINUE"
@@ -61,6 +63,8 @@ keywords = {
 	"if":       TOKEN_IF,
 	"else":     TOKEN_ELSE,
 	"return":   TOKEN_RETURN,
+	"for":      TOKEN_FOR,
+	"in":       TOKEN_IN,
 	"while":    TOKEN_WHILE,
 	"break":    TOKEN_BREAK,
 	"continue": TOKEN_CONTINUE,
@@ -100,7 +104,7 @@ fn isDigit(c) {
 }
 
 fn isLetter(c) {
-	return "a" <= c && c <= "z" || "A" <= c && c <= "Z" || c == "_"
+	return "a" <= c && c <= "z" || "A" <= c && c <= "Z" || c == "_" || c == "$"
 }
 
 fn readChar() {
@@ -124,7 +128,7 @@ fn peekChar() {
 
 fn readIdentifier() {
 	pos = lex_position
-	while (isLetter(lex_ch)) {
+	while (isLetter(lex_ch) || isDigit(lex_ch)) {
 		readChar()
 	}
 
@@ -284,6 +288,7 @@ const StringLiteralNode        = "StringLiteral"
 const ArrayLiteralNode         = "ArrayLiteral"
 const IndexExpressionNode      = "IndexExpression"
 const HashLiteralNode          = "HashLiteral"
+const ForArrayExpressionNode   = "ForArrayExpression"
 const WhileExpressionNode      = "WhileExpression"
 const BreakExpressionNode      = "BreakExpression"
 const ContinueExpressionNode   = "ContinueExpression"
@@ -582,6 +587,25 @@ fn Ast_HashLiteral(tok, pairs) {
 	return self
 }
 
+//for variable in iterable { block }
+fn Ast_ForArrayExpression(tok, variable, iterable, block) {
+	let self = {"Token": tok, "Var": variable, "Value": iterable, "Block": block, "Type": ForArrayExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = "for "
+	str += variable
+	str += " in "
+	str += iterable["String"]
+	str += " { "
+	str += block["String"]
+	str += " }"
+	self["String"] = str
+
+	return self
+}
+
+//while (condition) { block }
 fn Ast_WhileExpression(tok, condition, block) {
 	let self = {"Token": tok, "Condition":  condition, "Block": block, "Type": WhileExpressionNode}
 
@@ -804,6 +828,8 @@ fn parseExpression(precedence) {
 		leftExp = parseArrayLiteral()
 	} elif parser_curToken["type"] == TOKEN_LBRACE {
 		leftExp = parseHashLiteral()
+	}  elif parser_curToken["type"] == TOKEN_FOR {
+		leftExp = parseForExpression()
 	} elif parser_curToken["type"] == TOKEN_WHILE {
 		leftExp = parseWhileExpression()
 	} elif parser_curToken["type"] == TOKEN_BREAK {
@@ -1131,6 +1157,45 @@ fn parseHashLiteral() {
 	return Ast_HashLiteral(curToken, pairs)
 }
 
+fn parseForExpression() {
+	let curToken = parser_curToken
+
+	if !expectPeek(TOKEN_IDENT) {
+		return nil
+	}
+
+	let variable = parser_curToken["literal"]
+
+	return parseForEachArray(curToken, variable)
+}
+
+//for item in array { block }
+fn parseForEachArray(tok, variable) {
+	isInLoop = true
+
+	if !expectPeek(TOKEN_IN) {
+		return nil
+	}
+	parser_nextToken()
+
+	let iterable = parseExpression(LOWEST)
+
+	let block = nil
+	if peekTokenIs(TOKEN_LBRACE) {
+		parser_nextToken()
+		block = parseBlockStatement()
+	} else {
+		let msg = sprintf("Syntax Error: for loop must be followed by a '{'.")
+		parser_Errors.push(msg)
+		return nil
+	}
+
+	isInLoop = false
+
+	return Ast_ForArrayExpression(tok, variable, iterable, block)
+}
+
+
 fn parseWhileExpression() {
 	let curToken = parser_curToken
 
@@ -1309,11 +1374,14 @@ const HASH_OBJ         = "HASH"
 const BREAK_OBJ        = "BREAK"
 const CONTINUE_OBJ     = "CONTINUE"
 
-/* Every Object should have below properties:
+/* Every Object must have below properties:
     "Type":       Object Type
     "Inspect":    Mainly for debug
     "CallMethod": Object method which has the following prototype
          (scope, methodName, methodArgs) -> Object"
+
+   And may be other properties, e.g.
+    "Iterable": means the object could be used in a 'for-in' expression
 */
 
 fn IntegerObj(value) {
@@ -1408,7 +1476,7 @@ fn FunctionObj(parameters, body, scope) {
 }
 
 fn StringObj(value) {
-	let self = {"Type": STRING_OBJ, "Inspect": value, "Value": value}
+	let self = {"Type": STRING_OBJ, "Inspect": value, "Value": value, "Iterable": true}
 
 	self["CallMethod"] = fn (scope, methodName, methodArgs) {
 		if methodName == "upper" {
@@ -1444,7 +1512,7 @@ fn BuiltinObj(builtinFn) {
 }
 
 fn ArrayObj(elements) {
-	let self = {"Type": ARRAY_OBJ, "Elements": elements}
+	let self = {"Type": ARRAY_OBJ, "Elements": elements, "Iterable": true}
 
 	Array_Inspect(self)
 
@@ -1781,6 +1849,8 @@ fn Eval(node, scope) {
 		return evalIndexExpression(idx_left, idx_index)
 	} elif nodeType == HashLiteralNode {
 		return evalHashLiteral(node, scope)
+	} elif nodeType == ForArrayExpressionNode {
+		return evalForArrayExpression(node, scope)
 	} elif nodeType == WhileExpressionNode {
 		return evalWhileExpression(node, scope)
 	} elif nodeType == BreakExpressionNode {
@@ -2159,6 +2229,77 @@ fn evalMethodCallExpression(node, scope) {
 	return obj["CallMethod"](scope, methName, args)
 }
 
+//for var in iterable
+fn evalForArrayExpression(node, scope) {
+	let innerScope = NewEnclosedScope(scope)
+
+	let value = Eval(node["Value"], innerScope)
+	let valueType = value["Type"]
+
+	if valueType == ERROR_OBJ {
+		return value
+	}
+
+	//first check if it's a Nil object
+	if valueType == NIL_OBJ {
+		//return an empty array object
+		return ArrayObj([])
+	}
+
+	//The object must be 'iterable'
+	if value["Iterable"] == nil || value["Iterable"] == false {
+		let msg = "foreach's operating type must be iterable"
+		return ErrorObj(msg)
+	}
+
+	let members = []
+	if valueType == STRING_OBJ {
+		for c in value["Value"] {
+			members.push(StringObj(c))
+		}
+	} elif valueType == ARRAY_OBJ {
+		members = value["Elements"]
+	}
+
+	let elements = []
+	let ret = ArrayObj(elements)
+	let result = NIL
+
+	for idx, member in members {
+		let newSubScope = NewEnclosedScope(innerScope)
+		SetIntoScope(newSubScope, "$_", IntegerObj(idx)) // "$_" is idx
+		SetIntoScope(newSubScope, node["Var"], member)
+
+		result = Eval(node["Block"], newSubScope)
+		if result["Type"] == ERROR_OBJ {
+			return result
+		}
+
+		if result["Type"] == BREAK_OBJ {
+			break
+		}
+
+		if result["Type"] == CONTINUE_OBJ {
+			continue
+		}
+
+		if result["Type"] == RETURN_VALUE_OBJ {
+			if result["Value"] != nil {
+				return result
+			}
+			break
+		} else {
+			elements.push(result)
+		}
+	}
+
+	if result == nil || result["Type"] == BREAK_OBJ || result["Type"] == CONTINUE_OBJ {
+		return ret
+	}
+
+	return ret
+}
+
 fn evalWhileExpression(node, scope) {
 	let innerScope = NewEnclosedScope(scope)
 
@@ -2358,22 +2499,34 @@ fn unwrapReturnValue(obj) {
     # println(arr)
 	# ``
 
-	source = ``let five = 5
+	source = ``
+	println()
+	println("----Testing 'let' statement----")
+	let five = 5
 	let ten = 10
 	println("five = ", five)
 	println("ten = ", ten)
+
+	println()
+	println("----Testing integer object and integer method----")
+
 	println("six = ", five.next())
 	println("nine = ", ten.prev())
 
 	let fifteen = five + ten
 	println("fifteen = ", fifteen)
 
+	println()
+	println("----Testing function literal----")
 	let add = fn(x, y) {
 		x + y
 	}
 	let result = add(five, ten)
 	println("add(", five, ",", ten, ") = ", result)
+	println("5 * 3 = ", fn(x, y) { x * y}(5, 3))
 
+	println()
+	println("----Testing array object and array method----")
 	let arr = [1, 2]
 	println(arr)
 	println("arr[1] = ", arr[1])
@@ -2387,6 +2540,9 @@ fn unwrapReturnValue(obj) {
 	println("new arr2 = ", arr)
 	println("new arr2 length = ", len(arr))
 
+
+	println()
+	println("----Testing hash object and hash method----")
 	let h = {"Name": "HHF", "Age": 43}
 	println(h)
 	println("h[Age] = ", h["Age"])
@@ -2399,10 +2555,17 @@ fn unwrapReturnValue(obj) {
 	println(h.pop("Name"))
 	println(h)
 
+
+	println()
+	println("----Testing string object and string method----")
 	let strHello = "Hello World"
+	println("strHello[4] = ", strHello[4], ", strHello[-2] = ", strHello[-2])
 	println(strHello.lower())
 	println(strHello.upper())
 
+
+	println()
+	println("----Testing 'while (condition) { block }'----")
 	let i = 10
 	println("i = ", i)
 	while (i-- > 3) {
@@ -2411,6 +2574,9 @@ fn unwrapReturnValue(obj) {
 		println(i)
 	}
 
+
+	println()
+	println("----Testing 'if (condition) { block }'----")
 	let x = 3
 	if (x >= 3 ) {
 		println("OK")
@@ -2418,6 +2584,9 @@ fn unwrapReturnValue(obj) {
 		println("NOT OK")
 	}
 
+
+	println()
+	println("----Testing 'and' & 'or'----")
 	let m = 10
 	let n = 20
 	if (m >= 10 and n <= 20) {
@@ -2430,13 +2599,25 @@ fn unwrapReturnValue(obj) {
 		println("m > 0")
 	}
 
+
+	println()
+	println("--------Testing 'FunctionStatement'--------")
 	fn sub(x, y) { x - y }
 	println("5 - 3 = ", sub(5, 3))
 
-	println("5 * 3 = ", fn(x, y) { x * y}(5, 3))
 
-	let s = "Hello World"
-	println("s[4] = ", s[4], ", s[-2] = ", s[-2])
+	println()
+	println("----Testing 'for item in array'----")
+	for item in [1, "hello", 3] {
+		println("idx = ", $_, ", item = ", item)
+	}
+
+
+	println()
+	println("----Testing 'for item in string'----")
+	for item in "hello" {
+		println("idx = ", $_, ", item = ", item)
+	}
 	``
 
 	/* lexer */
@@ -2444,7 +2625,7 @@ fn unwrapReturnValue(obj) {
 
 /* for debugging : print each tokens */
 //	do {
-//		n = nextToken()
+//		n = lex_nextToken()
 //		if n["type"] == TOKEN_EOF {
 //			break
 //		} else {
