@@ -262,7 +262,7 @@ fn lex_nextToken() {
 ////////////////////////////////////////////////
 //                 AST
 ////////////////////////////////////////////////
-/* All AST node should have below properties:
+/* All AST node must have below properties:
     "Type":            Node Type
     "TokenLiteral":    Token Literal
     "String":          Mainly for debug
@@ -289,6 +289,7 @@ const ArrayLiteralNode         = "ArrayLiteral"
 const IndexExpressionNode      = "IndexExpression"
 const HashLiteralNode          = "HashLiteral"
 const ForArrayExpressionNode   = "ForArrayExpression"
+const ForMapExpressionNode     = "ForMapExpression"
 const WhileExpressionNode      = "WhileExpression"
 const BreakExpressionNode      = "BreakExpression"
 const ContinueExpressionNode   = "ContinueExpression"
@@ -602,6 +603,23 @@ fn Ast_ForArrayExpression(tok, variable, iterable, block) {
 	str += " }"
 	self["String"] = str
 
+	return self
+}
+
+//for key, value in hashObj { block }
+fn Ast_ForMapExpression(tok, key, value, h, block) {
+	let self = {"Token": tok, "Key": key, "Value": value, "Hash": h, "Block": block, "Type": ForMapExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = "for "
+	str += key + ", " + value
+	str += " in "
+	str += h["String"]
+	str += " { "
+	str += block["String"]
+	str += " }"
+	self["String"] = str
 	return self
 }
 
@@ -1166,7 +1184,49 @@ fn parseForExpression() {
 
 	let variable = parser_curToken["literal"]
 
+	if peekTokenIs(TOKEN_COMMA) {
+		return parseForEachMap(curToken, variable)
+	}
+
 	return parseForEachArray(curToken, variable)
+}
+
+//for key, value in hashObj { block }
+fn parseForEachMap(tok, variable) {
+	isInLoop = true
+
+	let key = variable
+
+	if !expectPeek(TOKEN_COMMA) {
+		return nil
+	}
+
+	if !expectPeek(TOKEN_IDENT) {
+		return nil
+	}
+
+	let value = parser_curToken["literal"]
+
+	if !expectPeek(TOKEN_IN) {
+		return nil
+	}
+
+	parser_nextToken()
+	let h = parseExpression(LOWEST)
+
+	let block = nil
+	if peekTokenIs(TOKEN_LBRACE) {
+		parser_nextToken()
+		block = parseBlockStatement()
+	} else {
+		let msg = sprintf("Syntax Error: for loop must be followed by a '{'.")
+		parser_Errors.push(msg)
+		return nil
+	}
+
+	isInLoop = false
+
+	return Ast_ForMapExpression(tok, key, value, h, block) 
 }
 
 //for item in array { block }
@@ -1577,7 +1637,7 @@ fn HashObj(pairs) {
 	//Pairs map[HashKey]HashPair
 	//Here I use obj["Inspect"] as the hash key.
 
-	let self = {"Type": HASH_OBJ, "Pairs": pairs}
+	let self = {"Type": HASH_OBJ, "Pairs": pairs, "Iterable": true}
 
 	Hash_Inspect(self)
 
@@ -1851,6 +1911,8 @@ fn Eval(node, scope) {
 		return evalHashLiteral(node, scope)
 	} elif nodeType == ForArrayExpressionNode {
 		return evalForArrayExpression(node, scope)
+	} elif nodeType == ForMapExpressionNode {
+		return evalForMapExpression(node, scope)
 	} elif nodeType == WhileExpressionNode {
 		return evalWhileExpression(node, scope)
 	} elif nodeType == BreakExpressionNode {
@@ -2263,12 +2325,78 @@ fn evalForArrayExpression(node, scope) {
 
 	let elements = []
 	let ret = ArrayObj(elements)
-	let result = NIL
+	let result = nil
 
 	for idx, member in members {
 		let newSubScope = NewEnclosedScope(innerScope)
 		SetIntoScope(newSubScope, "$_", IntegerObj(idx)) // "$_" is idx
 		SetIntoScope(newSubScope, node["Var"], member)
+
+		result = Eval(node["Block"], newSubScope)
+		if result["Type"] == ERROR_OBJ {
+			return result
+		}
+
+		if result["Type"] == BREAK_OBJ {
+			break
+		}
+
+		if result["Type"] == CONTINUE_OBJ {
+			continue
+		}
+
+		if result["Type"] == RETURN_VALUE_OBJ {
+			if result["Value"] != nil {
+				return result
+			}
+			break
+		} else {
+			elements.push(result)
+		}
+	}
+
+	if result == nil || result["Type"] == BREAK_OBJ || result["Type"] == CONTINUE_OBJ {
+		return ret
+	}
+
+	return ret
+}
+
+fn evalForMapExpression(node, scope) {
+	let innerScope = NewEnclosedScope(scope)
+
+	let aValue = Eval(node["Hash"], innerScope)
+
+	if aValue["Type"] == ERROR_OBJ {
+		return aValue
+	}
+
+	if aValue["Type"] != HASH_OBJ {
+		let msg = "for-in type is not hash"
+		return ErrorObj(msg)
+	}
+
+	if aValue["Type"] == NIL_OBJ {
+		//return an empty array object
+		return ArrayObj([])
+	}
+
+	//The object must be 'iterable'
+	if aValue["Iterable"] == nil || aValue["Iterable"] == false {
+		let msg = "foreach's operating type must be iterable"
+		return ErrorObj(msg)
+	}
+
+
+	let elements = []
+	let ret = ArrayObj(elements)
+	let result = nil
+
+	let pairs = aValue["Pairs"]
+	for notUsed, pair in pairs {
+		let newSubScope = NewEnclosedScope(innerScope)
+		SetIntoScope(newSubScope, node["Key"], pair["Key"])
+		SetIntoScope(newSubScope, node["Value"], pair["Value"])
 
 		result = Eval(node["Block"], newSubScope)
 		if result["Type"] == ERROR_OBJ {
@@ -2551,6 +2679,10 @@ fn unwrapReturnValue(obj) {
 	println(h.exists("Name"))
 
 	h.push("Height", "164cm")
+	for k, v in h {
+		println("key = ", k, ", value = ", v)
+	}
+
 	println(h)
 	println(h.pop("Name"))
 	println(h)
