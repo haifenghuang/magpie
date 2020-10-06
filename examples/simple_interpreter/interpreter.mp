@@ -680,20 +680,22 @@ fn Ast_PostfixExpression(tok, left, operator) {
 ////////////////////////////////////////////////
 //                 PARSER
 ////////////////////////////////////////////////
+const (
+	NONE  = 0,
+	LOWEST,
+	ASSIGN,      // =
+	COND_OR,     // or
+	COND_AND,    // and
+	EQUALS,      // ==
+	LESSGREATER, // > or <
+	SUM,         // +
+	PRODUCT,     // *
+	PREFIX,      // -X or !X
+	CALL,        // myFunction(X)
+	INDEX,       // array[index]
+	INCREMENT,   // ++, --	
+)
 
-const NONE         = 0
-const LOWEST       = 1
-const ASSIGN       = 2  // =
-const COND_OR      = 3  // or
-const COND_AND     = 4  // and
-const EQUALS       = 5  // ==
-const LESSGREATER  = 6  // > or <
-const SUM          = 7  // +
-const PRODUCT      = 8  // *
-const PREFIX       = 9  // -X or !X
-const CALL         = 10 // myFunction(X)
-const INDEX        = 11 // array[index]
-const INCREMENT    = 12 // ++, --
 
 precedences = {
 	TOKEN_ASSIGN:   ASSIGN,
