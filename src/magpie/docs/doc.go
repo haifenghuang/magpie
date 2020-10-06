@@ -436,10 +436,10 @@ func sortedLets(lets []*ast.LetStatement, fh *os.File) []*Value {
 func sortedConsts(consts []*ast.ConstStatement, fh *os.File) []*Value {
 	list := make([]*Value, len(consts))
 	i := 0
-	for _, c := range consts {
+	for idx, c := range consts {
 		src, lineSrc := genSourceText(c, fh)
 		list[i] = &Value{
-			Name:     c.Name.Value,
+			Name:     c.Name[idx].Value,
 			Doc:      preProcessCommentSpecial(c.Doc.Text()),
 			Text:     c.Docs(),
 			ShowSrc:  Cfg.ShowSrcComment,

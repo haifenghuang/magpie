@@ -468,13 +468,15 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 	return
 }
 
-func evalConstStatement(c *ast.ConstStatement, scope *Scope) (val Object) {
-	val = Eval(c.Value, scope)
-	if val.Type() == ERROR_OBJ {
-		return val
-	}
-	scope.SetConst(c.Name.Value, val)
-	return
+func evalConstStatement(c *ast.ConstStatement, scope *Scope) Object {
+	for idx, name := range c.Name {
+		val := Eval(c.Value[idx], scope)
+		if val.Type() == ERROR_OBJ {
+			return val
+		}
+		scope.SetConst(name.Value, val)
+	} 
+	return NIL
 }
 
 func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, scope *Scope, val Object) (ret Object) {

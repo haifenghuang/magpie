@@ -1034,16 +1034,87 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 	stmt := &ast.ConstStatement{Token: p.curToken}
 	stmt.Doc = p.lineComment
 
-	if !p.expectPeek(token.IDENT) {
-		return nil
-	}
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
-	if !p.expectPeek(token.ASSIGN) {
-		return nil
-	}
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
 
-	p.nextToken()
-	stmt.Value = p.parseExpression(LOWEST)
+		var autoInt int64 = 0 //autoIncrement
+
+		idPair := make(map[string]ast.Expression)
+
+		for {
+			if p.peekTokenIs(token.RPAREN) {
+				p.nextToken()
+				return stmt
+			}
+			// identifier is mandatory here
+			if !p.expectPeek(token.IDENT) {
+				return stmt
+			}
+
+			id := p.parseIdentifier().(*ast.Identifier)
+			stmt.Name = append(stmt.Name, id)
+
+			// peek next that can be only '=' or ',' or ')'
+			if !p.peekTokenIs(token.ASSIGN) && !p.peekTokenIs(token.COMMA) && !p.peekTokenIs(token.RPAREN) {
+				msg := fmt.Sprintf("Syntax Error:%v- Token %s not allowed here.", p.peekToken.Pos, p.peekToken.Type)
+				p.errors = append(p.errors, msg)
+				return nil
+			}
+
+			// check for optional default value (optional only in `INT` case)
+			var value ast.Expression
+			if p.peekTokenIs(token.ASSIGN) {
+				p.nextToken()
+				p.nextToken()
+
+				value = p.parseExpressionStatement().Expression
+			}
+
+			if value != nil {
+				if _, ok := value.(*ast.IntegerLiteral); ok {
+					intLiteral := value.(*ast.IntegerLiteral)
+					autoInt = intLiteral.Value + 1
+				}
+			} else {
+				//create a new INT token with 'autoInt' as it's value
+				tok := token.Token{Type: token.INT, Literal: strconv.Itoa(int(autoInt))}
+				value = &ast.IntegerLiteral{Token: tok, Value: autoInt}
+				autoInt++
+			}
+
+			str_id := id.Value
+			if _, ok := idPair[str_id]; ok { //is identifier redeclared?
+				msg := fmt.Sprintf("Syntax Error:%v- Identifier %s redeclared.", p.curToken.Pos, str_id)
+				p.errors = append(p.errors, msg)
+				return nil
+			} else {
+				idPair[str_id] = value
+				stmt.Value = append(stmt.Value, value)
+			}
+
+			if !p.peekTokenIs(token.COMMA) {
+				p.nextToken()
+				break
+			}
+			p.nextToken()
+		}
+
+	} else {
+		if !p.expectPeek(token.IDENT) {
+			return nil
+		}
+
+		name := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		stmt.Name = append(stmt.Name, name)
+
+		if !p.expectPeek(token.ASSIGN) {
+			return nil
+		}
+
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		stmt.Value = append(stmt.Value, value)
+	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()

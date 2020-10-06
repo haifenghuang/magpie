@@ -1398,8 +1398,8 @@ func (ls *LetStatement) Docs() string {
 ///////////////////////////////////////////////////////////
 type ConstStatement struct {
 	Token token.Token
-	Name  *Identifier
-	Value Expression
+	Name  []*Identifier
+	Value []Expression
 
 	StaticFlag    bool
 	ModifierLevel ModifierLevel //used in 'class'
@@ -1415,7 +1415,11 @@ func (cs *ConstStatement) Pos() token.Position {
 }
 
 func (cs *ConstStatement) End() token.Position {
-	return cs.Value.End()
+	aLen := len(cs.Value)
+	if aLen > 0 {
+		return cs.Value[aLen-1].End()
+	}
+	return token.Position{}
 }
 
 //Below two methods implements 'Source' interface.
@@ -1442,13 +1446,18 @@ func (cs *ConstStatement) String() string {
 	}
 
 	out.WriteString(cs.TokenLiteral() + " ")
+	out.WriteString(" ( ")
 
-	out.WriteString(cs.Name.TokenLiteral())
-	out.WriteString(" = ")
-	if cs.Value != nil {
-		out.WriteString(cs.Value.String())
+	for idx, name := range cs.Name {
+		out.WriteString(name.TokenLiteral())
+		out.WriteString(" = ")
+		if cs.Value[idx] != nil {
+			out.WriteString(cs.Value[idx].String())
+		}
+		out.WriteString(",")
 	}
-	out.WriteString(";")
+
+	out.WriteString(" )")
 	return out.String()
 }
 
