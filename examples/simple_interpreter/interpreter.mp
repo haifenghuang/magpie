@@ -1,59 +1,61 @@
 ////////////////////////////////////////////////
 //                 TOKEN
 ////////////////////////////////////////////////
-const TOKEN_ILLEGAL = "ILLEGAL"
-const TOKEN_EOF     = "EOF"
-
-// Identifiers + literals
-const TOKEN_IDENT  = "IDENT" // add, foobar, x, y, ...
-const TOKEN_INT    = "INT"   // 1343456
-const TOKEN_STRING = "STRING"
-
-// Operators
-const TOKEN_ASSIGN   = "="
-const TOKEN_PLUS     = "+"
-const TOKEN_MINUS    = "-"
-const TOKEN_BANG     = "!"
-const TOKEN_ASTERISK = "*"
-const TOKEN_SLASH    = "/"
-const TOKEN_INCREMENT= "++"
-const TOKEN_DECREMENT= "--"
-
-const TOKEN_LT = "<"
-const TOKEN_LE = "<="
-const TOKEN_GT = ">"
-const TOKEN_GE = ">="
-
-const TOKEN_EQ     = "=="
-const TOKEN_NOT_EQ = "!="
-
-// Delimiters
-const TOKEN_COMMA     = ","
-const TOKEN_SEMICOLON = ";"
-const TOKEN_LPAREN    = "("
-const TOKEN_RPAREN    = ")"
-const TOKEN_LBRACE    = "{"
-const TOKEN_RBRACE    = "}"
-const TOKEN_LBRAKET   = "["
-const TOKEN_RBRAKET   = "]"
-const TOKEN_COLON     = ":"
-const TOKEN_DOT       = "."
-
-// Keywords
-const TOKEN_FUNCTION = "FUNCTION"
-const TOKEN_LET      = "LET"
-const TOKEN_TRUE     = "TRUE"
-const TOKEN_FALSE    = "FALSE"
-const TOKEN_IF       = "IF"
-const TOKEN_ELSE     = "ELSE"
-const TOKEN_RETURN   = "RETURN"
-const TOKEN_FOR      = "FOR"
-const TOKEN_IN       = "IN"
-const TOKEN_WHILE    = "WHILE"
-const TOKEN_BREAK    = "BREAK"
-const TOKEN_CONTINUE = "CONTINUE"
-const TOKEN_AND      = "AND"
-const TOKEN_OR       = "OR"
+const (
+	TOKEN_ILLEGAL,
+	TOKEN_EOF,
+	
+	// Identifiers + literals
+	TOKEN_IDENT,   // add, foobar, x, y, ...
+	TOKEN_INT,     // 1343456
+	TOKEN_STRING,
+	
+	// Operators
+	TOKEN_ASSIGN,      // "="
+	TOKEN_PLUS,        // "+"
+	TOKEN_MINUS,       // "-"
+	TOKEN_BANG,        // "!"
+	TOKEN_ASTERISK,    // "*"
+	TOKEN_SLASH,       // "/"
+	TOKEN_INCREMENT,   // "++"
+	TOKEN_DECREMENT,   // "--"
+	
+	TOKEN_LT,  // "<"
+	TOKEN_LE,  // "<="
+	TOKEN_GT,  // ">"
+	TOKEN_GE,  // ">="
+	
+	TOKEN_EQ,     // "=="
+	TOKEN_NOT_EQ, // "!="
+	
+	// Delimiters
+	TOKEN_COMMA,     // ","
+	TOKEN_SEMICOLON, // ";"
+	TOKEN_LPAREN,    // "("
+	TOKEN_RPAREN,    // ")"
+	TOKEN_LBRACE,    // "{"
+	TOKEN_RBRACE,    // "}"
+	TOKEN_LBRAKET,   // "["
+	TOKEN_RBRAKET,   // "]"
+	TOKEN_COLON,     // ":"
+	TOKEN_DOT,       // "."
+	
+	// Keywords
+	TOKEN_FUNCTION, // "FUNCTION"
+	TOKEN_LET,      // "LET"
+	TOKEN_TRUE,     // "TRUE"
+	TOKEN_FALSE,    // "FALSE"
+	TOKEN_IF,       // "IF"
+	TOKEN_ELSE,     // "ELSE"
+	TOKEN_RETURN,   // "RETURN"
+	TOKEN_FOR,      // "FOR"
+	TOKEN_IN,       // "IN"
+	TOKEN_WHILE,    // "WHILE"
+	TOKEN_BREAK,    // "BREAK"
+	TOKEN_CONTINUE, // "CONTINUE"
+	TOKEN_AND,      // "AND"
+	TOKEN_OR,       // "OR"
+)
 
 keywords = {
 	"fn":       TOKEN_FUNCTION,
@@ -83,7 +85,53 @@ fn newToken(t, ch) {
 	return {"type": t, "literal": ch}
 }
 
-
+fn tokenString(tok) {
+	case tok in {
+		TOKEN_ILLEGAL   { return "ILLEGAL" }
+		TOKEN_EOF       { return "EOF" }
+		TOKEN_IDENT     { return "IDENT" }
+		TOKEN_INT       { return "INT" }
+		TOKEN_STRING    { return "STRING" }
+		TOKEN_ASSIGN    { return "=" }
+		TOKEN_PLUS      { return "+" }
+		TOKEN_MINUS     { return "-" }
+		TOKEN_BANG      { return "!" }
+		TOKEN_ASTERISK  { return "*" }
+		TOKEN_SLASH     { return "/" }
+		TOKEN_INCREMENT { return "++" }
+		TOKEN_DECREMENT { return "--" }
+		TOKEN_LT        { return "<" }
+		TOKEN_LE        { return "<=" }
+		TOKEN_GT        { return ">" }
+		TOKEN_GE        { return ">=" }
+		TOKEN_EQ        { return "==" }
+		TOKEN_NOT_EQ    { return "!=" }
+		TOKEN_COMMA     { return " {" }
+		TOKEN_SEMICOLON { return ";" }
+		TOKEN_LPAREN    { return "(" }
+		TOKEN_RPAREN    { return ")" }
+		TOKEN_LBRACE    { return "{" }
+		TOKEN_RBRACE    { return "}" }
+		TOKEN_LBRAKET   { return "[" }
+		TOKEN_RBRAKET   { return "]" }
+		TOKEN_COLON     { return ":" }
+		TOKEN_DOT       { return "." }
+		TOKEN_FUNCTION  { return "FUNCTION" }
+		TOKEN_LET       { return "LET" }
+		TOKEN_TRUE      { return "TRUE" }
+		TOKEN_FALSE     { return "FALSE" }
+		TOKEN_IF        { return "IF" }
+		TOKEN_ELSE      { return "ELSE" }
+		TOKEN_RETURN    { return "RETURN" }
+		TOKEN_FOR       { return "FOR" }
+		TOKEN_IN        { return "IN" }
+		TOKEN_WHILE     { return "WHILE" }
+		TOKEN_BREAK     { return "BREAK" }
+		TOKEN_CONTINUE  { return "CONTINUE" }
+		TOKEN_AND       { return "AND" }
+		TOKEN_OR        { return "OR" }
+	}
+}
 
 ////////////////////////////////////////////////
 //                 LEXER
@@ -269,32 +317,34 @@ fn lex_nextToken() {
 */
 
 //AST node type
-const ProgramNode              = "Program"
-const IdentifierNode           = "Identifier"
-const LetStatementNode         = "LetStatement"
-const ReturnStatementNode      = "ReturnStatement"
-const ExpressionStatementNode  = "ExpressionStatement"
-const IntegerLiteralNode       = "IntegerLiteral"
-const PrefixExpressionNode     = "PrefixExpression"
-const InfixExpressionNode      = "InfixExpression"
-const BooleanNode              = "Boolean"
-const IfExpressionNode         = "IfExpression"
-const BlockStatementNode       = "BlockStatement"
-const FunctionStatementNode    = "FunctionStatement"
-const FunctionLiteralNode      = "FunctionLiteral"
-const CallExpressionNode       = "CallExpression"
-const MethodCallExpressionNode = "MethodCallExpression"
-const StringLiteralNode        = "StringLiteral"
-const ArrayLiteralNode         = "ArrayLiteral"
-const IndexExpressionNode      = "IndexExpression"
-const HashLiteralNode          = "HashLiteral"
-const ForArrayExpressionNode   = "ForArrayExpression"
-const ForMapExpressionNode     = "ForMapExpression"
-const WhileExpressionNode      = "WhileExpression"
-const BreakExpressionNode      = "BreakExpression"
-const ContinueExpressionNode   = "ContinueExpression"
-const AssignExpressionNode     = "AssignExpression"
-const PostfixExpressionNode    = "PostfixExpression"
+const (
+	ProgramNode,
+	IdentifierNode,
+	LetStatementNode,
+	ReturnStatementNode,
+	ExpressionStatementNode,
+	IntegerLiteralNode,
+	PrefixExpressionNode,
+	InfixExpressionNode,
+	BooleanNode,
+	IfExpressionNode,
+	BlockStatementNode,
+	FunctionStatementNode,
+	FunctionLiteralNode,
+	CallExpressionNode,
+	MethodCallExpressionNode,
+	StringLiteralNode,
+	ArrayLiteralNode,
+	IndexExpressionNode,
+	HashLiteralNode,
+	ForArrayExpressionNode,
+	ForMapExpressionNode,
+	WhileExpressionNode,
+	BreakExpressionNode,
+	ContinueExpressionNode,
+	AssignExpressionNode,
+	PostfixExpressionNode,
+)
 
 fn Ast_Program(statements) {
 	let self = {"Statements": statements, "Type": ProgramNode}
@@ -2763,7 +2813,7 @@ fn unwrapReturnValue(obj) {
 //		if n["type"] == TOKEN_EOF {
 //			break
 //		} else {
-//			printf("{token.%s, \"%s\"}\n", n["type"], n["literal"])
+//			printf("{tokentype: \"%s\", literal: \"%s\"}\n", tokenString(n["type"]), n["literal"])
 //		}
 //	}
 
