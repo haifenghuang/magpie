@@ -2155,8 +2155,30 @@ fn evalInfixExpression(operator, left, right) {
 	} elif left["Type"] == INTEGER_OBJ && right["Type"] == INTEGER_OBJ {
 		return evalIntegerInfixExpression(operator, left, right)
 	} elif operator == "==" {
+		if left["Type"] == BOOLEAN_OBJ && right["Type"] == BOOLEAN_OBJ {
+			if l["Value"] == r["Value"] {
+				return TRUE
+			}
+			return FALSE
+		}
+
+		if left["Type"] == NIL_OBJ && right["Type"] == NIL_OBJ { //(s == nil) should return true if s is nil
+			return TRUE
+		}
+
 		return nativeBoolToBooleanObject(left == right)
 	} elif operator == "!=" {
+		if left["Type"] != right["Type"] {
+			return TRUE
+		}
+
+		if left["Type"]== BOOLEAN_OBJ && right["Type"] == BOOLEAN_OBJ {
+			if l["Value"] != r["Value"] {
+				return TRUE
+			}
+			return FALSE
+		}
+
 		return nativeBoolToBooleanObject(left != right)
 	} elif left["Type"] == STRING_OBJ && right["Type"] == STRING_OBJ {
 		return evalStringInfixExpression(operator, left, right)
@@ -2249,13 +2271,30 @@ fn evalExpressions(exps, scope) {
 }
 
 fn evalStringInfixExpression(operator, left, right) {
-	if operator != "+" {
+	let lv = left["Value"]
+	let rv = right["Value"]
+
+	if operator == "==" {
+		return nativeBoolToBooleanObject(lv == rv)
+	} elif operator == "!=" {
+		return nativeBoolToBooleanObject(lv != rv)
+	} elif operator == "+" {
+		return StringObj(lv + rv)
+	} elif operator == "<" {
+		return nativeBoolToBooleanObject(lv < rv)
+	} elif operator == "<=" {
+		return nativeBoolToBooleanObject(lv <= rv)
+	} elif operator == ">" {
+		return nativeBoolToBooleanObject(lv > rv)
+	} elif operator == ">=" {
+		return nativeBoolToBooleanObject(lv >= rv)
+	} else {
 		let msg = sprintf("unknown operator: %s %s %s", left["Type"], operator, right["Type"])
 		return  ErrorObj(msg)
 	}
 
-	let lv = left["Value"]
-	let rv = right["Value"]
+
+
 	return StringObj(lv + rv)
 }
 
