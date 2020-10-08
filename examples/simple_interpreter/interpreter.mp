@@ -55,6 +55,7 @@ const (
 	TOKEN_CONTINUE, // "CONTINUE"
 	TOKEN_AND,      // "AND"
 	TOKEN_OR,       // "OR"
+	TOKEN_NIL,      // "NIL"
 )
 
 keywords = {
@@ -72,6 +73,7 @@ keywords = {
 	"continue": TOKEN_CONTINUE,
 	"and":      TOKEN_AND,
 	"or":       TOKEN_OR,
+	"nil":      TOKEN_NIL,
 }
 
 fn lookupIdent(ident) {
@@ -344,6 +346,7 @@ const (
 	ContinueExpressionNode,
 	AssignExpressionNode,
 	PostfixExpressionNode,
+	NilExpressionNode,
 )
 
 fn Ast_Program(statements) {
@@ -724,7 +727,9 @@ fn Ast_PostfixExpression(tok, left, operator) {
 	return self
 }
 
-
+fn Ast_NilLiteral(tok) {
+	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": NilExpressionNode}
+}
 
 
 ////////////////////////////////////////////////
@@ -914,6 +919,8 @@ fn parseExpression(precedence) {
 		} else {
 			leftExp = parseContinueWithoutLoopContext()
 		}
+	} elif parser_curToken["type"] == TOKEN_NIL {
+		leftExp = parseNilExpression()
 	} else {
 		noPrefixParseFnError(parser_curToken["type"])
 		return nil
@@ -1371,6 +1378,10 @@ fn parseAssignExpression(left) {
 
 fn parsePostfixExpression(left) {
 	return Ast_PostfixExpression(parser_curToken, left, parser_curToken["literal"])
+}
+
+fn parseNilExpression() {
+	return Ast_NilLiteral(parser_curToken)
 }
 
 fn curTokenIs(t) {
@@ -1979,6 +1990,8 @@ fn Eval(node, scope) {
 			return p_left
 		}
 		return evalPostfixExpression(node["Operator"], p_left)
+	} elif nodeType == NilExpressionNode {
+		return NIL
 	}
 
 	return nil
