@@ -1502,6 +1502,7 @@ const ARRAY_OBJ        = "ARRAY"
 const HASH_OBJ         = "HASH"
 const BREAK_OBJ        = "BREAK"
 const CONTINUE_OBJ     = "CONTINUE"
+const FILE_OBJ         = "FILE"
 
 /* Every Object must have below properties:
     "Type":       Object Type
@@ -1826,13 +1827,103 @@ fn ContinueObj() {
 	return {"Type": CONTINUE_OBJ, "Inspect": "continue", "CallMethod": nil}
 }
 
+fn FileObj(filehandle, filename) {
+	let self = {"Type": FILE_OBJ, "File": filehandle, "Inspect": "<file object: " + filename + ">"}
 
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "close" {
+			return File_Close(self, scope, methodArgs)
+		} elif methodName == "read" {
+			return File_Read(self, scope, methodArgs)
+		} elif methodName == "readLine" {
+			return File_ReadLine(self, scope, methodArgs)
+		} elif methodName == "write" {
+			return File_Write(self, scope, methodArgs)
+		} elif methodName == "writeLine" {
+			return File_WriteLine(self, scope, methodArgs)
+		} elif methodName == "writeString" {
+			return File_WriteString(self, scope, methodArgs)
+		} elif methodName == "writeString" {
+			return File_WriteString(self, scope, methodArgs)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, FILE_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+//Because it's just a simple demostration. 
+//so below code has no error check.
+fn File_Close(self, scope, methodArgs) {
+	let fh = self["File"]
+	fh.close()
+	return NIL
+}
+
+fn File_Read(self, scope, methodArgs) {
+	let fh = self["File"]
+	let size = methodArgs[0]
+	let readSize = fh.read(size["Value"])
+	return IntegerObj(readSize)
+}
+
+
+fn File_ReadLine(self, scope, methodArgs) {
+	let fh = self["File"]
+	let s = fh.readLine()
+
+	if s == nil {
+		return NIL
+	}
+	return StringObj(s)
+}
+
+fn File_Write(self, scope, methodArgs) {
+	let fh = self["File"]
+	let s = methodArgs[0]
+
+	let n = fh.write(s["Value"])
+	return IntegerObj(n)
+}
+
+fn File_WriteLine(self, scope, methodArgs) {
+	let fh = self["File"]
+	let s = methodArgs[0]
+	let n = fh.writeLine(s["Value"])
+	return IntegerObj(n)
+}
+
+fn File_WriteString(self, scope, methodArgs) {
+	let fh = self["File"]
+	let s = methodArgs[0]
+
+	let n = fh.writeString(s["Value"])
+	return IntegerObj(n)
+}
 
 
 ////////////////////////////////////////////////
 //                 BUILTINS
 ////////////////////////////////////////////////
 /* builtins = map[string]BuiltinObj */
+
+fn openBuiltin(args) {
+	if len(args) != 1 && len(args) != 2 {
+		let msg = sprintf("wrong number of arguments. got=%d, want=1|2", len(args))
+		return ErrorObj(msg)
+	}
+
+	let filename = args[0]["Value"]
+	let mode = "r" // default is 'read'
+	if len(args) == 2 {
+		mode = args[1]["Value"]
+	}
+
+	let f = newFile(filename, mode)
+	return FileObj(f, filename)
+}
 
 fn lenBuiltin(args) {
 	if len(args) != 1 {
@@ -1873,6 +1964,7 @@ const builtins = {
 	"len":  BuiltinObj(lenBuiltin),
 	"print": BuiltinObj(printBuiltin),
 	"println": BuiltinObj(printlnBuiltin),
+	"open": BuiltinObj(openBuiltin),
 }
 
 
@@ -2659,6 +2751,10 @@ fn isTruthy(obj) {
 		return false
 	}
 
+	if obj["Type"] == BOOLEAN_OBJ {
+		return obj["Value"]
+	}
+
 	if obj["Type"] == INTEGER_OBJ {
 		if obj["Value"] == 0 {
 			return false
@@ -2860,6 +2956,19 @@ fn unwrapReturnValue(obj) {
 	for item in "hello" {
 		println("idx = ", $_, ", item = ", item)
 	}
+
+	println()
+	println("----Testing 'file' object operation----")
+	let ofile = open("demo.txt", "w")
+	ofile.writeLine("AAAA")
+	ofile.writeLine("BBBB")
+	ofile.close()
+
+	let ifile = open("demo.txt", "r")
+	while ((l = ifile.readLine()) != nil) {
+		println(l)
+	}
+	ifile.close()
 	``
 
 	/* lexer */
