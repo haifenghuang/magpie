@@ -1470,11 +1470,17 @@ fn ResetScope(scope, name, val) {
 		store[name] = val
 	}
 
+	// if we not found in the current, we search the parent scope
 	if obj == nil {
 		let outer = scope["outer"]
 		if outer != nil {
-			return ResetScope(outer, name, val)
+			obj = ResetScope(outer, name, val)
 		}
+	}
+
+	// still could not found in the parent scope, then we set it in the current scope
+	if obj == nil {
+		store[name] = val
 	}
 
 	return val
