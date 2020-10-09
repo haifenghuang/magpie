@@ -211,9 +211,22 @@ fn readString() {
 	return lex_input[position : lex_position]
 }
 
+fn skipComment() {
+	while lex_ch != "\n" && lex_ch != 0 {
+		readChar()
+	}
+	if lex_ch == "\n" {
+		readChar()
+	}
+}
+
 fn lex_nextToken() {
 	let tok
 	skipWhitespace()
+
+	if lex_ch == "#" {
+		skipComment()
+	}
 
 	if lex_ch == "=" {
 		if peekChar() == "=" {
@@ -2972,178 +2985,7 @@ fn unwrapReturnValue(obj) {
 #define DEBUG
 #ifdef DEBUG
 {
-	# source = ``let five = 5
-	# let ten = 10
-	# println("five = ", five)
-	# println("ten = ", ten)
-
-    # let fifteen = five + ten
-    # println("fifteen = ", fifteen)
-
-	# let add = fn(x, y) {
-	# 	x + y
-	# }
-	# let result = add(five, ten)
-	# println("result = ", result)
-
-	# let arr = [1, 2]
-    # println(arr)
-	# ``
-
-	source = ``
-	println()
-	println("----Testing 'let' statement----")
-	let five = 5
-	let ten = 10
-	println("five = ", five)
-	println("ten = ", ten)
-
-	println()
-	println("----Testing integer object and integer method----")
-
-	println("six = ", five.next())
-	println("nine = ", ten.prev())
-
-	let fifteen = five + ten
-	println("fifteen = ", fifteen)
-
-	println()
-	println("----Testing function literal----")
-	let add = fn(x, y) {
-		x + y
-	}
-	let result = add(five, ten)
-	println("add(", five, ",", ten, ") = ", result)
-	println("5 * 3 = ", fn(x, y) { x * y}(5, 3))
-
-	println()
-	println("----Testing array object and array method----")
-	let arr = [1, 2]
-	arr[0] = 10
-	println(arr)
-	println("arr[1] = ", arr[1])
-	println("arr[-1] = ", arr[-1])
-	println("arr[-2] = ", arr[-2])
-
-	arr.push(3)
-	println("new arr = ", arr)
-	println("new arr length = ", len(arr))
-	arr.pop()
-	println("new arr2 = ", arr)
-	println("new arr2 length = ", len(arr))
-
-	println()
-	println("----Testing tuple object----")
-	let tup1 = (1, 2)
-	println(tup1)
-	println("tup1[1] = ", tup1[1])
-	println("tup1[-1] = ", tup1[-1])
-	println("tup1[-2] = ", tup1[-2])
-
-	let tup2 = (1,)
-	println(tup2)
-	println("tup2[0] = ", tup2[0])
-	println("tup2[-1] = ", tup2[-1])
-
-
-	println()
-	println("----Testing hash object and hash method----")
-	let h = {"Name": "HHF", "Age": 43}
-	println(h)
-	println("h[Age] = ", h["Age"])
-	println(h.keys())
-	println(h.values())
-	println(h.exists("Name"))
-
-	h.push("Height", "164cm")
-	for k, v in h {
-		println("key = ", k, ", value = ", v)
-	}
-
-	println(h)
-	println(h.pop("Name"))
-	println(h)
-
-
-	println()
-	println("----Testing string object and string method----")
-	let strHello = "Hello World"
-	println("strHello[4] = ", strHello[4], ", strHello[-2] = ", strHello[-2])
-	println(strHello.lower())
-	println(strHello.upper())
-	strHello[5] = "-"
-	println(strHello)
-
-
-	println()
-	println("----Testing 'while (condition) { block }'----")
-	let i = 10
-	println("i = ", i)
-	while (i-- > 3) {
-		if (i == 7) { continue }
-		if (i == 5) { break }
-		println(i)
-	}
-
-
-	println()
-	println("----Testing 'if (condition) { block }'----")
-	let x = 3
-	if (x >= 3 ) {
-		println("OK")
-	} else {
-		println("NOT OK")
-	}
-
-
-	println()
-	println("----Testing 'and' & 'or'----")
-	let m = 10
-	let n = 20
-	if (m >= 10 and n <= 20) {
-		println("m >= 10 and n <= 20")
-	}
-	if (m < 10 or n >= 10) {
-		println("m < 10 and n >= 20")
-	}
-	if (m) {
-		println("m > 0")
-	}
-
-
-	println()
-	println("--------Testing 'FunctionStatement'--------")
-	fn sub(x, y) { x - y }
-	println("5 - 3 = ", sub(5, 3))
-
-
-	println()
-	println("----Testing 'for item in array'----")
-	for item in [1, "hello", 3] {
-		println("idx = ", $_, ", item = ", item)
-	}
-
-
-	println()
-	println("----Testing 'for item in string'----")
-	for item in "hello" {
-		println("idx = ", $_, ", item = ", item)
-	}
-
-	println()
-	println("----Testing 'file' object operation----")
-	let ofile = open("demo.txt", "w")
-	ofile.writeLine("AAAA")
-	ofile.writeLine("BBBB")
-	ofile.close()
-
-	let ifile = open("demo.txt", "r")
-	while ((l = ifile.readLine()) != nil) {
-		println(l)
-	}
-	ifile.close()
-	``
-
+	let source = ioutil.readFile("examples/simple_interpreter/example.txt")
 	/* lexer */
 	NewLexer(source)
 
