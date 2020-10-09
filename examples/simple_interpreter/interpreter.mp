@@ -337,6 +337,7 @@ const (
 	MethodCallExpressionNode,
 	StringLiteralNode,
 	ArrayLiteralNode,
+	TupleLiteralNode,
 	IndexExpressionNode,
 	HashLiteralNode,
 	ForArrayExpressionNode,
@@ -602,6 +603,24 @@ fn Ast_ArrayLiteral(tok, elements) {
 	str += "["
 	str += strings.join(elems, ", ")
 	str += "]"
+	self["String"] = str
+
+	return self
+}
+
+fn Ast_TupleLiteral(tok, elements) {
+	let self = {"Token": tok, "Elements": elements, "Type": TupleLiteralNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = ""
+	let elems = []
+	for elem in elements {
+		elems.push(elem["String"])
+	}
+	str += "("
+	str += strings.join(elems, ", ")
+	str += ")"
 	self["String"] = str
 
 	return self
@@ -997,14 +1016,50 @@ fn parseBoolean() {
 }
 
 fn parseGroupedExpression() {
+	let curToken = parser_curToken
 	parser_nextToken()
+
+	if parser_curToken["type"] == TOKEN_LPAREN && curTokenIs(TOKEN_RPAREN) {
+		//empty tuple, e.g. 'x = ()'
+		return Ast_TupleLiteral(curToken, [])
+	}
+
 	let exp = parseExpression(LOWEST)
+
+	if peekTokenIs(TOKEN_COMMA) {
+		parser_nextToken()
+		return parseTupleExpression(curToken, exp)
+	}
 
 	if !expectPeek(TOKEN_RPAREN) {
 		return nil
 	}
 
 	return exp
+}
+
+fn parseTupleExpression(tok, expr) {
+	let elements = [expr]
+
+	for {
+		if parser_curToken["type"] == TOKEN_RPAREN {
+			return Ast_TupleLiteral(tok, elements)
+		} elif parser_curToken["type"] == TOKEN_COMMA {
+			parser_nextToken()
+			//For a 1-tuple: "(1,)", the trailing comma is necessary to distinguish it
+			//from the parenthesized expression (1).
+			if curTokenIs(TOKEN_RPAREN) { //e.g.  let x = (1,)
+				return Ast_TupleLiteral(tok, elements)
+			}
+			elements.push(parseExpression(LOWEST))
+			parser_nextToken()
+		} else {
+			printf("2222222222222\n")
+			let msg = sprintf("Syntax Error: expected token to be ',' or ')', got %s instead", parser_curToken["type"])
+			parser_Errors.push(msg)
+			return nil
+		}
+	}
 }
 
 fn parseIfExpression() {
@@ -1499,6 +1554,7 @@ const FUNCTION_OBJ     = "FUNCTION"
 const STRING_OBJ       = "STRING"
 const BUILTIN_OBJ      = "BUILTIN"
 const ARRAY_OBJ        = "ARRAY"
+const TUPLE_OBJ        = "TUPLE"
 const HASH_OBJ         = "HASH"
 const BREAK_OBJ        = "BREAK"
 const CONTINUE_OBJ     = "CONTINUE"
@@ -1697,6 +1753,36 @@ fn Array_Pop(self, scope) {
 	Array_Inspect(self)
 
 	return self
+}
+
+fn TupleObj(elements) {
+	let self = {"Type": TUPLE_OBJ, "Elements": elements, "Iterable": true}
+
+	let items = []
+	for elem in elements {
+		items.push(elem["Inspect"])
+	}
+
+	let str = ""
+	str += "("
+	str += strings.join(items, ", ")
+	if len(elements) == 1 {
+		str += ","
+	}
+	str += ")"
+	self["Inspect"] = str
+
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		let msg = sprintf("undefined method '%s' for object %s", methodName, TUPLE_OBJ)
+		return ErrorObj(msg)
+	}
+
+	return self
+}
+
+fn Tuple_Inspect(self) {
+
 }
 
 fn HashPair(key, value) {
@@ -1933,7 +2019,7 @@ fn lenBuiltin(args) {
 
 	let arg0 = args[0]
 	let arg0Type = arg0["Type"]
-	if arg0Type == ARRAY_OBJ {
+	if arg0Type == ARRAY_OBJ || arg0Type == TUPLE_OBJ {
 		return IntegerObj(len(arg0["Elements"]))
 	} elif arg0Type == STRING_OBJ {
 			return IntegerObj(len(arg0["Value"]))
@@ -2058,6 +2144,12 @@ fn Eval(node, scope) {
 			return arr_elements[0]
 		}
 		return ArrayObj(arr_elements)
+	} elif nodeType == TupleLiteralNode {
+		let tup_elements = evalExpressions(node["Elements"], scope)
+		if len(tup_elements) == 1 && isError(tup_elements[0]) {
+			return tup_elements[0]
+		}
+		return TupleObj(tup_elements)
 	} elif nodeType == IndexExpressionNode {
 		let idx_left = Eval(node["Left"], scope)
 		if isError(idx_left) {
@@ -2391,7 +2483,7 @@ fn evalStringInfixExpression(operator, left, right) {
 }
 
 fn evalIndexExpression(left, index) {
-	if left["Type"] == ARRAY_OBJ && index["Type"] == INTEGER_OBJ {
+	if (left["Type"] == ARRAY_OBJ || left["Type"] == TUPLE_OBJ) && index["Type"] == INTEGER_OBJ {
 		return evalArrayIndexExpression(left, index)
 	} elif left["Type"] == HASH_OBJ {
 		return evalHashIndexExpression(left, index)
@@ -2522,6 +2614,8 @@ fn evalForArrayExpression(node, scope) {
 			members.push(StringObj(c))
 		}
 	} elif valueType == ARRAY_OBJ {
+		members = value["Elements"]
+	} elif valueType == TUPLE_OBJ {
 		members = value["Elements"]
 	}
 
@@ -2873,6 +2967,19 @@ fn unwrapReturnValue(obj) {
 	arr.pop()
 	println("new arr2 = ", arr)
 	println("new arr2 length = ", len(arr))
+
+	println()
+	println("----Testing tuple object----")
+	let tup1 = (1, 2)
+	println(tup1)
+	println("tup1[1] = ", tup1[1])
+	println("tup1[-1] = ", tup1[-1])
+	println("tup1[-2] = ", tup1[-2])
+
+	let tup2 = (1,)
+	println(tup2)
+	println("tup2[0] = ", tup2[0])
+	println("tup2[-1] = ", tup2[-1])
 
 
 	println()
