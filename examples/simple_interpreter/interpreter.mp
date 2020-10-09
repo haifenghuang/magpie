@@ -1054,7 +1054,6 @@ fn parseTupleExpression(tok, expr) {
 			elements.push(parseExpression(LOWEST))
 			parser_nextToken()
 		} else {
-			printf("2222222222222\n")
 			let msg = sprintf("Syntax Error: expected token to be ',' or ')', got %s instead", parser_curToken["type"])
 			parser_Errors.push(msg)
 			return nil
@@ -1707,6 +1706,10 @@ fn ArrayObj(elements) {
 			return Array_Push(self, scope, methodArgs)
 		} elif methodName == "pop" {
 			return Array_Pop(self, scope)
+		} elif methodName == "set" {
+			return Array_Set(self, scope, methodArgs)
+		} elif methodName == "get" {
+			return Array_Get(self, scope, methodArgs)
 		} else {
 			let msg = sprintf("undefined method '%s' for object %s", methodName, ARRAY_OBJ)
 			return ErrorObj(msg)
@@ -1753,6 +1756,40 @@ fn Array_Pop(self, scope) {
 	Array_Inspect(self)
 
 	return self
+}
+
+fn Array_Get(self, scope, args) {
+	let elements = self["Elements"]
+
+	let idxObj = args[0]
+	let value = idxObj["Value"]
+	if value < 0 || value >= len(elements) {
+		return NIL
+	}
+	return elements[value]
+}
+
+fn Array_Set(self, scope, args) {
+	let elements = self["Elements"]
+
+	idxObj = args[0]
+
+	let value = idxObj["Value"]
+
+	if value < 0 || value >= len(elements) {
+		let oldLen = len(elements)
+		let i = 0;
+		for (i = oldLen; i <= value; i++) {
+			elements.push(NIL)
+		}
+	}
+
+	elements[value] = args[1]
+
+	//recalculate 'Inspect'
+	Array_Inspect(self)
+
+	return NIL
 }
 
 fn TupleObj(elements) {
@@ -2771,6 +2808,22 @@ fn evalAssignExpression(node, scope) {
 	let val = Eval(node["Value"], scope)
 	if val["Type"] != ERROR_OBJ {
 		let name = node["Name"]
+
+		if name["Type"] == IndexExpressionNode {
+			let leftVal = Eval(name["Left"], scope)
+			let indexVal = Eval(name["Index"], scope)
+			if leftVal["Type"] == ARRAY_OBJ {
+				Array_Set(leftVal, scope, [indexVal, val])
+			} elif leftVal["Type"] == TUPLE_OBJ {
+				let s = sprintf("%s[IDX]", TUPLE_OBJ)
+				let msg = sprintf("'%s': Tuple cannot be assigned", node["String"])
+				return  ErrorObj(msg)
+
+			} elif leftVal["Type"] == HASH_OBJ {
+				Hash_Push(leftVal, scope, [indexVal, val])
+			}
+		}
+
 		let v = ResetScope(scope, name["String"], val)
 		if v != nil {
 			return v
@@ -2956,6 +3009,7 @@ fn unwrapReturnValue(obj) {
 	println()
 	println("----Testing array object and array method----")
 	let arr = [1, 2]
+	arr[0] = 10
 	println(arr)
 	println("arr[1] = ", arr[1])
 	println("arr[-1] = ", arr[-1])
@@ -2972,6 +3026,7 @@ fn unwrapReturnValue(obj) {
 	println("----Testing tuple object----")
 	let tup1 = (1, 2)
 	println(tup1)
+	tup1[0] = 10
 	println("tup1[1] = ", tup1[1])
 	println("tup1[-1] = ", tup1[-1])
 	println("tup1[-2] = ", tup1[-2])
@@ -3106,6 +3161,9 @@ fn unwrapReturnValue(obj) {
 
 	/* evaluator */
 	let root_scope = NewScope()
-	Eval(p, root_scope)
+	obj = Eval(p, root_scope)
+	if obj["Type"] == ERROR_OBJ {
+		println(obj["Message"])
+	}
 }
 
