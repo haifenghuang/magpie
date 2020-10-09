@@ -35,6 +35,9 @@ func (t *Tuple) Inspect() string {
 	}
 	out.WriteString("(")
 	out.WriteString(strings.Join(members, ", "))
+	if (len(t.Members)) == 1 {
+		out.WriteString(",")
+	}
 	out.WriteString(")")
 
 	return out.String()
