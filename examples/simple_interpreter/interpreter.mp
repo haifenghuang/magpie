@@ -1666,11 +1666,12 @@ fn StringObj(value) {
 	self["CallMethod"] = fn (scope, methodName, methodArgs) {
 		if methodName == "upper" {
 			return String_Upper(value)
-
 		} elif methodName == "lower" {
 			return String_Lower(value)
 		} elif methodName == "trim" {
 			return String_Trim(value)
+		} elif methodName == "set" {
+			return String_Set(self, scope, methodArgs)
 		} else {
 			let msg = sprintf("undefined method '%s' for object %s", methodName, BOOLEAN_OBJ)
 			return ErrorObj(msg)
@@ -1690,6 +1691,14 @@ fn String_Upper(value) {
 
 fn String_Trim(value) {
 	return StringObj(value.trim())
+}
+
+fn String_Set(self, scope, methodArgs) {
+	let idx = methodArgs[0]
+	let replaceStr = methodArgs[1]
+	let value = self["Value"]
+	value.set(idx["Value"], replaceStr["Value"])
+	self["Inspect"] = value
 }
 
 fn BuiltinObj(builtinFn) {
@@ -2818,9 +2827,10 @@ fn evalAssignExpression(node, scope) {
 				let s = sprintf("%s[IDX]", TUPLE_OBJ)
 				let msg = sprintf("'%s': Tuple cannot be assigned", node["String"])
 				return  ErrorObj(msg)
-
 			} elif leftVal["Type"] == HASH_OBJ {
 				Hash_Push(leftVal, scope, [indexVal, val])
+			} elif leftVal["Type"] == STRING_OBJ {
+				String_Set(leftVal, scope, [indexVal, val])
 			}
 		}
 
@@ -3026,7 +3036,6 @@ fn unwrapReturnValue(obj) {
 	println("----Testing tuple object----")
 	let tup1 = (1, 2)
 	println(tup1)
-	tup1[0] = 10
 	println("tup1[1] = ", tup1[1])
 	println("tup1[-1] = ", tup1[-1])
 	println("tup1[-2] = ", tup1[-2])
@@ -3062,6 +3071,8 @@ fn unwrapReturnValue(obj) {
 	println("strHello[4] = ", strHello[4], ", strHello[-2] = ", strHello[-2])
 	println(strHello.lower())
 	println(strHello.upper())
+	strHello[5] = "-"
+	println(strHello)
 
 
 	println()
