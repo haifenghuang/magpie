@@ -1126,6 +1126,8 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			//fmt.Printf("leftVal.Value=%v, leftVal.Type=%T, leftVal=%s\n", leftVal, leftVal, leftVal.Inspect())
 			//fmt.Printf("indexVal.Value=%v, indexVal.Type=%T, indexVal=%s\n", indexVal, indexVal, indexVal.Inspect())
 			switch v := leftVal.(type) {
+			case *String:
+				v.Set(a.Pos().Sline(), indexVal, val)
 			case *Hash:
 				v.Push(a.Pos().Sline(), indexVal, val)
 			case *Array:

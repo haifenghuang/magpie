@@ -207,6 +207,8 @@ func (s *String) CallMethod(line string, scope *Scope, method string, args ...Ob
 		return s.Hash(line, args...)
 	case "valid", "isValid", "ok":
 		return s.IsValid(line, args...)
+	case "set":
+		return s.Set(line, args...)
 	case "setValid":
 		return s.SetValid(line, args...)
 	}
@@ -803,6 +805,41 @@ func (s *String) SetValid(line string, args ...Object) Object {
 	}
 
 	s.String, s.Valid = val.String, true
+	return s
+}
+
+func (s *String) Set(line string, args ...Object) Object {
+	argLen := len(args)
+	if argLen != 2 {
+		panic(NewError(line, ARGUMENTERROR, "2", argLen))
+	}
+
+	idxObj, ok := args[0].(*Integer)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type()))
+	}
+
+	idx := idxObj.Int64
+	if idx < 0 || idx > int64(len(s.String)) {
+		panic(NewError(line, INDEXERROR, idx))
+	}
+
+	replaceObj, ok := args[1].(*String)
+	if !ok {
+		panic(NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type()))
+	}
+
+	var out bytes.Buffer
+	runes := []rune(s.String)
+	for index, rune := range runes {
+		if int64(index) == idx {
+			out.WriteString(replaceObj.String)
+		} else {
+			out.WriteString(string(rune))
+		}
+	}
+
+	s.String = out.String()
 	return s
 }
 
