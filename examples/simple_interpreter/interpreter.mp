@@ -374,7 +374,7 @@ fn Ast_Program(statements) {
 
 	let str = ""
 	for stmt in statements {
-		str += stmt["String"]
+		str += stmt["String"] + "\n"
 	}
 	self["String"] = str
 
@@ -489,13 +489,13 @@ fn Ast_IfExpression(tok, condition, consequence, alternative) {
 	self["Type"] = IfExpressionNode
 	self["TokenLiteral"] = tok["literal"]
 
-	let str = "if"
+	let str = "if "
 	str += condition["String"]
-	str += " "
-	str += consequence["String"]
+	str += " {\n"
+	str += "\t" + consequence["String"] + "}"
 	if alternative != nil {
-		str += "else"
-		str += alternative["String"]
+		str += "else {\n"
+		str += "\t" + alternative["String"] + "}\n"
 	}
 	self["String"] = str
 
@@ -509,7 +509,7 @@ fn Ast_BlockStatement(tok, statements) {
 
 	let str = ""
 	for stmt in statements {
-		str += stmt["String"]
+		str += stmt["String"] + "\n"
 	}
 	self["String"] = str
 
@@ -533,10 +533,10 @@ fn Ast_FunctionStatement(tok, name, functionLiteral) {
 	str += " ("
 	str += strings.join(params, ", ")
 	str += ") "
-	str += "{ "
+	str += "{\n"
 
-	str += functionLiteral["Body"]["String"]
-	str += " }"
+	str += "\t" + functionLiteral["Body"]["String"]
+	str += "}\n"
 
 	return self
 }
@@ -556,9 +556,9 @@ fn Ast_FunctionLiteral(tok, parameters, body) {
 	str += "("
 	str += strings.join(params, ", ")
 	str += ") "
-	str += "{ "
-	str += body["String"]
-	str += " }"
+	str += "{\n"
+	str += "\t" + body["String"]
+	str += "}\n"
 	self["String"] = str
 
 	return self
@@ -683,9 +683,9 @@ fn Ast_ForArrayExpression(tok, variable, iterable, block) {
 	str += variable
 	str += " in "
 	str += iterable["String"]
-	str += " { "
-	str += block["String"]
-	str += " }"
+	str += " {\n "
+	str += "\t" + block["String"]
+	str += "}\n"
 	self["String"] = str
 
 	return self
@@ -701,9 +701,9 @@ fn Ast_ForMapExpression(tok, key, value, h, block) {
 	str += key + ", " + value
 	str += " in "
 	str += h["String"]
-	str += " { "
-	str += block["String"]
-	str += " }"
+	str += " {\n"
+	str += "\t" + block["String"]
+	str += "}\n"
 	self["String"] = str
 	return self
 }
@@ -716,9 +716,9 @@ fn Ast_WhileExpression(tok, condition, block) {
 
 	let str = "while "
 	str += condition["String"]
-	str += "{ "
-	str += block["String"]
-	str += " }"
+	str += " {\n"
+	str += "\t" + block["String"]
+	str += "}\n"
 	self["String"] = str
 
 	return self
