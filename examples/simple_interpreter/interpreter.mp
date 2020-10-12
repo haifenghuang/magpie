@@ -429,15 +429,21 @@ fn Ast_LetStatement(tok, names, values) {
 	return self
 }
 
-fn Ast_ReturnStatement(tok, rv) {
-	let self = {"Token": tok, "ReturnValue": rv, "Type": ReturnStatementNode}
+//Now because we support return multiple values, so here the "ReturnValue" is reserved only
+//for campatibility with old code.
+fn Ast_ReturnStatement(tok, rv, rvs) {
+	let self = {"Token": tok, "ReturnValue": rv, "ReturnValues": rvs, "Type": ReturnStatementNode}
 
 	self["TokenLiteral"] = tok["literal"]
 
 	let str = tok["literal"] + " "
-	if rv != nil {
-		str += rv["TokenLiteral"]
+
+	let values = []
+	for value in rvs {
+		values.push(value["String"])
 	}
+	str += strings.join(values, ", ")
+
 	str += ";"
 	self["String"] = str
 
@@ -954,15 +960,33 @@ fn parseLetStatement(nextFlag) {
 fn parseReturnStatement() {
 	let curToken = parser_curToken
 
+	if peekTokenIs(TOKEN_SEMICOLON) { // e.g. { return; }
+		parser_nextToken()
+		return Ast_ReturnStatement(curToken, nil, [])
+	}
+
+	if peekTokenIs(TOKEN_RBRACE) { //e.g. { return }
+		return Ast_ReturnStatement(curToken, nil, [])
+	}
+
+	let retValues = []
 	parser_nextToken()
+	for {
+		let expr = parseExpressionStatement()
+		retValues.push(expr["Expression"])
 
-	let returnValue = parseExpression(LOWEST)
-
-	if peekTokenIs(TOKEN_SEMICOLON) {
+		if !peekTokenIs(TOKEN_COMMA) {
+			break
+		}
+		parser_nextToken()
 		parser_nextToken()
 	}
 
-	return Ast_ReturnStatement(curToken, returnValue)
+	if len(retValues) > 0 {
+		return Ast_ReturnStatement(curToken, retValues[0], retValues)
+	} else {
+		return Ast_ReturnStatement(curToken, nil, [])
+	}
 }
 
 fn parseExpressionStatement() {
@@ -1719,8 +1743,19 @@ fn NilObj() {
 	return {"Type": NIL_OBJ, "Inspect": "nil", "CallMethod": nil}
 }
 
-fn ReturnObj(value) {
-	return {"Type": RETURN_VALUE_OBJ, "Inspect": value["Inspect"], "Value": value, "CallMethod": nil}
+//Now because we support return multiple values, so here the "Value" is reserved only
+//for campatibility with old code.
+fn ReturnObj(value, values) {
+	let self = {"Type": RETURN_VALUE_OBJ, "Value": value, "Values": values, "CallMethod": nil}
+
+	let retValues = []
+	for v in values {
+		retValues.push(v["Inspect"])
+	}
+
+	self["Inspect"] = strings.join(retValues, ", ")
+
+	return self
 }
 
 fn ErrorObj(message) {
@@ -1889,8 +1924,12 @@ fn Array_Set(self, scope, args) {
 	return NIL
 }
 
-fn TupleObj(elements) {
-	let self = {"Type": TUPLE_OBJ, "Elements": elements, "Iterable": true}
+/* 'IsMulti' flag is used in function return values.
+   if a function returns multiple values, they will be wrapped into a tuple,
+   the flag will be set to true
+*/
+fn TupleObj(elements, isMulti = false) {
+	let self = {"Type": TUPLE_OBJ, "Elements": elements, "Iterable": true, "IsMulti": isMulti}
 
 	let items = []
 	for elem in elements {
@@ -2235,11 +2274,17 @@ fn Eval(node, scope) {
 	} elif nodeType == IfExpressionNode {
 		return evalIfExpression(node, scope)
 	} elif nodeType == ReturnStatementNode {
-		let r_val = Eval(node["ReturnValue"], scope)
-		if isError(r_val) {
-			return r_val
+		let retValues = []
+		for value in node["ReturnValues"] {
+			retValues.push(Eval(value, scope))
 		}
-		return ReturnValueObj(val)
+
+		let retValue = NIL
+		if len(retValues) > 0 {
+			retValue = retValues[0] // for old campatibility
+		}
+
+		return ReturnObj(retValue, retValues)
 	} elif nodeType == LetStatementNode {
 		return evalLetStatement(node, scope)
 //		let l_val = Eval(node["Value"], scope)
@@ -2331,7 +2376,7 @@ fn evalProgram(program, scope) {
 		result = Eval(statement, scope)
 		if result != nil {
 			if result["Type"] == RETURN_VALUE_OBJ {
-				return result["Value"]
+				return result["Values"]
 			} elif result["Type"] == ERROR_OBJ {
 				return result
 			}
@@ -2374,7 +2419,7 @@ fn objectToNativeBoolean(o) {
 	let obj = o
 
 	if obj["Type"] == RETURN_VALUE_OBJ {
-		obj = r.Value
+		obj = unwrapReturnValue(obj)
 	}
 
 	if obj["Type"] == INTEGER_OBJ {
@@ -2384,6 +2429,22 @@ fn objectToNativeBoolean(o) {
 		return true
 	} elif obj["Type"] == BOOLEAN_OBJ {
 		return obj["Value"]
+	} elif obj["Type"] == ARRAY_OBJ {
+		if len(obj["Elements"]) == 0 {
+			return false
+		}
+		return true
+	} elif obj["Type"] == TUPLE_OBJ {
+		if len(obj["Elements"]) == 0 {
+			return false
+		}
+		return true
+	} elif obj["Type"] == HASH_OBJ {
+		let h = obj["Pairs"]
+		if h.len() == 0 {
+			return false
+		}
+		return true
 	}
 
 	return true
@@ -2563,8 +2624,21 @@ fn evalLetStatement(node, scope) {
 	let valuesLen = 0
 	for value in node["Values"] {
 		let val = Eval(value, scope)
-		valuesLen += 1
-		values.push(val)
+		if val["Type"] == TUPLE_OBJ {
+			let tupleObj = val
+			if tupleObj["IsMulti"] {
+				valuesLen += len(tupleObj["Elements"])
+				for tupleItem in tupleObj["Elements"] {
+					values.push(tupleItem)
+				}
+			} else {
+				valuesLen += 1
+				values.push(tupleObj)
+			}
+		} else {
+			valuesLen += 1
+			values.push(val)
+		}
 	}
 
 	for idx, item in node["Names"] {
@@ -2807,10 +2881,7 @@ fn evalForArrayExpression(node, scope) {
 		}
 
 		if result["Type"] == RETURN_VALUE_OBJ {
-			if result["Value"] != nil {
-				return result
-			}
-			break
+			return result
 		} else {
 			elements.push(result)
 		}
@@ -2873,10 +2944,7 @@ fn evalForMapExpression(node, scope) {
 		}
 
 		if result["Type"] == RETURN_VALUE_OBJ {
-			if result["Value"] != nil {
-				return result
-			}
-			break
+			return result
 		} else {
 			elements.push(result)
 		}
@@ -2918,10 +2986,7 @@ fn evalWhileExpression(node, scope) {
 		}
 
 		if result["Type"] == RETURN_VALUE_OBJ {
-			if result["Value"] != nil {
-				return result
-			}
-			break
+			return result
 		}
 	}
 
@@ -3076,6 +3141,10 @@ fn extendFunctionScope(func, args) {
 
 fn unwrapReturnValue(obj) {
 	if obj["Type"] == RETURN_VALUE_OBJ {
+		if len(obj["Values"]) > 1 {
+			//if the function returns multiple values, then we wrap it in a tuple object.
+			return TupleObj(obj["Values"], true)
+		}
 		return obj["Value"]
 	}
 

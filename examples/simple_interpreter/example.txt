@@ -129,6 +129,9 @@ println("--------Testing 'FunctionStatement'--------")
 fn sub(x, y) { x - y }
 println("5 - 3 = ", sub(5, 3))
 
+fn multi_ret_value(x, y) { return x, y }
+w0, w1, w2, w3 = "aaa", multi_ret_value(12, "Hello"), "world"
+println("w0 = ", w0, ", w1 = ", w1, ", w2 = ", w2, ", w3 = ", w3)
 
 println()
 println("----Testing 'for item in array'----")
