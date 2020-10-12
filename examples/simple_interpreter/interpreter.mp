@@ -18,6 +18,7 @@ const (
 	TOKEN_BANG,        // "!"
 	TOKEN_ASTERISK,    // "*"
 	TOKEN_SLASH,       // "/"
+	TOKEN_POWER,       // "**"
 	TOKEN_INCREMENT,   // "++"
 	TOKEN_DECREMENT,   // "--"
 	
@@ -103,6 +104,7 @@ fn tokenString(tok) {
 		TOKEN_BANG      { return "!" }
 		TOKEN_ASTERISK  { return "*" }
 		TOKEN_SLASH     { return "/" }
+		TOKEN_POWER     { return "**" }
 		TOKEN_INCREMENT { return "++" }
 		TOKEN_DECREMENT { return "--" }
 		TOKEN_LT        { return "<" }
@@ -276,7 +278,13 @@ fn lex_nextToken() {
 	} elif lex_ch == "/" {
 		tok = newToken(TOKEN_SLASH, lex_ch)
 	} elif lex_ch == "*" {
-		tok = newToken(TOKEN_ASTERISK, lex_ch)
+		if peekChar() == "*" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_POWER, ch + lex_ch)
+		} else {
+			tok = newToken(TOKEN_ASTERISK, lex_ch)			
+		}
 	} elif lex_ch == "<" {
 		if peekChar() == "=" {
 			ch = lex_ch
@@ -852,6 +860,7 @@ precedences = {
 	TOKEN_MINUS:    SUM,
 	TOKEN_SLASH:    PRODUCT,
 	TOKEN_ASTERISK: PRODUCT,
+	TOKEN_POWER:    PRODUCT,
 	TOKEN_LPAREN:   CALL,
 	TOKEN_DOT:      CALL,
 	TOKEN_LBRAKET:  INDEX,
@@ -1089,7 +1098,7 @@ fn parseExpression(precedence) {
 	while !peekTokenIs(SEMICOLON) && precedence < peekPrecedence() {
 		//infix expression
 		if parser_peekToken["type"] == TOKEN_PLUS || parser_peekToken["type"] == TOKEN_MINUS ||
-		   parser_peekToken["type"] == TOKEN_SLASH || parser_peekToken["type"] == TOKEN_ASTERISK ||
+		   parser_peekToken["type"] == TOKEN_SLASH || parser_peekToken["type"] == TOKEN_ASTERISK || parser_peekToken["type"] == TOKEN_POWER ||
 		   parser_peekToken["type"] == TOKEN_EQ || parser_peekToken["type"] == TOKEN_NOT_EQ ||
 		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT ||
 		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE ||
@@ -1151,6 +1160,13 @@ fn parseInfixExpression(left) {
 	let curToken = parser_curToken
 
 	let precedence = curPrecedence()
+
+	// if the token is '**', we process it specially. e.g. 3 ** 2 ** 3 = 3 ** (2 ** 3)
+	// i.e. Exponent operator '**'' has right-to-left associativity
+	if curTokenIs(TOKEN_POWER) {
+		precedence = precedence - 1
+	}
+
 	parser_nextToken()
 	let right = parseExpression(precedence)
 
@@ -2661,14 +2677,19 @@ fn evalNumberInfixExpression(operator, left, right) {
 		} else {
 			return FloatObj(leftVal * rightVal)
 		} 
-		
 	} elif operator == "/" {
 		if isInt {
 			return IntegerObj(leftVal / rightVal)
 		} else {
 			return FloatObj(leftVal / rightVal)
 		}
-		
+	} elif operator == "**" {
+		let v = math.pow(leftVal, rightVal)
+		if isInt {
+			return IntegerObj(int(v))
+		} else {
+			return FloatObj(v)
+		}
 	} elif operator == "<" {
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	} elif operator == "<=" {
@@ -3150,10 +3171,13 @@ fn evalIncrementPostfixOperatorExpression(left) {
 fn evalDecrementPostfixOperatorExpression(left) {
 	if left["Type"] == INTEGER_OBJ {
 		let left_value = left["Value"]
+printf("111111111111-1, left_value=%v\n", left_value)
 		let returnVal = IntegerObj(left_value)
+printf("111111111111-2, returnVal=%v\n", returnVal)
 		left["Value"] = left_value - 1
-		left["Inspect"] = sprintf("%d", left_value - 1)
-
+printf("111111111111-3, left[Value]=%v\n", left["Value"])
+		left["Inspect"] = sprintf("%d", left["Value"])
+printf("111111111111-4, left[Inspect]=%v\n", left["Inspect"])
 		return returnVal
 	} elif left["Type"] == FLOAT_OBJ {
 		let left_value = left["Value"]
