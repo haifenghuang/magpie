@@ -10,6 +10,10 @@ println("a = ", a, ", b = ", b)
 c, _, d = "hello", 10, "world"
 println("c = ", c, ", d = ", d)
 
+let f1, f2 = 12.5, 3.789
+println("f1 = ", f1, ", f2 = ", f2)
+println(a, " + ", f2, " = ", a + f2)
+
 # This is a comment
 println()
 println("----Testing integer object and integer method----")

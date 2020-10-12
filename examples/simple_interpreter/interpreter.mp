@@ -8,6 +8,7 @@ const (
 	// Identifiers + literals
 	TOKEN_IDENT,   // add, foobar, x, y, ...
 	TOKEN_INT,     // 1343456
+	TOKEN_FLOAT,   // 13.43456
 	TOKEN_STRING,
 	
 	// Operators
@@ -94,6 +95,7 @@ fn tokenString(tok) {
 		TOKEN_EOF       { return "EOF" }
 		TOKEN_IDENT     { return "IDENT" }
 		TOKEN_INT       { return "INT" }
+		TOKEN_FLOAT     { return "FLOAT" }
 		TOKEN_STRING    { return "STRING" }
 		TOKEN_ASSIGN    { return "=" }
 		TOKEN_PLUS      { return "+" }
@@ -188,11 +190,20 @@ fn readIdentifier() {
 }
 
 fn readNumber() {
-	p = lex_position
-	while isDigit(lex_ch) {
+	let ret = lex_ch
+	readChar()
+
+	while isDigit(lex_ch) || lex_ch == "." || lex_ch == "_" { //support 1_000_000 format
+		if lex_ch == "_" {
+			readChar()
+			continue
+		}
+
+		ret += lex_ch
 		readChar()
 	}
-	return lex_input[p : lex_position]
+
+	return ret
 }
 
 fn skipWhitespace() {
@@ -314,7 +325,12 @@ fn lex_nextToken() {
 			typ = lookupIdent(lit)
 			return newToken(typ, lit)
 		} else if isDigit(lex_ch) {
-			return newToken(TOKEN_INT, readNumber())
+			let num_literal = readNumber()
+			if num_literal.contains(".") {
+				return newToken(TOKEN_FLOAT, num_literal)
+			} else {
+				return newToken(TOKEN_INT, num_literal)
+			}
 		} else {
 			tok = newToken(TOKEN_ILLEGAL, lex_ch)
 		}
@@ -343,6 +359,7 @@ const (
 	ReturnStatementNode,
 	ExpressionStatementNode,
 	IntegerLiteralNode,
+	FloatLiteralNode,
 	PrefixExpressionNode,
 	InfixExpressionNode,
 	BooleanNode,
@@ -466,6 +483,15 @@ fn Ast_ExpressionStatement(tok, expr) {
 
 fn Ast_IntegerLiteral(tok, value) {
 	let self = {"Token": tok, "Value": value, "Type": IntegerLiteralNode}
+
+	self["TokenLiteral"] = tok["literal"]
+	self["String"] = tok["literal"]
+
+	return self
+}
+
+fn Ast_FloatLiteral(tok, value) {
+	let self = {"Token": tok, "Value": value, "Type": FloatLiteralNode}
 
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = tok["literal"]
@@ -1011,6 +1037,8 @@ fn parseExpression(precedence) {
 		leftExp = parseIdentifier()
 	} elif parser_curToken["type"] == TOKEN_INT {
 		leftExp = parseIntegerLiteral()
+	} elif parser_curToken["type"] == TOKEN_FLOAT {
+		leftExp = parseFloatLiteral()
 	} elif parser_curToken["type"] == TOKEN_BANG {
 		leftExp = parsePrefixExpression()
 	} elif parser_curToken["type"] == TOKEN_MINUS {
@@ -1101,6 +1129,12 @@ fn parseIdentifier() {
 
 fn parseIntegerLiteral() {
 	return Ast_IntegerLiteral(parser_curToken, int(parser_curToken["literal"]))
+}
+
+fn parseFloatLiteral() {
+	let literal = parser_curToken["literal"]
+	
+	return Ast_FloatLiteral(parser_curToken, literal.parseFloat())
 }
 
 fn parsePrefixExpression() {
@@ -1658,6 +1692,7 @@ fn ResetScope(scope, name, val) {
 ////////////////////////////////////////////////
 /* Object Type */
 const INTEGER_OBJ      = "INTEGER"
+const FLOAT_OBJ        = "FLOAT"
 const BOOLEAN_OBJ      = "BOOLEAN"
 const NIL_OBJ          = "NIL"
 const RETURN_VALUE_OBJ = "RETURN_VALUE"
@@ -1683,7 +1718,7 @@ const FILE_OBJ         = "FILE"
 */
 
 fn IntegerObj(value) {
-	let self = {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value}
+	let self = {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value, "IsNumber": true}
 
 	self["CallMethod"] = fn (scope, methodName, methodArgs) {
 		if methodName == "next" {
@@ -1706,6 +1741,32 @@ fn Integer_Next(value) {
 
 fn Integer_Prev(value) {
 	return IntegerObj(value - 1)
+}
+
+fn FloatObj(value) {
+	let self = {"Type": FLOAT_OBJ, "Inspect": sprintf("%g", value), "Value": value, "IsNumber": true}
+
+	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+		if methodName == "ceil" {
+			return Float_Ceil(value)
+
+		} elif methodName == "floor" {
+			return Float_Floor(value)
+		} else {
+			let msg = sprintf("undefined method '%s' for object %s", methodName, FLOAT_OBJ)
+			return ErrorObj(msg)
+		}
+	}
+
+	return self
+}
+
+fn Float_Ceil(value) {
+	return FloatObj(value.ceil())
+}
+
+fn Float_Floor(value) {
+	return FloatObj(value.floor())
 }
 
 fn BooleanObj(value) {
@@ -2250,6 +2311,8 @@ fn Eval(node, scope) {
 		return Eval(node["Expression"], scope)
 	} elif nodeType == IntegerLiteralNode {
 		return IntegerObj(node["Value"])
+	} elif nodeType == FloatLiteralNode {
+		return FloatObj(node["Value"])
 	} elif nodeType == BooleanNode {
 		return nativeBoolToBooleanObject(node["Value"])
 	} elif nodeType == PrefixExpressionNode {
@@ -2428,6 +2491,11 @@ fn objectToNativeBoolean(o) {
 			return false
 		}
 		return true
+	} elif obj["Type"] == FLOAT_OBJ {
+		if obj["Value"] == 0.0 {
+			return false
+		}
+		return true
 	} elif obj["Type"] == BOOLEAN_OBJ {
 		return obj["Value"]
 	} elif obj["Type"] == ARRAY_OBJ {
@@ -2480,39 +2548,36 @@ fn evalBangOperatorExpression(right) {
 }
 
 fn evalMinusPrefixOperatorExpression(right) {
-	if right["Type"] != INTEGER_OBJ {
-		let msg = sprintf("unknown operator: -%s", right["Type"])
-		return ErrorObj(msg)
+	if right["Type"] == INTEGER_OBJ {
+		let value = right["Value"]
+		return IntegerObj(-value)
+	} elif right["Type"] == FLOAT_OBJ {
+		let value = right["Value"]
+		return FloatObj(-value)
 	}
 
-	let value = right["Value"]
-	return IntegerObj(-value)
-}
-
-fn evalIncrementPrefixOperatorExpression(right) {
-	if right["Type"] != INTEGER_OBJ {
-		let msg = sprintf("unsupported operator for prefix expression:'++' and type: %s", right["Type"])
-		return ErrorObj(msg)
-	}
-
-	let value = right["Value"]
-	right["Value"] = value + 1
-	right["Inspect"] = sprintf("%d", value + 1)
-
-	return IntegerObj(value + 1)
+	let msg = sprintf("unknown operator: -%s", right["Type"])
+	return ErrorObj(msg)
 }
 
 fn evalDecrementPrefixOperatorExpression(right) {
-	if right["Type"] != INTEGER_OBJ {
-		let msg = sprintf("unsupported operator for prefix expression:'--' and type: %s", right["Type"])
-		return ErrorObj(msg)
+	if right["Type"] == INTEGER_OBJ {
+		let value = right["Value"]
+		right["Value"] = value - 1
+		right["Inspect"] = sprintf("%d", value - 1)
+
+		return IntegerObj(value - 1)
+
+	} elif right["Type"] == FLOAT_OBJ {
+		let value = right["Value"]
+		right["Value"] = value - 1
+		right["Inspect"] = sprintf("%g", value - 1)
+
+		return FloatObj(value - 1)
 	}
 
-	let value = right["Value"]
-	right["Value"] = value - 1
-	right["Inspect"] = sprintf("%d", value - 1)
-
-	return IntegerObj(value - 1)
+	let msg = sprintf("unsupported operator for prefix expression:'--' and type: %s", right["Type"])
+	return ErrorObj(msg)
 }
 
 fn evalInfixExpression(operator, left, right) {
@@ -2533,8 +2598,8 @@ fn evalInfixExpression(operator, left, right) {
 			let rightCond = objectToNativeBoolean(right)
 			return nativeBoolToBooleanObject(leftCond || rightCond)
 		}
-	} elif left["Type"] == INTEGER_OBJ && right["Type"] == INTEGER_OBJ {
-		return evalIntegerInfixExpression(operator, left, right)
+	} elif left["IsNumber"] && right["IsNumber"] {
+		return evalNumberInfixExpression(operator, left, right)
 	} elif operator == "==" {
 		if left["Type"] == BOOLEAN_OBJ && right["Type"] == BOOLEAN_OBJ {
 			if l["Value"] == r["Value"] {
@@ -2572,18 +2637,38 @@ fn evalInfixExpression(operator, left, right) {
 	return  ErrorObj(msg2)
 }
 
-fn evalIntegerInfixExpression(operator, left, right) {
+fn evalNumberInfixExpression(operator, left, right) {
 	let leftVal = left["Value"]
 	let rightVal = right["Value"]
 
+	let isInt = left["Type"] == INTEGER_OBJ && right["Type"] == INTEGER_OBJ
+
 	if operator == "+" {
-		return IntegerObj(leftVal + rightVal)
+		if isInt {
+			return IntegerObj(leftVal + rightVal)
+		} else {
+			return FloatObj(leftVal + rightVal)
+		}
 	} elif operator == "-" {
-		return IntegerObj(leftVal - rightVal)
+		if isInt {
+			return IntegerObj(leftVal - rightVal)
+		} else {
+			return FloatObj(leftVal - rightVal)
+		}
 	} elif operator == "*" {
-		return IntegerObj(leftVal * rightVal)
+		if isInt {
+			return IntegerObj(leftVal * rightVal)
+		} else {
+			return FloatObj(leftVal * rightVal)
+		} 
+		
 	} elif operator == "/" {
-		return IntegerObj(leftVal / rightVal)
+		if isInt {
+			return IntegerObj(leftVal / rightVal)
+		} else {
+			return FloatObj(leftVal / rightVal)
+		}
+		
 	} elif operator == "<" {
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	} elif operator == "<=" {
@@ -3044,30 +3129,44 @@ fn evalPostfixExpression(operator, left) {
 }
 
 fn evalIncrementPostfixOperatorExpression(left) {
-	if left["Type"] != INTEGER_OBJ {
-		let msg = sprintf("unsupported operator for post expression:'++' and type: %s", left["Type"])
-		return ErrorObj(msg)
-	}
+	if left["Type"] == INTEGER_OBJ {
+		let left_value = left["Value"]
+		let returnVal = IntegerObj(left_value)
+		left["Value"] = left_value + 1
+		left["Inspect"] = sprintf("%d", left_value + 1)
+		return returnVal
+	} elif left["Type"] == FLOAT_OBJ {
+		let left_value = left["Value"]
+		let returnVal = FloatObj(left_value)
+		left["Value"] = left_value + 1
+		left["Inspect"] = sprintf("%g", left_value + 1)
+		return returnVal
+	} 
 
-	let left_value = left["Value"]
-	let returnVal = IntegerObj(left_value)
-	left["Value"] = left_value + 1
-	left["Inspect"] = sprintf("%d", left_value + 1)
-	return returnVal
+	let msg = sprintf("unsupported operator for post expression:'++' and type: %s", left["Type"])
+	return ErrorObj(msg)
 }
 
 fn evalDecrementPostfixOperatorExpression(left) {
-	if left["Type"] != INTEGER_OBJ {
-		let msg = sprintf("unsupported operator for post expression:'--' and type: %s", left["Type"])
-		return ErrorObj(msg)
+	if left["Type"] == INTEGER_OBJ {
+		let left_value = left["Value"]
+		let returnVal = IntegerObj(left_value)
+		left["Value"] = left_value - 1
+		left["Inspect"] = sprintf("%d", left_value - 1)
+
+		return returnVal
+	} elif left["Type"] == FLOAT_OBJ {
+		let left_value = left["Value"]
+		let returnVal = FloatObj(left_value)
+		left["Value"] = left_value - 1
+		left["Inspect"] = sprintf("%g", left_value - 1)
+
+		return returnVal
 	}
 
-	let left_value = left["Value"]
-	let returnVal = IntegerObj(left_value)
-	left["Value"] = left_value - 1
-	left["Inspect"] = sprintf("%d", left_value - 1)
-
-	return returnVal
+	
+	let msg = sprintf("unsupported operator for post expression:'--' and type: %s", left["Type"])
+	return ErrorObj(msg)
 }
 
 fn evalFunctionLiteral(node, scope) {
@@ -3099,6 +3198,13 @@ fn isTruthy(obj) {
 
 	if obj["Type"] == INTEGER_OBJ {
 		if obj["Value"] == 0 {
+			return false
+		}
+		return true
+	}
+
+	if obj["Type"] == FLOAT_OBJ {
+		if obj["Value"] == 0.0 {
 			return false
 		}
 		return true
