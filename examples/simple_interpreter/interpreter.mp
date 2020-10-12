@@ -119,6 +119,7 @@ fn tokenString(tok) {
 		TOKEN_RBRAKET   { return "]" }
 		TOKEN_COLON     { return ":" }
 		TOKEN_DOT       { return "." }
+		TOKEN_UNDERSCORE{ return "_" }
 		TOKEN_FUNCTION  { return "FUNCTION" }
 		TOKEN_LET       { return "LET" }
 		TOKEN_TRUE      { return "TRUE" }
