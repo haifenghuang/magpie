@@ -5,6 +5,11 @@ let ten = 10
 println("five = ", five)
 println("ten = ", ten)
 
+let a, b = 12, 10
+println("a = ", a, ", b = ", b)
+c, _, d = "hello", 10, "world"
+println("c = ", c, ", d = ", d)
+
 # This is a comment
 println()
 println("----Testing integer object and integer method----")

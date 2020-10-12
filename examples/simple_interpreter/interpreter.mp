@@ -39,7 +39,8 @@ const (
 	TOKEN_RBRAKET,   // "]"
 	TOKEN_COLON,     // ":"
 	TOKEN_DOT,       // "."
-	
+	TOKEN_UNDERSCORE,// "_"(PlaceHolder)
+
 	// Keywords
 	TOKEN_FUNCTION, // "FUNCTION"
 	TOKEN_LET,      // "LET"
@@ -302,6 +303,8 @@ fn lex_nextToken() {
 		tok = newToken(TOKEN_STRING, readString())
 	} elif lex_ch == "." {
 		tok = newToken(TOKEN_DOT, lex_ch)
+	} elif lex_ch == "_" {
+		tok = newToken(TOKEN_UNDERSCORE, lex_ch)
 	} elif lex_ch == 0 {
 		tok = newToken(TOKEN_EOF, "")
 	} else {
@@ -390,18 +393,36 @@ fn Ast_Identifier(tok, value) {
 	return self
 }
 
-fn Ast_LetStatement(tok, name, value) {
-	let self = {"Token": tok, "Name": name, "Value": value, "Type": LetStatementNode}
+fn Ast_LetStatement(tok, names, values) {
+	let self = {"Token": tok, "Names": names, "Values": values, "Type": LetStatementNode}
 
 	self["TokenLiteral"] = tok["literal"]
 
 	let str = ""
 	str += tok["literal"] + " "
-	str += name["TokenLiteral"]
-	str += " = "
-	if value != nil {
-		str += value["String"]
+
+	//names
+	let n = []
+	for name in names {
+		n.push(name["String"])
 	}
+	str += strings.join(n, ", ")
+
+	if len(values) == 0 { // no values
+		str += ";"
+		self["String"] = str
+		return self
+	}
+
+	str += " = "
+
+	//values
+	let v = []
+	for value in values {
+		v.push(value["String"])
+	}
+	str += strings.join(v, ", ")
+
 	str += ";"
 	self["String"] = str
 
@@ -844,36 +865,90 @@ fn ParseProgram() {
 
 fn parseStatement() {
 	if parser_curToken["type"] == TOKEN_LET {
-		return parseLetStatement()
+		return parseLetStatement(true)
 	} elif parser_curToken["type"] == TOKEN_RETURN {
 		return parseReturnStatement()
 	} elif parser_curToken["type"] == TOKEN_FUNCTION {
 		return parseFunctionStatement()
+	} elif parser_curToken["type"] == TOKEN_IDENT {
+		//if the current token is an 'identifier' and next token is a ',', 
+		//then we think it's a multiple assignment, but we treat it as a 'let' statement.
+		//otherwise, we just call parseExpressionStatement.
+		if peekTokenIs(TOKEN_COMMA) {
+			return parseLetStatement(false)
+		}
+		return parseExpressionStatement()
 	} else {
 		return parseExpressionStatement()
 	}
 }
 
-fn parseLetStatement() {
+fn parseLetStatement(nextFlag) {
 	let curToken = parser_curToken
-	if !expectPeek(TOKEN_IDENT) {
-		return nil
+
+	if !nextFlag {
+		//construct a dummy 'let' token
+		curToken = newToken(TOKEN_LET, "let")
 	}
 
-	let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
+	//parse left hand side of the assignment
+	let names = []
+	for {
+		if nextFlag {
+			parser_nextToken()
+		}
+		nextFlag = true
 
-	if !expectPeek(TOKEN_ASSIGN) {
-		return nil
-	}
+		if !curTokenIs(TOKEN_IDENT) && !curTokenIs(TOKEN_UNDERSCORE) {
+			let msg = sprintf("Syntax Error: expected token to be identifier|underscore, got %s instead.", parser_curToken["type"])
+			parser_Errors.push(msg)
+			return nil
+		}
 
-	parser_nextToken()
+		let name = Ast_Identifier(parser_curToken, parser_curToken["literal"])
+		names.push(name)
 
-	let value = parseExpression(LOWEST)
-	if peekTokenIs(TOKEN_SEMICOLON) {
+		if !peekTokenIs(TOKEN_ASSIGN) && !curTokenIs(TOKEN_SEMICOLON) && !peekTokenIs(TOKEN_COMMA) {
+			if peekTokenIs(TOKEN_SEMICOLON) {
+				parser_nextToken()
+			}
+
+			return Ast_LetStatement(curToken, names, nil)
+		}
+
 		parser_nextToken()
+		if curTokenIs(TOKEN_ASSIGN) || curTokenIs(TOKEN_SEMICOLON) {
+			break
+		}
+		if !curTokenIs(TOKEN_COMMA) {
+			let msg = sprintf("Syntax Error: expected token to be comma, got %s instead.", parser_curToken["type"])
+			parser_Errors.push(msg)
+			return nil
+		}
 	}
 
-	return Ast_LetStatement(curToken, name, value)
+	if curTokenIs(TOKEN_SEMICOLON) { //let x;
+		return Ast_LetStatement(curToken, names, nil)
+	}
+
+	//parse right hand side of the assignment
+	let values = []
+	let i = 0
+	parser_nextToken()
+	for {
+		let tmp = parseExpressionStatement()
+		values.push(tmp["Expression"])
+
+		if !peekTokenIs(TOKEN_COMMA) {
+			break
+		}
+		parser_nextToken()
+		parser_nextToken()
+
+		i += 1
+	}
+
+	return Ast_LetStatement(curToken, names, values)
 }
 
 fn parseReturnStatement() {
@@ -1491,7 +1566,7 @@ fn peekError(t) {
 }
 
 fn noPrefixParseFnError(t) {
-	let msg = "no prefix parse function for " + t +" found"
+	let msg = "no prefix parse function for " + tokenString(t) +" found"
 	parser_Errors.push(msg)
 }
 
@@ -2166,14 +2241,15 @@ fn Eval(node, scope) {
 		}
 		return ReturnValueObj(val)
 	} elif nodeType == LetStatementNode {
-		let l_val = Eval(node["Value"], scope)
-		if isError(l_val) {
-			return l_val
-		}
-
-		let l_name = node["Name"]
-		let name_value = l_name["Value"]
-		SetIntoScope(scope, name_value, l_val)
+		return evalLetStatement(node, scope)
+//		let l_val = Eval(node["Value"], scope)
+//		if isError(l_val) {
+//			return l_val
+//		}
+//
+//		let l_name = node["Name"]
+//		let name_value = l_name["Value"]
+//		SetIntoScope(scope, name_value, l_val)
 
 	} elif nodeType == IdentifierNode {
 		return evalIdentifier(node, scope)
@@ -2479,6 +2555,36 @@ fn evalIfExpression(ie, scope) {
 		return Eval(alternative, scope)
 	} else {
 		return NIL
+	}
+}
+
+fn evalLetStatement(node, scope) {
+	let values = []
+	let valuesLen = 0
+	for value in node["Values"] {
+		let val = Eval(value, scope)
+		valuesLen += 1
+		values.push(val)
+	}
+
+	for idx, item in node["Names"] {
+		let tok = item["Token"]
+		if idx >= valuesLen { //There are more Names than Values
+			let tok = item["Token"]
+			if tok["Type"] != TOKEN_UNDERSCORE {
+				SetIntoScope(scope, item["String"], NIL)
+			}
+		} else {
+			if tok["Type"] == TOKEN_UNDERSCORE {
+				continue
+			}
+			val = values[idx]
+			if val["Type"] != ERROR_OBJ {
+				SetIntoScope(scope, item["String"], val)
+			} else {
+				return
+			}
+		}
 	}
 }
 
