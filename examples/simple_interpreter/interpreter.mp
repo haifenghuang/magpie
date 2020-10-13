@@ -46,6 +46,7 @@ const (
 	// Keywords
 	TOKEN_FUNCTION, // "FUNCTION"
 	TOKEN_LET,      // "LET"
+	TOKEN_CONST,    // "CONST"
 	TOKEN_TRUE,     // "TRUE"
 	TOKEN_FALSE,    // "FALSE"
 	TOKEN_IF,       // "IF"
@@ -64,6 +65,7 @@ const (
 keywords = {
 	"fn":       TOKEN_FUNCTION,
 	"let":      TOKEN_LET,
+	"const":    TOKEN_CONST,
 	"true":     TOKEN_TRUE,
 	"false":    TOKEN_FALSE,
 	"if":       TOKEN_IF,
@@ -126,6 +128,7 @@ fn tokenString(tok) {
 		TOKEN_UNDERSCORE{ return "_" }
 		TOKEN_FUNCTION  { return "FUNCTION" }
 		TOKEN_LET       { return "LET" }
+		TOKEN_CONST     { return "CONST" }
 		TOKEN_TRUE      { return "TRUE" }
 		TOKEN_FALSE     { return "FALSE" }
 		TOKEN_IF        { return "IF" }
@@ -364,6 +367,7 @@ const (
 	ProgramNode,
 	IdentifierNode,
 	LetStatementNode,
+	ConstStatementNode,
 	ReturnStatementNode,
 	ExpressionStatementNode,
 	IntegerLiteralNode,
@@ -450,6 +454,30 @@ fn Ast_LetStatement(tok, names, values) {
 	str += strings.join(v, ", ")
 
 	str += ";"
+	self["String"] = str
+
+	return self
+}
+
+fn Ast_ConstStatement(tok, names, values) {
+	let self = {"Token": tok, "Names": names, "Values": values, "Type": ConstStatementNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = ""
+	str += tok["literal"] + " ( "
+
+	for idx, name in names {
+		str += name["TokenLiteral"]
+		str += " = "
+		let v = values[idx]
+		if v != nil {
+			str += v["String"]
+		}
+		str += ", "
+	}
+
+	str += " )"
 	self["String"] = str
 
 	return self
@@ -908,6 +936,8 @@ fn ParseProgram() {
 fn parseStatement() {
 	if parser_curToken["type"] == TOKEN_LET {
 		return parseLetStatement(true)
+	} if parser_curToken["type"] == TOKEN_CONST {
+		return parseConstStatement()
 	} elif parser_curToken["type"] == TOKEN_RETURN {
 		return parseReturnStatement()
 	} elif parser_curToken["type"] == TOKEN_FUNCTION {
@@ -991,6 +1021,101 @@ fn parseLetStatement(nextFlag) {
 	}
 
 	return Ast_LetStatement(curToken, names, values)
+}
+
+fn parseConstStatement() {
+	let curToken = parser_curToken
+
+	let names = []
+	let values = []
+
+	if peekTokenIs(TOKEN_LPAREN) {
+		parser_nextToken()
+
+		let autoInt = 0 //autoIncrement
+
+		let idPair = {}
+
+		for {
+			if peekTokenIs(TOKEN_RPAREN) {
+				parser_nextToken()
+				return Ast_ConstStatement(curToken, names, values)
+			}
+
+			if !expectPeek(TOKEN_IDENT) { // identifier is mandatory here
+				return nil
+			}
+
+			let id = parseIdentifier()
+			names.push(id)
+
+			// peek next that can be only '=' or ',' or ')'
+			if !peekTokenIs(TOKEN_ASSIGN) && !peekTokenIs(TOKEN_COMMA) && !peekTokenIs(TOKEN_RPAREN) {
+				let msg = sprintf("Syntax Error: Token %s not allowed here.", peekToken["type"])
+				parser_Errors.push(msg)
+				return nil
+			}
+
+			// check for optional default value (optional only in `INT` case)
+			let value = nil
+			if peekTokenIs(TOKEN_ASSIGN) {
+				parser_nextToken()
+				parser_nextToken()
+
+				let expStmt = parseExpressionStatement()
+				value = expStmt["Expression"]
+			}
+
+			if value != nil {
+				if value["Type"] == IntegerLiteralNode {
+					autoInt = value["Value"] + 1
+				}
+			} else {
+				//create a new INT token with 'autoInt' as it's value
+				let tok = newToken(TOKEN_INT, str(autoInt))
+				value = Ast_IntegerLiteral(parser_curToken, autoInt)
+				autoInt++
+			}
+
+			let str_id = id["Value"]
+			if idPair.exists(str_id) { //is identifier redeclared?
+				let msg = sprintf("Syntax Error: Identifier %s redeclared.", str_id)
+				parser_Errors.push(msg)
+				return nil
+			} else {
+				idPair[str_id] = value
+				values.push(value)
+			}
+
+			if !peekTokenIs(TOKEN_COMMA) {
+				parser_nextToken()
+				break
+			}
+			parser_nextToken()
+		}
+
+	} else {
+		if !expectPeek(TOKEN_IDENT) {
+			return nil
+		}
+
+		let name = parseIdentifier()
+		names.push(name)
+
+		if !expectPeek(TOKEN_ASSIGN) {
+			return nil
+		}
+
+		parser_nextToken()
+		let value = parseExpression(LOWEST)
+		values.push(value)
+	}
+
+	if peekTokenIs(TOKEN_SEMICOLON) {
+		parser_nextToken()
+	}
+
+	return Ast_ConstStatement(curToken, names, values)
 }
 
 fn parseReturnStatement() {
@@ -1651,7 +1776,7 @@ fn noPrefixParseFnError(t) {
 //                 SCOPE
 ////////////////////////////////////////////////
 fn NewScope() {
-	return {"store": {}, "outer": nil}
+	return {"store": {}, "readonly": {}, "outer": nil}
 }
 
 fn NewEnclosedScope(outerScope) {
@@ -1675,15 +1800,39 @@ fn GetFromScope(scope, name) {
 
 fn SetIntoScope(scope, name, val) {
 	let store = scope["store"]
+	let ro = scope["readonly"]
+
+	if store.exists(name) && ro.exists(name) {
+		printf("Const variable '%s' cannot be modified.\n", name)
+		os.exit(3)
+	}
+
 	store[name] = val
 	return val
 }
 
+fn SetIntoConstScope(scope, name, val) {
+	let store = scope["store"]
+	let ro = scope["readonly"]
+
+	store[name] = val
+	
+	ro[name] = true //mark it as readonly
+
+	return val
+
+}
 
 fn ResetScope(scope, name, val) {
 	let store = scope["store"]
+	let ro = scope["readonly"]
+
 	let obj = store[name]
 	if obj != nil {
+		if ro.exists(name) {
+			printf("Const variable '%s' cannot be modified.\n", name)
+			os.exit(3)
+		}
 		store[name] = val
 	}
 
@@ -2375,7 +2524,8 @@ fn Eval(node, scope) {
 //		let l_name = node["Name"]
 //		let name_value = l_name["Value"]
 //		SetIntoScope(scope, name_value, l_val)
-
+	} elif nodeType == ConstStatementNode {
+		return evalConstStatement(node, scope)
 	} elif nodeType == IdentifierNode {
 		return evalIdentifier(node, scope)
 	} elif nodeType == FunctionLiteralNode {
@@ -2767,6 +2917,19 @@ fn evalLetStatement(node, scope) {
 			}
 		}
 	}
+}
+
+fn evalConstStatement(node, scope) {
+	for idx, name in node["Names"] {
+		let v = node["Values"]
+		val = Eval(v[idx], scope)
+		if val["Type"] == ERROR_OBJ {
+			return val
+		}
+		SetIntoConstScope(scope, name["Value"], val)
+	}
+
+	return NIL
 }
 
 fn evalIdentifier(node, scope) {
