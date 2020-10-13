@@ -244,6 +244,7 @@ fn lex_nextToken() {
 
 	if lex_ch == "#" {
 		skipComment()
+		return lex_nextToken()
 	}
 
 	if lex_ch == "=" {

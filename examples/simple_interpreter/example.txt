@@ -56,6 +56,10 @@ println("new arr2 length = ", len(arr))
 println()
 println("----Testing tuple object----")
 let tup1 = (1, 2)
+
+# error: cannot assign to a tuple
+# tup1[0] = 10
+
 println(tup1)
 println("tup1[1] = ", tup1[1])
 println("tup1[-1] = ", tup1[-1])
@@ -153,6 +157,23 @@ println("----Testing 'for item in string'----")
 for item in "hello" {
 	println("idx = ", $_, ", item = ", item)
 }
+
+
+println()
+println("----Testing 'const' statement----")
+const (
+	TOKEN_ILLEGAL,
+	TOKEN_EOF,
+	TOKEN_ASSIGN = 10,
+	TOKEN_PLUS,
+)
+println("TOKEN_ILLEGAL = ", TOKEN_ILLEGAL)
+println("TOKEN_EOF = ", TOKEN_EOF)
+println("TOKEN_ASSIGN = ", TOKEN_ASSIGN)
+println("TOKEN_PLUS = ", TOKEN_PLUS)
+
+# error: cannot modify a constant
+# TOKEN_EOF = 5
 
 println()
 println("----Testing 'file' object operation----")
