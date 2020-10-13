@@ -15,7 +15,7 @@ println("f1 = ", f1, ", f2 = ", f2)
 println(a, " + ", f2, " = ", a + f2)
 
 let f3 = 3 ** 2 ** 3
-println("f3 = ", f3)
+println("3 ** 2 ** 3 = ", f3)
 
 
 # This is a comment
