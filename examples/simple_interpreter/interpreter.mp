@@ -466,7 +466,7 @@ fn Ast_ConstStatement(tok, names, values) {
 	self["TokenLiteral"] = tok["literal"]
 
 	let str = ""
-	str += tok["literal"] + " ( "
+	str += tok["literal"] + " ("
 
 	for idx, name in names {
 		str += name["TokenLiteral"]
@@ -478,7 +478,7 @@ fn Ast_ConstStatement(tok, names, values) {
 		str += ", "
 	}
 
-	str += " )"
+	str += ")"
 	self["String"] = str
 
 	return self
@@ -1074,7 +1074,7 @@ fn parseConstStatement() {
 			} else {
 				//create a new INT token with 'autoInt' as it's value
 				let tok = newToken(TOKEN_INT, str(autoInt))
-				value = Ast_IntegerLiteral(parser_curToken, autoInt)
+				value = Ast_IntegerLiteral(tok, autoInt)
 				autoInt++
 			}
 
