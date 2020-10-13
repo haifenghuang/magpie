@@ -160,7 +160,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		if left.Type() == ERROR_OBJ {
 			return left
 		}
-		return evalPostfixExpression(left, node)
+		return evalPostfixExpression(left, node, scope)
 	case *ast.IfExpression:
 		return evalIfExpression(node, scope)
 	case *ast.IfMacroStatement:
@@ -1658,46 +1658,52 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		}
 
 	case "++":
-		return evalIncrementPrefixOperatorExpression(p, right)
+		return evalIncrementPrefixOperatorExpression(p, right, scope)
 	case "--":
-		return evalDecrementPrefixOperatorExpression(p, right)
+		return evalDecrementPrefixOperatorExpression(p, right, scope)
 	}
 	panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
 }
 
-func evalIncrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object) Object {
+func evalIncrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object, scope *Scope) Object {
 	switch right.Type() {
 	case INTEGER_OBJ:
 		rightObj := right.(*Integer)
-		rightObj.Int64 = rightObj.Int64 + 1
-		return NewInteger(rightObj.Int64)
+		rightVal := rightObj.Int64
+		scope.Reset(p.Right.String(), NewInteger(rightVal + 1))
+		return NewInteger(rightVal + 1)
 	case UINTEGER_OBJ:
 		rightObj := right.(*UInteger)
-		rightObj.UInt64 = rightObj.UInt64 + 1
-		return NewUInteger(rightObj.UInt64)
+		rightVal := rightObj.UInt64
+		scope.Reset(p.Right.String(), NewUInteger(rightVal + 1))
+		return NewUInteger(rightVal + 1)
 	case FLOAT_OBJ:
 		rightObj := right.(*Float)
-		rightObj.Float64 = rightObj.Float64 + 1
-		return NewFloat(rightObj.Float64)
+		rightVal := rightObj.Float64
+		scope.Reset(p.Right.String(), NewFloat(rightVal + 1))
+		return NewFloat(rightVal + 1)
 	default:
 		panic(NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type()))
 	}
 }
 
-func evalDecrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object) Object {
+func evalDecrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object, scope *Scope) Object {
 	switch right.Type() {
 	case INTEGER_OBJ:
 		rightObj := right.(*Integer)
-		rightObj.Int64 = rightObj.Int64 - 1
-		return NewInteger(rightObj.Int64)
+		rightVal := rightObj.Int64
+		scope.Reset(p.Right.String(), NewInteger(rightVal - 1))
+		return NewInteger(rightVal - 1)
 	case UINTEGER_OBJ:
 		rightObj := right.(*UInteger)
-		rightObj.UInt64 = rightObj.UInt64 - 1
-		return NewUInteger(rightObj.UInt64)
+		rightVal := rightObj.UInt64
+		scope.Reset(p.Right.String(), NewUInteger(rightVal - 1))
+		return NewUInteger(rightVal - 1)
 	case FLOAT_OBJ:
 		rightObj := right.(*Float)
-		rightObj.Float64 = rightObj.Float64 - 1
-		return NewFloat(rightObj.Float64)
+		rightVal := rightObj.Float64
+		scope.Reset(p.Right.String(), NewFloat(rightVal - 1))
+		return NewFloat(rightVal - 1)
 	default:
 		panic(NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type()))
 	}
@@ -4796,7 +4802,7 @@ func evalTupleIndex(tuple *Tuple, ie *ast.IndexExpression, scope *Scope) Object 
 	return tuple.Members[idx]
 }
 
-func evalPostfixExpression(left Object, node *ast.PostfixExpression) Object {
+func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scope) Object {
 	if left.Type() == INSTANCE_OBJ { //operator overloading
 		instanceObj := left.(*ObjectInstance)
 		method := instanceObj.GetMethod(node.Operator)
@@ -4815,52 +4821,52 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression) Object {
 
 	switch node.Operator {
 	case "++":
-		return evalIncrementPostfixOperatorExpression(node, left)
+		return evalIncrementPostfixOperatorExpression(node, left, scope)
 	case "--":
-		return evalDecrementPostfixOperatorExpression(node, left)
+		return evalDecrementPostfixOperatorExpression(node, left, scope)
 	default:
 		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
 	}
 }
 
-func evalIncrementPostfixOperatorExpression(node *ast.PostfixExpression, left Object) Object {
+func evalIncrementPostfixOperatorExpression(node *ast.PostfixExpression, left Object, scope *Scope) Object {
 	switch left.Type() {
 	case INTEGER_OBJ:
 		leftObj := left.(*Integer)
 		returnVal := NewInteger(leftObj.Int64)
-		leftObj.Int64 = leftObj.Int64 + 1
+		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64 + 1))
 		return returnVal
 	case UINTEGER_OBJ:
 		leftObj := left.(*UInteger)
 		returnVal := NewUInteger(leftObj.UInt64)
-		leftObj.UInt64 = leftObj.UInt64 + 1
+		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64 + 1))
 		return returnVal
 	case FLOAT_OBJ:
 		leftObj := left.(*Float)
 		returnVal := NewFloat(leftObj.Float64)
-		leftObj.Float64 = leftObj.Float64 + 1
+		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 + 1))
 		return returnVal
 	default:
 		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
 	}
 }
 
-func evalDecrementPostfixOperatorExpression(node *ast.PostfixExpression, left Object) Object {
+func evalDecrementPostfixOperatorExpression(node *ast.PostfixExpression, left Object, scope *Scope) Object {
 	switch left.Type() {
 	case INTEGER_OBJ:
 		leftObj := left.(*Integer)
 		returnVal := NewInteger(leftObj.Int64)
-		leftObj.Int64 = leftObj.Int64 - 1
+		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64 - 1))
 		return returnVal
 	case UINTEGER_OBJ:
 		leftObj := left.(*UInteger)
 		returnVal := NewUInteger(leftObj.UInt64)
-		leftObj.UInt64 = leftObj.UInt64 - 1
+		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64 - 1))
 		return returnVal
 	case FLOAT_OBJ:
 		leftObj := left.(*Float)
 		returnVal := NewFloat(leftObj.Float64)
-		leftObj.Float64 = leftObj.Float64 - 1
+		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 - 1))
 		return returnVal
 	default:
 		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
