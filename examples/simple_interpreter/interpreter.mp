@@ -3171,13 +3171,9 @@ fn evalIncrementPostfixOperatorExpression(left) {
 fn evalDecrementPostfixOperatorExpression(left) {
 	if left["Type"] == INTEGER_OBJ {
 		let left_value = left["Value"]
-printf("111111111111-1, left_value=%v\n", left_value)
 		let returnVal = IntegerObj(left_value)
-printf("111111111111-2, returnVal=%v\n", returnVal)
 		left["Value"] = left_value - 1
-printf("111111111111-3, left[Value]=%v\n", left["Value"])
 		left["Inspect"] = sprintf("%d", left["Value"])
-printf("111111111111-4, left[Inspect]=%v\n", left["Inspect"])
 		return returnVal
 	} elif left["Type"] == FLOAT_OBJ {
 		let left_value = left["Value"]
