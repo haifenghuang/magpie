@@ -1,4 +1,32 @@
 ////////////////////////////////////////////////
+//                 POSITION
+////////////////////////////////////////////////
+
+//Position is the location of a code point in the source
+fn newPosition(filename, offset, line, column) {
+	//fffset: relative to entire file
+	//column: relative to each line
+
+	return {"Filename": filename, "Offset": offset, "Line": line, "Column": column}
+}
+
+//convert position to string
+fn positionStr(position) {
+	let msg = ""
+	if position == nil {
+		return "NoPos"
+	}
+
+	if position["Filename"] == nil || position["Filename"] == "" {
+		msg = sprintf(" <%d:%d> ", position["Line"], position["Column"])
+	} else {
+		msg = sprintf(" <%s: %d:%d> ", position["Filename"], position["Line"], position["Column"])
+	}
+
+	return msg
+}
+
+////////////////////////////////////////////////
 //                 TOKEN
 ////////////////////////////////////////////////
 const (
@@ -88,8 +116,8 @@ fn lookupIdent(ident) {
 	return TOKEN_IDENT
 }
 
-fn newToken(t, ch) {
-	return {"type": t, "literal": ch}
+fn newToken(t, ch, position) {
+	return {"type": t, "literal": ch, "position": position}
 }
 
 fn tokenString(tok) {
@@ -147,13 +175,17 @@ fn tokenString(tok) {
 ////////////////////////////////////////////////
 //                 LEXER
 ////////////////////////////////////////////////
+lex_filename = ""
 lex_input = ""        // input 
 lex_position = 0     // current position in input (points to current char)
 lex_readPosition = 0 // current reading position in input (after current char)
 lex_ch = " "         // current char under examination
+lex_line = 1
+lex_col = 0
 
 //create a new lexer
-fn NewLexer(input) {
+fn NewLexer(input, filename) {
+	lex_filename = filepath.base(filename)
 	lex_input = input
 	readChar()
 }
@@ -171,6 +203,12 @@ fn readChar() {
 		lex_ch = 0
 	} else {
 		lex_ch = lex_input[lex_readPosition]
+		if lex_ch == "\n" {
+			lex_col = 0
+			lex_line += 1
+		} else {
+			lex_col += 1
+		}
 	}
 
 	lex_position = lex_readPosition
@@ -238,9 +276,13 @@ fn skipComment() {
 	}
 }
 
+
 fn lex_nextToken() {
 	let tok
 	skipWhitespace()
+
+	let tok_pos = newPosition(lex_filename, lex_position, lex_line, lex_col)
+	tok_pos["Column"] -= 1
 
 	if lex_ch == "#" {
 		skipComment()
@@ -251,97 +293,97 @@ fn lex_nextToken() {
 		if peekChar() == "=" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_EQ, ch + lex_ch)
+			tok = newToken(TOKEN_EQ, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_ASSIGN, lex_ch)
+			tok = newToken(TOKEN_ASSIGN, lex_ch, tok_pos)
 		}
 	} elif lex_ch == "+" {
 		if peekChar() == "+" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_INCREMENT, ch + lex_ch)
+			tok = newToken(TOKEN_INCREMENT, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_PLUS, lex_ch)
+			tok = newToken(TOKEN_PLUS, lex_ch, tok_pos)
 		}
 	} elif lex_ch == "-" {
 		if peekChar() == "-" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_DECREMENT, ch + lex_ch)
+			tok = newToken(TOKEN_DECREMENT, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_MINUS, lex_ch)				
+			tok = newToken(TOKEN_MINUS, lex_ch, tok_pos)				
 		}
 	} elif lex_ch == "!" {
 		if peekChar() == "=" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_NOT_EQ, ch + lex_ch)
+			tok = newToken(TOKEN_NOT_EQ, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_BANG, lex_ch)
+			tok = newToken(TOKEN_BANG, lex_ch, tok_pos)
 		}
 	} elif lex_ch == "/" {
-		tok = newToken(TOKEN_SLASH, lex_ch)
+		tok = newToken(TOKEN_SLASH, lex_ch, tok_pos)
 	} elif lex_ch == "*" {
 		if peekChar() == "*" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_POWER, ch + lex_ch)
+			tok = newToken(TOKEN_POWER, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_ASTERISK, lex_ch)			
+			tok = newToken(TOKEN_ASTERISK, lex_ch, tok_pos)			
 		}
 	} elif lex_ch == "<" {
 		if peekChar() == "=" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_LE, ch + lex_ch)
+			tok = newToken(TOKEN_LE, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_LT, lex_ch)
+			tok = newToken(TOKEN_LT, lex_ch, tok_pos)
 		}
 	} elif lex_ch == ">" {
 		if peekChar() == "=" {
 			ch = lex_ch
 			readChar()
-			tok = newToken(TOKEN_GE, ch + lex_ch)
+			tok = newToken(TOKEN_GE, ch + lex_ch, tok_pos)
 		} else {
-			tok = newToken(TOKEN_GT, lex_ch)
+			tok = newToken(TOKEN_GT, lex_ch, tok_pos)
 		}
 	} elif lex_ch == ";" {
-		tok = newToken(TOKEN_SEMICOLON, lex_ch)
+		tok = newToken(TOKEN_SEMICOLON, lex_ch, tok_pos)
 	} elif lex_ch == "(" {
-		tok = newToken(TOKEN_LPAREN, lex_ch)
+		tok = newToken(TOKEN_LPAREN, lex_ch, tok_pos)
 	} elif lex_ch == ")" {
-		tok = newToken(TOKEN_RPAREN, lex_ch)
+		tok = newToken(TOKEN_RPAREN, lex_ch, tok_pos)
 	} elif lex_ch == "," {
-		tok = newToken(TOKEN_COMMA, lex_ch)
+		tok = newToken(TOKEN_COMMA, lex_ch, tok_pos)
 	} elif lex_ch == "{" {
-		tok = newToken(TOKEN_LBRACE, lex_ch)
+		tok = newToken(TOKEN_LBRACE, lex_ch, tok_pos)
 	} elif lex_ch == "}" {
-		tok = newToken(TOKEN_RBRACE, lex_ch)
+		tok = newToken(TOKEN_RBRACE, lex_ch, tok_pos)
 	} elif lex_ch == "[" {
-		tok = newToken(TOKEN_LBRAKET, lex_ch)
+		tok = newToken(TOKEN_LBRAKET, lex_ch, tok_pos)
 	} elif lex_ch == "]" {
-		tok = newToken(TOKEN_RBRAKET, lex_ch)
+		tok = newToken(TOKEN_RBRAKET, lex_ch, tok_pos)
 	} elif lex_ch == ":" {
-		tok = newToken(TOKEN_COLON, lex_ch)
+		tok = newToken(TOKEN_COLON, lex_ch, tok_pos)
 	} elif lex_ch == "\"" {
-		tok = newToken(TOKEN_STRING, readString())
+		tok = newToken(TOKEN_STRING, readString(), tok_pos)
 	} elif lex_ch == "." {
-		tok = newToken(TOKEN_DOT, lex_ch)
+		tok = newToken(TOKEN_DOT, lex_ch, tok_pos)
 	} elif lex_ch == "_" {
-		tok = newToken(TOKEN_UNDERSCORE, lex_ch)
+		tok = newToken(TOKEN_UNDERSCORE, lex_ch, tok_pos)
 	} elif lex_ch == 0 {
-		tok = newToken(TOKEN_EOF, "")
+		tok = newToken(TOKEN_EOF, "", tok_pos)
 	} else {
 		if isLetter(lex_ch) {
 			lit = readIdentifier()
 			typ = lookupIdent(lit)
-			return newToken(typ, lit)
+			return newToken(typ, lit, tok_pos, tok_pos)
 		} else if isDigit(lex_ch) {
 			let num_literal = readNumber()
 			if num_literal.contains(".") {
-				return newToken(TOKEN_FLOAT, num_literal)
+				return newToken(TOKEN_FLOAT, num_literal, tok_pos)
 			} else {
-				return newToken(TOKEN_INT, num_literal)
+				return newToken(TOKEN_INT, num_literal, tok_pos)
 			}
 		} else {
 			tok = newToken(TOKEN_ILLEGAL, lex_ch)
@@ -898,8 +940,8 @@ precedences = {
 }
 
 let parser_Errors = []
-let parser_curToken = newToken(TOKEN_ILLEGAL, "")
-let parser_peekToken = newToken(TOKEN_ILLEGAL, "")
+let parser_curToken = newToken(TOKEN_ILLEGAL, "", nil)
+let parser_peekToken = newToken(TOKEN_ILLEGAL, "", nil)
 
 let isInLoop = false
 
@@ -961,7 +1003,7 @@ fn parseLetStatement(nextFlag) {
 
 	if !nextFlag {
 		//construct a dummy 'let' token
-		curToken = newToken(TOKEN_LET, "let")
+		curToken = newToken(TOKEN_LET, "let", curToken["position"])
 	}
 
 	//parse left hand side of the assignment
@@ -1073,7 +1115,7 @@ fn parseConstStatement() {
 				}
 			} else {
 				//create a new INT token with 'autoInt' as it's value
-				let tok = newToken(TOKEN_INT, str(autoInt))
+				let tok = newToken(TOKEN_INT, str(autoInt), parser_curToken["position"])
 				value = Ast_IntegerLiteral(tok, autoInt)
 				autoInt++
 			}
@@ -3451,9 +3493,10 @@ fn unwrapReturnValue(obj) {
 #define DEBUG
 #ifdef DEBUG
 {
-	let source = ioutil.readFile("examples/simple_interpreter/example.txt")
+	let filename = "examples/simple_interpreter/example.txt"
+	let source = ioutil.readFile(filename)
 	/* lexer */
-	NewLexer(source)
+	NewLexer(source, filename)
 
 /* for debugging : print each tokens */
 //	do {
@@ -3461,7 +3504,7 @@ fn unwrapReturnValue(obj) {
 //		if n["type"] == TOKEN_EOF {
 //			break
 //		} else {
-//			printf("{tokentype: \"%s\", literal: \"%s\"}\n", tokenString(n["type"]), n["literal"])
+//			printf("{tokentype: \"%s\", literal: \"%s\", pos : %s}\n", tokenString(n["type"]), n["literal"], positionStr(n["position"]))
 //		}
 //	}
 
