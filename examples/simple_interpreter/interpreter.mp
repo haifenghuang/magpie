@@ -10,6 +10,10 @@ fn newPosition(filename, offset, line, column) {
 	return {"Filename": filename, "Offset": offset, "Line": line, "Column": column}
 }
 
+fn invalidPos() {
+	return newPosition("", 0, 0, 0)
+}
+
 //convert position to string
 fn positionStr(position) {
 	let msg = ""
@@ -143,7 +147,7 @@ fn tokenString(tok) {
 		TOKEN_GE        { return ">=" }
 		TOKEN_EQ        { return "==" }
 		TOKEN_NOT_EQ    { return "!=" }
-		TOKEN_COMMA     { return " {" }
+		TOKEN_COMMA     { return "," }
 		TOKEN_SEMICOLON { return ";" }
 		TOKEN_LPAREN    { return "(" }
 		TOKEN_RPAREN    { return ")" }
@@ -225,7 +229,7 @@ fn peekChar() {
 
 fn readIdentifier() {
 	pos = lex_position
-	while (isLetter(lex_ch) || isDigit(lex_ch)) {
+	while (lex_ch != 0 && (isLetter(lex_ch) || isDigit(lex_ch))) {
 		readChar()
 	}
 
@@ -236,7 +240,7 @@ fn readNumber() {
 	let ret = lex_ch
 	readChar()
 
-	while isDigit(lex_ch) || lex_ch == "." || lex_ch == "_" { //support 1_000_000 format
+	while (lex_ch != 0 && (isDigit(lex_ch) || lex_ch == "." || lex_ch == "_")) { //support 1_000_000 format
 		if lex_ch == "_" {
 			readChar()
 			continue
@@ -259,7 +263,7 @@ fn readString() {
 	position = lex_position + 1
 	for {
 		readChar()
-		if lex_ch == "\"" {
+		if lex_ch == "\"" || lex_ch == 0 {
 			break
 		}
 	}
@@ -397,12 +401,14 @@ fn lex_nextToken() {
 
 
 ////////////////////////////////////////////////
-//                 AST
+//          AST(Abstract Syntax Tree)
 ////////////////////////////////////////////////
 /* All AST node must have below properties:
     "Type":            Node Type
     "TokenLiteral":    Token Literal
     "String":          Mainly for debug
+    "StartPos":        position of first character belonging to the AST node
+	"EndPos":          position of first character immediately after the AST node
 */
 
 //AST node type
@@ -454,6 +460,16 @@ fn Ast_Program(statements) {
 	}
 	self["String"] = str
 
+	//start & end position
+	let stmtLen = len(statements)
+	if stmtLen > 0 {
+		self["StartPos"] = statements[0]["StartPos"]
+		self["EndPos"] = statements[stmtLen-1]["EndPos"]
+	} else {
+		self["StartPos"] = invalidPos()
+		self["EndPos"] = invalidPos()
+	}
+
 	return self
 }
 
@@ -462,6 +478,14 @@ fn Ast_Identifier(tok, value) {
 
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = value
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(value)
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
 
 	return self
 }
@@ -499,6 +523,16 @@ fn Ast_LetStatement(tok, names, values) {
 	str += ";"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+
+	let valLen = len(values)
+	if valLen > 0 {
+		self["EndPos"] = values[valLen - 1]["EndPos"]
+	} else {
+		self["EndPos"] = names[0]["EndPos"]
+	}
+
 	return self
 }
 
@@ -523,6 +557,16 @@ fn Ast_ConstStatement(tok, names, values) {
 	str += ")"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+
+	let valLen = len(values)
+	if valLen > 0 {
+		self["EndPos"] = values[valLen - 1]["EndPos"]
+	} else {
+		self["EndPos"] = names[0]["EndPos"]
+	}
+
 	return self
 }
 
@@ -544,6 +588,19 @@ fn Ast_ReturnStatement(tok, rv, rvs) {
 	str += ";"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+
+	let rvsLen = len(rvs)
+	if rvsLen > 0 {
+		self["EndPos"] = rvs[rvsLen-1]["EndPos"]
+	} else {
+		let literalLen = len(tok["literal"])
+		let tokPos = tok["position"]
+		let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + literalLen, tokPos["Line"], tokPos["Column"] + literalLen)
+		self["EndPos"] = endPos
+	}
+
 	return self
 }
 
@@ -557,6 +614,10 @@ fn Ast_ExpressionStatement(tok, expr) {
 		self["String"] = expr["String"]
 	}
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = expr["EndPos"]
+
 	return self
 }
 
@@ -566,6 +627,14 @@ fn Ast_IntegerLiteral(tok, value) {
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = tok["literal"]
 
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
+
 	return self
 }
 
@@ -574,6 +643,14 @@ fn Ast_FloatLiteral(tok, value) {
 
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = tok["literal"]
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
 
 	return self
 }
@@ -588,6 +665,10 @@ fn Ast_PrefixExpression(tok, operator, right) {
 	str += right["String"]
 	str += ")"
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = right["EndPos"]
 
 	return self
 }
@@ -604,6 +685,10 @@ fn Ast_InfixExpression(tok, left, operator, right) {
 	str += ")"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = right["EndPos"]
+
 	return self
 }
 
@@ -612,6 +697,14 @@ fn Ast_Boolean(tok, value) {
 
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = tok["literal"]
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
 
 	return self
 }
@@ -632,10 +725,19 @@ fn Ast_IfExpression(tok, condition, consequence, alternative) {
 	}
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	if alternative != nil {
+		self["EndPos"] = alternative["EndPos"]
+	} else {
+		self["EndPos"] = consequence["EndPos"]
+	}
+
 	return self
 }
 
-fn Ast_BlockStatement(tok, statements) {
+//rbraceToken: right brace token
+fn Ast_BlockStatement(tok, statements, rbraceToken) {
 	let self = {"Token": tok, "Statements": statements, "Type": BlockStatementNode}
 
 	self["TokenLiteral"] = tok["literal"]
@@ -645,6 +747,10 @@ fn Ast_BlockStatement(tok, statements) {
 		str += stmt["String"] + "\n"
 	}
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = rbraceToken["position"]
 
 	return self
 }
@@ -671,6 +777,10 @@ fn Ast_FunctionStatement(tok, name, functionLiteral) {
 	str += "\t" + functionLiteral["Body"]["String"]
 	str += "}\n"
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = functionLiteral["Body"]["EndPos"]
+
 	return self
 }
 
@@ -694,6 +804,10 @@ fn Ast_FunctionLiteral(tok, parameters, body) {
 	str += "}\n"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = body["EndPos"]
+
 	return self
 }
 
@@ -715,6 +829,19 @@ fn Ast_CallExpression(tok, function, arguments) {
 	str += ")"
 	self["String"] = str
 
+	//start & end position
+	let funLlen = len(function["String"])
+	let tokPos = tok["position"]
+	let startPos = newPosition(tokPos["Filename"], tokPos["Offset"] - funLlen, tokPos["Line"], tokPos["Column"] - funLlen)
+	self["StartPos"] = startPos
+
+	let aLen = len(arguments)
+	if aLen > 0 {
+		self["EndPos"] = arguments[aLen - 1]["EndPos"]
+	} else {
+		self["EndPos"] = function["EndPos"]
+	}
+
 	return self
 }
 
@@ -724,6 +851,10 @@ fn Ast_MethodCallExpression(tok, obj, call) {
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = obj["String"] + "." + call["String"]
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = call["EndPos"]
+
 	return self
 }
 
@@ -732,6 +863,14 @@ fn Ast_StringLiteral(tok, value) {
 
 	self["TokenLiteral"] = tok["literal"]
 	self["String"] = tok["literal"]
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(value)
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
 
 	return self
 }
@@ -751,10 +890,24 @@ fn Ast_ArrayLiteral(tok, elements) {
 	str += "]"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+
+	let aLen = len(elements)
+	if aLen > 0 {
+		self["EndPos"] = elements[aLen-1]["EndPos"]
+	} else {
+		let tokPos = tok["position"]
+		tokPos["Column"] = tokPos["Column"] + 1
+		self["EndPos"] = tokPos
+	}
+
+
 	return self
 }
 
-fn Ast_TupleLiteral(tok, elements) {
+//rParenToken: right paren token
+fn Ast_TupleLiteral(tok, elements, rParenToken) {
 	let self = {"Token": tok, "Elements": elements, "Type": TupleLiteralNode}
 
 	self["TokenLiteral"] = tok["literal"]
@@ -768,6 +921,10 @@ fn Ast_TupleLiteral(tok, elements) {
 	str += strings.join(elems, ", ")
 	str += ")"
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = rParenToken["position"]
 
 	return self
 }
@@ -784,10 +941,15 @@ fn Ast_IndexExpression(tok, left, index) {
 	str += "])"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = index["EndPos"]
+
 	return self
 }
 
-fn Ast_HashLiteral(tok, pairs) {
+//rbrackToken: right brace token
+fn Ast_HashLiteral(tok, pairs, rbraceToken) {
 	let self = {"Token": tok, "Pairs": pairs, "Type": HashLiteralNode}
 
 	self["TokenLiteral"] = tok["literal"]
@@ -802,6 +964,10 @@ fn Ast_HashLiteral(tok, pairs) {
 	str += strings.join(kvPairs, ", ")
 	str += "}"
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = rbraceToken["position"]
 
 	return self
 }
@@ -821,6 +987,10 @@ fn Ast_ForArrayExpression(tok, variable, iterable, block) {
 	str += "}\n"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = block["EndPos"]
+
 	return self
 }
 
@@ -838,6 +1008,11 @@ fn Ast_ForMapExpression(tok, key, value, h, block) {
 	str += "\t" + block["String"]
 	str += "}\n"
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = block["EndPos"]
+
 	return self
 }
 
@@ -854,16 +1029,40 @@ fn Ast_WhileExpression(tok, condition, block) {
 	str += "}\n"
 	self["String"] = str
 
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = block["EndPos"]
+
 	return self
 }
 
 fn Ast_BreakExpression(tok) {
-	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": BreakExpressionNode}
+	let self = {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": BreakExpressionNode}
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let literalLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + literalLen, tokPos["Line"], tokPos["Column"] + literalLen)
+	self["EndPos"] = endPos
+
+	return self
 }
 
 
 fn Ast_ContinueExpression(tok) {
-	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": ContinueExpressionNode}
+	let self = {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": ContinueExpressionNode}
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let literalLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + literalLen, tokPos["Line"], tokPos["Column"] + literalLen)
+	self["EndPos"] = endPos
+
+	return self
 }
 
 fn Ast_AssignExpression(tok, name, value) {
@@ -875,6 +1074,10 @@ fn Ast_AssignExpression(tok, name, value) {
 	str += " = "
 	str += value["String"]
 	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = value["EndPos"]
 
 	return self
 }
@@ -889,11 +1092,30 @@ fn Ast_PostfixExpression(tok, left, operator) {
 	str += " " + operator + " "
 	str += ")"
 	self["String"] = str
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let operatorLen = len(operator)
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + operatorLen, tokPos["Line"], tokPos["Column"] + operatorLen)
+	self["EndPos"] = endPos
+
 	return self
 }
 
 fn Ast_NilLiteral(tok) {
-	return {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": NilExpressionNode}
+	let self = {"Token": tok, "TokenLiteral": tok["literal"], "String": tok["literal"], "Type": NilExpressionNode}
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let literalLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + literalLen, tokPos["Line"], tokPos["Column"] + literalLen)
+	self["EndPos"] = endPos
+
+	return self
 }
 
 
@@ -945,12 +1167,10 @@ let parser_peekToken = newToken(TOKEN_ILLEGAL, "", nil)
 
 let isInLoop = false
 
-fn Parser_Errors() {
-	return parser_Errors
-}
-
 fn debugToken(msg) {
-	printf("%s, curToken.type=%s, curToken.literal=%s, peekToken.type=%s, peekToken.literal=%s\n", msg, parser_curToken["type"], parser_curToken["literal"], parser_peekToken["type"], parser_peekToken["literal"])
+	printf("%s, curToken.type=%s, curToken.literal=%s, curTok.Pos=%s, peekToken.type=%s, peekToken.literal=%s, peekToken.Pos=%s\n", 
+			msg, parser_curToken["type"], parser_curToken["literal"], positionStr(parser_curToken["position"]),
+			parser_peekToken["type"], parser_peekToken["literal"], positionStr(parser_peekToken["position"]))
 }
 
 fn parser_nextToken() {
@@ -1015,7 +1235,7 @@ fn parseLetStatement(nextFlag) {
 		nextFlag = true
 
 		if !curTokenIs(TOKEN_IDENT) && !curTokenIs(TOKEN_UNDERSCORE) {
-			let msg = sprintf("Syntax Error: expected token to be identifier|underscore, got %s instead.", parser_curToken["type"])
+			let msg = sprintf("Syntax Error%s: expected token to be identifier|underscore, got %s instead.", positionStr(parser_curToken["position"]), tokenString(parser_curToken["type"]))
 			parser_Errors.push(msg)
 			return nil
 		}
@@ -1036,7 +1256,7 @@ fn parseLetStatement(nextFlag) {
 			break
 		}
 		if !curTokenIs(TOKEN_COMMA) {
-			let msg = sprintf("Syntax Error: expected token to be comma, got %s instead.", parser_curToken["type"])
+			let msg = sprintf("Syntax Error%s: expected token to be comma, got %s instead.", positionStr(parser_curToken["position"]), tokenString(parser_curToken["type"]))
 			parser_Errors.push(msg)
 			return nil
 		}
@@ -1094,7 +1314,7 @@ fn parseConstStatement() {
 
 			// peek next that can be only '=' or ',' or ')'
 			if !peekTokenIs(TOKEN_ASSIGN) && !peekTokenIs(TOKEN_COMMA) && !peekTokenIs(TOKEN_RPAREN) {
-				let msg = sprintf("Syntax Error: Token %s not allowed here.", peekToken["type"])
+				let msg = sprintf("Syntax Error%s: Token %s not allowed here.", positionStr(parser_peekToken["position"]), tokenString(parser_peekToken["type"]))
 				parser_Errors.push(msg)
 				return nil
 			}
@@ -1122,7 +1342,7 @@ fn parseConstStatement() {
 
 			let str_id = id["Value"]
 			if idPair.exists(str_id) { //is identifier redeclared?
-				let msg = sprintf("Syntax Error: Identifier %s redeclared.", str_id)
+				let msg = sprintf("Syntax Error%s: Identifier %s redeclared.", positionStr(parser_curToken["position"]), str_id)
 				parser_Errors.push(msg)
 				return nil
 			} else {
@@ -1352,7 +1572,7 @@ fn parseGroupedExpression() {
 
 	if parser_curToken["type"] == TOKEN_LPAREN && curTokenIs(TOKEN_RPAREN) {
 		//empty tuple, e.g. 'x = ()'
-		return Ast_TupleLiteral(curToken, [])
+		return Ast_TupleLiteral(curToken, [], parser_curToken)
 	}
 
 	let exp = parseExpression(LOWEST)
@@ -1374,18 +1594,18 @@ fn parseTupleExpression(tok, expr) {
 
 	for {
 		if parser_curToken["type"] == TOKEN_RPAREN {
-			return Ast_TupleLiteral(tok, elements)
+			return Ast_TupleLiteral(tok, elements, parser_curToken)
 		} elif parser_curToken["type"] == TOKEN_COMMA {
 			parser_nextToken()
 			//For a 1-tuple: "(1,)", the trailing comma is necessary to distinguish it
 			//from the parenthesized expression (1).
 			if curTokenIs(TOKEN_RPAREN) { //e.g.  let x = (1,)
-				return Ast_TupleLiteral(tok, elements)
+				return Ast_TupleLiteral(tok, elements, parser_curToken)
 			}
 			elements.push(parseExpression(LOWEST))
 			parser_nextToken()
 		} else {
-			let msg = sprintf("Syntax Error: expected token to be ',' or ')', got %s instead", parser_curToken["type"])
+			let msg = sprintf("Syntax Error%s: expected token to be ',' or ')', got %s instead", positionStr(parser_curToken["position"]), tokenString(parser_curToken["type"]))
 			parser_Errors.push(msg)
 			return nil
 		}
@@ -1439,7 +1659,7 @@ fn parseBlockStatement() {
 		parser_nextToken()
     }
 
-	return Ast_BlockStatement(curToken, statements)
+	return Ast_BlockStatement(curToken, statements, parser_curToken)
 }
 
 fn parseFunctionStatement() {
@@ -1616,7 +1836,7 @@ fn parseHashLiteral() {
 		return nil
 	}
 
-	return Ast_HashLiteral(curToken, pairs)
+	return Ast_HashLiteral(curToken, pairs, parser_curToken)
 }
 
 fn parseForExpression() {
@@ -1663,7 +1883,7 @@ fn parseForEachMap(tok, variable) {
 		parser_nextToken()
 		block = parseBlockStatement()
 	} else {
-		let msg = sprintf("Syntax Error: for loop must be followed by a '{'.")
+		let msg = sprintf("Syntax Error%s: for loop must be followed by a '{'.", positionStr(parser_curToken["position"]))
 		parser_Errors.push(msg)
 		return nil
 	}
@@ -1689,7 +1909,7 @@ fn parseForEachArray(tok, variable) {
 		parser_nextToken()
 		block = parseBlockStatement()
 	} else {
-		let msg = sprintf("Syntax Error: for loop must be followed by a '{'.")
+		let msg = sprintf("Syntax Error%s: for loop must be followed by a '{'.", positionStr(parser_curToken["position"]))
 		parser_Errors.push(msg)
 		return nil
 	}
@@ -1718,7 +1938,7 @@ fn parseWhileExpression() {
 		parser_nextToken()
 		block = parseBlockStatement()
 	} else {
-		let msg = sprintf("Syntax Error: while loop must be followed by a '{'.")
+		let msg = sprintf("Syntax Error%s: while loop must be followed by a '{'.", positionStr(parser_curToken["position"]))
 		parser_Errors.push(msg)
 		return nil
 	}
@@ -1729,7 +1949,7 @@ fn parseWhileExpression() {
 }
 
 fn parseBreakWithoutLoopContext() {
-	let msg = sprintf("Syntax Error: 'break' outside of loop context")
+	let msg = sprintf("Syntax Error%s: 'break' outside of loop context", positionStr(parser_curToken["position"]))
 	parser_Errors.push(msg)
 
 	return parseBreakExpression()
@@ -1740,8 +1960,8 @@ fn parseBreakExpression() {
 }
 
 fn parseContinueWithoutLoopContext() {
-	let msg = sprintf("Syntax Error: 'continue' outside of loop context")
-	p.errors = append(p.errors, msg)
+	let msg = sprintf("Syntax Error%s: 'continue' outside of loop context", positionStr(parser_curToken["position"]))
+	parser_Errors.push(msg)
 
 	return parseContinueExpression()
 }
@@ -1804,12 +2024,13 @@ fn expectPeek(t) {
 }
 
 fn peekError(t) {
-	let msg = "expected next token to be " + parser_peekToken["type"] + ", got " + t + " instead"
+	let msg = sprintf("Syntax Error%s: expected next token to be %s, got %s instead", 
+		positionStr(parser_peekToken["position"]), tokenString(t), tokenString(parser_peekToken["type"]))
 	parser_Errors.push(msg)
 }
 
 fn noPrefixParseFnError(t) {
-	let msg = "no prefix parse function for " + tokenString(t) +" found"
+	let msg = sprintf("Syntax Error%s: no prefix parse function for %s found", positionStr(parser_curToken["position"]), tokenString(t))
 	parser_Errors.push(msg)
 }
 
@@ -3514,6 +3735,7 @@ fn unwrapReturnValue(obj) {
 		for errMsg in parser_Errors {
 			println("\t" + errMsg + "\n")
 		}
+		os.exit(1)
 	}
 
 	//for debugging
