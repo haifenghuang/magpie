@@ -2135,7 +2135,7 @@ const FILE_OBJ         = "FILE"
     "Type":       Object Type
     "Inspect":    Mainly for debug
     "CallMethod": Object method which has the following prototype
-         (scope, methodName, methodArgs) -> Object"
+         (scope, line, methodName, methodArgs) -> Object"
 
    And may be other properties, e.g.
     "Iterable": means the object could be used in a 'for-in' expression
@@ -2144,15 +2144,14 @@ const FILE_OBJ         = "FILE"
 fn IntegerObj(value) {
 	let self = {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value, "IsNumber": true}
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "next" {
 			return Integer_Next(value)
 
 		} elif methodName == "prev" {
 			return Integer_Prev(value)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, INTEGER_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, INTEGER_OBJ)
 		}
 	}
 
@@ -2170,15 +2169,14 @@ fn Integer_Prev(value) {
 fn FloatObj(value) {
 	let self = {"Type": FLOAT_OBJ, "Inspect": sprintf("%g", value), "Value": value, "IsNumber": true}
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "ceil" {
 			return Float_Ceil(value)
 
 		} elif methodName == "floor" {
 			return Float_Floor(value)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, FLOAT_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, FLOAT_OBJ)
 		}
 	}
 
@@ -2196,15 +2194,14 @@ fn Float_Floor(value) {
 fn BooleanObj(value) {
 	let self = {"Type": BOOLEAN_OBJ, "Inspect": sprintf("%t", value), "Value": value}
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "toYesNo" {
 			return Boolean_ToYesNo(value)
 
 		} elif methodName == "toTrueFalse" {
 			return Boolean_ToTrueFalse(value)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, BOOLEAN_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, BOOLEAN_OBJ)
 		}
 	}
 
@@ -2244,9 +2241,23 @@ fn ReturnObj(value, values) {
 	return self
 }
 
+//Generic Error Object
 fn ErrorObj(message) {
 	return {"Type": ERROR_OBJ, "Inspect": "Runtime Error:" + message, "Message": message, "CallMethod": nil}
 }
+
+//Specific error object for 'undefined method'
+fn undefinedMethodError(line, methodName, obj) {
+	let msg = sprintf("undefined method '%s' for object %s at line %d", methodName, obj, line)
+	return ErrorObj(msg)
+}
+
+//Specific error object for 'wrong number of arguemnts' of function
+fn wrongArgumentError(line, got, want) {
+	let msg = sprintf("wrong number of arguments at line %d. got=%d, want=%s", line, got, want)
+	return ErrorObj(msg)
+}
+
 
 fn FunctionObj(parameters, body, scope) {
 	let self = {"Type": FUNCTION_OBJ, "Parameters": parameters, "Body": body, "Scope": scope, "CallMethod": nil}
@@ -2272,7 +2283,7 @@ fn FunctionObj(parameters, body, scope) {
 fn StringObj(value) {
 	let self = {"Type": STRING_OBJ, "Inspect": value, "Value": value, "Iterable": true}
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "upper" {
 			return String_Upper(value)
 		} elif methodName == "lower" {
@@ -2282,8 +2293,7 @@ fn StringObj(value) {
 		} elif methodName == "set" {
 			return String_Set(self, scope, methodArgs)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, BOOLEAN_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, STRING_OBJ)
 		}
 	}
 
@@ -2319,7 +2329,7 @@ fn ArrayObj(elements) {
 
 	Array_Inspect(self)
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "push" {
 			return Array_Push(self, scope, methodArgs)
 		} elif methodName == "pop" {
@@ -2329,8 +2339,7 @@ fn ArrayObj(elements) {
 		} elif methodName == "get" {
 			return Array_Get(self, scope, methodArgs)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, ARRAY_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, ARRAY_OBJ)
 		}
 	}
 
@@ -2432,9 +2441,8 @@ fn TupleObj(elements, isMulti = false) {
 	self["Inspect"] = str
 
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
-		let msg = sprintf("undefined method '%s' for object %s", methodName, TUPLE_OBJ)
-		return ErrorObj(msg)
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
+		return undefinedMethodError(line, methodName, TUPLE_OBJ)
 	}
 
 	return self
@@ -2456,7 +2464,7 @@ fn HashObj(pairs) {
 
 	Hash_Inspect(self)
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "exists" || methodName == "has" {
 			return Hash_Exists(self, scope, methodArgs)
 		} elif methodName == "push" {
@@ -2468,8 +2476,7 @@ fn HashObj(pairs) {
 		} elif methodName == "values" {
 			return Hash_Values(self, scope)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, HASH_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, HASH_OBJ)
 		}
 	}
 
@@ -2575,7 +2582,7 @@ fn ContinueObj() {
 fn FileObj(filehandle, filename) {
 	let self = {"Type": FILE_OBJ, "File": filehandle, "Inspect": "<file object: " + filename + ">"}
 
-	self["CallMethod"] = fn (scope, methodName, methodArgs) {
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "close" {
 			return File_Close(self, scope, methodArgs)
 		} elif methodName == "read" {
@@ -2591,8 +2598,7 @@ fn FileObj(filehandle, filename) {
 		} elif methodName == "writeString" {
 			return File_WriteString(self, scope, methodArgs)
 		} else {
-			let msg = sprintf("undefined method '%s' for object %s", methodName, FILE_OBJ)
-			return ErrorObj(msg)
+			return undefinedMethodError(line, methodName, FILE_OBJ)
 		}
 	}
 
@@ -2654,10 +2660,9 @@ fn File_WriteString(self, scope, methodArgs) {
 ////////////////////////////////////////////////
 /* builtins = map[string]BuiltinObj */
 
-fn openBuiltin(args) {
+fn openBuiltin(line, args) {
 	if len(args) != 1 && len(args) != 2 {
-		let msg = sprintf("wrong number of arguments. got=%d, want=1|2", len(args))
-		return ErrorObj(msg)
+		return wrongArgumentError(line, len(args), "1|2")
 	}
 
 	let filename = args[0]["Value"]
@@ -2670,10 +2675,9 @@ fn openBuiltin(args) {
 	return FileObj(f, filename)
 }
 
-fn lenBuiltin(args) {
+fn lenBuiltin(line, args) {
 	if len(args) != 1 {
-		let msg = sprintf("wrong number of arguments. got=%d, want=1", len(args))
-		return ErrorObj(msg)
+		return wrongArgumentError(line, len(args), "1")
 	}
 
 	let arg0 = args[0]
@@ -2688,7 +2692,7 @@ fn lenBuiltin(args) {
 	return ErrorObj(msg2)
 }
 
-fn printBuiltin(args) {
+fn printBuiltin(line, args) {
 	for arg in args {
 		print(arg["Inspect"])
 	}
@@ -2696,7 +2700,7 @@ fn printBuiltin(args) {
 	return NIL
 }
 
-fn printlnBuiltin(args) {
+fn printlnBuiltin(line, args) {
 	for arg in args {
 		print(arg["Inspect"])
 	}
@@ -2764,7 +2768,11 @@ fn Eval(node, scope) {
 	} elif nodeType == ReturnStatementNode {
 		let retValues = []
 		for value in node["ReturnValues"] {
-			retValues.push(Eval(value, scope))
+			let val = Eval(value, scope)
+			if isError(val) {
+				return val
+			}
+			retValues.push(val)
 		}
 
 		let retValue = NIL
@@ -2802,7 +2810,7 @@ fn Eval(node, scope) {
 			return call_args[0]
 		}
 
-		return applyFunction(call_fn, call_args)
+		return applyFunction(node, call_fn, call_args)
 	} elif nodeType == MethodCallExpressionNode {
 		return evalMethodCallExpression(node, scope)
 	} elif nodeType == StringLiteralNode {
@@ -2845,7 +2853,7 @@ fn Eval(node, scope) {
 		return evalAssignExpression(node, scope)
 	} elif nodeType == PostfixExpressionNode {
 		let p_left = Eval(node["Left"], scope)
-		if p_left["Type"] == ERROR_OBJ {
+		if isError(p_left) {
 			return p_left
 		}
 		return evalPostfixExpression(node["Operator"], p_left)
@@ -3119,6 +3127,10 @@ fn evalNumberInfixExpression(operator, left, right) {
 
 fn evalIfExpression(ie, scope) {
 	let condition = Eval(ie["Condition"], scope)
+	if isError(condition) {
+		return condition
+	}
+
 	let alternative = ie["Alternative"]
 	let consequence = ie["Consequence"]
 
@@ -3140,6 +3152,10 @@ fn evalLetStatement(node, scope) {
 	let valuesLen = 0
 	for value in node["Values"] {
 		let val = Eval(value, scope)
+		if isError(val) {
+			return val
+		}
+
 		if val["Type"] == TUPLE_OBJ {
 			let tupleObj = val
 			if tupleObj["IsMulti"] {
@@ -3182,7 +3198,7 @@ fn evalConstStatement(node, scope) {
 	for idx, name in node["Names"] {
 		let v = node["Values"]
 		val = Eval(v[idx], scope)
-		if val["Type"] == ERROR_OBJ {
+		if isError(val) {
 			return val
 		}
 		SetIntoConstScope(scope, name["Value"], val)
@@ -3336,21 +3352,30 @@ fn evalHashLiteral(node, scope) {
 
 fn evalMethodCallExpression(node, scope) {
 	let obj = Eval(node["Object"], scope)
+	if isError(obj) {
+		return obj
+	}
 
 	let call = node["Call"]
 	let methName = call["Function"]["String"]
 
 	if obj["CallMethod"] == nil {
-		let msg = sprintf("undefined method '%s' for object %s", methName, obj["Type"])
-		return  ErrorObj(msg)
+		let startPos = node["StartPos"]
+		return undefinedMethodError(startPos["Line"], methName, obj["Type"])
 	}
 
 	//arguments
 	let args = []
 	for v in call["Arguments"] {
-		args.push(Eval(v, scope))
+		let obj = Eval(v, scope)
+		if isError(obj) {
+			return obj
+		}
+		args.push(obj)
 	}
-	return obj["CallMethod"](scope, methName, args)
+
+	let startPos = node["StartPos"]
+	return obj["CallMethod"](scope, startPos["Line"], methName, args)
 }
 
 //for var in iterable
@@ -3533,7 +3558,15 @@ fn evalAssignExpression(node, scope) {
 
 		if name["Type"] == IndexExpressionNode {
 			let leftVal = Eval(name["Left"], scope)
+			if isError(leftVal) {
+				return leftVal
+			}
+
 			let indexVal = Eval(name["Index"], scope)
+			if isError(indexVal) {
+				return indexVal
+			}
+
 			if leftVal["Type"] == ARRAY_OBJ {
 				Array_Set(leftVal, scope, [indexVal, val])
 			} elif leftVal["Type"] == TUPLE_OBJ {
@@ -3626,6 +3659,10 @@ fn evalFunctionStatement(node, scope) {
 }
 
 fn isTruthy(obj) {
+	if isError(obj) {
+		return false
+	}
+
 	if obj == NIL {
 		return false
 	} elif obj == TRUE {
@@ -3663,15 +3700,20 @@ fn isError(obj) {
 	return false
 }
 
-fn applyFunction(func, args) {
+fn applyFunction(node, func, args) {
 	let funcType = func["Type"]
 	if funcType == FUNCTION_OBJ {
 		let extendedScope = extendFunctionScope(func, args)
 		let evaluated = Eval(func["Body"], extendedScope)
+		if isError(evaluated) {
+			return evaluated
+		}
+
 		return unwrapReturnValue(evaluated)
 	} elif funcType == BUILTIN_OBJ {
 		let builtin_fn = func["BuiltinFn"]
-		return builtin_fn(args)
+		let startPos = node["StartPos"]
+		return builtin_fn(startPos["Line"], args)
 	}
 
 	let msg = sprintf("not a function: %s", func["Type"])
