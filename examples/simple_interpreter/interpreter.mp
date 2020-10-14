@@ -616,7 +616,10 @@ fn Ast_ExpressionStatement(tok, expr) {
 
 	//start & end position
 	self["StartPos"] = tok["position"]
-	self["EndPos"] = expr["EndPos"]
+	self["EndPos"] = tok["position"]
+	if expr != nil {
+		self["EndPos"] = expr["EndPos"]
+	}
 
 	return self
 }
@@ -1905,14 +1908,10 @@ fn parseForEachArray(tok, variable) {
 	let iterable = parseExpression(LOWEST)
 
 	let block = nil
-	if peekTokenIs(TOKEN_LBRACE) {
-		parser_nextToken()
-		block = parseBlockStatement()
-	} else {
-		let msg = sprintf("Syntax Error%s: for loop must be followed by a '{'.", positionStr(parser_curToken["position"]))
-		parser_Errors.push(msg)
+	if !expectPeek(TOKEN_LBRACE) {
 		return nil
 	}
+	block = parseBlockStatement()
 
 	isInLoop = false
 
@@ -1934,14 +1933,10 @@ fn parseWhileExpression() {
 	}
 
 	let block = nil
-	if peekTokenIs(TOKEN_LBRACE) {
-		parser_nextToken()
-		block = parseBlockStatement()
-	} else {
-		let msg = sprintf("Syntax Error%s: while loop must be followed by a '{'.", positionStr(parser_curToken["position"]))
-		parser_Errors.push(msg)
+	if !expectPeek(TOKEN_LBRACE) {
 		return nil
 	}
+	block = parseBlockStatement()
 
 	isInLoop = false
 
