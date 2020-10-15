@@ -2242,20 +2242,21 @@ fn ReturnObj(value, values) {
 }
 
 //Generic Error Object
-fn ErrorObj(message) {
-	return {"Type": ERROR_OBJ, "Inspect": "Runtime Error:" + message, "Message": message, "CallMethod": nil}
+fn ErrorObj(line, message) {
+	let msg = sprintf("Runtime Error at line %d: %s", line, message)
+	return {"Type": ERROR_OBJ, "Inspect": msg, "CallMethod": nil}
 }
 
 //Specific error object for 'undefined method'
 fn undefinedMethodError(line, methodName, obj) {
-	let msg = sprintf("undefined method '%s' for object %s at line %d", methodName, obj, line)
-	return ErrorObj(msg)
+	let msg = sprintf("undefined method '%s' for object %s", methodName, obj)
+	return ErrorObj(line, msg)
 }
 
 //Specific error object for 'wrong number of arguemnts' of function
 fn wrongArgumentError(line, got, want) {
-	let msg = sprintf("wrong number of arguments at line %d. got=%d, want=%s", line, got, want)
-	return ErrorObj(msg)
+	let msg = sprintf("wrong number of arguments. got=%d, want=%s", got, want)
+	return ErrorObj(line, msg)
 }
 
 
@@ -2689,7 +2690,7 @@ fn lenBuiltin(line, args) {
 	}
 
 	let msg2 = sprintf("argument to `len` not supported, got %s", arg0Type)
-	return ErrorObj(msg2)
+	return ErrorObj(line, msg2)
 }
 
 fn printBuiltin(line, args) {
@@ -2748,7 +2749,7 @@ fn Eval(node, scope) {
 		if isError(p_right) {
 			return p_right
 		}
-		return evalPrefixExpression(node["Operator"], p_right)
+		return evalPrefixExpression(node, p_right)
 	} elif nodeType == InfixExpressionNode {
 		let i_left = Eval(node["Left"], scope)
 		if isError(i_left) {
@@ -2760,7 +2761,7 @@ fn Eval(node, scope) {
 			return i_right
 		}
 
-		return evalInfixExpression(node["Operator"], i_left, i_right)
+		return evalInfixExpression(node, i_left, i_right)
 	} elif nodeType == BlockStatementNode {
 		return evalBlockStatement(node, scope)
 	} elif nodeType == IfExpressionNode {
@@ -2836,7 +2837,7 @@ fn Eval(node, scope) {
 		if isError(idx_index) {
 			return idx_index
 		}
-		return evalIndexExpression(idx_left, idx_index)
+		return evalIndexExpression(node, idx_left, idx_index)
 	} elif nodeType == HashLiteralNode {
 		return evalHashLiteral(node, scope)
 	} elif nodeType == ForArrayExpressionNode {
@@ -2856,7 +2857,7 @@ fn Eval(node, scope) {
 		if isError(p_left) {
 			return p_left
 		}
-		return evalPostfixExpression(node["Operator"], p_left)
+		return evalPostfixExpression(node, p_left)
 	} elif nodeType == NilExpressionNode {
 		return NIL
 	}
@@ -2952,35 +2953,28 @@ fn objectToNativeBoolean(o) {
 	return true
 }
 
-fn evalPrefixExpression(operator, right) {
+fn evalPrefixExpression(node, right) {
+	let operator = node["Operator"]
 	if operator == "!" {
 		return evalBangOperatorExpression(right)
 	} elif operator =="-" {
-		return evalMinusPrefixOperatorExpression(right)
+		return evalMinusPrefixOperatorExpression(node, right)
 	} elif operator == "++" {
-		return evalIncrementPrefixOperatorExpression(right)
+		return evalIncrementPrefixOperatorExpression(node, right)
 	} elif operator == "--" {
-		return evalDecrementPrefixOperatorExpression(right)
+		return evalDecrementPrefixOperatorExpression(node, right)
 	}
 
-	let msg = sprintf("unknown operator: %s%s", operator, right["Type"])
-	return ErrorObj(msg)
+	let msg = sprintf("unknown operator - %s%s", operator, right["Type"])
+	return ErrorObj(node["StartPos"]["Line"], msg)
 
 }
 
 fn evalBangOperatorExpression(right) {
-	if right == TRUE {
-		return FALSE
-	} elif right == FALSE {
-		return TRUE
-	} elif right == NIL {
-		return TRUE
-	}
-
-	return FALSE
+	return nativeBoolToBooleanObject(!isTruthy(right))
 }
 
-fn evalMinusPrefixOperatorExpression(right) {
+fn evalMinusPrefixOperatorExpression(node, right) {
 	if right["Type"] == INTEGER_OBJ {
 		let value = right["Value"]
 		return IntegerObj(-value)
@@ -2990,10 +2984,30 @@ fn evalMinusPrefixOperatorExpression(right) {
 	}
 
 	let msg = sprintf("unknown operator: -%s", right["Type"])
-	return ErrorObj(msg)
+	return ErrorObj(node["StartPos"]["Line"], msg)
 }
 
-fn evalDecrementPrefixOperatorExpression(right) {
+fn evalIncrementPrefixOperatorExpression(node, right) {
+	if right["Type"] == INTEGER_OBJ {
+		let value = right["Value"]
+		right["Value"] = value + 1
+		right["Inspect"] = sprintf("%d", value + 1)
+
+		return IntegerObj(value + 1)
+
+	} elif right["Type"] == FLOAT_OBJ {
+		let value = right["Value"]
+		right["Value"] = value + 1
+		right["Inspect"] = sprintf("%g", value + 1)
+
+		return FloatObj(value + 1)
+	}
+
+	let msg = sprintf("unsupported operator for prefix expression:'++' and type: %s", right["Type"])
+	return ErrorObj(node["StartPos"]["Line"], msg)
+}
+
+fn evalDecrementPrefixOperatorExpression(node, right) {
 	if right["Type"] == INTEGER_OBJ {
 		let value = right["Value"]
 		right["Value"] = value - 1
@@ -3010,10 +3024,11 @@ fn evalDecrementPrefixOperatorExpression(right) {
 	}
 
 	let msg = sprintf("unsupported operator for prefix expression:'--' and type: %s", right["Type"])
-	return ErrorObj(msg)
+	return ErrorObj(node["StartPos"]["Line"], msg)
 }
 
-fn evalInfixExpression(operator, left, right) {
+fn evalInfixExpression(node, left, right) {
+	let operator = node["Operator"]
 	if operator == "and" || operator == "or" {
 		if operator == "and" {
 			let leftCond = objectToNativeBoolean(left)
@@ -3032,7 +3047,7 @@ fn evalInfixExpression(operator, left, right) {
 			return nativeBoolToBooleanObject(leftCond || rightCond)
 		}
 	} elif left["IsNumber"] && right["IsNumber"] {
-		return evalNumberInfixExpression(operator, left, right)
+		return evalNumberInfixExpression(node, left, right)
 	} elif operator == "==" {
 		if left["Type"] == BOOLEAN_OBJ && right["Type"] == BOOLEAN_OBJ {
 			if l["Value"] == r["Value"] {
@@ -3060,17 +3075,18 @@ fn evalInfixExpression(operator, left, right) {
 
 		return nativeBoolToBooleanObject(left != right)
 	} elif left["Type"] == STRING_OBJ && right["Type"] == STRING_OBJ {
-		return evalStringInfixExpression(operator, left, right)
+		return evalStringInfixExpression(node, left, right)
 	} elif left["Type"] != right["Type"] {
 		let msg = sprintf("type mismatch: %s %s %s", left["Type"], operator, right["Type"])
-		return ErrorObj(msg)
+		return ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 	let msg2 = sprintf("unknown operator: %s %s %s", left["Type"], operator, right["Type"])
-	return  ErrorObj(msg2)
+	return  ErrorObj(node["StartPos"]["Line"], msg2)
 }
 
-fn evalNumberInfixExpression(operator, left, right) {
+fn evalNumberInfixExpression(node, left, right) {
+	let operator = node["Operator"]
 	let leftVal = left["Value"]
 	let rightVal = right["Value"]
 
@@ -3122,7 +3138,7 @@ fn evalNumberInfixExpression(operator, left, right) {
 	}
 
 	let msg = sprintf("unknown operator: %s %s %s", left["Type"], operator, right["Type"])
-	return  ErrorObj(msg)
+	return  ErrorObj(node["StartPos"]["Line"], msg)
 }
 
 fn evalIfExpression(ie, scope) {
@@ -3220,7 +3236,7 @@ fn evalIdentifier(node, scope) {
 	}
 
 	let msg = sprintf("identifier not found: " + node.Value)
-	return  ErrorObj(msg)
+	return  ErrorObj(node["StartPos"]["Line"], msg)
 }
 
 fn evalExpressions(exps, scope) {
@@ -3238,7 +3254,8 @@ fn evalExpressions(exps, scope) {
 	return result
 }
 
-fn evalStringInfixExpression(operator, left, right) {
+fn evalStringInfixExpression(node, left, right) {
+	let operator = node["Operator"]
 	let lv = left["Value"]
 	let rv = right["Value"]
 
@@ -3258,7 +3275,7 @@ fn evalStringInfixExpression(operator, left, right) {
 		return nativeBoolToBooleanObject(lv >= rv)
 	} else {
 		let msg = sprintf("unknown operator: %s %s %s", left["Type"], operator, right["Type"])
-		return  ErrorObj(msg)
+		return  ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 
@@ -3266,54 +3283,54 @@ fn evalStringInfixExpression(operator, left, right) {
 	return StringObj(lv + rv)
 }
 
-fn evalIndexExpression(left, index) {
+fn evalIndexExpression(node, left, index) {
 	if (left["Type"] == ARRAY_OBJ || left["Type"] == TUPLE_OBJ) && index["Type"] == INTEGER_OBJ {
-		return evalArrayIndexExpression(left, index)
+		return evalArrayIndexExpression(node, left, index)
 	} elif left["Type"] == HASH_OBJ {
-		return evalHashIndexExpression(left, index)
+		return evalHashIndexExpression(node, left, index)
 	} elif left["Type"] == STRING_OBJ && index["Type"] == INTEGER_OBJ {
-		return evalStringIndexExpression(left, index)
+		return evalStringIndexExpression(node, left, index)
 	}
 
 	let msg = sprintf("index operator not supported: %s", left["Type"])
-	return  ErrorObj(msg)
+	return  ErrorObj(node["StartPos"]["Line"], msg)
 }
 
-fn evalStringIndexExpression(left, index) {
+fn evalStringIndexExpression(node, left, index) {
 	let l = left["Value"]
 	let length = len(l)
 	let idx = index["Value"]
 
 	if idx > length - 1 {
 		let msg = sprintf("index error: '%d' out of range", idx)
-		return  ErrorObj(msg)
+		return  ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 	if idx < 0 {
 		idx = length + idx
 		if idx > length - 1 || idx < 0 {
 			let msg2 = sprintf("index error: '%d' out of range", idx)
-			return  ErrorObj(msg2)
+			return  ErrorObj(node["StartPos"]["Line"], msg2)
 		}
 	}
 
 	return StringObj(l[idx])
 }
 
-fn evalArrayIndexExpression(arr, index) {
+fn evalArrayIndexExpression(node, arr, index) {
 	let length = len(arr["Elements"])
 	let idx = index["Value"]
 
 	if idx > length - 1 {
 		let msg = sprintf("index error: '%d' out of range", idx)
-		return  ErrorObj(msg)
+		return  ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 	if idx < 0 {
 		idx = length + idx
 		if idx > length - 1 || idx < 0 {
 			let msg2 = sprintf("index error: '%d' out of range", idx)
-			return  ErrorObj(msg2)
+			return  ErrorObj(node["StartPos"]["Line"], msg2)
 		}
 	}
 
@@ -3321,7 +3338,7 @@ fn evalArrayIndexExpression(arr, index) {
 	return item[idx]
 }
 
-fn evalHashIndexExpression(h, index) {
+fn evalHashIndexExpression(node, h, index) {
 	let k = index["Inspect"]
 	let pairs = h["Pairs"]
 	for notUsed, pair in pairs {
@@ -3398,7 +3415,7 @@ fn evalForArrayExpression(node, scope) {
 	//The object must be 'iterable'
 	if value["Iterable"] == nil || value["Iterable"] == false {
 		let msg = "foreach's operating type must be iterable"
-		return ErrorObj(msg)
+		return ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 	let members = []
@@ -3459,7 +3476,7 @@ fn evalForMapExpression(node, scope) {
 
 	if aValue["Type"] != HASH_OBJ {
 		let msg = "for-in type is not hash"
-		return ErrorObj(msg)
+		return ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 	if aValue["Type"] == NIL_OBJ {
@@ -3470,7 +3487,7 @@ fn evalForMapExpression(node, scope) {
 	//The object must be 'iterable'
 	if aValue["Iterable"] == nil || aValue["Iterable"] == false {
 		let msg = "foreach's operating type must be iterable"
-		return ErrorObj(msg)
+		return ErrorObj(node["StartPos"]["Line"], msg)
 	}
 
 
@@ -3572,7 +3589,7 @@ fn evalAssignExpression(node, scope) {
 			} elif leftVal["Type"] == TUPLE_OBJ {
 				let s = sprintf("%s[IDX]", TUPLE_OBJ)
 				let msg = sprintf("'%s': Tuple cannot be assigned", node["String"])
-				return  ErrorObj(msg)
+				return  ErrorObj(node["StartPos"]["Line"], msg)
 			} elif leftVal["Type"] == HASH_OBJ {
 				Hash_Push(leftVal, scope, [indexVal, val])
 			} elif leftVal["Type"] == STRING_OBJ {
@@ -3586,25 +3603,26 @@ fn evalAssignExpression(node, scope) {
 		}
 
 		let msg = sprintf("unknown identifier: '%s' is not defined", name["String"])
-		return  ErrorObj(msg)
+		return  ErrorObj(node["StartPos"]["Line"], msg)
 	}
 	return val
 }
 
 
-fn evalPostfixExpression(operator, left) {
+fn evalPostfixExpression(node, left) {
+	let operator = node["Operator"]
 	if operator == "++" {
-		return evalIncrementPostfixOperatorExpression(left)
+		return evalIncrementPostfixOperatorExpression(node, left)
 	} elif operator == "--" {
-		return evalDecrementPostfixOperatorExpression(left)
+		return evalDecrementPostfixOperatorExpression(node, left)
 	}
 
 	let msg = sprintf("unsupported operator for postfix expression:'%s' and type: %s", operator, left["Type"])
-	return ErrorObj(msg)
+	return ErrorObj(node["StartPos"]["Line"], msg)
 
 }
 
-fn evalIncrementPostfixOperatorExpression(left) {
+fn evalIncrementPostfixOperatorExpression(node, left) {
 	if left["Type"] == INTEGER_OBJ {
 		let left_value = left["Value"]
 		let returnVal = IntegerObj(left_value)
@@ -3620,10 +3638,10 @@ fn evalIncrementPostfixOperatorExpression(left) {
 	} 
 
 	let msg = sprintf("unsupported operator for post expression:'++' and type: %s", left["Type"])
-	return ErrorObj(msg)
+	return ErrorObj(node["StartPos"]["Line"], msg)
 }
 
-fn evalDecrementPostfixOperatorExpression(left) {
+fn evalDecrementPostfixOperatorExpression(node, left) {
 	if left["Type"] == INTEGER_OBJ {
 		let left_value = left["Value"]
 		let returnVal = IntegerObj(left_value)
@@ -3641,7 +3659,7 @@ fn evalDecrementPostfixOperatorExpression(left) {
 
 	
 	let msg = sprintf("unsupported operator for post expression:'--' and type: %s", left["Type"])
-	return ErrorObj(msg)
+	return ErrorObj(node["StartPos"]["Line"], msg)
 }
 
 fn evalFunctionLiteral(node, scope) {
@@ -3717,7 +3735,7 @@ fn applyFunction(node, func, args) {
 	}
 
 	let msg = sprintf("not a function: %s", func["Type"])
-	return  ErrorObj(msg)
+	return  ErrorObj(node["StartPos"]["Line"], msg)
 }
 
 fn extendFunctionScope(func, args) {
@@ -3784,7 +3802,7 @@ fn unwrapReturnValue(obj) {
 	let root_scope = NewScope()
 	obj = Eval(p, root_scope)
 	if obj["Type"] == ERROR_OBJ {
-		println(obj["Message"])
+		println(obj["Inspect"])
 	}
 }
 
