@@ -1158,7 +1158,7 @@ func initGlobalObj() {
 	SetGlobalObj("stdout", &FileObject{File: os.Stdout})
 	SetGlobalObj("stderr", &FileObject{File: os.Stderr})
 
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS != "windows" {
 		SetGlobalObj("endl", NewString("\n"))
 	} else {
 		SetGlobalObj("endl", NewString("\r\n"))
