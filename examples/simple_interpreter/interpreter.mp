@@ -61,7 +61,10 @@ const (
 	
 	TOKEN_EQ,     // "=="
 	TOKEN_NOT_EQ, // "!="
-	
+
+	TOKEN_SHIFT_L,   // << (SHIFT LEFT)
+	TOKEN_SHIFT_R,   // >> (SHIFT RIGHT)
+
 	// Delimiters
 	TOKEN_COMMA,     // ","
 	TOKEN_SEMICOLON, // ";"
@@ -145,6 +148,8 @@ fn tokenString(tok) {
 		TOKEN_LE        { return "<=" }
 		TOKEN_GT        { return ">" }
 		TOKEN_GE        { return ">=" }
+		TOKEN_SHIFT_L   { return ">>" }
+		TOKEN_SHIFT_R   { return "<<" }
 		TOKEN_EQ        { return "==" }
 		TOKEN_NOT_EQ    { return "!=" }
 		TOKEN_COMMA     { return "," }
@@ -340,6 +345,10 @@ fn lex_nextToken() {
 			ch = lex_ch
 			readChar()
 			tok = newToken(TOKEN_LE, ch + lex_ch, tok_pos)
+		} elif peekChar() == "<" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_SHIFT_L, ch + lex_ch, tok_pos) 
 		} else {
 			tok = newToken(TOKEN_LT, lex_ch, tok_pos)
 		}
@@ -348,6 +357,10 @@ fn lex_nextToken() {
 			ch = lex_ch
 			readChar()
 			tok = newToken(TOKEN_GE, ch + lex_ch, tok_pos)
+		} elif peekChar() == ">" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_SHIFT_R, ch + lex_ch, tok_pos)
 		} else {
 			tok = newToken(TOKEN_GT, lex_ch, tok_pos)
 		}
@@ -1132,7 +1145,8 @@ const (
 	COND_OR,     // or
 	COND_AND,    // and
 	EQUALS,      // ==
-	LESSGREATER, // > or <
+	LESSGREATER, // >, <, >=, <=
+	SHIFTS,      // >> or <<
 	SUM,         // +
 	PRODUCT,     // *
 	PREFIX,      // -X or !X
@@ -1152,6 +1166,8 @@ precedences = {
 	TOKEN_LE:       LESSGREATER,
 	TOKEN_GT:       LESSGREATER,
 	TOKEN_GE:       LESSGREATER,
+	TOKEN_SHIFT_L:  SHIFTS,
+	TOKEN_SHIFT_R:  SHIFTS,
 	TOKEN_PLUS:     SUM,
 	TOKEN_MINUS:    SUM,
 	TOKEN_SLASH:    PRODUCT,
@@ -1493,8 +1509,8 @@ fn parseExpression(precedence) {
 		   parser_peekToken["type"] == TOKEN_EQ || parser_peekToken["type"] == TOKEN_NOT_EQ ||
 		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT ||
 		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE ||
-		   parser_peekToken["type"] == TOKEN_AND || parser_peekToken["type"] == TOKEN_OR {
-
+		   parser_peekToken["type"] == TOKEN_AND || parser_peekToken["type"] == TOKEN_OR ||
+		   parser_peekToken["type"] == TOKEN_SHIFT_L || parser_peekToken["type"] == TOKEN_SHIFT_R {
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
 		} elif parser_peekToken["type"] == TOKEN_LPAREN {
@@ -2153,7 +2169,8 @@ const FILE_OBJ         = "FILE"
          (scope, line, methodName, methodArgs) -> Object"
 
    And may be other properties, e.g.
-    "Iterable": means the object could be used in a 'for-in' expression
+    "Iterable": means the object could be used in a 'for-in' expression. e.g. STRING_OBJ/ARRAY_OBJ/HASH_OBJ
+    "Writable": means the object is writable, e.g. FILE_OBJ
 */
 
 fn IntegerObj(value) {
@@ -2650,7 +2667,7 @@ fn ContinueObj() {
 }
 
 fn FileObj(filehandle, filename) {
-	let self = {"Type": FILE_OBJ, "File": filehandle, "Inspect": "<file object: " + filename + ">"}
+	let self = {"Type": FILE_OBJ, "File": filehandle, "Inspect": "<file object: " + filename + ">", "Writable": true}
 
 	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
 		if methodName == "close" {
@@ -2690,7 +2707,7 @@ fn File_Read(self, scope, methodArgs) {
 	if len(methodArgs) >0 {
 		size = methodArgs[0]["Value"]
 	}
-	let s = fh.read(1024)
+	let s = fh.read(size)
 	return StringObj(s)
 }
 
@@ -2792,7 +2809,7 @@ const builtins = {
 globalScopes["stdin"]  = FileObj(stdin, "<stdin>")
 globalScopes["stdout"] = FileObj(stdout, "<stdout>")
 globalScopes["stderr"] = FileObj(stderr, "<stderr>")
-
+globalScopes["endl"] = StringObj("\n")
 
 ////////////////////////////////////////////////
 //                 EVALUATOR
@@ -2837,7 +2854,7 @@ fn Eval(node, scope) {
 			return i_right
 		}
 
-		return evalInfixExpression(node, i_left, i_right)
+		return evalInfixExpression(node, i_left, i_right, scope)
 	} elif nodeType == BlockStatementNode {
 		return evalBlockStatement(node, scope)
 	} elif nodeType == IfExpressionNode {
@@ -3098,8 +3115,35 @@ fn evalDecrementPrefixOperatorExpression(node, right) {
 	return prefixOperatorError(node["StartPos"]["Line"], "--", right["Type"])
 }
 
-fn evalInfixExpression(node, left, right) {
+fn evalInfixExpression(node, left, right, scope) {
 	let operator = node["Operator"]
+
+	//check if it is 'Writable'
+	if left["Writable"] != nil && left["Writable"] {
+		if operator == "<<" {
+			if left["Type"] == FILE_OBJ {
+				let strObj = StringObj(right["Inspect"])
+				File_Write(left, scope, [strObj])
+				//Here we return left, so we can chain multiple '<<'.
+				// e.g.
+				//     stdout << "hello " << "world!"
+				return left
+			}
+		} elif operator == ">>" {
+			// let a;
+			// stdin >> a;
+
+			//right should be an identifier
+			if node["Right"]["Type"] != IdentifierNode {
+				return infixOperatorError(node["StartPos"]["Line"], left["Type"], operator, right["Type"])
+			}
+			ret = File_ReadLine(left, scope, [])
+			SetIntoScope(scope, node["Right"]["String"], ret)
+			return ret
+		}
+	}
+
+
 	if operator == "and" || operator == "or" {
 		if operator == "and" {
 			let leftCond = objectToNativeBoolean(left)
@@ -3204,6 +3248,12 @@ fn evalNumberInfixExpression(node, left, right) {
 		return nativeBoolToBooleanObject(leftVal == rightVal)
 	} elif operator == "!=" {
 		return nativeBoolToBooleanObject(leftVal != rightVal)
+	} elif operator == ">>" {
+		let aRes = leftVal >> rightVal
+		return IntegerObj(aRes)
+	} elif operator == "<<" {
+		let aRes = leftVal << rightVal
+		return IntegerObj(aRes)
 	}
 
 	return infixOperatorError(node["StartPos"]["Line"], left["Type"], operator, right["Type"])

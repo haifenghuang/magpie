@@ -4,6 +4,8 @@ let five = 5
 let ten = 10
 println("five = ", five)
 println("ten = ", ten)
+println("10 * 2 = ", 10 << 1)
+println("10 / 2 = ", 10 >> 1)
 
 let a, b = 12, 10
 println("a = ", a, ", b = ", b)
@@ -191,7 +193,14 @@ ifile.close()
 
 println()
 println("----Testing 'stdin' & 'stdout' object operation----")
-print("Please type your name: ")
-name = stdin.read()  # read up to 1024 bytes from stdin
-stdout.writeLine("Your name is " + name)
+#print("Please type your name: ")
+#name = stdin.read()  # read up to 1024 bytes from stdin
+#stdout.writeLine("Your name is " + name)
+
+stdout << "Hello" << " World" << endl
+
+
+#let input
+#stdin >> input
+#println("input = ", input)
 
