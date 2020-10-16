@@ -2111,6 +2111,21 @@ fn ResetScope(scope, name, val) {
 	return val
 }
 
+//global scope used for some builtin object
+let globalScopes = {}
+
+fn GetGlobalObj(name) {
+	if globalScopes.exists(name) {
+		return globalScopes[name]
+	}
+	return NIL
+}
+
+fn SetGlobalObj(name, obj) {
+	globalScopes[name] = obj
+}
+
+
 ////////////////////////////////////////////////
 //                 OBJECT
 ////////////////////////////////////////////////
@@ -2670,11 +2685,14 @@ fn File_Close(self, scope, methodArgs) {
 
 fn File_Read(self, scope, methodArgs) {
 	let fh = self["File"]
-	let size = methodArgs[0]
-	let readSize = fh.read(size["Value"])
-	return IntegerObj(readSize)
-}
 
+	let size = 1024 //default buffer
+	if len(methodArgs) >0 {
+		size = methodArgs[0]["Value"]
+	}
+	let s = fh.read(1024)
+	return StringObj(s)
+}
 
 fn File_ReadLine(self, scope, methodArgs) {
 	let fh = self["File"]
@@ -2769,6 +2787,11 @@ const builtins = {
 	"println": BuiltinObj(printlnBuiltin),
 	"open": BuiltinObj(openBuiltin),
 }
+
+//Predefined global object
+globalScopes["stdin"]  = FileObj(stdin, "<stdin>")
+globalScopes["stdout"] = FileObj(stdout, "<stdout>")
+globalScopes["stderr"] = FileObj(stderr, "<stderr>")
 
 
 ////////////////////////////////////////////////
@@ -3269,6 +3292,12 @@ fn evalConstStatement(node, scope) {
 }
 
 fn evalIdentifier(node, scope) {
+	//Get from global scope first
+	let obj = GetGlobalObj(node["String"])
+	if obj != NIL {
+		return obj
+	}
+
 	let nodeVal = node["Value"]
 	let val = GetFromScope(scope, nodeVal)
 	if val != nil {
@@ -3404,9 +3433,16 @@ fn evalHashLiteral(node, scope) {
 }
 
 fn evalMethodCallExpression(node, scope) {
-	let obj = Eval(node["Object"], scope)
-	if isError(obj) {
-		return obj
+	let obj = NIL
+
+	let tmpObj = GetGlobalObj(node["Object"]["String"])
+	if tmpObj != NIL {
+		obj = tmpObj
+	} else {
+		obj = Eval(node["Object"], scope)
+		if isError(obj) {
+			return obj
+		}
 	}
 
 	let call = node["Call"]

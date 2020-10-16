@@ -187,3 +187,11 @@ while ((l = ifile.readLine()) != nil) {
 	println(l)
 }
 ifile.close()
+
+
+println()
+println("----Testing 'stdin' & 'stdout' object operation----")
+print("Please type your name: ")
+name = stdin.read()  # read up to 1024 bytes from stdin
+stdout.writeLine("Your name is " + name)
+
