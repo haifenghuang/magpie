@@ -204,3 +204,17 @@ stdout << "Hello" << " World" << endl
 #stdin >> input
 #println("input = ", input)
 
+
+println()
+println("----Testing 'regular expression' operation----")
+if ("abc 123	mnj" =~ "\d+\t") {
+	println("MATCHED")
+}
+if ("abc xxx mnj" !~ "\d+") {
+	println("NOT MATCHED")
+}
+
+let regex = /aaa/
+let destStr = regex.replace("aaa bbb ccc aaa", "bbb")
+println("destStr = ", destStr)
+

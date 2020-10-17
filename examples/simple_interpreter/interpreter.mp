@@ -65,6 +65,10 @@ const (
 	TOKEN_SHIFT_L,   // << (SHIFT LEFT)
 	TOKEN_SHIFT_R,   // >> (SHIFT RIGHT)
 
+	TOKEN_REGEXP,  // "/xxx/"
+	TOKEN_MATCH,   // "=~""
+	TOKEN_UNMATCH, // "!~""
+
 	// Delimiters
 	TOKEN_COMMA,     // ","
 	TOKEN_SEMICOLON, // ";"
@@ -152,6 +156,9 @@ fn tokenString(tok) {
 		TOKEN_SHIFT_R   { return "<<" }
 		TOKEN_EQ        { return "==" }
 		TOKEN_NOT_EQ    { return "!=" }
+		TOKEN_REGEXP    { return "/REGEX/" }
+		TOKEN_MATCH     { return "=~" }
+		TOKEN_UNMATCH   { return "!~" }
 		TOKEN_COMMA     { return "," }
 		TOKEN_SEMICOLON { return ";" }
 		TOKEN_LPAREN    { return "(" }
@@ -191,6 +198,7 @@ lex_readPosition = 0 // current reading position in input (after current char)
 lex_ch = " "         // current char under examination
 lex_line = 1
 lex_col = 0
+let lex_prevToken
 
 //create a new lexer
 fn NewLexer(input, filename) {
@@ -285,6 +293,24 @@ fn skipComment() {
 	}
 }
 
+fn readRegExLiteral() {
+	position = lex_position
+
+	/* read until closing slash */
+	for {
+		readChar()
+		if lex_ch == "\\" {
+			// Skip escape sequence
+			readChar()
+		} elif lex_ch == "/" {
+			// This is the closing
+			literal = lex_input[position + 1 : lex_position]
+			readChar() //skip the '/'
+
+			return literal
+		}
+	}
+}
 
 fn lex_nextToken() {
 	let tok
@@ -303,6 +329,10 @@ fn lex_nextToken() {
 			ch = lex_ch
 			readChar()
 			tok = newToken(TOKEN_EQ, ch + lex_ch, tok_pos)
+		} elif peekChar() == "~" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_MATCH, ch + lex_ch, tok_pos)
 		} else {
 			tok = newToken(TOKEN_ASSIGN, lex_ch, tok_pos)
 		}
@@ -327,11 +357,27 @@ fn lex_nextToken() {
 			ch = lex_ch
 			readChar()
 			tok = newToken(TOKEN_NOT_EQ, ch + lex_ch, tok_pos)
+		} elif peekChar() == "~" {
+			ch = lex_ch
+			readChar()
+			tok = newToken(TOKEN_UNMATCH, ch + lex_ch, tok_pos)
 		} else {
 			tok = newToken(TOKEN_BANG, lex_ch, tok_pos)
 		}
 	} elif lex_ch == "/" {
-		tok = newToken(TOKEN_SLASH, lex_ch, tok_pos)
+		if lex_prevToken["type"] == TOKEN_RBRACE || // impossible?
+			lex_prevToken["type"] == TOKEN_RPAREN || // (a+c) / b
+			lex_prevToken["type"] == TOKEN_RBRACKET || // a[3] / b
+			lex_prevToken["type"] == TOKEN_IDENT || // a / b
+			lex_prevToken["type"] == TOKEN_INT || // 3 / b
+			lex_prevToken["type"] == TOKEN_FLOAT || // 3.5 / b
+			lex_prevToken["type"] == TOKEN_FUNCTION { // e.g. fn /() - operator overloading
+				tok = newToken(TOKEN_SLASH, lex_ch, tok_pos)
+		} else { //regexp
+			lit = readRegExLiteral()
+			return newToken(TOKEN_REGEXP, lit, tok_pos)
+		}
+
 	} elif lex_ch == "*" {
 		if peekChar() == "*" {
 			ch = lex_ch
@@ -394,13 +440,19 @@ fn lex_nextToken() {
 		if isLetter(lex_ch) {
 			lit = readIdentifier()
 			typ = lookupIdent(lit)
-			return newToken(typ, lit, tok_pos, tok_pos)
+			tok = newToken(typ, lit, tok_pos, tok_pos)
+			lex_prevToken = tok
+			return tok
 		} else if isDigit(lex_ch) {
 			let num_literal = readNumber()
 			if num_literal.contains(".") {
-				return newToken(TOKEN_FLOAT, num_literal, tok_pos)
+				tok = newToken(TOKEN_FLOAT, num_literal, tok_pos)
+				lex_prevToken = tok
+				return tok
 			} else {
-				return newToken(TOKEN_INT, num_literal, tok_pos)
+				tok = newToken(TOKEN_INT, num_literal, tok_pos)
+				lex_prevToken = tok
+				return tok
 			}
 		} else {
 			tok = newToken(TOKEN_ILLEGAL, lex_ch)
@@ -408,6 +460,7 @@ fn lex_nextToken() {
 	}
 
 	readChar()
+	lex_prevToken = tok
 	return tok
 }
 
@@ -456,6 +509,7 @@ const (
 	AssignExpressionNode,
 	PostfixExpressionNode,
 	NilExpressionNode,
+	RegExLiteralNode,
 )
 
 fn Ast_Program(statements) {
@@ -1134,6 +1188,22 @@ fn Ast_NilLiteral(tok) {
 	return self
 }
 
+fn Ast_RegExLiteral(tok, value) {
+	let self = {"Token": tok, "Value": value, "Type": RegExLiteralNode}
+
+	self["TokenLiteral"] = tok["literal"]
+	self["String"] = tok["literal"]
+
+	//start & end position
+	let tokPos = tok["position"]
+	self["StartPos"] = tokPos
+
+	let valLen = len(tok["literal"])
+	let endPos = newPosition(tokPos["Filename"], tokPos["Offset"] + valLen, tokPos["Line"], tokPos["Column"] + valLen)
+	self["EndPos"] = endPos
+
+	return self
+}
 
 ////////////////////////////////////////////////
 //                 PARSER
@@ -1150,6 +1220,7 @@ const (
 	SUM,         // +
 	PRODUCT,     // *
 	PREFIX,      // -X or !X
+	MATCHING,    // =~, !~
 	CALL,        // myFunction(X)
 	INDEX,       // array[index]
 	INCREMENT,   // ++, --	
@@ -1173,6 +1244,8 @@ precedences = {
 	TOKEN_SLASH:    PRODUCT,
 	TOKEN_ASTERISK: PRODUCT,
 	TOKEN_POWER:    PRODUCT,
+	TOKEN_MATCH:    MATCHING,
+	TOKEN_UNMATCH:  MATCHING,
 	TOKEN_LPAREN:   CALL,
 	TOKEN_DOT:      CALL,
 	TOKEN_LBRAKET:  INDEX,
@@ -1497,6 +1570,8 @@ fn parseExpression(precedence) {
 		}
 	} elif parser_curToken["type"] == TOKEN_NIL {
 		leftExp = parseNilExpression()
+	} elif parser_curToken["type"] == TOKEN_REGEXP {
+		leftExp = parseRegExLiteralExpression()
 	} else {
 		noPrefixParseFnError(parser_curToken["type"])
 		return nil
@@ -1510,7 +1585,8 @@ fn parseExpression(precedence) {
 		   parser_peekToken["type"] == TOKEN_LT || parser_peekToken["type"] == TOKEN_GT ||
 		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE ||
 		   parser_peekToken["type"] == TOKEN_AND || parser_peekToken["type"] == TOKEN_OR ||
-		   parser_peekToken["type"] == TOKEN_SHIFT_L || parser_peekToken["type"] == TOKEN_SHIFT_R {
+		   parser_peekToken["type"] == TOKEN_SHIFT_L || parser_peekToken["type"] == TOKEN_SHIFT_R ||
+		   parser_peekToken["type"] == TOKEN_MATCH || parser_peekToken["type"] == TOKEN_UNMATCH {
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
 		} elif parser_peekToken["type"] == TOKEN_LPAREN {
@@ -2000,6 +2076,10 @@ fn parseNilExpression() {
 	return Ast_NilLiteral(parser_curToken)
 }
 
+fn parseRegExLiteralExpression() {
+	return Ast_RegExLiteral(parser_curToken, parser_curToken["literal"])
+}
+
 fn curTokenIs(t) {
 	return parser_curToken["type"] == t
 }
@@ -2161,6 +2241,7 @@ const HASH_OBJ         = "HASH"
 const BREAK_OBJ        = "BREAK"
 const CONTINUE_OBJ     = "CONTINUE"
 const FILE_OBJ         = "FILE"
+const REGEX_OBJ        = "REGEX"
 
 /* Every Object must have below properties:
     "Type":       Object Type
@@ -2744,6 +2825,61 @@ fn File_WriteString(self, scope, methodArgs) {
 	return IntegerObj(n)
 }
 
+fn RegExObj(regex, value) {
+	let self = {"Type": REGEX_OBJ, "Inspect": value, "RegEx":regex, "Value": value}
+
+	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
+		if methodName == "match" {
+			return RegEx_Match(self, methodArgs)
+		} elif methodName == "replace" {
+			return RegEx_Replace(self, methodArgs)
+		} elif methodName == "split" {
+			return RegEx_Split(self, methodArgs)
+		} else {
+			return undefinedMethodError(line, methodName, BOOLEAN_OBJ)
+		}
+	}
+
+	return self
+}
+
+fn RegEx_Match(self, methodArgs) {
+	let regex = self["RegEx"]
+
+	let matched = regex.match(methodArgs[0])
+	if matched {
+		return TRUE
+	}
+
+	return FALSE
+}
+
+fn RegEx_Replace(self, methodArgs) {
+	let regex = self["RegEx"]
+
+	let source = methodArgs[0]
+	let repl = methodArgs[1]
+
+	let result = regex.replace(source["Value"], repl["Value"])
+	return StringObj(result)
+}
+
+fn RegEx_Split(self, methodArgs) {
+	let regex = self["RegEx"]
+
+	let source = methodArgs[0]
+
+	strArr = regex.Split(source, -1)
+	let arr = []
+	for v in strArr {
+		arr.push(v)
+	}
+
+	return ArrayObj(arr) 
+
+}
+
+
 
 ////////////////////////////////////////////////
 //                 BUILTINS
@@ -2953,6 +3089,8 @@ fn Eval(node, scope) {
 		return evalPostfixExpression(node, p_left)
 	} elif nodeType == NilExpressionNode {
 		return NIL
+	} elif nodeType == RegExLiteralNode {
+		return evalRegExLiteral(node, scope)
 	}
 
 	return nil
@@ -3382,7 +3520,21 @@ fn evalStringInfixExpression(node, left, right) {
 	let lv = left["Value"]
 	let rv = right["Value"]
 
-	if operator == "==" {
+	if operator == "=~" {
+		regObj = regexp.compile(rv)
+		let matched = regObj.match(lv)
+		if matched {
+			return TRUE
+		}
+		return FALSE
+	} elif operator == "!~" {
+		regObj = regexp.compile(rv)
+		let matched = regObj.match(lv)
+		if matched {
+			return FALSE
+		}
+		return TRUE
+	} elif operator == "==" {
 		return nativeBoolToBooleanObject(lv == rv)
 	} elif operator == "!=" {
 		return nativeBoolToBooleanObject(lv != rv)
@@ -3782,6 +3934,11 @@ fn evalFunctionStatement(node, scope) {
 	SetIntoScope(scope, node["Name"]["Value"], fnObj) //save to scope
 
 	return fnObj
+}
+
+fn evalRegExLiteral(node, scope) {
+	regObj = regexp.compile(node["Value"])
+	return RegExObj(regObj, node["Value"])
 }
 
 fn isTruthy(obj) {
