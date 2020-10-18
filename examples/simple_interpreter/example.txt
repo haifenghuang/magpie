@@ -218,3 +218,15 @@ let regex = /aaa/
 let destStr = regex.replace("aaa bbb ccc aaa", "bbb")
 println("destStr = ", destStr)
 
+println()
+println("----Testing 'string' operation----")
+let str1 = "123 456 789 123"
+println("s6 = ", str1.replace("123", "aaa"))
+
+let iFound = str1.index("456")
+println("iFound = ", iFound)
+
+let subStr = str1.substr(4, 7)
+println("subStr = '", subStr + "'")
+
+

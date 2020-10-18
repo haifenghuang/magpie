@@ -2460,6 +2460,14 @@ fn StringObj(value) {
 			return String_Trim(value)
 		} elif methodName == "set" {
 			return String_Set(self, scope, methodArgs)
+		} elif methodName == "replace" {
+			return String_Replace(self, scope, methodArgs)
+		} elif methodName == "find" {
+			return String_Find(self, scope, methodArgs)
+		} elif methodName == "index" {
+			return String_Find(self, scope, methodArgs)
+		} elif methodName == "substr" {
+			return String_Substr(self, scope, methodArgs)
 		} else {
 			return undefinedMethodError(line, methodName, STRING_OBJ)
 		}
@@ -2487,6 +2495,33 @@ fn String_Set(self, scope, methodArgs) {
 	value.set(idx["Value"], replaceStr["Value"])
 	self["Inspect"] = value
 }
+
+fn String_Replace(self, scope, methodArgs) {
+	let srcStr = methodArgs[0]
+	let replaceStr = methodArgs[1]
+
+	let value = self["Value"] 
+	let ret = value.replace(srcStr["Value"], replaceStr["Value"])
+	return StringObj(ret)
+}
+
+fn String_Find(self, scope, methodArgs) {
+	let subStr = methodArgs[0]
+
+	let value = self["Value"] 
+	let idx = value.find(subStr["Value"])
+	return IntegerObj(idx)
+}
+
+fn String_Substr(self, scope, methodArgs) {
+	let pos = methodArgs[0]
+	let length = methodArgs[1]
+
+	let value = self["Value"]
+	let ret = value.substr(pos["Value"], length["Value"])
+	return StringObj(ret)
+}
+
 
 fn BuiltinObj(builtinFn) {
 	return {"Type": BUILTIN_OBJ, "Inspect": "<builtin>", "BuiltinFn": builtinFn, "CallMethod": nil}
