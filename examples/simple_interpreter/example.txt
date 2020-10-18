@@ -112,6 +112,15 @@ while (i-- > 3) {
 	println(i)
 }
 
+println()
+println("----Testing 'for { block }'----")
+let j = 10
+for {
+	j--
+	if (j == 7) { continue }
+	if (j == 5) { break }
+	println("j = ", j)
+}
 
 println()
 println("----Testing 'if (condition) { block }'----")

@@ -503,6 +503,7 @@ const (
 	HashLiteralNode,
 	ForArrayExpressionNode,
 	ForMapExpressionNode,
+	ForEverLoopExpressionNode,
 	WhileExpressionNode,
 	BreakExpressionNode,
 	ContinueExpressionNode,
@@ -1086,6 +1087,25 @@ fn Ast_ForMapExpression(tok, key, value, h, block) {
 	return self
 }
 
+//for { block }
+fn Ast_ForEverLoopExpression(tok, block) {
+	let self = {"Token": tok, "Block": block, "Type": ForEverLoopExpressionNode}
+
+	self["TokenLiteral"] = tok["literal"]
+
+	let str = "for "
+	str += " {\n"
+	str += "\t" + block["String"]
+	str += "}\n"
+	self["String"] = str
+
+	//start & end position
+	self["StartPos"] = tok["position"]
+	self["EndPos"] = block["EndPos"]
+
+	return self
+}
+
 //while (condition) { block }
 fn Ast_WhileExpression(tok, condition, block) {
 	let self = {"Token": tok, "Condition":  condition, "Block": block, "Type": WhileExpressionNode}
@@ -1261,8 +1281,8 @@ let isInLoop = false
 
 fn debugToken(msg) {
 	printf("%s, curToken.type=%s, curToken.literal=%s, curTok.Pos=%s, peekToken.type=%s, peekToken.literal=%s, peekToken.Pos=%s\n", 
-			msg, parser_curToken["type"], parser_curToken["literal"], positionStr(parser_curToken["position"]),
-			parser_peekToken["type"], parser_peekToken["literal"], positionStr(parser_peekToken["position"]))
+			msg, tokenString(parser_curToken["type"]), parser_curToken["literal"], positionStr(parser_curToken["position"]),
+			tokenString(parser_peekToken["type"]), parser_peekToken["literal"], positionStr(parser_peekToken["position"]))
 }
 
 fn parser_nextToken() {
@@ -1937,6 +1957,10 @@ fn parseHashLiteral() {
 fn parseForExpression() {
 	let curToken = parser_curToken
 
+	if peekTokenIs(TOKEN_LBRACE) {
+		return parseForEverLoopExpression(curToken)
+	}
+
 	if !expectPeek(TOKEN_IDENT) {
 		return nil
 	}
@@ -1948,6 +1972,17 @@ fn parseForExpression() {
 	}
 
 	return parseForEachArray(curToken, variable)
+}
+
+fn parseForEverLoopExpression(tok) {
+	isInLoop = true
+
+	expectPeek(TOKEN_LBRACE)
+	let block = parseBlockStatement()
+
+	isInLoop = false
+
+	return Ast_ForEverLoopExpression(tok, block) 
 }
 
 //for key, value in hashObj { block }
@@ -3104,6 +3139,8 @@ fn Eval(node, scope) {
 		return evalIndexExpression(node, idx_left, idx_index)
 	} elif nodeType == HashLiteralNode {
 		return evalHashLiteral(node, scope)
+	} elif nodeType == ForEverLoopExpressionNode {
+		return evalForEverLoopExpression(node, scope)
 	} elif nodeType == ForArrayExpressionNode {
 		return evalForArrayExpression(node, scope)
 	} elif nodeType == ForMapExpressionNode {
@@ -3702,6 +3739,33 @@ fn evalMethodCallExpression(node, scope) {
 
 	let startPos = node["StartPos"]
 	return obj["CallMethod"](scope, startPos["Line"], methName, args)
+}
+
+//for { block }
+fn evalForEverLoopExpression(node, scope) {
+	let e = NIL
+	let innerScope = NewEnclosedScope(scope)
+	for {
+		e = Eval(node["Block"], innerScope)
+		if isError(e) {
+			return e
+		}
+
+		if e["Type"] == BREAK_OBJ {
+			break
+		}
+		if e["Type"] == CONTINUE_OBJ {
+			continue
+		}
+		if e["Type"] == RETURN_VALUE_OBJ {
+			return e
+		}
+	}
+
+	if e == NIL || e["Type"] == BREAK_OBJ || e["Type"] == CONTINUE_OBJ {
+		return NIL
+	}
+	return e
 }
 
 //for var in iterable
