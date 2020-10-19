@@ -176,7 +176,7 @@ n = nil
 const PI = 3.14159
 PI = 3.14 //错误
 
-const TOKEN_TYPE (
+const (
     INT,    //缺省为0
     DOUBLE,
     STRING
