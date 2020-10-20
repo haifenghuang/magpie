@@ -54,6 +54,7 @@ println("new arr length = ", len(arr))
 arr.pop()
 println("new arr2 = ", arr)
 println("new arr2 length = ", len(arr))
+println("hello in [1, 2, hello] = ", "hello" in [1, 2, "hello"])
 
 println()
 println("----Testing tuple object----")
@@ -71,7 +72,7 @@ let tup2 = (1,)
 println(tup2)
 println("tup2[0] = ", tup2[0])
 println("tup2[-1] = ", tup2[-1])
-
+println("hello in (1, 2, hello) = ", "hello" in (1, 2, "hello"))
 
 println()
 println("----Testing hash object and hash method----")
@@ -91,6 +92,9 @@ println(h)
 println(h.pop("Name"))
 println(h)
 
+let h2 = {"Name": "HHF", "Age": 43}
+println("Age2 in {Name: HHF, Age: 43} = ", "Age2" in h2) # false
+println("Age in {Name: HHF, Age: 43} = ", "Age" in h2)   # true
 
 println()
 println("----Testing string object and string method----")
@@ -238,4 +242,5 @@ println("iFound = ", iFound)
 let subStr = str1.substr(4, 7)
 println("subStr = '", subStr + "'")
 
-
+println("x in 'abc' = ", "x" in "abc")
+println("a in 'abc' = ", "a" in "abc")

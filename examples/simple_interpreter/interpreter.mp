@@ -185,6 +185,7 @@ fn tokenString(tok) {
 		TOKEN_CONTINUE  { return "CONTINUE" }
 		TOKEN_AND       { return "AND" }
 		TOKEN_OR        { return "OR" }
+		TOKEN_NIL       { return "NIL" }
 	}
 }
 
@@ -1257,6 +1258,7 @@ precedences = {
 	TOKEN_LE:       LESSGREATER,
 	TOKEN_GT:       LESSGREATER,
 	TOKEN_GE:       LESSGREATER,
+	TOKEN_IN:       LESSGREATER,
 	TOKEN_SHIFT_L:  SHIFTS,
 	TOKEN_SHIFT_R:  SHIFTS,
 	TOKEN_PLUS:     SUM,
@@ -1606,7 +1608,8 @@ fn parseExpression(precedence) {
 		   parser_peekToken["type"] == TOKEN_LE || parser_peekToken["type"] == TOKEN_GE ||
 		   parser_peekToken["type"] == TOKEN_AND || parser_peekToken["type"] == TOKEN_OR ||
 		   parser_peekToken["type"] == TOKEN_SHIFT_L || parser_peekToken["type"] == TOKEN_SHIFT_R ||
-		   parser_peekToken["type"] == TOKEN_MATCH || parser_peekToken["type"] == TOKEN_UNMATCH {
+		   parser_peekToken["type"] == TOKEN_MATCH || parser_peekToken["type"] == TOKEN_UNMATCH || 
+		   parser_peekToken["type"] == TOKEN_IN {
 			parser_nextToken()
 			leftExp = parseInfixExpression(leftExp)
 		} elif parser_peekToken["type"] == TOKEN_LPAREN {
@@ -2289,6 +2292,29 @@ const REGEX_OBJ        = "REGEX"
     "Writable": means the object is writable, e.g. FILE_OBJ
 */
 
+//lhsV : left-hand side Value
+fn objEqual(lhsV, rhsV) {
+	if lhsV == nil && rhsV == nil {
+		return true
+	}
+	if (lhsV == nil && rhsV != nil) || (lhsV != nil && rhsV == nil) {
+		return false
+	}
+
+	if lhsV["Type"] != rhsV["Type"] {
+		return false
+	}
+
+	if lhsV["Type"] == NIL_OBJ {
+		if rhsV["Type"] == NIL_OBJ {
+			return true
+		}
+	}
+
+	return lhsV["Inspect"] == rhsV["Inspect"]
+}
+
+
 fn IntegerObj(value) {
 	let self = {"Type": INTEGER_OBJ, "Inspect": sprintf("%d", value), "Value": value, "IsNumber": true}
 
@@ -2503,6 +2529,8 @@ fn StringObj(value) {
 			return String_Find(self, scope, methodArgs)
 		} elif methodName == "substr" {
 			return String_Substr(self, scope, methodArgs)
+		} elif methodName == "contains" {
+			return String_Contains(self, scope, methodArgs)
 		} else {
 			return undefinedMethodError(line, methodName, STRING_OBJ)
 		}
@@ -2557,6 +2585,17 @@ fn String_Substr(self, scope, methodArgs) {
 	return StringObj(ret)
 }
 
+fn String_Contains(self, scope, methodArgs) {
+	let arg0 = methodArgs[0]
+
+	let value = self["Value"]
+	if value.contains(arg0["Inspect"]) {
+		return TRUE
+	}
+
+	return FALSE
+}
+
 
 fn BuiltinObj(builtinFn) {
 	return {"Type": BUILTIN_OBJ, "Inspect": "<builtin>", "BuiltinFn": builtinFn, "CallMethod": nil}
@@ -2576,6 +2615,8 @@ fn ArrayObj(elements) {
 			return Array_Set(self, scope, methodArgs)
 		} elif methodName == "get" {
 			return Array_Get(self, scope, methodArgs)
+		} elif methodName == "include" {
+			return Array_Include(self, scope, methodArgs)
 		} else {
 			return undefinedMethodError(line, methodName, ARRAY_OBJ)
 		}
@@ -2621,6 +2662,19 @@ fn Array_Pop(self, scope) {
 	Array_Inspect(self)
 
 	return self
+}
+
+fn Array_Include(self, scope, args) {
+	let elements = self["Elements"]
+
+	let obj = args[0]
+
+	for item in elements {
+		if objEqual(obj, item) {
+			return TRUE
+		}
+	}
+	return FALSE
 }
 
 fn Array_Get(self, scope, args) {
@@ -2680,7 +2734,11 @@ fn TupleObj(elements, isMulti = false) {
 
 
 	self["CallMethod"] = fn (scope, line, methodName, methodArgs) {
-		return undefinedMethodError(line, methodName, TUPLE_OBJ)
+		if methodName == "include" {
+			return Tuple_Include(self, scope, methodArgs)
+		} else {
+			return undefinedMethodError(line, methodName, TUPLE_OBJ)
+		}
 	}
 
 	return self
@@ -2688,6 +2746,19 @@ fn TupleObj(elements, isMulti = false) {
 
 fn Tuple_Inspect(self) {
 
+}
+
+fn Tuple_Include(self, scope, args) {
+	let elements = self["Elements"]
+
+	let obj = args[0]
+
+	for item in elements {
+		if objEqual(obj, item) {
+			return TRUE
+		}
+	}
+	return FALSE
 }
 
 fn HashPair(key, value) {
@@ -3353,6 +3424,18 @@ fn evalInfixExpression(node, left, right, scope) {
 		}
 	}
 
+	if operator == "in" {
+		if right["Type"] == ARRAY_OBJ {
+			return Array_Include(right, scope, [left])
+		} elif right["Type"] == TUPLE_OBJ {
+			return Tuple_Include(right, scope, [left])
+		} elif right["Type"] == HASH_OBJ {
+			return Hash_Exists(right, scope, [left])
+		} elif right["Type"] == STRING_OBJ {
+			return String_Contains(right, scope, [left])
+		}
+		return FALSE
+	}
 
 	if operator == "and" || operator == "or" {
 		if operator == "and" {
@@ -4140,10 +4223,9 @@ fn unwrapReturnValue(obj) {
 /* for debugging : print each tokens */
 //	do {
 //		n = lex_nextToken()
+//		printf("{tokentype: \"%s\", literal: \"%s\", pos : %s}\n", tokenString(n["type"]), n["literal"], positionStr(n["position"]))
 //		if n["type"] == TOKEN_EOF {
 //			break
-//		} else {
-//			printf("{tokentype: \"%s\", literal: \"%s\", pos : %s}\n", tokenString(n["type"]), n["literal"], positionStr(n["position"]))
 //		}
 //	}
 
