@@ -1226,6 +1226,10 @@ func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
 func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) {
 	path := p.path
 
+	if path == "" {
+		path = "."
+	}
+
 	fn := filepath.Join(path, importpath+".my")
 	f, err := ioutil.ReadFile(fn)
 	if err != nil { //error occurred, maybe the file do not exists.
