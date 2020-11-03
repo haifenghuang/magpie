@@ -139,7 +139,7 @@ func (o *Optional) Or(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "or", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	opt := Eval(supplier.Literal.Body, s) // run the function
 	if opt.Type() != OPTIONAL_OBJ {       // the supplier function must return an Optional
 		return NewError(line, GENERICERROR, "The supplier function must return an optional.")
@@ -175,7 +175,7 @@ func (o *Optional) OrElseGet(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "orElseGet", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	ret := Eval(supplier.Literal.Body, s) // run the function
 	return ret
 }
@@ -216,7 +216,7 @@ func (o *Optional) IfPresent(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "ifPresent", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	s.Set(action.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 	ret := Eval(action.Literal.Body, s) // run the function
 
@@ -236,7 +236,7 @@ func (o *Optional) IfPresentOrElse(line string, scope *Scope, args ...Object) Ob
 			return NewError(line, PARAMTYPEERROR, "first", "ifPresentOrElse", "*Function", args[0].Type())
 		}
 
-		s := NewScope(scope)
+		s := NewScope(scope, nil)
 		s.Set(action.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 		ret := Eval(action.Literal.Body, s) // run the function
 		return ret
@@ -246,7 +246,7 @@ func (o *Optional) IfPresentOrElse(line string, scope *Scope, args ...Object) Ob
 			return NewError(line, PARAMTYPEERROR, "second", "ifPresentOrElse", "*Function", args[1].Type())
 		}
 
-		s := NewScope(scope)
+		s := NewScope(scope, nil)
 		ret := Eval(emptyAction.Literal.Body, s) // run the function
 		return ret
 	}
@@ -269,7 +269,7 @@ func (o *Optional) Filter(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	s.Set(predicate.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 	cond := Eval(predicate.Literal.Body, s) // run the function
 	if IsTrue(cond) {
@@ -298,7 +298,7 @@ func (o *Optional) Map(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	s.Set(mapper.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 	r := Eval(mapper.Literal.Body, s) // run the function
 	if obj, ok := r.(*ReturnValue); ok {
@@ -330,7 +330,7 @@ func (o *Optional) FlatMap(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "flatMap", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	s.Set(mapper.Literal.Parameters[0].(*ast.Identifier).Value, o.Value)
 	r := Eval(mapper.Literal.Body, s) // run the function
 	if obj, ok := r.(*ReturnValue); ok {

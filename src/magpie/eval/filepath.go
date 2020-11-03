@@ -416,7 +416,7 @@ func (f *FilePathObj) Walk(scope *Scope, line string, args ...Object) Object {
 }
 
 func walkFunc(scope *Scope, f *Function, path string, info os.FileInfo) error {
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	//Store to `Scope`，so below `Eval() could use them
 	s.Set(f.Literal.Parameters[0].(*ast.Identifier).Value, NewString(path))

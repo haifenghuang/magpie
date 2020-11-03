@@ -371,12 +371,12 @@ func (m *MethodInfo) Invoke(line string, scope *Scope, args ...Object) Object {
 	if method != nil {
 		switch meth := method.(type) {
 		case *Function:
-			newScope := NewScope(m.Instance.Scope)
+			newScope := NewScope(m.Instance.Scope, nil)
 			newScope.Set("parent", m.Instance.Class.Parent)
 			return evalFunctionDirect(method, args, m.Instance, newScope, nil)
 		case *BuiltinMethod:
 			builtinMethod := &BuiltinMethod{Fn: meth.Fn, Instance: m.Instance}
-			aScope := NewScope(m.Instance.Scope)
+			aScope := NewScope(m.Instance.Scope, nil)
 			return evalFunctionDirect(builtinMethod, args, m.Instance, aScope, nil)
 		}
 	}

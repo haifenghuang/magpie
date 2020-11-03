@@ -198,9 +198,9 @@ func (s *String) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "itoa":
 		return s.Itoa(line, args...)
 	case "writeLine":
-		return s.WriteLine(line, args...)
+		return s.WriteLine(line, scope, args...)
 	case "write":
-		return s.Write(line, args...)
+		return s.Write(line, scope, args...)
 	case "isEmpty":
 		return s.IsEmpty(line, args...)
 	case "hash":
@@ -733,21 +733,21 @@ func (s *String) Itoa(line string, args ...Object) Object {
 	return NewString(ret)
 }
 
-func (s *String) WriteLine(line string, args ...Object) Object {
+func (s *String) WriteLine(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 0 {
 		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
-	fmt.Println(s.String)
+	fmt.Fprintln(scope.Writer, s.String)
 	return NIL
 }
 
-func (s *String) Write(line string, args ...Object) Object {
+func (s *String) Write(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 0 {
 		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
-	fmt.Print(s.String)
+	fmt.Fprint(scope.Writer, s.String)
 	return NIL
 }
 
@@ -941,9 +941,9 @@ func (s *StringsObj) CallMethod(line string, scope *Scope, method string, args .
 	case "itoa":
 		return s.Itoa(line, args...)
 	case "writeLine":
-		return s.WriteLine(line, args...)
+		return s.WriteLine(line, scope, args...)
 	case "write":
-		return s.Write(line, args...)
+		return s.Write(line, scope, args...)
 	case "isEmpty":
 		return s.IsEmpty(line, args...)
 	case "hash":
@@ -1612,7 +1612,7 @@ func (s *StringsObj) Itoa(line string, args ...Object) Object {
 	return NewString(ret)
 }
 
-func (s *StringsObj) WriteLine(line string, args ...Object) Object {
+func (s *StringsObj) WriteLine(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
@@ -1622,11 +1622,11 @@ func (s *StringsObj) WriteLine(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "writeLine", "*String", args[0].Type())
 	}
 
-	fmt.Println(strObj.String)
+	fmt.Fprintln(scope.Writer, strObj.String)
 	return NIL
 }
 
-func (s *StringsObj) Write(line string, args ...Object) Object {
+func (s *StringsObj) Write(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
 		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
@@ -1636,7 +1636,7 @@ func (s *StringsObj) Write(line string, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
-	fmt.Print(strObj.String)
+	fmt.Fprint(scope.Writer, strObj.String)
 	return NIL
 }
 

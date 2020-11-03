@@ -872,7 +872,7 @@ func testEval(input string) Object {
 	l := lexer.New(input)
 	path, _ := os.Getwd()
 	p := parser.New(l, path)
-	s := NewScope(nil)
+	s := NewScope(nil, os.Stdout)
 	program := p.ParseProgram()
 	if len(program.Statements) == 0 {
 		if len(program.Includes) == 0 {

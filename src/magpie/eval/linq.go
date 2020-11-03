@@ -433,7 +433,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 			}
 		}
 
-		scop := NewScope(scope)
+		scop := NewScope(scope, nil)
 		arr := &Array{}
 		var lineNo int64 = 0
 		l := obj.(*FileObject).ReadLine(line)
@@ -739,7 +739,7 @@ func (lq *LinqObj) Where(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -773,7 +773,7 @@ func (lq *LinqObj) Select(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -821,7 +821,7 @@ func (lq *LinqObj) FirstWith(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "firstWith", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 
@@ -866,7 +866,7 @@ func (lq *LinqObj) LastWith(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "lastWith", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	next := lq.Query.Iterate()
 
 	var obj Object = NIL
@@ -895,7 +895,7 @@ func (lq *LinqObj) ForEach(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "forEach", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 
@@ -918,7 +918,7 @@ func (lq *LinqObj) ForEachIndexed(line string, scope *Scope, args ...Object) Obj
 		return NewError(line, PARAMTYPEERROR, "first", "forEachIndexed", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 	index := 0
@@ -976,7 +976,7 @@ func (lq *LinqObj) TakeWhile(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "takeWhile", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1026,7 +1026,7 @@ func (lq *LinqObj) TakeWhileIndexed(line string, scope *Scope, args ...Object) O
 		return NewError(line, PARAMTYPEERROR, "first", "takeWhileIndexed", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1112,7 +1112,7 @@ func (lq *LinqObj) SkipWhile(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "skipWhile", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1161,7 +1161,7 @@ func (lq *LinqObj) SkipWhileIndexed(line string, scope *Scope, args ...Object) O
 		return NewError(line, PARAMTYPEERROR, "first", "skipWhileIndexed", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1213,7 +1213,7 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		func() Iterator {
@@ -1306,7 +1306,7 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "fourth", "join", "*Function", args[3].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1409,7 +1409,7 @@ func (lq *LinqObj) Zip(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "zip", "*Function", args[1].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1508,7 +1508,7 @@ func (lq *LinqObj) SelectMany(line string, scope *Scope, args ...Object) Object 
 		return NewError(line, PARAMTYPEERROR, "first", "selectMany", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1571,7 +1571,7 @@ func (lq *LinqObj) SelectManyIndexed(line string, scope *Scope, args ...Object) 
 		return NewError(line, PARAMTYPEERROR, "first", "selectManyIndexed", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1632,7 +1632,7 @@ func (lq *LinqObj) SelectManyBy(line string, scope *Scope, args ...Object) Objec
 		return NewError(line, PARAMTYPEERROR, "second", "selectManyBy", "*Function", args[1].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1697,7 +1697,7 @@ func (lq *LinqObj) SelectManyByIndexed(line string, scope *Scope, args ...Object
 		return NewError(line, PARAMTYPEERROR, "second", "selectManyByIndexed", "*Function", args[1].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -1841,7 +1841,7 @@ func (lq *LinqObj) ExceptBy(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "exceptBy", "*Function", args[1].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -2022,7 +2022,7 @@ func (lq *LinqObj) DistinctBy(line string, scope *Scope, args ...Object) Object 
 		return NewError(line, PARAMTYPEERROR, "first", "distinctBy", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -2121,7 +2121,7 @@ func (lq *LinqObj) IntersectBy(line string, scope *Scope, args ...Object) Object
 		return NewError(line, PARAMTYPEERROR, "second", "intersectBy", "*Function", args[1].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -2184,7 +2184,7 @@ func (lq *LinqObj) Aggregate(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "aggregate", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 
@@ -2232,7 +2232,7 @@ func (lq *LinqObj) AggregateWithSeed(line string, scope *Scope, args ...Object) 
 		return NewError(line, PARAMTYPEERROR, "second", "aggregateWithSeed", "*Function", args[1].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 	result := seed
@@ -2282,7 +2282,7 @@ func (lq *LinqObj) AggregateWithSeedBy(line string, scope *Scope, args ...Object
 		return NewError(line, PARAMTYPEERROR, "third", "aggregateWithSeedBy", "*Function", args[2].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 	result := seed
@@ -2316,7 +2316,7 @@ func (lq *LinqObj) All(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "all", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 	for item, ok := next(); ok.Bool; item, ok = next() {
@@ -2353,7 +2353,7 @@ func (lq *LinqObj) AnyWith(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "anyWith", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	next := lq.Query.Iterate()
 
@@ -2417,7 +2417,7 @@ func (lq *LinqObj) CountWith(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "countWith", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	var r int64 = 0
 	next := lq.Query.Iterate()
@@ -2496,7 +2496,7 @@ func (lq *LinqObj) SingleWith(line string, scope *Scope, args ...Object) Object 
 		return NewError(line, PARAMTYPEERROR, "first", "singleWith", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 
 	var r Object = NIL
 	next := lq.Query.Iterate()
@@ -2693,7 +2693,7 @@ func (lq *LinqObj) OrderBy(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "orderBy", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	return &LinqObj{Query: lq.Query, OrderedQuery: OrderedQuery{
 		orders:   []order{{selector: selector, scope: scop}},
 		original: lq.Query,
@@ -2730,7 +2730,7 @@ func (lq *LinqObj) OrderByDescending(line string, scope *Scope, args ...Object) 
 		return NewError(line, PARAMTYPEERROR, "first", "orderByDescending", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	return &LinqObj{Query: lq.Query, OrderedQuery: OrderedQuery{
 		orders:   []order{{selector: selector, scope: scop, desc: true}},
 		original: lq.Query,
@@ -2768,7 +2768,7 @@ func (lq *LinqObj) ThenBy(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	return &LinqObj{Query: lq.Query, OrderedQuery: OrderedQuery{
 		orders:   append(lq.OrderedQuery.orders, order{selector: selector, scope: scop}),
 		original: lq.OrderedQuery.original,
@@ -2806,7 +2806,7 @@ func (lq *LinqObj) ThenByDescending(line string, scope *Scope, args ...Object) O
 		return NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	return &LinqObj{Query: lq.Query, OrderedQuery: OrderedQuery{
 		orders:   append(lq.OrderedQuery.orders, order{selector: selector, scope: scop, desc: true}),
 		original: lq.OrderedQuery.original,
@@ -2880,7 +2880,7 @@ func (lq *LinqObj) Sort(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "sort", "*Function", args[0].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
 			items := lq.Query.lessSort(scop, less)
@@ -2916,7 +2916,7 @@ func (lq *LinqObj) ToMap(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "toMap", "*Function", args[1].Type())
 	}
 
-	scop := NewScope(scope)
+	scop := NewScope(scope, nil)
 	hash := NewHash()
 	next := lq.Query.Iterate()
 	for item, ok := next(); ok.Bool; item, ok = next() {
@@ -3079,7 +3079,7 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 			}
 		}
 
-		scop := NewScope(scope)
+		scop := NewScope(scope, nil)
 		arr := &Array{}
 		var lineNo int64 = 0
 		l := obj.(*FileObject).ReadLine(line)
@@ -3336,7 +3336,7 @@ func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
 	}
 	letVar := letVarObj.String
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
 			next := lq.Query.Iterate()
@@ -3390,7 +3390,7 @@ func (lq *LinqObj) Where2(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -3423,7 +3423,7 @@ func (lq *LinqObj) Select2(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	return &LinqObj{Query: Query{
 		Iterate: func() Iterator {
@@ -3458,7 +3458,7 @@ func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type())
 	}
 
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	return &LinqObj{Query: Query{
 		func() Iterator {
 			next := lq.Query.Iterate()

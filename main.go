@@ -41,7 +41,7 @@ func runProgram(debug bool, filename string) {
 		}
 		os.Exit(1)
 	}
-	scope := eval.NewScope(nil)
+	scope := eval.NewScope(nil, os.Stdout)
 	RegisterGoGlobals()
 
 	if debug {

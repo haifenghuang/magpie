@@ -935,7 +935,7 @@ func (rex *RegExpObj) SubexpNames(line string, args ...Object) Object {
 
 //ReplaceAllStringFunc()'s callback function
 func replFunc(scope *Scope, f *Function, str string) string {
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	//Store to `Scope`，so below `Eval() could use them
 	s.Set(f.Literal.Parameters[0].(*ast.Identifier).Value, NewString(str))

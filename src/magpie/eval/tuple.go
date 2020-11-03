@@ -147,7 +147,7 @@ func (t *Tuple) Filter(line string, scope *Scope, args ...Object) Object {
 
 	tuple := &Tuple{}
 	tuple.Members = []Object{}
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	for _, argument := range t.Members {
 		s.Set(block.Literal.Parameters[0].(*ast.Identifier).Value, argument)
 		cond := Eval(block.Literal.Body, s)
@@ -196,7 +196,7 @@ func (t *Tuple) Map(line string, scope *Scope, args ...Object) Object {
 	}
 
 	tuple := &Tuple{}
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	for _, argument := range t.Members {
 		s.Set(block.Literal.Parameters[0].(*ast.Identifier).Value, argument)
 		r := Eval(block.Literal.Body, s)
@@ -237,7 +237,7 @@ func (t *Tuple) Reduce(line string, scope *Scope, args ...Object) Object {
 	if !ok {
 		return NewError(line, PARAMTYPEERROR, "first", "reduce", "*Function", args[0].Type())
 	}
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	start := 1
 	if l == 1 {
 		s.Set(block.Literal.Parameters[0].(*ast.Identifier).Value, t.Members[0])

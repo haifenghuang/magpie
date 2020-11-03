@@ -706,7 +706,7 @@ func (t *TemplateObj) Funcs(line string, scope *Scope, args ...Object) Object {
 				}
 			}
 
-			s := NewScope(scope)
+			s := NewScope(scope, nil)
 			//put all the arguments into scope for later 'Eval'
 			for idx, arg := range args {
 				o, _ := unmarshalJsonObject(arg) //convert go object to magpie object

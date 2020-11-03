@@ -2,6 +2,7 @@ package eval
 
 import (
 	"fmt"
+	"io"
 	"magpie/ast"
 	"os"
 	"sync"
@@ -14,13 +15,15 @@ var BuiltinClasses = map[string]*Class{
 	"NotEmpty": NOTEMPTY_ANNOCLASS,
 }
 
-func NewScope(p *Scope) *Scope {
+func NewScope(p *Scope, w io.Writer) *Scope {
 	s := make(map[string]Object)
 	r := make(map[string]bool)
 	ret := &Scope{store: s, readonly: r, parentScope: p}
 	if p == nil {
 		ret.CallStack = &CallStack{Frames: []CallFrame{CallFrame{}}} //creat a new empty CallStack
+		ret.Writer = w
 	} else {
+		ret.Writer = p.Writer
 		ret.CallStack = p.CallStack
 	}
 
@@ -50,6 +53,7 @@ type Scope struct {
 	store       map[string]Object
 	readonly    map[string]bool
 	parentScope *Scope
+	Writer      io.Writer
 	CallStack   *CallStack
 
 	//We need to use `Mutex`, because we added 'spawn'(multithread).
@@ -88,11 +92,11 @@ func (s *Scope) DebugPrint(indent string) {
 	defer s.Unlock()
 
 	for k, v := range s.store {
-		fmt.Printf("%s<%s> = <%s>  value.Type: %T\n", indent, k, v.Inspect(), v)
+		fmt.Fprintf(s.Writer, "%s<%s> = <%s>  value.Type: %T\n", indent, k, v.Inspect(), v)
 	}
 
 	if s.parentScope != nil {
-		fmt.Printf("\n%sParentScope:\n", indent)
+		fmt.Fprintf(s.Writer, "\n%sParentScope:\n", indent)
 		s.parentScope.DebugPrint(indent + "  ")
 	}
 
@@ -105,7 +109,7 @@ func (s *Scope) Set(name string, val Object) Object {
 	//check if it is readonly
 	_, ok := s.store[name]
 	if ok && s.readonly[name] {
-		fmt.Printf("Const variable '%s' cannot be modified.\n", name)
+		fmt.Fprintf(s.Writer, "Const variable '%s' cannot be modified.\n", name)
 		os.Exit(3)
 	}
 
@@ -131,7 +135,7 @@ func (s *Scope) Reset(name string, val Object) (Object, bool) {
 	_, ok = s.store[name]
 	if ok {
 		if s.readonly[name] {
-			fmt.Printf("Const variable '%s' cannot be modified.\n", name)
+			fmt.Fprintf(s.Writer, "Const variable '%s' cannot be modified.\n", name)
 			os.Exit(3)
 		}
 		s.store[name] = val

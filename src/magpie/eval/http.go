@@ -346,7 +346,7 @@ func (h *HttpObj) HandleFunc(line string, scope *Scope, args ...Object) Object {
 }
 
 func ServeHTTP(scope *Scope, f *Function, w http.ResponseWriter, r *http.Request) {
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	//Save the two variables to `Scope`, so `Eval` can use them
 	s.Set(f.Literal.Parameters[0].(*ast.Identifier).Value, &HttpResponseWriter{Writer: w})
@@ -402,7 +402,7 @@ type customHTTPHandler struct {
 }
 
 func (c *customHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s := NewScope(c.Scope)
+	s := NewScope(c.Scope, nil)
 
 	//Save the two variables to `Scope`, so `Eval` can use them
 	s.Set(c.F.Literal.Parameters[0].(*ast.Identifier).Value, &HttpResponseWriter{Writer: w})

@@ -307,7 +307,7 @@ func evalProgram(program *ast.Program, scope *Scope) (results Object) {
 
 func loadIncludes(includes map[string]*ast.IncludeStatement, scope *Scope) {
 	if includeScope == nil {
-		includeScope = NewScope(nil)
+		includeScope = NewScope(nil, scope.Writer)
 	}
 	for _, p := range includes {
 		Eval(p, scope)
@@ -325,7 +325,7 @@ func evalIncludeStatement(i *ast.IncludeStatement, scope *Scope) Object {
 		return cache
 	}
 
-	imported := &IncludedObject{Name: i.IncludePath.String(), Scope: NewScope(nil)}
+	imported := &IncludedObject{Name: i.IncludePath.String(), Scope: NewScope(nil, scope.Writer)}
 
 	// capture stdout to suppress output during evaluating import
 	so := os.Stdout
@@ -900,7 +900,7 @@ func evalClassIndexerAssignExpression(a *ast.AssignExpression, obj Object, index
 		if p.Setter == nil || len(p.Setter.Body.Statements) == 0 {
 			return NewError(a.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
-			newScope := NewScope(instanceObj.Scope)
+			newScope := NewScope(instanceObj.Scope, nil)
 			newScope.Set("value", val)
 
 			switch o := indexExpr.Index.(type) {
@@ -1016,7 +1016,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 					if len(p.Setter.Body.Statements) == 0 { // property xxx { set; }
 						instanceObj.Scope.Set("_"+strArr[1], val)
 					} else {
-						newScope := NewScope(instanceObj.Scope)
+						newScope := NewScope(instanceObj.Scope, nil)
 						newScope.Set("value", val)
 						results := Eval(p.Setter.Body, newScope)
 						if results.Type() == RETURN_VALUE_OBJ {
@@ -1090,7 +1090,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 					if len(p.Setter.Body.Statements) == 0 { // property xxx { set; }
 						clsObj.Scope.Set("_"+strArr[1], val)
 					} else {
-						newScope := NewScope(clsObj.Scope)
+						newScope := NewScope(clsObj.Scope, nil)
 						newScope.Set("value", val)
 						results := Eval(p.Setter.Body, newScope)
 						if results.Type() == RETURN_VALUE_OBJ {
@@ -1354,7 +1354,7 @@ func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
 }
 
 func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	hash := NewHash()
 	for _, key := range hl.Order {
@@ -1388,7 +1388,7 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 }
 
 func evalStructLiteral(s *ast.StructLiteral, scope *Scope) Object {
-	structScope := NewScope(nil)
+	structScope := NewScope(nil, scope.Writer)
 	for key, value := range s.Pairs {
 		if ident, ok := key.(*ast.Identifier); ok {
 			aObj := Eval(value, scope)
@@ -1407,7 +1407,7 @@ func evalEnumStatement(enumStmt *ast.EnumStatement, scope *Scope) Object {
 }
 
 func evalEnumLiteral(e *ast.EnumLiteral, scope *Scope) Object {
-	enumScope := NewScope(nil)
+	enumScope := NewScope(nil, scope.Writer)
 	for key, value := range e.Pairs {
 		if ident, ok := key.(*ast.Identifier); ok {
 			aObj := Eval(value, scope)
@@ -1576,7 +1576,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 		if method != nil {
 			switch method.(type) {
 			case *Function:
-				newScope := NewScope(instanceObj.Scope)
+				newScope := NewScope(instanceObj.Scope, nil)
 				args := []Object{right}
 				return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 			case *BuiltinMethod:
@@ -2681,13 +2681,13 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 	if method != nil {
 		switch m := method.(type) {
 		case *Function:
-			newScope := NewScope(instanceObj.Scope)
+			newScope := NewScope(instanceObj.Scope, nil)
 			args := []Object{right}
 			return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 		case *BuiltinMethod:
 			args := []Object{right}
 			builtinMethod := &BuiltinMethod{Fn: m.Fn, Instance: instanceObj}
-			aScope := NewScope(instanceObj.Scope)
+			aScope := NewScope(instanceObj.Scope, nil)
 			return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 		}
 	}
@@ -2749,7 +2749,7 @@ func evalUnlessExpression(ie *ast.UnlessExpression, scope *Scope) Object {
 }
 
 func evalDoLoopExpression(dl *ast.DoLoop, scope *Scope) Object {
-	newScope := NewScope(scope)
+	newScope := NewScope(scope, nil)
 
 	var e Object
 	for {
@@ -2780,7 +2780,7 @@ func evalDoLoopExpression(dl *ast.DoLoop, scope *Scope) Object {
 }
 
 func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	var result Object
 	for {
@@ -2878,7 +2878,7 @@ func evalGrepExpression(ge *ast.GrepExpr, scope *Scope) Object {
 	for _, item := range members {
 		//Note: we must opening a new scope, because the variable is different in each iteration.
 		//If not, then the next iteration will overwrite the previous assigned variable.
-		newSubScope := NewScope(scope)
+		newSubScope := NewScope(scope, nil)
 		newSubScope.Set(ge.Var, item)
 
 		var cond Object
@@ -2938,7 +2938,7 @@ func evalMapExpression(me *ast.MapExpr, scope *Scope) Object {
 	result.Members = []Object{}
 
 	for _, item := range members {
-		newSubScope := NewScope(scope)
+		newSubScope := NewScope(scope, nil)
 		newSubScope.Set(me.Var, item)
 
 		var r Object
@@ -2960,7 +2960,7 @@ func evalMapExpression(me *ast.MapExpr, scope *Scope) Object {
 //[ str for str in strs <where cond> ]
 //[ x for x in tuple <where cond> ]
 func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 	aValue := Eval(lc.Value, innerScope)
 	if aValue.Type() == ERROR_OBJ {
 		return aValue
@@ -3001,7 +3001,7 @@ func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
 	ret := &Array{}
 	var result Object
 	for idx, value := range members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(lc.Var, value)
 		if lc.Cond != nil {
@@ -3029,7 +3029,7 @@ func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
 //[ x for x in a..b <where cond> ]
 //Almost same as evalForEachDotRangeExpression() function
 func evalListRangeComprehension(lc *ast.ListRangeComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	startIdx := Eval(lc.StartIdx, innerScope)
 	endIdx := Eval(lc.EndIdx, innerScope)
@@ -3039,7 +3039,7 @@ func evalListRangeComprehension(lc *ast.ListRangeComprehension, scope *Scope) Ob
 	ret := &Array{}
 	var result Object
 	for idx, value := range arr.Members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(lc.Var, value)
 		if lc.Cond != nil {
@@ -3066,7 +3066,7 @@ func evalListRangeComprehension(lc *ast.ListRangeComprehension, scope *Scope) Ob
 
 //[ expr for k,v in hash <where cond> ]
 func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 	aValue := Eval(mc.X, innerScope)
 	if aValue.Type() == ERROR_OBJ {
 		return aValue
@@ -3093,7 +3093,7 @@ func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object
 	var result Object
 	for _, hk := range hash.Order {
 		pair, _ := hash.Pairs[hk]
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set(mc.Key, pair.Key)
 		newSubScope.Set(mc.Value, pair.Value)
 
@@ -3124,7 +3124,7 @@ func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object
 //{ k:v for x in tuple <where cond> }
 //Almost same as evalListComprehension
 func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 	aValue := Eval(hc.Value, innerScope)
 	if aValue.Type() == ERROR_OBJ {
 		return aValue
@@ -3162,7 +3162,7 @@ func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
 	ret := NewHash()
 
 	for idx, value := range members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(hc.Var, value)
 		if hc.Cond != nil {
@@ -3196,7 +3196,7 @@ func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
 //{ k:v for x in a..b <where cond> }
 //Almost same as evalListRangeComprehension() function
 func evalHashRangeComprehension(hc *ast.HashRangeComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	startIdx := Eval(hc.StartIdx, innerScope)
 	endIdx := Eval(hc.EndIdx, innerScope)
@@ -3206,7 +3206,7 @@ func evalHashRangeComprehension(hc *ast.HashRangeComprehension, scope *Scope) Ob
 	ret := NewHash()
 
 	for idx, value := range arr.Members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(hc.Var, value)
 		if hc.Cond != nil {
@@ -3240,7 +3240,7 @@ func evalHashRangeComprehension(hc *ast.HashRangeComprehension, scope *Scope) Ob
 //{ k:v for k,v in hash <where cond> }
 //Almost same as evalListMapComprehension
 func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object {
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 	aValue := Eval(mc.X, innerScope)
 	if aValue.Type() == ERROR_OBJ {
 		return aValue
@@ -3266,7 +3266,7 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 	ret := NewHash()
 	for _, hk := range hash.Order {
 		pair, _ := hash.Pairs[hk]
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set(mc.Key, pair.Key)
 		newSubScope.Set(mc.Value, pair.Value)
 
@@ -3317,7 +3317,7 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 		}
 
 		matchExpr := item.(*ast.CaseMatchExpr)
-		matchRv := Eval(matchExpr.Expr, NewScope(scope)) //matcher expression
+		matchRv := Eval(matchExpr.Expr, NewScope(scope, nil)) //matcher expression
 		if matchRv.Type() == ERROR_OBJ {
 			return matchRv
 		}
@@ -3327,7 +3327,7 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 			continue
 		}
 		//Eval matcher block
-		matcherScope := NewScope(scope)
+		matcherScope := NewScope(scope, nil)
 		rv = Eval(matchExpr.Block, matcherScope)
 		if rv.Type() == ERROR_OBJ {
 			return rv
@@ -3338,7 +3338,7 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 	}
 
 	if !done && elseExpr != nil {
-		elseScope := NewScope(scope)
+		elseScope := NewScope(scope, nil)
 		rv = Eval(elseExpr.Block, elseScope)
 		if rv.Type() == ERROR_OBJ {
 			return rv
@@ -3348,7 +3348,7 @@ func evalCaseExpression(ce *ast.CaseExpr, scope *Scope) Object {
 }
 
 func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	if fl.Init != nil {
 		init := Eval(fl.Init, innerScope)
@@ -3364,7 +3364,7 @@ func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
 
 	var result Object
 	for IsTrue(condition) {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		result = Eval(fl.Block, newSubScope)
 		if result.Type() == ERROR_OBJ {
 			return result
@@ -3415,7 +3415,7 @@ func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
 
 func evalForEverLoopExpression(fel *ast.ForEverLoop, scope *Scope) Object {
 	var e Object
-	newScope := NewScope(scope)
+	newScope := NewScope(scope, nil)
 	for {
 		e = Eval(fel.Block, newScope)
 		if e.Type() == ERROR_OBJ {
@@ -3450,7 +3450,7 @@ func evalForEverLoopExpression(fel *ast.ForEverLoop, scope *Scope) Object {
 //for item in goObj
 //for item in linqObj
 func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object { //fal:For Array Loop
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	aValue := Eval(fal.Value, innerScope)
 	if aValue.Type() == ERROR_OBJ {
@@ -3533,7 +3533,7 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 	ret := &Array{}
 	var result Object
 	for idx, value := range members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(fal.Var, value)
 		if fal.Cond != nil {
@@ -3613,7 +3613,7 @@ func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope
 	ret := &Array{}
 	var result Object
 	for idx, value := range members {
-		newSubScope := NewScope(scope)
+		newSubScope := NewScope(scope, nil)
 		newSubScope.Set(fml.Key, NewInteger(int64(idx)))
 		newSubScope.Set(fml.Value, value)
 		if fml.Cond != nil {
@@ -3657,7 +3657,7 @@ func evalForEachArrayWithIndex(fml *ast.ForEachMapLoop, val Object, scope *Scope
 }
 
 func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //fml:For Map Loop
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	aValue := Eval(fml.X, innerScope)
 	if aValue.Type() == ERROR_OBJ {
@@ -3692,7 +3692,7 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 	var result Object
 	for _, hk := range hash.Order {
 		pair, _ := hash.Pairs[hk]
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set(fml.Key, pair.Key)
 		newSubScope.Set(fml.Value, pair.Value)
 
@@ -3735,7 +3735,7 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 }
 
 func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Object { //fdr:For Dot Range
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	startIdx := Eval(fdr.StartIdx, innerScope)
 	//	if startIdx.Type() != INTEGER_OBJ {
@@ -3752,7 +3752,7 @@ func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Objec
 	ret := &Array{}
 	var result Object
 	for idx, value := range arr.Members {
-		newSubScope := NewScope(innerScope)
+		newSubScope := NewScope(innerScope, nil)
 		newSubScope.Set("$_", NewInteger(int64(idx)))
 		newSubScope.Set(fdr.Var, value)
 		if fdr.Cond != nil {
@@ -3921,7 +3921,7 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 			}
 		} else if builtin, ok := builtins[call.Function.String()]; ok {
 			args := evalArgs(call.Arguments, scope)
-			return builtin.Fn(call.Function.Pos().Sline(), args...)
+			return builtin.Fn(call.Function.Pos().Sline(), scope, args...)
 		} else if callExpr, ok := call.Function.(*ast.CallExpression); ok { //call expression
 			//let complex={ "add" : fn(x,y){ fn(z) {x+y+z} } }
 			//complex["add"](2,3)(4)
@@ -3976,7 +3976,7 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 		}
 	}
 
-	newScope := NewScope(f.Scope)
+	newScope := NewScope(f.Scope, nil)
 
 	//Register this function call in the call stack
 	newScope.CallStack.Frames = append(newScope.CallStack.Frames, CallFrame{FuncScope: newScope, CurrentCall: call})
@@ -4254,13 +4254,13 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if method != nil {
 				switch m := method.(type) {
 				case *Function:
-					newScope := NewScope(instanceObj.Scope)
+					newScope := NewScope(instanceObj.Scope, nil)
 					args := evalArgs(o.Arguments, newScope)
 					return evalFunctionDirect(method, args, instanceObj, newScope, o)
 
 				case *BuiltinMethod:
 					builtinMethod := &BuiltinMethod{Fn: m.Fn, Instance: instanceObj}
-					aScope := NewScope(instanceObj.Scope)
+					aScope := NewScope(instanceObj.Scope, nil)
 					args := evalArgs(o.Arguments, aScope)
 					return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 				}
@@ -4362,7 +4362,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return evalFunctionDirect(m, args, nil, newScope, o)
 				case *BuiltinMethod:
 					builtinMethod := &BuiltinMethod{Fn: m.Fn, Instance: nil}
-					aScope := NewScope(newScope)
+					aScope := NewScope(newScope, nil)
 					args := evalArgs(o.Arguments, aScope)
 					return evalFunctionDirect(builtinMethod, args, nil, aScope, nil)
 				}
@@ -4387,7 +4387,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if ok {
 				name := fmt.Sprintf("%s$%s", objType, o.String())
 				if fn, ok := scope.Get(name); ok {
-					extendScope := NewScope(scope)
+					extendScope := NewScope(scope, nil)
 					extendScope.Set("self", obj) // Set "self" to be the implicit object.
 					results := Eval(fn.(*Function).Literal.Body, extendScope)
 					if results.Type() == RETURN_VALUE_OBJ {
@@ -4479,7 +4479,7 @@ func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpressi
 		if p.Getter == nil || len(p.Getter.Body.Statements) == 0 {
 			return NewError(ie.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
-			newScope := NewScope(instanceObj.Scope)
+			newScope := NewScope(instanceObj.Scope, nil)
 
 			switch o := ie.Index.(type) {
 			case *ast.ClassIndexerExpression:
@@ -4808,7 +4808,7 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scop
 		if method != nil {
 			switch method.(type) {
 			case *Function:
-				newScope := NewScope(instanceObj.Scope)
+				newScope := NewScope(instanceObj.Scope, nil)
 				args := []Object{left}
 				return evalFunctionDirect(method, args, instanceObj, newScope, nil)
 			case *BuiltinMethod:
@@ -4873,7 +4873,7 @@ func evalDecrementPostfixOperatorExpression(node *ast.PostfixExpression, left Ob
 }
 
 func evalTryStatement(ts *ast.TryStmt, scope *Scope) Object {
-	tryScope := NewScope(scope)
+	tryScope := NewScope(scope, nil)
 
 	rv := evalTryBlockStatements(ts.Block.Statements, tryScope) //try statement
 	if isTryError(rv) {
@@ -4891,9 +4891,9 @@ func evalTryStatement(ts *ast.TryStmt, scope *Scope) Object {
 		done := false
 		var catchAllStmt *ast.CatchAllStmt
 
-		catchScope := NewScope(scope)
+		catchScope := NewScope(scope, nil)
 		for _, item := range ts.Catches {
-			catchSubScope := NewScope(catchScope)
+			catchSubScope := NewScope(catchScope, nil)
 			if cas, ok := item.(*ast.CatchAllStmt); ok {
 				catchAllStmt = cas //cas: Catch All Statement
 				continue
@@ -4930,7 +4930,7 @@ func evalTryStatement(ts *ast.TryStmt, scope *Scope) Object {
 		} //end for
 
 		if !done && catchAllStmt != nil {
-			rv = evalTryBlockStatements(catchAllStmt.Block.Statements, NewScope(scope))
+			rv = evalTryBlockStatements(catchAllStmt.Block.Statements, NewScope(scope, nil))
 			if rv.Type() == ERROR_OBJ {
 				return rv
 			}
@@ -4938,7 +4938,7 @@ func evalTryStatement(ts *ast.TryStmt, scope *Scope) Object {
 	} //end if
 
 	if ts.Finally != nil { //finally
-		finalScope := NewScope(scope)
+		finalScope := NewScope(scope, nil)
 		rv = evalTryBlockStatements(ts.Finally.Statements, finalScope)
 		if rv.Type() == ERROR_OBJ {
 			return rv
@@ -4963,7 +4963,7 @@ func evalTernaryExpression(te *ast.TernaryExpression, scope *Scope) Object {
 }
 
 func evalSpawnStatement(s *ast.SpawnStmt, scope *Scope) Object {
-	newSpawnScope := NewScope(scope)
+	newSpawnScope := NewScope(scope, nil)
 
 	switch callExp := s.Call.(type) {
 	case *ast.CallExpression:
@@ -5081,13 +5081,13 @@ func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
 	}
 
 	//create a new Class scope
-	newScope := NewScope(scope)
+	newScope := NewScope(scope, nil)
 	//evaluate the 'Members' fields of class with proper scope.
 	for idx := len(classChain) - 1; idx >= 0; idx-- {
 		for _, member := range classChain[idx].Members {
 			Eval(member, newScope) //evaluate the 'Members' fields of class
 		}
-		newScope = NewScope(newScope)
+		newScope = NewScope(newScope, nil)
 	}
 	clsObj.Scope = newScope.parentScope
 	clsObj.Scope.Set("this", clsObj) //make 'this' refer to class object itself
@@ -5138,7 +5138,7 @@ func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
 	}
 
 	//create a new Class scope
-	clsObj.Scope = NewScope(scope)
+	clsObj.Scope = NewScope(scope, nil)
 	clsObj.Scope.Set("this", clsObj) //make 'this' refer to class object itself
 	clsObj.Scope.Set("parent", parentClass)
 
@@ -5166,7 +5166,7 @@ func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 	}
 
 	//create a new Class scope
-	newScope := NewScope(scope)
+	newScope := NewScope(scope, nil)
 	//evaluate the 'Members' fields of class with proper scope.
 	for idx := len(classChain) - 1; idx >= 0; idx-- {
 		for _, member := range classChain[idx].Members {
@@ -5174,7 +5174,7 @@ func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 				Eval(member, newScope) //evaluate the 'Members' fields of class
 			}
 		}
-		newScope = NewScope(newScope)
+		newScope = NewScope(newScope, nil)
 	}
 
 	instance := &ObjectInstance{Class: clsObj, Scope: newScope.parentScope}
@@ -5209,7 +5209,7 @@ func processClassAnnotation(Annotations []*ast.AnnotationStmt, scope *Scope, lin
 		annoClsObj := annoClass.(*Class)
 
 		//create the annotation instance
-		newScope := NewScope(scope)
+		newScope := NewScope(scope, nil)
 		annoInstanceObj := &ObjectInstance{Class: annoClsObj, Scope: newScope}
 		annoInstanceObj.Scope.Set("this", annoInstanceObj) //make 'this' refer to annoObj
 
@@ -5260,7 +5260,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 		//			return NewError("", GENERICERROR, "Not enough parameters to call function")
 		//		}
 
-		newScope := NewScope(scope)
+		newScope := NewScope(scope, nil)
 		variadicParam := []Object{}
 		for i, _ := range args {
 			//Because of function default values, we need to check `i >= len(args)`
@@ -5330,7 +5330,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 
 		return results
 	case *Builtin:
-		return fn.Fn("", args...)
+		return fn.Fn("", scope, args...)
 	case *BuiltinMethod:
 		return fn.Fn("", fn.Instance, scope, args...)
 	}
@@ -5429,7 +5429,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 	fromExpr := query.From.(*ast.FromExpr)
 	queryBodyExpr := query.QueryBody.(*ast.QueryBodyExpr)
 
-	innerScope := NewScope(scope)
+	innerScope := NewScope(scope, nil)
 
 	inValue := Eval(fromExpr.Expr, innerScope)
 	if inValue.Type() == ERROR_OBJ {
@@ -5473,7 +5473,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			tmpLinq = tmpLinq.Where2(line, innerScope, fnObj).(*LinqObj)
 
 		case *ast.JoinExpr:
-			fmt.Printf("JOIN: [NOT IMPLEMENTED]\n")
+			fmt.Fprintf(scope.Writer, "JOIN: [NOT IMPLEMENTED]\n")
 
 		case *ast.OrderExpr: // orderby_clause : ORDERBY ordering (','  ordering)*
 			orderExpr := clause
@@ -5510,7 +5510,7 @@ func evalLinqQueryExpression(query *ast.QueryExpr, scope *Scope) Object {
 			tmpLinq = tmpLinq.FromQuery(line, innerScope, arr, NewString(str)).(*LinqObj)
 
 		default:
-			fmt.Printf("[NOT IMPLEMENTED]\n")
+			fmt.Fprintf(scope.Writer, "[NOT IMPLEMENTED]\n")
 		}
 	}
 
@@ -5657,7 +5657,7 @@ func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
 		}
 	}
 
-	fmt.Printf(ServiceHint, svcObj.Addr)
+	fmt.Fprintf(scope.Writer, ServiceHint, svcObj.Addr)
 	svcObj.Run(s.Pos().Sline(), NewBooleanObj(s.Debug))
 	return NIL
 }
@@ -5908,7 +5908,7 @@ func reportTypoSuggestionsMeth(line string, scope *Scope, objName string, miss s
 
 func extendFunctionScope(fn *Function, args []Object) *Scope {
 	fl := fn.Literal
-	scope := NewScope(fn.Scope)
+	scope := NewScope(fn.Scope, nil)
 
 	// Set the defaults
 	for k, v := range fl.Values {

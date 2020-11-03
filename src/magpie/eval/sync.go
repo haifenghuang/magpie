@@ -99,7 +99,7 @@ func (o *SyncOnceObj) Do(line string, scope *Scope, args ...Object) Object {
 }
 
 func doOnceFunc(scope *Scope, f *Function) {
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	Eval(f.Literal.Body, s)
 	return

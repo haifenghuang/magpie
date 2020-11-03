@@ -26,30 +26,30 @@ func (f *FmtObj) Type() ObjectType { return FMT_OBJ }
 func (f *FmtObj) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	switch method {
 	case "errorf":
-		return f.Errorf(line, args...)
+		return f.Errorf(line, scope, args...)
 	case "print":
-		return f.Print(line, args...)
+		return f.Print(line, scope, args...)
 	case "printf":
-		return f.Printf(line, args...)
+		return f.Printf(line, scope, args...)
 	case "println":
-		return f.Println(line, args...)
+		return f.Println(line, scope, args...)
 	case "sprint":
-		return f.Sprint(line, args...)
+		return f.Sprint(line, scope, args...)
 	case "sprintf":
-		return f.Sprintf(line, args...)
+		return f.Sprintf(line, scope, args...)
 	case "sprintln":
-		return f.Sprintln(line, args...)
+		return f.Sprintln(line, scope, args...)
 	case "fprint":
-		return f.Fprint(line, args...)
+		return f.Fprint(line, scope, args...)
 	case "fprintf":
-		return f.Fprintf(line, args...)
+		return f.Fprintf(line, scope, args...)
 	case "fprintln":
-		return f.Fprintln(line, args...)
+		return f.Fprintln(line, scope, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
-func (f *FmtObj) Errorf(line string, args ...Object) Object {
+func (f *FmtObj) Errorf(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 1 {
 		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
@@ -71,9 +71,9 @@ func (f *FmtObj) Errorf(line string, args ...Object) Object {
 	return NIL
 }
 
-func (f *FmtObj) Print(line string, args ...Object) Object {
+func (f *FmtObj) Print(line string, scope *Scope, args ...Object) Object {
 	if len(args) == 0 {
-		n, err := gofmt.Print()
+		n, err := gofmt.Fprint(scope.Writer)
 		if err != nil {
 			return NewNil(err.Error())
 		}
@@ -81,7 +81,7 @@ func (f *FmtObj) Print(line string, args ...Object) Object {
 	}
 
 	format, wrapped := correctPrintResult(false, args...)
-	n, err := gofmt.Printf(format, wrapped...)
+	n, err := gofmt.Fprintf(scope.Writer, format, wrapped...)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -89,7 +89,7 @@ func (f *FmtObj) Print(line string, args ...Object) Object {
 	return NewInteger(int64(n))
 }
 
-func (f *FmtObj) Printf(line string, args ...Object) Object {
+func (f *FmtObj) Printf(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 1 {
 		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
@@ -111,7 +111,7 @@ func (f *FmtObj) Printf(line string, args ...Object) Object {
 			formatStr = "\033[1;" + colorMap["STRING"] + "m" + formatStr + "\033[0m"
 		}
 	}
-	n, err := gofmt.Printf(formatStr, wrapped...)
+	n, err := gofmt.Fprintf(scope.Writer, formatStr, wrapped...)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -119,9 +119,9 @@ func (f *FmtObj) Printf(line string, args ...Object) Object {
 	return NewInteger(int64(n))
 }
 
-func (f *FmtObj) Println(line string, args ...Object) Object {
+func (f *FmtObj) Println(line string, scope *Scope, args ...Object) Object {
 	if len(args) == 0 {
-		n, err := gofmt.Println()
+		n, err := gofmt.Fprintln(scope.Writer)
 		if err != nil {
 			return NewNil(err.Error())
 		}
@@ -129,7 +129,7 @@ func (f *FmtObj) Println(line string, args ...Object) Object {
 	}
 
 	format, wrapped := correctPrintResult(true, args...)
-	n, err := gofmt.Printf(format, wrapped...)
+	n, err := gofmt.Fprintf(scope.Writer, format, wrapped...)
 	if err != nil {
 		return NewNil(err.Error())
 	}
@@ -137,7 +137,7 @@ func (f *FmtObj) Println(line string, args ...Object) Object {
 	return NewInteger(int64(n))
 }
 
-func (f *FmtObj) Sprint(line string, args ...Object) Object {
+func (f *FmtObj) Sprint(line string, scope *Scope, args ...Object) Object {
 	if len(args) == 0 {
 		return NewString("")
 	}
@@ -151,7 +151,7 @@ func (f *FmtObj) Sprint(line string, args ...Object) Object {
 	return NewString(ret)
 }
 
-func (f *FmtObj) Sprintf(line string, args ...Object) Object {
+func (f *FmtObj) Sprintf(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 1 {
 		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
@@ -171,7 +171,7 @@ func (f *FmtObj) Sprintf(line string, args ...Object) Object {
 	return NewString(ret)
 }
 
-func (f *FmtObj) Sprintln(line string, args ...Object) Object {
+func (f *FmtObj) Sprintln(line string, scope *Scope, args ...Object) Object {
 	if len(args) == 0 {
 		ret := gofmt.Sprintln()
 		return NewString(ret)
@@ -186,7 +186,7 @@ func (f *FmtObj) Sprintln(line string, args ...Object) Object {
 	return NewString(ret)
 }
 
-func (f *FmtObj) Fprint(line string, args ...Object) Object {
+func (f *FmtObj) Fprint(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 2 {
 		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
@@ -204,7 +204,7 @@ func (f *FmtObj) Fprint(line string, args ...Object) Object {
 	writer := w.(Writable).IOWriter()
 	if writer == os.Stdout || writer == os.Stderr { //output to stdout or stderr
 		format, wrapped := correctPrintResult(false, subArgs...)
-		n, err = gofmt.Printf(format, wrapped...)
+		n, err = gofmt.Fprintf(scope.Writer, format, wrapped...)
 	} else {
 		wrapped := make([]interface{}, len(subArgs))
 		for i, v := range subArgs {
@@ -220,7 +220,7 @@ func (f *FmtObj) Fprint(line string, args ...Object) Object {
 	return NewInteger(int64(n))
 }
 
-func (f *FmtObj) Fprintf(line string, args ...Object) Object {
+func (f *FmtObj) Fprintf(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 2 {
 		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
@@ -241,7 +241,7 @@ func (f *FmtObj) Fprintf(line string, args ...Object) Object {
 	writer := w.(Writable).IOWriter()
 	if len(args) > 2 { //has format
 		if writer == os.Stdout || writer == os.Stderr { //output to stdout or stderr
-			return f.Printf(line, args[1:]...)
+			return f.Printf(line, scope, args[1:]...)
 		} else {
 			subArgs := args[2:]
 			wrapped := make([]interface{}, len(subArgs))
@@ -253,7 +253,7 @@ func (f *FmtObj) Fprintf(line string, args ...Object) Object {
 	} else { //only string with no format, e.g. fmt.fprintf(stdout, "Hello world\n")
 		formatStr := formatObj.String
 		if writer == os.Stdout || writer == os.Stderr { //output to stdout or stderr
-			return f.Printf(line, args[1:]...)
+			return f.Printf(line, scope, args[1:]...)
 		}
 		n, err = gofmt.Fprintf(writer, formatStr)
 	}
@@ -264,7 +264,7 @@ func (f *FmtObj) Fprintf(line string, args ...Object) Object {
 	return NewInteger(int64(n))
 }
 
-func (f *FmtObj) Fprintln(line string, args ...Object) Object {
+func (f *FmtObj) Fprintln(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 2 {
 		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
@@ -282,7 +282,7 @@ func (f *FmtObj) Fprintln(line string, args ...Object) Object {
 	writer := w.(Writable).IOWriter()
 	if writer == os.Stdout || writer == os.Stderr { //output to stdout or stderr
 		format, wrapped := correctPrintResult(true, subArgs...)
-		n, err = gofmt.Printf(format, wrapped...)
+		n, err = gofmt.Fprintf(scope.Writer, format, wrapped...)
 	} else {
 		wrapped := make([]interface{}, len(subArgs))
 		for i, v := range subArgs {

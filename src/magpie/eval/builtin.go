@@ -33,7 +33,7 @@ var fileModeTable = map[string]int{
 	"+>>": os.O_RDWR | os.O_APPEND | os.O_CREATE,
 }
 
-type BuiltinFunc func(line string, args ...Object) Object
+type BuiltinFunc func(line string, scope *Scope, args ...Object) Object
 
 type Builtin struct {
 	Fn BuiltinFunc
@@ -43,7 +43,7 @@ var builtins map[string]*Builtin
 
 func absBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -65,7 +65,7 @@ func absBuiltin() *Builtin {
 
 func rangeBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 && len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "1|2", len(args))
 			}
@@ -117,7 +117,7 @@ func rangeBuiltin() *Builtin {
 
 func addmBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 3 {
 				return NewError(line, ARGUMENTERROR, "3", len(args))
 			}
@@ -141,7 +141,7 @@ func addmBuiltin() *Builtin {
 
 func chrBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -166,7 +166,7 @@ func chrBuiltin() *Builtin {
 
 func newFileBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			var fname *String
 			var flag int = os.O_RDONLY
 			var ok bool
@@ -214,7 +214,7 @@ func newFileBuiltin() *Builtin {
 
 func intBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty int(defaults to 0)
 				return NewInteger(0)
@@ -266,7 +266,7 @@ func intBuiltin() *Builtin {
 
 func uintBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty int(defaults to 0)
 				return NewInteger(0)
@@ -317,7 +317,7 @@ func uintBuiltin() *Builtin {
 
 func floatBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty float(defaults to 0.0)
 				return NewFloat(0.0)
@@ -378,7 +378,7 @@ func floatBuiltin() *Builtin {
 
 func strBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty string
 				return NewString("")
@@ -399,7 +399,7 @@ func strBuiltin() *Builtin {
 
 func arrayBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty array
 				return &Array{Members: []Object{}}
@@ -425,7 +425,7 @@ func arrayBuiltin() *Builtin {
 
 func tupleBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty tuple
 				return &Tuple{Members: []Object{}}
@@ -451,7 +451,7 @@ func tupleBuiltin() *Builtin {
 
 func hashBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty hash
 				return NewHash()
@@ -523,7 +523,7 @@ func hashBuiltin() *Builtin {
 
 func decimalBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				//returns an empty decimal(defaults to 0)
 				return &DecimalObj{Number: NewDec(0, 0), Valid: true}
@@ -579,7 +579,7 @@ func decimalBuiltin() *Builtin {
 
 func lenBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -603,7 +603,7 @@ func lenBuiltin() *Builtin {
 
 func methodsBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -622,7 +622,7 @@ func methodsBuiltin() *Builtin {
 
 func ordBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -640,9 +640,9 @@ func ordBuiltin() *Builtin {
 
 func printBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				n, err := fmt.Print()
+				n, err := fmt.Print(scope.Writer)
 				if err != nil {
 					return NewNil(err.Error())
 				}
@@ -650,7 +650,7 @@ func printBuiltin() *Builtin {
 			}
 
 			format, wrapped := correctPrintResult(false, args...)
-			n, err := fmt.Printf(format, wrapped...)
+			n, err := fmt.Fprintf(scope.Writer, format, wrapped...)
 
 			//Note, here we do not use 'fmt.Print', why? please see correctPrintResult() comments.
 			//n, err := fmt.Print(s, wrapped...)
@@ -665,9 +665,9 @@ func printBuiltin() *Builtin {
 
 func printlnBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
-				n, err := fmt.Println()
+				n, err := fmt.Fprintln(scope.Writer)
 				if err != nil {
 					return NewNil(err.Error())
 				}
@@ -678,7 +678,7 @@ func printlnBuiltin() *Builtin {
 			//n, err := fmt.Println(s, wrapped...)
 
 			format, wrapped := correctPrintResult(true, args...)
-			n, err := fmt.Printf(format, wrapped...)
+			n, err := fmt.Fprintf(scope.Writer, format, wrapped...)
 			if err != nil {
 				return NewNil(err.Error())
 			}
@@ -690,7 +690,7 @@ func printlnBuiltin() *Builtin {
 
 func printfBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) < 1 {
 				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
@@ -712,7 +712,7 @@ func printfBuiltin() *Builtin {
 					formatStr = "\033[1;" + colorMap["STRING"] + "m" + formatStr + "\033[0m"
 				}
 			}
-			n, err := fmt.Printf(formatStr, wrapped...)
+			n, err := fmt.Fprintf(scope.Writer, formatStr, wrapped...)
 
 			if err != nil {
 				return NewNil(err.Error())
@@ -725,7 +725,7 @@ func printfBuiltin() *Builtin {
 
 func sprintfBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) < 1 {
 				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
@@ -756,7 +756,7 @@ func sprintfBuiltin() *Builtin {
 
 func sscanfBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) < 2 {
 				return NewError(line, ARGUMENTERROR, ">=2", len(args))
 			}
@@ -810,7 +810,7 @@ func sscanfBuiltin() *Builtin {
 
 func typeBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -821,7 +821,7 @@ func typeBuiltin() *Builtin {
 
 func chanBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) == 0 {
 				return &ChanObject{ch: make(chan Object)}
 			} else if len(args) == 1 {
@@ -843,7 +843,7 @@ func chanBuiltin() *Builtin {
 
 func assertBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -864,7 +864,7 @@ func assertBuiltin() *Builtin {
 
 func reverseBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -908,7 +908,7 @@ func reverseBuiltin() *Builtin {
 
 func iffBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 3 {
 				return NewError(line, ARGUMENTERROR, "3", len(args))
 			}
@@ -929,7 +929,7 @@ func iffBuiltin() *Builtin {
 
 func newArrayBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) < 0 {
 				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
@@ -984,7 +984,7 @@ func newArrayBuiltin() *Builtin {
 
 func dialTCPBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1014,7 +1014,7 @@ func dialTCPBuiltin() *Builtin {
 
 func listenTCPBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1044,7 +1044,7 @@ func listenTCPBuiltin() *Builtin {
 
 func dialUDPBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1074,7 +1074,7 @@ func dialUDPBuiltin() *Builtin {
 
 func dialUnixBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1104,7 +1104,7 @@ func dialUnixBuiltin() *Builtin {
 
 func listenUnixBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1134,7 +1134,7 @@ func listenUnixBuiltin() *Builtin {
 
 func dbOpenBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1160,7 +1160,7 @@ func dbOpenBuiltin() *Builtin {
 
 func newTimeBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 && len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "0|1", len(args))
 			}
@@ -1184,7 +1184,7 @@ func newTimeBuiltin() *Builtin {
 /* accept a timestamp(second & nanosecond), and convert it to a TimeObj */
 func unixTimeBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 && len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "1|2", len(args))
 			}
@@ -1217,7 +1217,7 @@ func unixTimeBuiltin() *Builtin {
 //func Date(year int, month Month, day, hour, min, sec, nsec int, loc int)
 func newDateBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 7 && argLen != 8 {
 				return NewError(line, ARGUMENTERROR, "7|8", len(args))
@@ -1289,7 +1289,7 @@ func newDateBuiltin() *Builtin {
 
 func newCondBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 1 {
 				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
@@ -1308,7 +1308,7 @@ func newCondBuiltin() *Builtin {
 
 func newOnceBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1319,7 +1319,7 @@ func newOnceBuiltin() *Builtin {
 
 func newMutexBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1330,7 +1330,7 @@ func newMutexBuiltin() *Builtin {
 
 func newRWMutexBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1341,7 +1341,7 @@ func newRWMutexBuiltin() *Builtin {
 
 func newWaitGroupBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1352,7 +1352,7 @@ func newWaitGroupBuiltin() *Builtin {
 
 func newPipeBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1364,7 +1364,7 @@ func newPipeBuiltin() *Builtin {
 
 func newLoggerBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 3 && len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0|3", len(args))
 			}
@@ -1397,7 +1397,7 @@ func newLoggerBuiltin() *Builtin {
 
 func newListBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 0 {
 				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
@@ -1409,7 +1409,7 @@ func newListBuiltin() *Builtin {
 
 func newDeepEqualBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			if len(args) != 2 {
 				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
@@ -1425,7 +1425,7 @@ func newDeepEqualBuiltin() *Builtin {
 
 func newCsvReaderBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
 				return NewError(line, ARGUMENTERROR, "1", argLen)
@@ -1448,7 +1448,7 @@ func newCsvReaderBuiltin() *Builtin {
 
 func newCsvWriterBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
 				return NewError(line, ARGUMENTERROR, "1", argLen)
@@ -1466,7 +1466,7 @@ func newCsvWriterBuiltin() *Builtin {
 
 func instanceOfBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 2 {
 				return NewError(line, ARGUMENTERROR, "2", argLen)
@@ -1491,7 +1491,7 @@ func instanceOfBuiltin() *Builtin {
 
 func classOfBuiltin() *Builtin {
 	return &Builtin{
-		Fn: func(line string, args ...Object) Object {
+		Fn: func(line string, scope *Scope, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
 				return NewError(line, ARGUMENTERROR, "1", argLen)

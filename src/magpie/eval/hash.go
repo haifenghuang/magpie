@@ -143,7 +143,7 @@ func (h *Hash) Filter(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters))
 	}
 	hash := NewHash()
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	for _, hk := range h.Order { //hk:hash key
 		argument, _ := h.Pairs[hk]
 		s.Set(block.Literal.Parameters[0].(*ast.Identifier).Value, argument.Key)
@@ -352,7 +352,7 @@ func (h *Hash) Map(line string, scope *Scope, args ...Object) Object {
 		return NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters))
 	}
 	hash := NewHash()
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 	for _, hk := range h.Order { //hk:hash key
 		argument, _ := h.Pairs[hk]
 		s.Set(block.Literal.Parameters[0].(*ast.Identifier).Value, argument.Key)

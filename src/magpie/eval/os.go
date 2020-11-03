@@ -516,7 +516,7 @@ func (o *Os) Expand(scope *Scope, line string, args ...Object) Object {
 }
 
 func evalExpandMappingFunc(scope *Scope, f *Function, s string) string {
-	sc := NewScope(scope)
+	sc := NewScope(scope, nil)
 	sc.Set(f.Literal.Parameters[0].(*ast.Identifier).Value, NewString(s))
 	r := Eval(f.Literal.Body, sc)
 	if obj, ok := r.(*ReturnValue); ok {

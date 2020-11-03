@@ -126,7 +126,7 @@ func (s *Struct) CallMethod(line string, scope *Scope, method string, args ...Ob
 	if !ok {
 		return NewError(line, NOMETHODERROR, method, s.Type())
 	}
-	fn.Scope = NewScope(scope)
+	fn.Scope = NewScope(scope, nil)
 	fn.Scope.Set("this", s)
 	for i, v := range fn.Literal.Parameters {
 		fn.Scope.Set(v.String(), args[i])

@@ -143,7 +143,7 @@ func (s *ServiceObj) HandleFunc(line string, scope *Scope, args ...Object) Objec
 }
 
 func ServeService(line string, scope *Scope, f *Function, w http.ResponseWriter, r *http.Request) {
-	s := NewScope(scope)
+	s := NewScope(scope, nil)
 
 	//Save the two variables to `Scope`, so `Eval` can use them
 	s.Set(f.Literal.Parameters[0].(*ast.Identifier).Value, &HttpResponseWriter{Writer: w})

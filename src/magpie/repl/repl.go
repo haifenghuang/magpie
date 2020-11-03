@@ -76,7 +76,7 @@ func Start(out io.Writer, color bool) {
 	if color && !l.IsInwinConsole() {
 		eval.REPLColor = true
 	}
-	scope := eval.NewScope(nil)
+	scope := eval.NewScope(nil, os.Stdout)
 	wd, err := os.Getwd()
 	if err != nil {
 		io.WriteString(out, err.Error())

@@ -223,7 +223,7 @@ func (d *Debugger) ProcessCommand() {
 			oldNode := d.Node
 			d.showPrompt = false
 			program := p.ParseProgram()
-			aval := Eval(program, NewScope(d.Scope))
+			aval := Eval(program, NewScope(d.Scope, nil))
 			fmt.Printf("%s\n\n", aval.Inspect())
 			d.SrcLines = oldLines
 			d.Node = oldNode
