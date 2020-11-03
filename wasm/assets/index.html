@@ -15,7 +15,7 @@
     <body>
         <style type="text/css" media="screen">
             #editor { 
-                width: 50%;
+                width: 100%;
                 height: 350px;
             }
         </style>
@@ -53,14 +53,16 @@ for i in arr1 where /^\d+/.match(i) {
         
         <p><button onclick="interpret();" id="interpretButton">Run code with Ctrl+Enter, or click HERE</button></p>
         <h3 id="output">Output</h3>
-        <textarea id="magpieoutput" name="magpieoutput" cols="100" rows="20" disabled></textarea>
+        <div style="width: 100%;">
+            <textarea style="width: 100%;" id="result" name="result" rows="20"></textarea>
+        </div>
 
     </body>
     <script>
         let interpret = function() {
-            var editor = ace.edit("editor");
+            let editor = ace.edit("editor");
             let code = editor.getValue();
-            magpieoutput.value = magpie_run_code(code)
+            result.value = magpie_run_code(code)
         }
      </script>
 </html> 
