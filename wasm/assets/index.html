@@ -18,9 +18,14 @@
                 width: 100%;
                 height: 350px;
             }
-        </style>
+            .magpie-error {
+                position:absolute;
+                background:rgba(100,200,100,0.5);
+                z-index:20
+            }
+           </style>
 
-<h2>Magpie playground</h2>
+<h3>Input</h3>
 <div id="editor">let arr = [1,3,5,2,4,6,7,8,9]
 println(arr)
 
@@ -61,8 +66,35 @@ for i in arr1 where /^\d+/.match(i) {
     <script>
         let interpret = function() {
             let editor = ace.edit("editor");
+
+            //remove all markers previously added
+            let all_markers = editor.session.getMarkers();
+            for(var key in all_markers){
+                if (all_markers[key].type == "fullLine") {
+                    editor.session.removeMarker(all_markers[key].id);
+                }
+            }
+
+            //evaluate code
             let code = editor.getValue();
-            result.value = magpie_run_code(code)
+            let { errline, output } = magpie_run_code(code)
+
+            //check for parser error, and mark line if has error
+            var Range = ace.require('ace/range').Range;
+            if (errline > 0) { //parser error
+                editor.session.addMarker(new Range(errline - 1, 0, errline - 1, 2000), "magpie-error", "fullLine");
+            }
+
+            //check for Runtime error, and mark line if has error
+            let reg = /Runtime Error:.* at line (\d+)/g;
+            var match;
+            while (match = reg.exec(output)) {
+                let line = parseInt(match[1]);
+                editor.session.addMarker(new Range(line - 1, 0, line - 1, 2000), "magpie-error", "fullLine");
+            }
+
+            //output result
+            result.value = output
         }
      </script>
 </html> 

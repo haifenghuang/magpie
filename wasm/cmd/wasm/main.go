@@ -11,8 +11,10 @@ import (
 )
 
 func runCode(this js.Value, i []js.Value) interface{} {
+	m := make(map[string]interface{})
 	var buf bytes.Buffer
 
+	m["errline"] = -1
 	l := lexer.New("", i[0].String())
 	p := parser.New(l, "")
 	program := p.ParseProgram()
@@ -21,16 +23,17 @@ func runCode(this js.Value, i []js.Value) interface{} {
 		for _, msg := range p.Errors() {
 			buf.WriteString("\t" + msg + "\n")
 		}
-		return buf.String()
+		errLines := p.ErrorLines()
+
+		m["errline"] = errLines[0]
+		m["output"] = buf.String()
+		return m
 	}
 
 	scope := eval.NewScope(nil, &buf)
-	result := eval.Eval(program, scope)
-	if result.Type() == eval.ERROR_OBJ {
-		return result.Inspect()
-	}
-
-	return buf.String()
+	eval.Eval(program, scope)
+	m["output"] = buf.String()
+	return m
 }
 
 func main() {
