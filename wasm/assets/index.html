@@ -1,0 +1,67 @@
+<html>  
+    <head>
+        <title>Magpie playground</title>
+        <meta charset="utf-8"/>
+        <script src="wasm_exec.js"></script>
+
+        <script>
+            const go = new Go();
+            WebAssembly.instantiateStreaming(fetch("magpie.wasm"), go.importObject).then((result) => {
+                go.run(result.instance);
+            });
+        </script>
+
+    </head>
+    <body>
+        <style type="text/css" media="screen">
+            #editor { 
+                width: 50%;
+                height: 350px;
+            }
+        </style>
+
+<h2>Magpie playground</h2>
+<div id="editor">let arr = [1,3,5,2,4,6,7,8,9]
+println(arr)
+
+for i in arr where i % 2 == 0 {
+    println(i)
+}
+
+println("--------------------------------")
+let arr1 = ["1","a5","5", "5b","4","cc", "7", "dd", "9"]
+println(arr1)
+
+for i in arr1 where /^\d+/.match(i) {
+    println(i)
+}</div>
+        
+        <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.5/ace.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script>
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/solarized_light");
+            editor.session.setMode("ace/mode/javascript");
+            editor.getSession().setUseWorker(false);
+            editor.setOptions({fontSize: "13pt"});
+            editor.commands.addCommand({
+                name: "run",
+                bindKey: {win: "Ctrl-Enter", mac: "Command-Enter"},
+                exec: function(editor) { interpret() }
+            });
+        </script>
+        
+        <p><button onclick="interpret();" id="interpretButton">Run code with Ctrl+Enter, or click HERE</button></p>
+        <h3 id="output">Output</h3>
+        <textarea id="magpieoutput" name="magpieoutput" cols="100" rows="20" disabled></textarea>
+
+    </body>
+    <script>
+        let interpret = function() {
+            var editor = ace.edit("editor");
+            let code = editor.getValue();
+            magpieoutput.value = magpie_run_code(code)
+        }
+     </script>
+</html> 
+
