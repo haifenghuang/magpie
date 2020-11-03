@@ -123,22 +123,22 @@ func (d *DecimalObj) CallMethod(line string, scope *Scope, method string, args .
 	case "getMarshalJSONWithoutQuotes":
 		return d.GetMarshalJSONWithoutQuotes(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, d.Type()))
+	return NewError(line, NOMETHODERROR, method, d.Type())
 }
 
 func (d *DecimalObj) New(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	value, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "new", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "new", "*Integer", args[0].Type())
 	}
 
 	exp, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "new", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "new", "*Integer", args[1].Type())
 	}
 
 	return &DecimalObj{Number: NewDec(value.Int64, int32(exp.Int64)), Valid: true}
@@ -146,17 +146,17 @@ func (d *DecimalObj) New(line string, args ...Object) Object {
 
 func (d *DecimalObj) FromString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fromString", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fromString", "*Integer", args[0].Type())
 	}
 
 	d1, err := NewFromString(value.String)
 	if err != nil {
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	return &DecimalObj{Number: d1, Valid: true}
@@ -164,7 +164,7 @@ func (d *DecimalObj) FromString(line string, args ...Object) Object {
 
 func (d *DecimalObj) FromFloat(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	switch input := args[0].(type) {
@@ -175,13 +175,13 @@ func (d *DecimalObj) FromFloat(line string, args ...Object) Object {
 	case *Float:
 		return &DecimalObj{Number: NewFromFloat(input.Float64), Valid: true}
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "fromFloat", "*Float|*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fromFloat", "*Float|*Integer|*UInteger", args[0].Type())
 	}
 }
 
 func (d *DecimalObj) FromFloatWithExponent(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var value float64
@@ -193,12 +193,12 @@ func (d *DecimalObj) FromFloatWithExponent(line string, args ...Object) Object {
 	case *Float:
 		value = input.Float64
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "fromFloatWithExponent", "*Float|*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fromFloatWithExponent", "*Float|*Integer|*UInteger", args[0].Type())
 	}
 
 	exp, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "fromFloatWithExponent", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "fromFloatWithExponent", "*Integer", args[1].Type())
 	}
 
 	return &DecimalObj{Number: NewFromFloatWithExponent(value, int32(exp.Int64)), Valid: true}
@@ -206,12 +206,12 @@ func (d *DecimalObj) FromFloatWithExponent(line string, args ...Object) Object {
 
 func (d *DecimalObj) Avg(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	first, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "avg", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "avg", "*DecimalObj", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -227,12 +227,12 @@ func (d *DecimalObj) Avg(line string, args ...Object) Object {
 
 func (d *DecimalObj) Max(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	first, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "max", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "max", "*DecimalObj", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -248,12 +248,12 @@ func (d *DecimalObj) Max(line string, args ...Object) Object {
 
 func (d *DecimalObj) Min(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	first, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "min", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "min", "*DecimalObj", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -269,12 +269,12 @@ func (d *DecimalObj) Min(line string, args ...Object) Object {
 
 func (d *DecimalObj) Sum(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	first, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sum", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sum", "*DecimalObj", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -290,7 +290,7 @@ func (d *DecimalObj) Sum(line string, args ...Object) Object {
 
 func (d *DecimalObj) Neg(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Neg()
@@ -299,7 +299,7 @@ func (d *DecimalObj) Neg(line string, args ...Object) Object {
 
 func (d *DecimalObj) Abs(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Abs()
@@ -309,7 +309,7 @@ func (d *DecimalObj) Abs(line string, args ...Object) Object {
 
 func (d *DecimalObj) Add(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -324,12 +324,12 @@ func (d *DecimalObj) Add(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Add(d2)
@@ -339,7 +339,7 @@ func (d *DecimalObj) Add(line string, args ...Object) Object {
 
 func (d *DecimalObj) Sub(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -354,12 +354,12 @@ func (d *DecimalObj) Sub(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Sub(d2)
@@ -369,7 +369,7 @@ func (d *DecimalObj) Sub(line string, args ...Object) Object {
 
 func (d *DecimalObj) Mul(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -384,12 +384,12 @@ func (d *DecimalObj) Mul(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Mul(d2)
@@ -399,7 +399,7 @@ func (d *DecimalObj) Mul(line string, args ...Object) Object {
 
 func (d *DecimalObj) Div(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -414,12 +414,12 @@ func (d *DecimalObj) Div(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Div(d2)
@@ -429,7 +429,7 @@ func (d *DecimalObj) Div(line string, args ...Object) Object {
 
 func (d *DecimalObj) DivRound(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var d2 Decimal
@@ -444,17 +444,17 @@ func (d *DecimalObj) DivRound(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	precision, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "divRound", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "divRound", "*Integer", args[1].Type())
 	}
 
 	ret := d.Number.DivRound(d2, int32(precision.Int64))
@@ -464,7 +464,7 @@ func (d *DecimalObj) DivRound(line string, args ...Object) Object {
 
 func (d *DecimalObj) Mod(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -479,12 +479,12 @@ func (d *DecimalObj) Mod(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Mod(d2)
@@ -494,7 +494,7 @@ func (d *DecimalObj) Mod(line string, args ...Object) Object {
 
 func (d *DecimalObj) Pow(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var d2 Decimal
@@ -509,12 +509,12 @@ func (d *DecimalObj) Pow(line string, args ...Object) Object {
 		var err error
 		d2, err = NewFromString(input.String)
 		if err != nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	case *DecimalObj:
 		d2 = input.Number
 	default:
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	ret := d.Number.Pow(d2)
@@ -524,7 +524,7 @@ func (d *DecimalObj) Pow(line string, args ...Object) Object {
 
 func (d *DecimalObj) Ceil(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Ceil()
@@ -534,7 +534,7 @@ func (d *DecimalObj) Ceil(line string, args ...Object) Object {
 
 func (d *DecimalObj) Round(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var places int64
@@ -544,7 +544,7 @@ func (d *DecimalObj) Round(line string, args ...Object) Object {
 	case *UInteger:
 		places = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "round", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "round", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := d.Number.Round(int32(places))
@@ -554,7 +554,7 @@ func (d *DecimalObj) Round(line string, args ...Object) Object {
 
 func (d *DecimalObj) Truncate(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var precision int64
@@ -564,7 +564,7 @@ func (d *DecimalObj) Truncate(line string, args ...Object) Object {
 	case *UInteger:
 		precision = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "trunc", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trunc", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := d.Number.Truncate(int32(precision))
@@ -574,7 +574,7 @@ func (d *DecimalObj) Truncate(line string, args ...Object) Object {
 
 func (d *DecimalObj) Floor(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Floor()
@@ -584,12 +584,12 @@ func (d *DecimalObj) Floor(line string, args ...Object) Object {
 
 func (d *DecimalObj) Cmp(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "cmp", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "cmp", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.Cmp(d2.Number)
@@ -598,12 +598,12 @@ func (d *DecimalObj) Cmp(line string, args ...Object) Object {
 
 func (d *DecimalObj) Equal(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "equal", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "equal", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.Equal(d2.Number)
@@ -615,12 +615,12 @@ func (d *DecimalObj) Equal(line string, args ...Object) Object {
 
 func (d *DecimalObj) GreaterThan(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "greaterThan", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "greaterThan", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.GreaterThan(d2.Number)
@@ -632,12 +632,12 @@ func (d *DecimalObj) GreaterThan(line string, args ...Object) Object {
 
 func (d *DecimalObj) GreaterThanOrEqual(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "greaterThanOrEqual", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "greaterThanOrEqual", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.GreaterThanOrEqual(d2.Number)
@@ -649,12 +649,12 @@ func (d *DecimalObj) GreaterThanOrEqual(line string, args ...Object) Object {
 
 func (d *DecimalObj) LessThan(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lessThan", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lessThan", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.LessThan(d2.Number)
@@ -666,12 +666,12 @@ func (d *DecimalObj) LessThan(line string, args ...Object) Object {
 
 func (d *DecimalObj) LessThanOrEqual(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	d2, ok := args[0].(*DecimalObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lessThanOrEqual", "*DecimalObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lessThanOrEqual", "*DecimalObj", args[0].Type())
 	}
 
 	ret := d.Number.LessThanOrEqual(d2.Number)
@@ -683,7 +683,7 @@ func (d *DecimalObj) LessThanOrEqual(line string, args ...Object) Object {
 
 func (d *DecimalObj) StringFixed(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var places int64
@@ -693,7 +693,7 @@ func (d *DecimalObj) StringFixed(line string, args ...Object) Object {
 	case *UInteger:
 		places = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "stringFixed", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "stringFixed", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := d.Number.StringFixed(int32(places))
@@ -703,7 +703,7 @@ func (d *DecimalObj) StringFixed(line string, args ...Object) Object {
 
 func (d *DecimalObj) StringScaled(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var exp int64
@@ -713,7 +713,7 @@ func (d *DecimalObj) StringScaled(line string, args ...Object) Object {
 	case *UInteger:
 		exp = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "stringScaled", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "stringScaled", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := d.Number.StringScaled(int32(exp))
@@ -723,7 +723,7 @@ func (d *DecimalObj) StringScaled(line string, args ...Object) Object {
 
 func (d *DecimalObj) String(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.String()
@@ -733,7 +733,7 @@ func (d *DecimalObj) String(line string, args ...Object) Object {
 
 func (d *DecimalObj) Sign(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Sign()
@@ -743,7 +743,7 @@ func (d *DecimalObj) Sign(line string, args ...Object) Object {
 
 func (d *DecimalObj) Exponent(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.Exponent()
@@ -753,7 +753,7 @@ func (d *DecimalObj) Exponent(line string, args ...Object) Object {
 
 func (d *DecimalObj) IntPart(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := d.Number.IntPart()
@@ -763,7 +763,7 @@ func (d *DecimalObj) IntPart(line string, args ...Object) Object {
 
 func (d *DecimalObj) Float(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, _ := d.Number.Float64()
@@ -773,7 +773,7 @@ func (d *DecimalObj) Float(line string, args ...Object) Object {
 
 func (d *DecimalObj) SetDivisionPrecision(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var value int64
@@ -783,7 +783,7 @@ func (d *DecimalObj) SetDivisionPrecision(line string, args ...Object) Object {
 	case *UInteger:
 		value = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDivisionPrecision", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDivisionPrecision", "*Integer|*UInteger", args[0].Type())
 	}
 
 	DivisionPrecision = int(value)
@@ -793,7 +793,7 @@ func (d *DecimalObj) SetDivisionPrecision(line string, args ...Object) Object {
 
 func (d *DecimalObj) GetDivisionPrecision(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewInteger(int64(DivisionPrecision))
@@ -801,12 +801,12 @@ func (d *DecimalObj) GetDivisionPrecision(line string, args ...Object) Object {
 
 func (d *DecimalObj) SetMarshalJSONWithoutQuotes(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(*Boolean)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setMarshalJSONWithoutQuotes", "*Boolean", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setMarshalJSONWithoutQuotes", "*Boolean", args[0].Type())
 	}
 
 	MarshalJSONWithoutQuotes = value.Bool
@@ -816,7 +816,7 @@ func (d *DecimalObj) SetMarshalJSONWithoutQuotes(line string, args ...Object) Ob
 
 func (d *DecimalObj) GetMarshalJSONWithoutQuotes(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	if MarshalJSONWithoutQuotes {
 		return TRUE

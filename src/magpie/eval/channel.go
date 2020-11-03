@@ -28,13 +28,13 @@ func (c *ChanObject) CallMethod(line string, scope *Scope, method string, args .
 	case "close":
 		return c.Close(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, c.Type()))
+		return NewError(line, NOMETHODERROR, method, c.Type())
 	}
 }
 
 func (c *ChanObject) Send(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	c.ch <- args[0]
@@ -43,7 +43,7 @@ func (c *ChanObject) Send(line string, args ...Object) Object {
 
 func (c *ChanObject) Recv(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	obj, more := <-c.ch
@@ -53,7 +53,7 @@ func (c *ChanObject) Recv(line string, args ...Object) Object {
 
 func (c *ChanObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	close(c.ch)

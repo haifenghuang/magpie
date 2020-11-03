@@ -46,12 +46,12 @@ func (c *Class) CallMethod(line string, scope *Scope, method string, args ...Obj
 	case "isAnnotationPresent":
 		return c.IsAnnotationPresent(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, c.Type()))
+	return NewError(line, NOMETHODERROR, method, c.Type())
 }
 
 func (c *Class) IsAnnotationPresent(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	//	if c.HasAnnotation {
@@ -182,7 +182,7 @@ func (oi *ObjectInstance) IsStatic(val string, kind ClassComponentKind) bool {
 	return oi.Class.IsStatic(val, kind)
 }
 func (oi *ObjectInstance) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, oi.Type()))
+	return NewError(line, NOMETHODERROR, method, oi.Type())
 }
 
 func (oi *ObjectInstance) GetModifierLevel(name string, kind ClassComponentKind) ast.ModifierLevel {
@@ -226,7 +226,7 @@ func initRootObject() bool {
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
-					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+					return NewError(line, ARGUMENTERROR, "0", argLen)
 				}
 
 				if self == nil {
@@ -240,7 +240,7 @@ func initRootObject() bool {
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 1 {
-					panic(NewError(line, ARGUMENTERROR, "1", argLen))
+					return NewError(line, ARGUMENTERROR, "1", argLen)
 				}
 
 				if self == nil {
@@ -254,14 +254,14 @@ func initRootObject() bool {
 					return nativeBoolToBooleanObject(InstanceOf(class.Name, self))
 				}
 
-				panic(NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for its argument"))
+				return NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for its argument")
 			},
 		},
 		"classOf": &BuiltinMethod{
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
-					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+					return NewError(line, ARGUMENTERROR, "0", argLen)
 				}
 
 				if self == nil {
@@ -275,7 +275,7 @@ func initRootObject() bool {
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
-					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+					return NewError(line, ARGUMENTERROR, "0", argLen)
 				}
 
 				if self == nil {
@@ -294,7 +294,7 @@ func initRootObject() bool {
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
-					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+					return NewError(line, ARGUMENTERROR, "0", argLen)
 				}
 
 				ret := &Array{}
@@ -313,7 +313,7 @@ func initRootObject() bool {
 			Fn: func(line string, self *ObjectInstance, scope *Scope, args ...Object) Object {
 				argLen := len(args)
 				if argLen != 0 {
-					panic(NewError(line, ARGUMENTERROR, "0", argLen))
+					return NewError(line, ARGUMENTERROR, "0", argLen)
 				}
 
 				ret := &Array{}
@@ -355,12 +355,12 @@ func (m *MethodInfo) CallMethod(line string, scope *Scope, method string, args .
 	case "getAnnotation":
 		return m.GetAnnotation(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, m.Type()))
+	return NewError(line, NOMETHODERROR, method, m.Type())
 }
 
 func (m *MethodInfo) GetName(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(m.Name)
@@ -386,7 +386,7 @@ func (m *MethodInfo) Invoke(line string, scope *Scope, args ...Object) Object {
 
 func (m *MethodInfo) GetAnnotations(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	method := m.Instance.GetMethod(m.Name)
@@ -404,12 +404,12 @@ func (m *MethodInfo) GetAnnotations(line string, args ...Object) Object {
 
 func (m *MethodInfo) GetAnnotation(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	annoCls, ok := args[0].(*Class)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "getAnnotation", "*Class", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "getAnnotation", "*Class", args[0].Type())
 	}
 
 	method := m.Instance.GetMethod(m.Name)
@@ -446,12 +446,12 @@ func (p *PropertyInfo) CallMethod(line string, scope *Scope, method string, args
 		//	case "getAnnotation":
 		//		return p.GetAnnotation(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, p.Type()))
+	return NewError(line, NOMETHODERROR, method, p.Type())
 }
 
 func (p *PropertyInfo) GetName(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(p.Name)
@@ -459,13 +459,13 @@ func (p *PropertyInfo) GetName(line string, args ...Object) Object {
 
 func (p *PropertyInfo) Value(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	prop := p.Instance.GetProperty(p.Name)
 	if prop != nil {
 		if prop.Getter == nil { //property xxx { set; }
-			panic(NewError(line, PROPERTYUSEERROR, p.Name, p.Instance.Class.Name))
+			return NewError(line, PROPERTYUSEERROR, p.Name, p.Instance.Class.Name)
 		} else {
 			if len(prop.Getter.Body.Statements) == 0 { //property xxx { get; }
 				v, _ := p.Instance.Scope.Get("_" + p.Name)
@@ -478,14 +478,13 @@ func (p *PropertyInfo) Value(line string, args ...Object) Object {
 			}
 		}
 	}
-	reportTypoSuggestions(line, p.Instance.Scope, p.Name)
-	return NIL
-	//panic(NewError(line, UNKNOWNIDENT, p.Name))
+	return reportTypoSuggestions(line, p.Instance.Scope, p.Name)
+	//return NewError(line, UNKNOWNIDENT, p.Name)
 }
 
 func (p *PropertyInfo) GetAnnotations(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := &Array{}
@@ -497,12 +496,12 @@ func (p *PropertyInfo) GetAnnotations(line string, scope *Scope, args ...Object)
 
 //func (p *PropertyInfo) GetAnnotation(line string, args ...Object) Object {
 //	if len(args) != 1 {
-//		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+//		return NewError(line, ARGUMENTERROR, "1", len(args))
 //	}
 //
 //	annoCls, ok := args[0].(*Class)
 //	if !ok {
-//		panic(NewError(line, PARAMTYPEERROR, "first", "getAnnotation", "*Class", args[0].Type()))
+//		return NewError(line, PARAMTYPEERROR, "first", "getAnnotation", "*Class", args[0].Type())
 //	}
 //
 //	propStmt := p.Instance.GetProperty(m.Name)

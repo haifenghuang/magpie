@@ -69,7 +69,7 @@ func (u *UnicodeObj) CallMethod(line string, scope *Scope, method string, args .
 	case "isUpper":
 		return u.IsUpper(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, u.Type()))
+	return NewError(line, NOMETHODERROR, method, u.Type())
 }
 
 func (u *UnicodeObj) IsControl(line string, args ...Object) Object {
@@ -125,12 +125,12 @@ func (u *UnicodeObj) IsUpper(line string, args ...Object) Object {
 
 func (u *UnicodeObj) checkFunc(name string, line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", name, "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", name, "*String", args[0].Type())
 	}
 
 	r := []rune(strObj.String)

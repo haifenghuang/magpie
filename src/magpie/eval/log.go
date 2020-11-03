@@ -64,7 +64,7 @@ func (l *LoggerObj) CallMethod(line string, scope *Scope, method string, args ..
 	case "setPrefix":
 		return l.SetPrefix(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, l.Type()))
+	return NewError(line, NOMETHODERROR, method, l.Type())
 }
 
 func (l *LoggerObj) Print(line string, args ...Object) Object {
@@ -83,12 +83,12 @@ func (l *LoggerObj) Print(line string, args ...Object) Object {
 
 func (l *LoggerObj) Printf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	format, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -131,12 +131,12 @@ func (l *LoggerObj) Fatal(line string, args ...Object) Object {
 
 func (l *LoggerObj) Fatalf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	format, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fatalf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fatalf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -179,12 +179,12 @@ func (l *LoggerObj) Panic(line string, args ...Object) Object {
 
 func (l *LoggerObj) Panicf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	format, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "panicf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "panicf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -213,7 +213,7 @@ func (l *LoggerObj) Panicln(line string, args ...Object) Object {
 
 func (l *LoggerObj) Flags(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	f := l.Logger.Flags()
@@ -222,17 +222,17 @@ func (l *LoggerObj) Flags(line string, args ...Object) Object {
 
 func (l *LoggerObj) Output(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	calldepth, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "output", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "output", "*Integer", args[0].Type())
 	}
 
 	s, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "output", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "output", "*String", args[1].Type())
 	}
 
 	err := l.Logger.Output(int(calldepth.Int64), s.String)
@@ -244,7 +244,7 @@ func (l *LoggerObj) Output(line string, args ...Object) Object {
 
 func (l *LoggerObj) Prefix(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	p := l.Logger.Prefix()
@@ -253,12 +253,12 @@ func (l *LoggerObj) Prefix(line string, args ...Object) Object {
 
 func (l *LoggerObj) SetFlags(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	flag, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setFlags", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setFlags", "*Integer", args[0].Type())
 	}
 
 	l.Logger.SetFlags(int(flag.Int64))
@@ -267,12 +267,12 @@ func (l *LoggerObj) SetFlags(line string, args ...Object) Object {
 
 func (l *LoggerObj) SetOutput(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	writer, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setOutput", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setOutput", "Writable", args[0].Type())
 	}
 
 	l.Logger.SetOutput(writer.IOWriter())
@@ -282,12 +282,12 @@ func (l *LoggerObj) SetOutput(line string, args ...Object) Object {
 
 func (l *LoggerObj) SetPrefix(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	prefix, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setPrefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setPrefix", "*String", args[0].Type())
 	}
 
 	l.Logger.SetPrefix(prefix.String)

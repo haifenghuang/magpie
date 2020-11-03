@@ -43,12 +43,12 @@ func (j *Json) CallMethod(line string, scope *Scope, method string, args ...Obje
 	case "writeFile":
 		return j.WriteFile(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, j.Type()))
+	return NewError(line, NOMETHODERROR, method, j.Type())
 }
 
 func (j *Json) Marshal(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	switch args[0].(type) {
@@ -109,19 +109,19 @@ func (j *Json) Marshal(line string, args ...Object) Object {
 		}
 		return NewString(string(res))
 	default:
-		panic(NewError(line, JSONERROR))
+		return NewError(line, JSONERROR)
 	}
 	return NIL
 }
 
 func (j *Json) UnMarshal(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	jsonStr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "unmarshal", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "unmarshal", "*String", args[0].Type())
 	}
 
 	in := []byte(jsonStr.String)
@@ -158,19 +158,19 @@ func (j *Json) UnMarshal(line string, args ...Object) Object {
 
 func (j *Json) Indent(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	val, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "indent", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "indent", "*String", args[0].Type())
 	}
 
 	var indent string = "\t"
 	if len(args) == 2 {
 		str, ok := args[1].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "indent", "*String", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "indent", "*String", args[1].Type())
 		}
 		indent = str.String
 	}
@@ -187,12 +187,12 @@ func (j *Json) Indent(line string, args ...Object) Object {
 
 func (j *Json) Read(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "read", "*String", args[0].Type())
 	}
 
 	return j.UnMarshal(line, strObj)
@@ -200,12 +200,12 @@ func (j *Json) Read(line string, args ...Object) Object {
 
 func (j *Json) ReadFile(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type())
 	}
 
 	byteValue, err := ioutil.ReadFile(strObj.String)
@@ -218,17 +218,17 @@ func (j *Json) ReadFile(line string, args ...Object) Object {
 
 func (j *Json) WriteFile(line string, args ...Object) Object {
 	if len(args) != 2 && len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "2|3", len(args)))
+		return NewError(line, ARGUMENTERROR, "2|3", len(args))
 	}
 
 	fileNameObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeFile", "*String", args[0].Type())
 	}
 
 	permObj, ok := args[2].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "writeFile", "*Integer", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "writeFile", "*Integer", args[2].Type())
 	}
 
 	v := j.Marshal(line, args[1])

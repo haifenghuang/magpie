@@ -53,7 +53,7 @@ func (gobj *GoObject) Equal(another Object) bool {
 func (gobj *GoObject) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	theMethod := reflect.ValueOf(gobj.obj).MethodByName(method)
 	if !theMethod.IsValid() {
-		panic(NewError(line, NOMETHODERROR, method, gobj.Type()))
+		return NewError(line, NOMETHODERROR, method, gobj.Type())
 	}
 
 	methodType := theMethod.Type()
@@ -86,7 +86,7 @@ func (gobj *GoObject) CallMethod(line string, scope *Scope, method string, args 
 	}
 	return results[0]
 
-	panic(NewError(line, NOMETHODERROR, method, gobj.Type()))
+	return NewError(line, NOMETHODERROR, method, gobj.Type())
 }
 
 func NewGoObject(obj interface{}) *GoObject {
@@ -238,7 +238,7 @@ func (gfn *GoFuncObject) CallMethod(line string, scope *Scope, method string, ar
 	}
 	return results[0]
 
-	// panic(NewError(line, NOMETHODERROR, method, gfn.Type()))
+	// return NewError(line, NOMETHODERROR, method, gfn.Type())
 }
 
 func NewGoFuncObject(fname string, fn interface{}) *GoFuncObject {

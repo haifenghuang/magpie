@@ -132,17 +132,17 @@ func (h *HttpObj) CallMethod(line string, scope *Scope, method string, args ...O
 	case "redirect":
 		return h.Redirect(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, h.Type()))
+	return NewError(line, NOMETHODERROR, method, h.Type())
 }
 
 func (h *HttpObj) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	url, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type())
 	}
 
 	response, err := http.Get(url.String)
@@ -154,12 +154,12 @@ func (h *HttpObj) Get(line string, args ...Object) Object {
 
 func (h *HttpObj) Head(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	url, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "head", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "head", "*String", args[0].Type())
 	}
 
 	response, err := http.Head(url.String)
@@ -171,17 +171,17 @@ func (h *HttpObj) Head(line string, args ...Object) Object {
 
 func (h *HttpObj) Post(line string, args ...Object) Object {
 	if len(args) != 2 && len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "2|3", len(args)))
+		return NewError(line, ARGUMENTERROR, "2|3", len(args))
 	}
 
 	urlStr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "post", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "post", "*String", args[0].Type())
 	}
 
 	contentType, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "post", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "post", "*String", args[1].Type())
 	}
 
 	var response *http.Response
@@ -192,7 +192,7 @@ func (h *HttpObj) Post(line string, args ...Object) Object {
 	} else {
 		body, ok := args[2].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "third", "post", "*String", args[2].Type()))
+			return NewError(line, PARAMTYPEERROR, "third", "post", "*String", args[2].Type())
 		}
 		response, err = http.Post(urlStr.String, contentType.String, strings.NewReader(body.String))
 	}
@@ -206,18 +206,18 @@ func (h *HttpObj) Post(line string, args ...Object) Object {
 
 func (h *HttpObj) PostForm(line string, args ...Object) Object {
 	//	if len(args) != 1 {
-	//		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	//		return NewError(line, ARGUMENTERROR, "1", len(args))
 	//	}
 	//
 	//	url, ok := args[0].(*String)
 	//	if !ok {
-	//		panic(NewError(line, PARAMTYPEERROR, "first", "postForm", "*String", args[0].Type()))
+	//		return NewError(line, PARAMTYPEERROR, "first", "postForm", "*String", args[0].Type())
 	//	}
 	//
 	//	response, err := http.Post(url.String)
 	//	if err != nil {
 	//		//return FALSE
-	//		panic(NewError(line, GENERICERROR, err.Error()))
+	//		return NewError(line, GENERICERROR, err.Error())
 	//	}
 	//	return &HttpResponse{Response:response}
 	return NIL
@@ -225,17 +225,17 @@ func (h *HttpObj) PostForm(line string, args ...Object) Object {
 
 func (h *HttpObj) NewRequest(line string, args ...Object) Object {
 	if len(args) != 2 && len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "2|3", len(args)))
+		return NewError(line, ARGUMENTERROR, "2|3", len(args))
 	}
 
 	method, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "newRequest", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "newRequest", "*String", args[0].Type())
 	}
 
 	urlStr, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "newRequest", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "newRequest", "*String", args[1].Type())
 	}
 
 	var request *http.Request
@@ -246,7 +246,7 @@ func (h *HttpObj) NewRequest(line string, args ...Object) Object {
 	} else {
 		body, ok := args[2].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "newRequest", "*String", args[2].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "newRequest", "*String", args[2].Type())
 		}
 		request, err = http.NewRequest(method.String, urlStr.String, strings.NewReader(body.String))
 	}
@@ -260,12 +260,12 @@ func (h *HttpObj) NewRequest(line string, args ...Object) Object {
 
 func (h *HttpObj) ListenAndServe(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	addr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "listenAndServe", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "listenAndServe", "*String", args[0].Type())
 	}
 
 	if len(args) == 1 {
@@ -276,12 +276,12 @@ func (h *HttpObj) ListenAndServe(line string, scope *Scope, args ...Object) Obje
 	} else {
 		block, ok := args[1].(*Function)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "listenAndServe", "*Function", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "listenAndServe", "*Function", args[1].Type())
 		}
 
 		paramCount := len(block.Literal.Parameters)
 		if paramCount != 2 {
-			panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
+			return NewError(line, FUNCCALLBACKERROR, 2, paramCount)
 		}
 
 		err := http.ListenAndServe(addr.String, &customHTTPHandler{Scope: scope, F: block})
@@ -295,22 +295,22 @@ func (h *HttpObj) ListenAndServe(line string, scope *Scope, args ...Object) Obje
 
 func (h *HttpObj) Handle(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	pattern, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "handle", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "handle", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "handle", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "handle", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 2 {
-		panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 2, paramCount)
 	}
 
 	http.Handle(pattern.String, &customHTTPHandler{Scope: scope, F: block})
@@ -320,22 +320,22 @@ func (h *HttpObj) Handle(line string, scope *Scope, args ...Object) Object {
 
 func (h *HttpObj) HandleFunc(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	pattern, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "handleFunc", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "handleFunc", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "handleFunc", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "handleFunc", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 2 {
-		panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 2, paramCount)
 	}
 
 	http.HandleFunc(pattern.String, func(w http.ResponseWriter, r *http.Request) {
@@ -356,12 +356,12 @@ func ServeHTTP(scope *Scope, f *Function, w http.ResponseWriter, r *http.Request
 
 func (h *HttpObj) NewServer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	addr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "newServer", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "newServer", "*String", args[0].Type())
 	}
 
 	return &HttpServer{Server: &http.Server{Addr: addr.String}}
@@ -369,27 +369,27 @@ func (h *HttpObj) NewServer(line string, args ...Object) Object {
 
 func (h *HttpObj) Redirect(line string, args ...Object) Object {
 	if len(args) != 4 {
-		panic(NewError(line, ARGUMENTERROR, "4", len(args)))
+		return NewError(line, ARGUMENTERROR, "4", len(args))
 	}
 
 	rw, ok := args[0].(*HttpResponseWriter)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "redirect", "*HttpResponseWriter", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "redirect", "*HttpResponseWriter", args[0].Type())
 	}
 
 	req, ok := args[1].(*HttpRequest)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "redirect", "*HttpRequest", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "redirect", "*HttpRequest", args[1].Type())
 	}
 
 	urlStr, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "redirect", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "redirect", "*String", args[2].Type())
 	}
 
 	code, ok := args[3].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "fourth", "redirect", "*Integer", args[3].Type()))
+		return NewError(line, PARAMTYPEERROR, "fourth", "redirect", "*Integer", args[3].Type())
 	}
 
 	http.Redirect(rw.Writer, req.Request, urlStr.String, int(code.Int64))
@@ -430,18 +430,18 @@ func (h *HttpClient) CallMethod(line string, scope *Scope, method string, args .
 	case "postForm":
 		return h.PostForm(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 }
 
 func (h *HttpClient) Do(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	req, ok := args[0].(*HttpRequest)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "do", "*HttpRequest", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "do", "*HttpRequest", args[0].Type())
 	}
 
 	response, err := h.Client.Do(req.Request)
@@ -453,12 +453,12 @@ func (h *HttpClient) Do(line string, args ...Object) Object {
 
 func (h *HttpClient) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	url, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type())
 	}
 
 	response, err := h.Client.Get(url.String)
@@ -470,12 +470,12 @@ func (h *HttpClient) Get(line string, args ...Object) Object {
 
 func (h *HttpClient) Head(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	url, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "url", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "url", "*String", args[0].Type())
 	}
 
 	response, err := h.Client.Head(url.String)
@@ -487,17 +487,17 @@ func (h *HttpClient) Head(line string, args ...Object) Object {
 
 func (h *HttpClient) Post(line string, args ...Object) Object {
 	if len(args) != 2 && len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "2|3", len(args)))
+		return NewError(line, ARGUMENTERROR, "2|3", len(args))
 	}
 
 	urlStr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "post", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "post", "*String", args[0].Type())
 	}
 
 	contentType, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "post", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "post", "*String", args[1].Type())
 	}
 
 	var response *http.Response
@@ -508,7 +508,7 @@ func (h *HttpClient) Post(line string, args ...Object) Object {
 	} else {
 		body, ok := args[2].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "third", "post", "*String", args[2].Type()))
+			return NewError(line, PARAMTYPEERROR, "third", "post", "*String", args[2].Type())
 		}
 		response, err = h.Client.Post(urlStr.String, contentType.String, strings.NewReader(body.String))
 	}
@@ -522,18 +522,18 @@ func (h *HttpClient) Post(line string, args ...Object) Object {
 
 func (h *HttpClient) PostForm(line string, args ...Object) Object {
 	//	if len(args) != 1 {
-	//		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+	//		return NewError(line, ARGUMENTERROR, "1", len(args))
 	//	}
 	//
 	//	url, ok := args[0].(*String)
 	//	if !ok {
-	//		panic(NewError(line, INPUTERROR, args[0].Type(), "postForm"))
+	//		return NewError(line, INPUTERROR, args[0].Type(), "postForm")
 	//	}
 	//
 	//	response, err := h.Client.Post(url.String)
 	//	if err != nil {
 	//		//return FALSE
-	//		panic(NewError(line, GENERICERROR, err.Error()))
+	//		return NewError(line, GENERICERROR, err.Error())
 	//	}
 	//	return &HttpResponse{Response:response}
 	return NIL
@@ -555,13 +555,13 @@ func (h *HttpResponse) CallMethod(line string, scope *Scope, method string, args
 	case "header":
 		return h.Header(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 }
 
 func (h *HttpResponse) CloseBody(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	h.Response.Body.Close()
@@ -570,7 +570,7 @@ func (h *HttpResponse) CloseBody(line string, args ...Object) Object {
 
 func (h *HttpResponse) ReadAll(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	b, err := ioutil.ReadAll(h.Response.Body)
@@ -582,7 +582,7 @@ func (h *HttpResponse) ReadAll(line string, args ...Object) Object {
 
 func (h *HttpResponse) Header(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &HttpHeader{Header: h.Response.Header}
@@ -606,14 +606,14 @@ func (h *HttpRequest) CallMethod(line string, scope *Scope, method string, args 
 	case "formValue":
 		return h.FormValue(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 	return NIL
 }
 
 func (h *HttpRequest) Method(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(h.Request.Method)
@@ -621,7 +621,7 @@ func (h *HttpRequest) Method(line string, args ...Object) Object {
 
 func (h *HttpRequest) Header(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &HttpHeader{Header: h.Request.Header}
@@ -629,12 +629,12 @@ func (h *HttpRequest) Header(line string, args ...Object) Object {
 
 func (h *HttpRequest) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	buf := bytes.NewBuffer([]byte(content.String))
@@ -648,12 +648,12 @@ func (h *HttpRequest) Write(line string, args ...Object) Object {
 
 func (h *HttpRequest) FormValue(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "formValue", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "formValue", "*String", args[0].Type())
 	}
 
 	return NewString(h.Request.FormValue(key.String))
@@ -678,18 +678,18 @@ func (h *HttpResponseWriter) CallMethod(line string, scope *Scope, method string
 	case "writeJson":
 		return h.WriteJson(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 }
 
 func (h *HttpResponseWriter) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	i, err := h.Writer.Write([]byte(content.String))
@@ -701,12 +701,12 @@ func (h *HttpResponseWriter) Write(line string, args ...Object) Object {
 
 func (h *HttpResponseWriter) WriteHeader(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	statusCode, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeHeader", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeHeader", "*Integer", args[0].Type())
 	}
 
 	h.Writer.WriteHeader(int(statusCode.Int64))
@@ -716,7 +716,7 @@ func (h *HttpResponseWriter) WriteHeader(line string, args ...Object) Object {
 
 func (h *HttpResponseWriter) Header(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &HttpHeader{Header: h.Writer.Header()}
@@ -724,19 +724,19 @@ func (h *HttpResponseWriter) Header(line string, args ...Object) Object {
 
 func (h *HttpResponseWriter) WriteJson(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	payLoadObj, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeJson", "*Hash", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeJson", "*Hash", args[0].Type())
 	}
 
 	var statusCodeObj *Integer
 	if len(args) == 2 {
 		statusCodeObj, ok = args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "writeHeader", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "writeHeader", "*Integer", args[1].Type())
 		}
 	} else {
 		statusCodeObj = NewInteger(int64(http.StatusOK))
@@ -780,18 +780,18 @@ func (h *HttpServer) CallMethod(line string, scope *Scope, method string, args .
 	case "setKeepAlivesEnabled":
 		return h.SetKeepAlivesEnabled(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 }
 
 func (h *HttpServer) SetReadTimeout(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	duration, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadTimeout", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadTimeout", "*Integer", args[0].Type())
 	}
 
 	h.Server.ReadTimeout = time.Duration(duration.Int64) * time.Second
@@ -801,12 +801,12 @@ func (h *HttpServer) SetReadTimeout(line string, args ...Object) Object {
 
 func (h *HttpServer) SetWriteTimeout(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	duration, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteTimeout", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteTimeout", "*Integer", args[0].Type())
 	}
 
 	h.Server.WriteTimeout = time.Duration(duration.Int64) * time.Second
@@ -816,12 +816,12 @@ func (h *HttpServer) SetWriteTimeout(line string, args ...Object) Object {
 
 func (h *HttpServer) SetMaxHeaderBytes(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	headerBytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setMaxHeaderBytes", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setMaxHeaderBytes", "*Integer", args[0].Type())
 	}
 
 	h.Server.MaxHeaderBytes = int(headerBytes.Int64)
@@ -831,7 +831,7 @@ func (h *HttpServer) SetMaxHeaderBytes(line string, args ...Object) Object {
 
 func (h *HttpServer) ListenAndServe(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := h.Server.ListenAndServe()
@@ -844,13 +844,13 @@ func (h *HttpServer) ListenAndServe(line string, args ...Object) Object {
 
 //func (h *HttpServer) Close(line string, args ...Object) Object {
 //	if len(args) != 0 {
-//		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+//		return NewError(line, ARGUMENTERROR, "0", len(args))
 //	}
 //
 //	err := h.Server.Close()
 //	if err != nil {
 //		//return FALSE
-//		panic(NewError(line, GENERICERROR, err.Error()))
+//		return NewError(line, GENERICERROR, err.Error())
 //	}
 //
 //	return NIL
@@ -858,12 +858,12 @@ func (h *HttpServer) ListenAndServe(line string, args ...Object) Object {
 
 func (h *HttpServer) SetKeepAlivesEnabled(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	b, ok := args[0].(*Boolean)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setKeepAlivesEnabled", "*Boolean", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setKeepAlivesEnabled", "*Boolean", args[0].Type())
 	}
 
 	h.Server.SetKeepAlivesEnabled(b.Bool)
@@ -890,24 +890,24 @@ func (h *HttpHeader) CallMethod(line string, scope *Scope, method string, args .
 	case "write":
 		return h.Write(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, h.Type()))
+		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
 	return NIL
 }
 
 func (h *HttpHeader) Add(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "add", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "add", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "add", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "add", "*String", args[1].Type())
 	}
 
 	h.Header.Add(key.String, value.String)
@@ -916,12 +916,12 @@ func (h *HttpHeader) Add(line string, args ...Object) Object {
 
 func (h *HttpHeader) Del(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "del", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "del", "*String", args[0].Type())
 	}
 
 	h.Header.Del(key.String)
@@ -930,12 +930,12 @@ func (h *HttpHeader) Del(line string, args ...Object) Object {
 
 func (h *HttpHeader) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "get", "*String", args[0].Type())
 	}
 
 	str := h.Header.Get(key.String)
@@ -944,17 +944,17 @@ func (h *HttpHeader) Get(line string, args ...Object) Object {
 
 func (h *HttpHeader) Set(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "set", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type())
 	}
 
 	h.Header.Set(key.String, value.String)
@@ -963,12 +963,12 @@ func (h *HttpHeader) Set(line string, args ...Object) Object {
 
 func (h *HttpHeader) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	buf := bytes.NewBuffer([]byte(content.String))

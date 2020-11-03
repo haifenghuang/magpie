@@ -52,12 +52,12 @@ func (c *CsvObj) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "setOptions":
 		return c.SetOptions(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, c.Type()))
+	return NewError(line, NOMETHODERROR, method, c.Type())
 }
 
 func (c *CsvObj) Read(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	record, err := c.Reader.Read()
@@ -75,7 +75,7 @@ func (c *CsvObj) Read(line string, args ...Object) Object {
 
 func (c *CsvObj) ReadAll(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	records, err := c.Reader.ReadAll()
@@ -97,7 +97,7 @@ func (c *CsvObj) ReadAll(line string, args ...Object) Object {
 
 func (c *CsvObj) CloseReader(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if c.ReaderFile != nil {
@@ -111,12 +111,12 @@ func (c *CsvObj) CloseReader(line string, args ...Object) Object {
 
 func (c *CsvObj) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	record, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "Write", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "Write", "*Array", args[0].Type())
 	}
 
 	strRecord := make([]string, len(record.Members))
@@ -134,12 +134,12 @@ func (c *CsvObj) Write(line string, args ...Object) Object {
 
 func (c *CsvObj) WriteAll(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	records, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "WriteAll", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "WriteAll", "*Array", args[0].Type())
 	}
 
 	//create a two dimensional string array
@@ -166,7 +166,7 @@ func (c *CsvObj) WriteAll(line string, args ...Object) Object {
 
 func (c *CsvObj) Flush(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	c.Writer.Flush()
@@ -180,24 +180,24 @@ func (c *CsvObj) Flush(line string, args ...Object) Object {
 
 func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	options, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setOptions", "*Hash", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setOptions", "*Hash", args[0].Type())
 	}
 
 	for _, option := range options.Pairs {
 		//check key type
 		key, ok := option.Key.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "setOptions", "key", "*String", option.Key.Type()))
+			return NewError(line, PARAMTYPEERROR, "setOptions", "key", "*String", option.Key.Type())
 		}
 
 		//check key name
 		if _, ok := optionsKeyMap[key.String]; !ok {
-			panic(NewError(line, GENERICERROR, "Keys should be:	Comma|Comment|FieldsPerRecord|LazyQuotes|TrimLeadingSpace|ReuseRecord"))
+			return NewError(line, GENERICERROR, "Keys should be:	Comma|Comment|FieldsPerRecord|LazyQuotes|TrimLeadingSpace|ReuseRecord")
 		}
 
 		//check value type
@@ -205,7 +205,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "Comma":
 			value, ok := option.Value.(*String)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'Comma' key's value should be a String"))
+				return NewError(line, GENERICERROR, "'Comma' key's value should be a String")
 			}
 			if c.Reader != nil {
 				c.Reader.Comma = rune(value.String[0])
@@ -215,7 +215,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "Comment":
 			value, ok := option.Value.(*String)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'Comment' key's value should be a String"))
+				return NewError(line, GENERICERROR, "'Comment' key's value should be a String")
 			}
 			if c.Reader != nil {
 				c.Reader.Comment = rune(value.String[0])
@@ -223,7 +223,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "FieldsPerRecord":
 			value, ok := option.Value.(*Integer)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'FieldsPerRecord' key's value should be an Integer"))
+				return NewError(line, GENERICERROR, "'FieldsPerRecord' key's value should be an Integer")
 			}
 			if c.Reader != nil {
 				c.Reader.FieldsPerRecord = int(value.Int64)
@@ -231,7 +231,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "LazyQuotes":
 			value, ok := option.Value.(*Boolean)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'LazyQuotes' key's value should be a Boolean"))
+				return NewError(line, GENERICERROR, "'LazyQuotes' key's value should be a Boolean")
 			}
 			if c.Reader != nil {
 				c.Reader.LazyQuotes = value.Bool
@@ -239,7 +239,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "TrimLeadingSpace":
 			value, ok := option.Value.(*Boolean)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'TrimLeadingSpace' key's value should be a Boolean"))
+				return NewError(line, GENERICERROR, "'TrimLeadingSpace' key's value should be a Boolean")
 			}
 			if c.Reader != nil {
 				c.Reader.TrimLeadingSpace = value.Bool
@@ -247,7 +247,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "ReuseRecord":
 			value, ok := option.Value.(*Boolean)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'ReuseRecord' key's value should be a Boolean"))
+				return NewError(line, GENERICERROR, "'ReuseRecord' key's value should be a Boolean")
 			}
 			if c.Reader != nil {
 				c.Reader.ReuseRecord = value.Bool
@@ -255,7 +255,7 @@ func (c *CsvObj) SetOptions(line string, args ...Object) Object {
 		case "UseCRLF":
 			value, ok := option.Value.(*Boolean)
 			if !ok {
-				panic(NewError(line, GENERICERROR, "'UseCRLF' key's value should be a Boolean"))
+				return NewError(line, GENERICERROR, "'UseCRLF' key's value should be a Boolean")
 			}
 			if c.Writer != nil {
 				c.Writer.UseCRLF = value.Bool

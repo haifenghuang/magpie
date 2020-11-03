@@ -55,17 +55,17 @@ func (f *FlagObj) CallMethod(line string, scope *Scope, method string, args ...O
 	case "isSet":
 		return f.IsSet(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, f.Type()))
+	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
 func (f *FlagObj) Arg(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	i, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "arg", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "arg", "*Integer", args[0].Type())
 	}
 
 	return NewString(flag.Arg(int(i.Int64)))
@@ -73,7 +73,7 @@ func (f *FlagObj) Arg(line string, args ...Object) Object {
 
 func (f *FlagObj) Args(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := &Array{}
@@ -86,7 +86,7 @@ func (f *FlagObj) Args(line string, args ...Object) Object {
 
 func (f *FlagObj) NArg(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	n := flag.NArg()
@@ -95,7 +95,7 @@ func (f *FlagObj) NArg(line string, args ...Object) Object {
 
 func (f *FlagObj) NFlag(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	n := flag.NFlag()
@@ -104,22 +104,22 @@ func (f *FlagObj) NFlag(line string, args ...Object) Object {
 
 func (f *FlagObj) Bool(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "bool", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "bool", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*Boolean)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "bool", "*Boolean", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "bool", "*Boolean", args[1].Type())
 	}
 
 	usage, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "bool", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "bool", "*String", args[2].Type())
 	}
 
 	//Because golang's flag module's `Bool` method returns pointer, only after calling `flag.Parse()`,
@@ -133,22 +133,22 @@ func (f *FlagObj) Bool(line string, args ...Object) Object {
 
 func (f *FlagObj) Int(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "int", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "int", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "int", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "int", "*Integer", args[1].Type())
 	}
 
 	usage, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "int", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "int", "*String", args[2].Type())
 	}
 
 	i := flag.Int64(name.String, value.Int64, usage.String)
@@ -160,22 +160,22 @@ func (f *FlagObj) Int(line string, args ...Object) Object {
 
 func (f *FlagObj) UInt(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "uint", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "uint", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*UInteger)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "uint", "*UInteger", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "uint", "*UInteger", args[1].Type())
 	}
 
 	usage, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "uint", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "uint", "*String", args[2].Type())
 	}
 
 	i := flag.Uint64(name.String, value.UInt64, usage.String)
@@ -187,22 +187,22 @@ func (f *FlagObj) UInt(line string, args ...Object) Object {
 
 func (f *FlagObj) Float(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "float", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "float", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*Float)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "float", "*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "float", "*Float", args[1].Type())
 	}
 
 	usage, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "float", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "float", "*String", args[2].Type())
 	}
 
 	flt := flag.Float64(name.String, value.Float64, usage.String)
@@ -214,22 +214,22 @@ func (f *FlagObj) Float(line string, args ...Object) Object {
 
 func (f *FlagObj) String(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "string", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "string", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "string", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "string", "*String", args[1].Type())
 	}
 
 	usage, ok := args[2].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "string", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "string", "*String", args[2].Type())
 	}
 
 	s := flag.String(name.String, value.String, usage.String)
@@ -241,17 +241,17 @@ func (f *FlagObj) String(line string, args ...Object) Object {
 
 func (f *FlagObj) Set(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "set", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type())
 	}
 
 	err := flag.Set(name.String, value.String)
@@ -264,7 +264,7 @@ func (f *FlagObj) Set(line string, args ...Object) Object {
 
 func (f *FlagObj) Parse(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	flag.Parse()
@@ -303,7 +303,7 @@ func (f *FlagObj) Parse(line string, args ...Object) Object {
 
 func (f *FlagObj) Parsed(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	b := flag.Parsed()
@@ -315,7 +315,7 @@ func (f *FlagObj) Parsed(line string, args ...Object) Object {
 
 func (f *FlagObj) PrintDefaults(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	flag.PrintDefaults()
@@ -324,12 +324,12 @@ func (f *FlagObj) PrintDefaults(line string, args ...Object) Object {
 
 func (f *FlagObj) IsSet(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "isSet", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isSet", "*String", args[0].Type())
 	}
 
 	alreadySet := make(map[string]bool)

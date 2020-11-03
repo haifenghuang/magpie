@@ -39,18 +39,18 @@ func (i *IOUtilObj) CallMethod(line string, scope *Scope, method string, args ..
 	case "writeFile":
 		return i.WriteFile(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, i.Type()))
+		return NewError(line, NOMETHODERROR, method, i.Type())
 	}
 }
 
 func (i *IOUtilObj) ReadAll(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fObj, ok := args[0].(*FileObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readAll", "*FileObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readAll", "*FileObject", args[0].Type())
 	}
 
 	reader := bufio.NewReader(fObj.File)
@@ -63,12 +63,12 @@ func (i *IOUtilObj) ReadAll(line string, args ...Object) Object {
 
 func (i *IOUtilObj) ReadDir(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	dirname, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readDir", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readDir", "*String", args[0].Type())
 	}
 
 	files, err := ioutil.ReadDir(dirname.String)
@@ -86,12 +86,12 @@ func (i *IOUtilObj) ReadDir(line string, args ...Object) Object {
 
 func (i *IOUtilObj) ReadFile(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	filename, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readFile", "*String", args[0].Type())
 	}
 
 	b, err := ioutil.ReadFile(filename.String)
@@ -104,17 +104,17 @@ func (i *IOUtilObj) ReadFile(line string, args ...Object) Object {
 
 func (i *IOUtilObj) TempDir(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	dir, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "tempDir", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "tempDir", "*String", args[0].Type())
 	}
 
 	prefix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "tempDir", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "tempDir", "*String", args[1].Type())
 	}
 
 	name, err := ioutil.TempDir(dir.String, prefix.String)
@@ -127,17 +127,17 @@ func (i *IOUtilObj) TempDir(line string, args ...Object) Object {
 
 func (i *IOUtilObj) TempFile(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	dir, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "tempFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "tempFile", "*String", args[0].Type())
 	}
 
 	prefix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "tempFile", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "tempFile", "*String", args[1].Type())
 	}
 
 	f, err := ioutil.TempFile(dir.String, prefix.String)
@@ -150,22 +150,22 @@ func (i *IOUtilObj) TempFile(line string, args ...Object) Object {
 
 func (i *IOUtilObj) WriteFile(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	filename, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeFile", "*String", args[0].Type())
 	}
 
 	data, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "writeFile", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "writeFile", "*String", args[1].Type())
 	}
 
 	perm, ok := args[2].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "writeFile", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "writeFile", "*String", args[2].Type())
 	}
 
 	err := ioutil.WriteFile(filename.String, []byte(data.String), os.FileMode(int(perm.Int64)))
@@ -223,13 +223,13 @@ func (f *FileObject) CallMethod(line string, scope *Scope, method string, args .
 	case "name":
 		return f.GetName(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, f.Type()))
+		return NewError(line, NOMETHODERROR, method, f.Type())
 	}
 }
 
 func (f *FileObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := f.File.Close()
 	if err != nil {
@@ -244,12 +244,12 @@ func (f *FileObject) Close(line string, args ...Object) Object {
 //   3. string - read string
 func (f *FileObject) Read(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	readlen, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type())
 	}
 
 	buffer := make([]byte, int(readlen.Int64))
@@ -266,17 +266,17 @@ func (f *FileObject) Read(line string, args ...Object) Object {
 
 func (f *FileObject) ReadAt(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	readlen, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readAt", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readAt", "*Integer", args[0].Type())
 	}
 
 	offset, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "readAt", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "readAt", "*Integer", args[1].Type())
 	}
 
 	buffer := make([]byte, int(readlen.Int64))
@@ -293,7 +293,7 @@ func (f *FileObject) ReadAt(line string, args ...Object) Object {
 
 func (f *FileObject) ReadRune(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if f.reader == nil {
@@ -314,7 +314,7 @@ func (f *FileObject) ReadRune(line string, args ...Object) Object {
 
 func (f *FileObject) ReadLine(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	if f.Scanner == nil {
 		f.Scanner = bufio.NewScanner(f.File)
@@ -332,17 +332,17 @@ func (f *FileObject) ReadLine(line string, args ...Object) Object {
 
 func (f *FileObject) Seek(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	offset, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "seek", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "seek", "*Integer", args[0].Type())
 	}
 
 	whence, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "seek", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "seek", "*Integer", args[1].Type())
 	}
 
 	ret, err := f.File.Seek(offset.Int64, int(whence.Int64))
@@ -355,7 +355,7 @@ func (f *FileObject) Seek(line string, args ...Object) Object {
 
 func (f *FileObject) Stat(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	fileInfo, err := f.File.Stat()
@@ -369,7 +369,7 @@ func (f *FileObject) Stat(line string, args ...Object) Object {
 
 func (f *FileObject) Sync(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := f.File.Sync()
@@ -382,12 +382,12 @@ func (f *FileObject) Sync(line string, args ...Object) Object {
 
 func (f *FileObject) Truncate(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	size, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "truncate", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "truncate", "*Integer", args[0].Type())
 	}
 
 	err := f.File.Truncate(size.Int64)
@@ -400,12 +400,12 @@ func (f *FileObject) Truncate(line string, args ...Object) Object {
 
 func (f *FileObject) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	n, err := f.File.Write([]byte(content.String))
@@ -418,17 +418,17 @@ func (f *FileObject) Write(line string, args ...Object) Object {
 
 func (f *FileObject) WriteAt(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeAt", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeAt", "*String", args[0].Type())
 	}
 
 	offset, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "writeAt", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "writeAt", "*Integer", args[1].Type())
 	}
 
 	ret, err := f.File.WriteAt([]byte(content.String), offset.Int64)
@@ -441,12 +441,12 @@ func (f *FileObject) WriteAt(line string, args ...Object) Object {
 
 func (f *FileObject) WriteString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeString", "*String", args[0].Type())
 	}
 
 	ret, err := f.File.WriteString(content.String)
@@ -459,12 +459,12 @@ func (f *FileObject) WriteString(line string, args ...Object) Object {
 
 func (f *FileObject) WriteLine(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeLine", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeLine", "*String", args[0].Type())
 	}
 
 	ret, err := f.File.Write([]byte(content.String + "\n"))
@@ -477,7 +477,7 @@ func (f *FileObject) WriteLine(line string, args ...Object) Object {
 
 func (f *FileObject) GetName(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(f.File.Name())

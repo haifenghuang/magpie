@@ -61,12 +61,12 @@ func (s *ServiceObj) CallMethod(line string, scope *Scope, method string, args .
 	case "queries":
 		return s.Queries(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, s.Type()))
+	return NewError(line, NOMETHODERROR, method, s.Type())
 }
 
 func (s *ServiceObj) Run(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if args[0].(*Boolean).Bool {
@@ -117,22 +117,22 @@ func (s *ServiceObj) Run(line string, args ...Object) Object {
 
 func (s *ServiceObj) HandleFunc(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	pattern, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "handleFunc", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "handleFunc", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "handleFunc", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "handleFunc", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 2 {
-		panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 2, paramCount)
 	}
 
 	s.Route = s.Router.HandleFunc(pattern.String, func(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +195,7 @@ func ServeService(line string, scope *Scope, f *Function, w http.ResponseWriter,
 
 func (s *ServiceObj) Methods(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var tmpArr []string
@@ -212,12 +212,12 @@ func (s *ServiceObj) Methods(line string, args ...Object) Object {
 
 func (s *ServiceObj) Host(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	hostObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "host", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "host", "*String", args[0].Type())
 	}
 
 	s.Route.Host(hostObj.String)
@@ -227,12 +227,12 @@ func (s *ServiceObj) Host(line string, args ...Object) Object {
 
 func (s *ServiceObj) Schemes(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	schemesObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "schemes", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "schemes", "*String", args[0].Type())
 	}
 
 	s.Route.Schemes(schemesObj.String)
@@ -242,12 +242,12 @@ func (s *ServiceObj) Schemes(line string, args ...Object) Object {
 
 func (s *ServiceObj) Headers(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	headersObj, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "headers", "*Hash", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "headers", "*Hash", args[0].Type())
 	}
 
 	for _, hk := range headersObj.Order {
@@ -262,12 +262,12 @@ func (s *ServiceObj) Headers(line string, args ...Object) Object {
 
 func (s *ServiceObj) Queries(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	queriesObj, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "queries", "*Hash", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "queries", "*Hash", args[0].Type())
 	}
 
 	for _, hk := range queriesObj.Order {

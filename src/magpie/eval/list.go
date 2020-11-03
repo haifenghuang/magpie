@@ -45,13 +45,13 @@ func (l *ListObject) CallMethod(line string, scope *Scope, method string, args .
 	case "remove":
 		return l.Remove(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, l.Type()))
+		return NewError(line, NOMETHODERROR, method, l.Type())
 	}
 }
 
 func (l *ListObject) Back(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &ListElemObject{Elem: l.List.Back()}
@@ -59,7 +59,7 @@ func (l *ListObject) Back(line string, args ...Object) Object {
 
 func (l *ListObject) Front(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &ListElemObject{Elem: l.List.Front()}
@@ -72,17 +72,17 @@ func (l *ListObject) Init(line string, args ...Object) Object {
 
 func (l *ListObject) InsertAfter(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	value, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "insertAfter", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "insertAfter", "Object", args[0].Type())
 	}
 
 	mark, ok := args[1].(*ListElemObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "insertAfter", "*ListElemObject", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "insertAfter", "*ListElemObject", args[1].Type())
 	}
 
 	return &ListElemObject{Elem: l.List.InsertAfter(value, mark.Elem)}
@@ -90,17 +90,17 @@ func (l *ListObject) InsertAfter(line string, args ...Object) Object {
 
 func (l *ListObject) InsertBefore(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	value, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "insertBefore", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "insertBefore", "Object", args[0].Type())
 	}
 
 	mark, ok := args[1].(*ListElemObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "insertBefore", "*ListElemObject", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "insertBefore", "*ListElemObject", args[1].Type())
 	}
 
 	return &ListElemObject{Elem: l.List.InsertBefore(value, mark.Elem)}
@@ -108,7 +108,7 @@ func (l *ListObject) InsertBefore(line string, args ...Object) Object {
 
 func (l *ListObject) Len(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewInteger(int64(l.List.Len()))
@@ -116,12 +116,12 @@ func (l *ListObject) Len(line string, args ...Object) Object {
 
 func (l *ListObject) MoveToBack(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	e, ok := args[0].(*ListElemObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "moveToBack", "*ListElemObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "moveToBack", "*ListElemObject", args[0].Type())
 	}
 
 	l.List.MoveToBack(e.Elem)
@@ -131,12 +131,12 @@ func (l *ListObject) MoveToBack(line string, args ...Object) Object {
 
 func (l *ListObject) MoveToFront(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	e, ok := args[0].(*ListElemObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "moveToFront", "*ListElemObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "moveToFront", "*ListElemObject", args[0].Type())
 	}
 
 	l.List.MoveToFront(e.Elem)
@@ -146,12 +146,12 @@ func (l *ListObject) MoveToFront(line string, args ...Object) Object {
 
 func (l *ListObject) PushBack(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "pushBack", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pushBack", "Object", args[0].Type())
 	}
 
 	return &ListElemObject{Elem: l.List.PushBack(value)}
@@ -159,12 +159,12 @@ func (l *ListObject) PushBack(line string, args ...Object) Object {
 
 func (l *ListObject) PushBackList(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(*ListObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "pushBackList", "*ListObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pushBackList", "*ListObject", args[0].Type())
 	}
 
 	l.List.PushBackList(value.List)
@@ -174,12 +174,12 @@ func (l *ListObject) PushBackList(line string, args ...Object) Object {
 
 func (l *ListObject) PushFront(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "pushFront", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pushFront", "Object", args[0].Type())
 	}
 
 	return &ListElemObject{Elem: l.List.PushFront(value)}
@@ -187,12 +187,12 @@ func (l *ListObject) PushFront(line string, args ...Object) Object {
 
 func (l *ListObject) PushFrontList(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	value, ok := args[0].(*ListObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "pushFrontList", "*ListObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pushFrontList", "*ListObject", args[0].Type())
 	}
 
 	l.List.PushFrontList(value.List)
@@ -202,12 +202,12 @@ func (l *ListObject) PushFrontList(line string, args ...Object) Object {
 
 func (l *ListObject) Remove(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	e, ok := args[0].(*ListElemObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "remove", "*ListElemObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "remove", "*ListElemObject", args[0].Type())
 	}
 
 	r := l.List.Remove(e.Elem)
@@ -235,13 +235,13 @@ func (e *ListElemObject) CallMethod(line string, scope *Scope, method string, ar
 	case "prev":
 		return e.Prev(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, e.Type()))
+		return NewError(line, NOMETHODERROR, method, e.Type())
 	}
 }
 
 func (e *ListElemObject) Next(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	elem := e.Elem.Next()
@@ -253,7 +253,7 @@ func (e *ListElemObject) Next(line string, args ...Object) Object {
 
 func (e *ListElemObject) Prev(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	elem := e.Elem.Prev()

@@ -56,24 +56,24 @@ func (s *SortObj) CallMethod(line string, scope *Scope, method string, args ...O
 		return s.StringsAreSorted(line, args...)
 	}
 
-	panic(NewError(line, NOMETHODERROR, method, s.Type()))
+	return NewError(line, NOMETHODERROR, method, s.Type())
 }
 
 func (s *SortObj) SortFloats(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	floatArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sortFloats", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sortFloats", "*Array", args[0].Type())
 	}
 
 	sortOrdering := Ascending
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "sortFloats", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "sortFloats", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -85,7 +85,7 @@ func (s *SortObj) SortFloats(line string, args ...Object) Object {
 	for _, v := range floatArr.Members {
 		_, ok := v.(Number)
 		if !ok {
-			panic(NewError(line, GENERICERROR, "Not all data are numbers"))
+			return NewError(line, GENERICERROR, "Not all data are numbers")
 		}
 
 		var f float64
@@ -111,19 +111,19 @@ func (s *SortObj) SortFloats(line string, args ...Object) Object {
 
 func (s *SortObj) FloatsAreSorted(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	floatArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "floatsAreSorted", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "floatsAreSorted", "*Array", args[0].Type())
 	}
 
 	var sortArr []float64
 	for _, v := range floatArr.Members {
 		_, ok := v.(Number)
 		if !ok {
-			panic(NewError(line, GENERICERROR, "Not all data are numbers"))
+			return NewError(line, GENERICERROR, "Not all data are numbers")
 		}
 
 		var f float64
@@ -141,7 +141,7 @@ func (s *SortObj) FloatsAreSorted(line string, args ...Object) Object {
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "floatsAreSorted", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "floatsAreSorted", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -158,19 +158,19 @@ func (s *SortObj) FloatsAreSorted(line string, args ...Object) Object {
 
 func (s *SortObj) SortInts(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	IntsArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sortInts", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sortInts", "*Array", args[0].Type())
 	}
 
 	sortOrdering := Ascending
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "sortInts", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "sortInts", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -181,7 +181,7 @@ func (s *SortObj) SortInts(line string, args ...Object) Object {
 	var sortArr []int64
 	for _, v := range IntsArr.Members {
 		if v.Type() != INTEGER_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are ints"))
+			return NewError(line, GENERICERROR, "Not all data are ints")
 		}
 
 		i := v.(*Integer).Int64
@@ -200,18 +200,18 @@ func (s *SortObj) SortInts(line string, args ...Object) Object {
 
 func (s *SortObj) IntsAreSorted(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	intArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "intsAreSorted", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "intsAreSorted", "*Array", args[0].Type())
 	}
 
 	var sortArr []int64
 	for _, v := range intArr.Members {
 		if v.Type() != INTEGER_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are ints"))
+			return NewError(line, GENERICERROR, "Not all data are ints")
 		}
 
 		i := v.(*Integer).Int64
@@ -222,7 +222,7 @@ func (s *SortObj) IntsAreSorted(line string, args ...Object) Object {
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "intsAreSorted", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "intsAreSorted", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -239,19 +239,19 @@ func (s *SortObj) IntsAreSorted(line string, args ...Object) Object {
 
 func (s *SortObj) SortUInts(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	UIntsArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sortUInts", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sortUInts", "*Array", args[0].Type())
 	}
 
 	sortOrdering := Ascending
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "sortInts", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "sortInts", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -262,7 +262,7 @@ func (s *SortObj) SortUInts(line string, args ...Object) Object {
 	var sortArr []uint64
 	for _, v := range UIntsArr.Members {
 		if v.Type() != UINTEGER_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are uints"))
+			return NewError(line, GENERICERROR, "Not all data are uints")
 		}
 
 		i := v.(*UInteger).UInt64
@@ -281,18 +281,18 @@ func (s *SortObj) SortUInts(line string, args ...Object) Object {
 
 func (s *SortObj) UIntsAreSorted(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	uintArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "uintsAreSorted", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "uintsAreSorted", "*Array", args[0].Type())
 	}
 
 	var sortArr []uint64
 	for _, v := range uintArr.Members {
 		if v.Type() != UINTEGER_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are uints"))
+			return NewError(line, GENERICERROR, "Not all data are uints")
 		}
 
 		i := v.(*UInteger).UInt64
@@ -303,7 +303,7 @@ func (s *SortObj) UIntsAreSorted(line string, args ...Object) Object {
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "uintsAreSorted", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "uintsAreSorted", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(Descending) {
@@ -320,19 +320,19 @@ func (s *SortObj) UIntsAreSorted(line string, args ...Object) Object {
 
 func (s *SortObj) SortStrings(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	stringsArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sortStrings", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sortStrings", "*Array", args[0].Type())
 	}
 
 	sortOrdering := Ascending
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "sortStrings", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "sortStrings", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(CaseInsensitiveDescending) {
@@ -343,7 +343,7 @@ func (s *SortObj) SortStrings(line string, args ...Object) Object {
 	var sortArr []string
 	for _, v := range stringsArr.Members {
 		if v.Type() != STRING_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are strings"))
+			return NewError(line, GENERICERROR, "Not all data are strings")
 		}
 
 		sortArr = append(sortArr, v.(*String).String)
@@ -361,18 +361,18 @@ func (s *SortObj) SortStrings(line string, args ...Object) Object {
 
 func (s *SortObj) StringsAreSorted(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	stringArr, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "stringsAreSorted", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "stringsAreSorted", "*Array", args[0].Type())
 	}
 
 	var sortArr []string
 	for _, v := range stringArr.Members {
 		if v.Type() != STRING_OBJ {
-			panic(NewError(line, GENERICERROR, "Not all data are strings"))
+			return NewError(line, GENERICERROR, "Not all data are strings")
 		}
 
 		s := v.(*String).String
@@ -383,7 +383,7 @@ func (s *SortObj) StringsAreSorted(line string, args ...Object) Object {
 	if len(args) == 2 {
 		sortOrder, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "sortStrings", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "sortStrings", "*Integer", args[1].Type())
 		}
 
 		if sortOrder.Int64 >= int64(Ascending) && sortOrder.Int64 <= int64(CaseInsensitiveDescending) {

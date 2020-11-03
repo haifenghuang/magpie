@@ -61,13 +61,13 @@ func (o *Optional) CallMethod(line string, scope *Scope, method string, args ...
 		return o.FlatMap(line, scope, args...)
 	}
 
-	panic(NewError(line, NOMETHODERROR, method, o.Type()))
+	return NewError(line, NOMETHODERROR, method, o.Type())
 }
 
 // Returns an empty Optional instance. No value is present for this Optional.
 func (o *Optional) Empty(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return EMPTY
@@ -76,11 +76,11 @@ func (o *Optional) Empty(line string, args ...Object) Object {
 // Returns an Optional describing the given no-nil value.
 func (o *Optional) Of(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if args[0] == NIL {
-		panic(NewError(line, GENERICERROR, "of()'s parameter value must not be nil."))
+		return NewError(line, GENERICERROR, "of()'s parameter value must not be nil.")
 	}
 
 	//returns a new Optional
@@ -90,7 +90,7 @@ func (o *Optional) Of(line string, args ...Object) Object {
 //Returns an Optional describing the given value, if non-nil, otherwise returns an empty Optional.
 func (o *Optional) OfNullable(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if args[0] == NIL {
@@ -102,11 +102,11 @@ func (o *Optional) OfNullable(line string, args ...Object) Object {
 // If a value is present, returns the value, otherwise panic
 func (o *Optional) Get(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if o.Value == NIL {
-		panic(NewError(line, GENERICERROR, "Option's value not present."))
+		return NewError(line, GENERICERROR, "Option's value not present.")
 	}
 	return o.Value
 }
@@ -114,7 +114,7 @@ func (o *Optional) Get(line string, args ...Object) Object {
 // If a value is present, returns true, otherwise false.
 func (o *Optional) IsPresent(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if o.Value != NIL {
@@ -127,7 +127,7 @@ func (o *Optional) IsPresent(line string, args ...Object) Object {
 // otherwise returns an Optional produced by the supplying function.
 func (o *Optional) Or(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.IsPresent(line) == TRUE {
@@ -136,13 +136,13 @@ func (o *Optional) Or(line string, scope *Scope, args ...Object) Object {
 
 	supplier, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "or", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "or", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
 	opt := Eval(supplier.Literal.Body, s) // run the function
 	if opt.Type() != OPTIONAL_OBJ {       // the supplier function must return an Optional
-		panic(NewError(line, GENERICERROR, "The supplier function must return an optional."))
+		return NewError(line, GENERICERROR, "The supplier function must return an optional.")
 	}
 	return opt
 }
@@ -150,7 +150,7 @@ func (o *Optional) Or(line string, scope *Scope, args ...Object) Object {
 // If a value is present, returns the value, otherwise returns other.
 func (o *Optional) OrElse(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.Value != NIL {
@@ -163,7 +163,7 @@ func (o *Optional) OrElse(line string, args ...Object) Object {
 // produced by the supplying function.
 func (o *Optional) OrElseGet(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.Value != NIL {
@@ -172,7 +172,7 @@ func (o *Optional) OrElseGet(line string, scope *Scope, args ...Object) Object {
 
 	supplier, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "orElseGet", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "orElseGet", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -184,7 +184,7 @@ func (o *Optional) OrElseGet(line string, scope *Scope, args ...Object) Object {
 // produced by the exception supplying function.
 func (o *Optional) OrElseThrow(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.Value != NIL {
@@ -193,7 +193,7 @@ func (o *Optional) OrElseThrow(line string, args ...Object) Object {
 
 	exceptStr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "orElseThrow", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "orElseThrow", "*String", args[0].Type())
 	}
 
 	//just like 'evalThrowStatement's return.
@@ -204,7 +204,7 @@ func (o *Optional) OrElseThrow(line string, args ...Object) Object {
 // otherwise does nothing.
 func (o *Optional) IfPresent(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.Value == NIL {
@@ -213,7 +213,7 @@ func (o *Optional) IfPresent(line string, scope *Scope, args ...Object) Object {
 
 	action, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "ifPresent", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "ifPresent", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -227,13 +227,13 @@ func (o *Optional) IfPresent(line string, scope *Scope, args ...Object) Object {
 // otherwise performs the given empty-based action.
 func (o *Optional) IfPresentOrElse(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	if o.Value != NIL {
 		action, ok := args[0].(*Function)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "first", "ifPresentOrElse", "*Function", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "ifPresentOrElse", "*Function", args[0].Type())
 		}
 
 		s := NewScope(scope)
@@ -243,7 +243,7 @@ func (o *Optional) IfPresentOrElse(line string, scope *Scope, args ...Object) Ob
 	} else {
 		emptyAction, ok := args[1].(*Function)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "ifPresentOrElse", "*Function", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "ifPresentOrElse", "*Function", args[1].Type())
 		}
 
 		s := NewScope(scope)
@@ -257,7 +257,7 @@ func (o *Optional) IfPresentOrElse(line string, scope *Scope, args ...Object) Ob
 // empty Optional.
 func (o *Optional) Filter(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.IsPresent(line) == FALSE {
@@ -266,7 +266,7 @@ func (o *Optional) Filter(line string, scope *Scope, args ...Object) Object {
 
 	predicate, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -286,7 +286,7 @@ func (o *Optional) Filter(line string, scope *Scope, args ...Object) Object {
 // returns an empty Optional.
 func (o *Optional) Map(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.IsPresent(line) == FALSE {
@@ -295,7 +295,7 @@ func (o *Optional) Map(line string, scope *Scope, args ...Object) Object {
 
 	mapper, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -318,7 +318,7 @@ func (o *Optional) Map(line string, scope *Scope, args ...Object) Object {
 
 func (o *Optional) FlatMap(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if o.IsPresent(line) == FALSE {
@@ -327,7 +327,7 @@ func (o *Optional) FlatMap(line string, scope *Scope, args ...Object) Object {
 
 	mapper, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "flatMap", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "flatMap", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -338,7 +338,7 @@ func (o *Optional) FlatMap(line string, scope *Scope, args ...Object) Object {
 	}
 
 	if r.Type() != OPTIONAL_OBJ {
-		panic(NewError(line, GENERICERROR, "flatmap() function's return value not an optional."))
+		return NewError(line, GENERICERROR, "flatmap() function's return value not an optional.")
 	}
 	return r
 }

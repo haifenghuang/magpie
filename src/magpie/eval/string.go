@@ -212,16 +212,16 @@ func (s *String) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "setValid":
 		return s.SetValid(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, s.Type()))
+	return NewError(line, NOMETHODERROR, method, s.Type())
 }
 
 func (s *String) Count(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	sub, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "count", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "count", "*String", args[0].Type())
 	}
 
 	count := strings.Count(s.String, sub.String)
@@ -230,11 +230,11 @@ func (s *String) Count(line string, args ...Object) Object {
 
 func (s *String) Find(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	sub, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "find", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "find", "*String", args[0].Type())
 	}
 
 	idx := strings.Index(s.String, sub.String)
@@ -245,19 +245,19 @@ func (s *String) Find(line string, args ...Object) Object {
 //func (s *String) Join(line string, args ...Object) Object {
 //	argLen := len(args)
 //	if argLen != 1 && argLen != 2 {
-//		panic(NewError(line, ARGUMENTERROR, "1|2", argLen))
+//		return NewError(line, ARGUMENTERROR, "1|2", argLen)
 //	}
 //
 //	sep := ""
 //	a, ok := args[0].(*Array)
 //	if !ok {
-//		panic(NewError(line, PARAMTYPEERROR, "first", "join", "*Array", args[0].Type()))
+//		return NewError(line, PARAMTYPEERROR, "first", "join", "*Array", args[0].Type())
 //	}
 //
 //	if argLen == 2 {
 //		v, ok := args[1].(*String)
 //		if !ok {
-//			panic(NewError(line, PARAMTYPEERROR, "second", "join", "*String", args[1].Type()))
+//			return NewError(line, PARAMTYPEERROR, "second", "join", "*String", args[1].Type())
 //		}
 //		sep = v.String
 //	}
@@ -278,7 +278,7 @@ func isWhiteSpace(a rune) bool {
 
 func (s *String) Reverse(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	runes := []rune(s.String)
@@ -296,17 +296,17 @@ func (s *String) Reverse(line string, args ...Object) Object {
 
 func (s *String) Replace(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	mObj, ok := args[0].(*String) //mObj: modify object
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type())
 	}
 
 	rObj, ok := args[1].(*String) //rObj: replace object
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type())
 	}
 
 	ret := strings.Replace(s.String, mObj.String, rObj.String, -1)
@@ -315,7 +315,7 @@ func (s *String) Replace(line string, args ...Object) Object {
 
 func (s *String) TrimLeft(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	if len(args) == 0 {
@@ -325,7 +325,7 @@ func (s *String) TrimLeft(line string, args ...Object) Object {
 
 	cutset, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimLeft", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimLeft", "*String", args[0].Type())
 	}
 
 	ret := strings.TrimLeft(s.String, cutset.String)
@@ -334,7 +334,7 @@ func (s *String) TrimLeft(line string, args ...Object) Object {
 
 func (s *String) TrimRight(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	if len(args) == 0 {
@@ -344,7 +344,7 @@ func (s *String) TrimRight(line string, args ...Object) Object {
 
 	cutset, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimRight", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimRight", "*String", args[0].Type())
 	}
 
 	ret := strings.TrimRight(s.String, cutset.String)
@@ -353,7 +353,7 @@ func (s *String) TrimRight(line string, args ...Object) Object {
 
 func (s *String) Trim(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	if len(args) == 0 {
@@ -363,7 +363,7 @@ func (s *String) Trim(line string, args ...Object) Object {
 
 	cutset, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trim", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trim", "*String", args[0].Type())
 	}
 
 	ret := strings.Trim(s.String, cutset.String)
@@ -372,12 +372,12 @@ func (s *String) Trim(line string, args ...Object) Object {
 
 func (s *String) TrimPrefix(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	prefix, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimPrefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimPrefix", "*String", args[0].Type())
 	}
 
 	ret := strings.TrimPrefix(s.String, prefix.String)
@@ -386,12 +386,12 @@ func (s *String) TrimPrefix(line string, args ...Object) Object {
 
 func (s *String) TrimSuffix(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	suffix, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimSuffix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimSuffix", "*String", args[0].Type())
 	}
 
 	ret := strings.TrimPrefix(s.String, suffix.String)
@@ -400,12 +400,12 @@ func (s *String) TrimSuffix(line string, args ...Object) Object {
 
 func (s *String) Split(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sep, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type())
 	}
 
 	a := &Array{}
@@ -418,7 +418,7 @@ func (s *String) Split(line string, args ...Object) Object {
 
 func (s *String) Lower(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	if s.String == "" {
 		return s
@@ -430,7 +430,7 @@ func (s *String) Lower(line string, args ...Object) Object {
 
 func (s *String) Upper(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	if s.String == "" {
 		return s
@@ -442,21 +442,21 @@ func (s *String) Upper(line string, args ...Object) Object {
 
 func (s *String) SubStr(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	if args[0].Type() != INTEGER_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "subStr", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "subStr", "*Integer", args[0].Type())
 	}
 	if args[1].Type() != INTEGER_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "second", "subStr", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "subStr", "*Integer", args[1].Type())
 	}
 
 	pos := args[0].(*Integer)
 	length := args[1].(*Integer)
 
 	if pos.Int64 < 0 || length.Int64 < 0 {
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	runes := []rune(s.String)
@@ -471,7 +471,7 @@ func (s *String) SubStr(line string, args ...Object) Object {
 
 func (s *String) Len(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	rune := []rune(s.String)
 
@@ -480,12 +480,12 @@ func (s *String) Len(line string, args ...Object) Object {
 
 func (s *String) Compare(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	b, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "compare", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "compare", "*String", args[0].Type())
 	}
 
 	ret := strings.Compare(s.String, b.String)
@@ -494,12 +494,12 @@ func (s *String) Compare(line string, args ...Object) Object {
 
 func (s *String) Contains(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	substr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "contains", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "contains", "*String", args[0].Type())
 	}
 
 	ret := strings.Contains(s.String, substr.String)
@@ -512,12 +512,12 @@ func (s *String) Contains(line string, args ...Object) Object {
 
 func (s *String) ContainsAny(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	chars, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "containsAny", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "containsAny", "*String", args[0].Type())
 	}
 
 	ret := strings.ContainsAny(s.String, chars.String)
@@ -530,7 +530,7 @@ func (s *String) ContainsAny(line string, args ...Object) Object {
 
 func (s *String) Fields(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	arr := &Array{}
@@ -544,12 +544,12 @@ func (s *String) Fields(line string, args ...Object) Object {
 
 func (s *String) HasPrefix(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	prefix, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasPrefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasPrefix", "*String", args[0].Type())
 	}
 
 	ret := strings.HasPrefix(s.String, prefix.String)
@@ -562,12 +562,12 @@ func (s *String) HasPrefix(line string, args ...Object) Object {
 
 func (s *String) HasSuffix(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	suffix, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*String", args[0].Type())
 	}
 
 	ret := strings.HasSuffix(s.String, suffix.String)
@@ -580,12 +580,12 @@ func (s *String) HasSuffix(line string, args ...Object) Object {
 
 func (s *String) LastIndex(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sep, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lastIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lastIndex", "*String", args[0].Type())
 	}
 
 	ret := strings.LastIndex(s.String, sep.String)
@@ -594,12 +594,12 @@ func (s *String) LastIndex(line string, args ...Object) Object {
 
 func (s *String) Repeat(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	count, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "repeat", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "repeat", "*Integer", args[0].Type())
 	}
 
 	ret := strings.Repeat(s.String, int(count.Int64))
@@ -608,7 +608,7 @@ func (s *String) Repeat(line string, args ...Object) Object {
 
 func (s *String) Title(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := strings.Title(s.String)
@@ -617,7 +617,7 @@ func (s *String) Title(line string, args ...Object) Object {
 
 func (s *String) Chomp(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := strings.TrimRight(s.String, "\r\n")
@@ -632,7 +632,7 @@ func (s *String) Chomp(line string, args ...Object) Object {
 // This also applies to parseFloat() and parseBool()
 func (s *String) ParseInt(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	var base int64 = 10
@@ -640,7 +640,7 @@ func (s *String) ParseInt(line string, args ...Object) Object {
 	if len(args) == 1 {
 		iBaseObj, ok := args[0].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "first", "parseInt", "*Integer", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "parseInt", "*Integer", args[0].Type())
 		}
 		base = iBaseObj.Int64
 	}
@@ -654,7 +654,7 @@ func (s *String) ParseInt(line string, args ...Object) Object {
 
 func (s *String) ParseUInt(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	var base uint64 = 10
@@ -662,7 +662,7 @@ func (s *String) ParseUInt(line string, args ...Object) Object {
 	if len(args) == 1 {
 		iBaseObj, ok := args[0].(*UInteger)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "first", "parseUInt", "*UInteger", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "parseUInt", "*UInteger", args[0].Type())
 		}
 		base = iBaseObj.UInt64
 	}
@@ -676,7 +676,7 @@ func (s *String) ParseUInt(line string, args ...Object) Object {
 
 func (s *String) ParseBool(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, err := strconv.ParseBool(s.String)
@@ -692,7 +692,7 @@ func (s *String) ParseBool(line string, args ...Object) Object {
 
 func (s *String) ParseFloat(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, err := strconv.ParseFloat(s.String, 64)
@@ -704,7 +704,7 @@ func (s *String) ParseFloat(line string, args ...Object) Object {
 
 func (s *String) Atoi(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, err := strconv.Atoi(s.String)
@@ -716,7 +716,7 @@ func (s *String) Atoi(line string, args ...Object) Object {
 
 func (s *String) Itoa(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var i int
@@ -726,7 +726,7 @@ func (s *String) Itoa(line string, args ...Object) Object {
 	case *UInteger:
 		i = int(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "itoa", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "itoa", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := strconv.Itoa(i)
@@ -735,7 +735,7 @@ func (s *String) Itoa(line string, args ...Object) Object {
 
 func (s *String) WriteLine(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	fmt.Println(s.String)
@@ -744,7 +744,7 @@ func (s *String) WriteLine(line string, args ...Object) Object {
 
 func (s *String) Write(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	fmt.Print(s.String)
@@ -753,7 +753,7 @@ func (s *String) Write(line string, args ...Object) Object {
 
 func (s *String) IsEmpty(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if len(s.String) == 0 {
@@ -766,7 +766,7 @@ func (s *String) IsEmpty(line string, args ...Object) Object {
 //code stolen from https://github.com/AlasdairF/Hash/blob/master/hash.go
 func (s *String) Hash(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	var v uint64 = 14695981039346656037
@@ -779,7 +779,7 @@ func (s *String) Hash(line string, args ...Object) Object {
 
 func (s *String) IsValid(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if s.Valid {
@@ -791,7 +791,7 @@ func (s *String) IsValid(line string, args ...Object) Object {
 func (s *String) SetValid(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 0 && argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", argLen))
+		return NewError(line, ARGUMENTERROR, "0|1", argLen)
 	}
 
 	if argLen == 0 {
@@ -801,7 +801,7 @@ func (s *String) SetValid(line string, args ...Object) Object {
 
 	val, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setValid", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setValid", "*String", args[0].Type())
 	}
 
 	s.String, s.Valid = val.String, true
@@ -811,22 +811,22 @@ func (s *String) SetValid(line string, args ...Object) Object {
 func (s *String) Set(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", argLen))
+		return NewError(line, ARGUMENTERROR, "2", argLen)
 	}
 
 	idxObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type())
 	}
 
 	idx := idxObj.Int64
 	if idx < 0 || idx > int64(len(s.String)) {
-		panic(NewError(line, INDEXERROR, idx))
+		return NewError(line, INDEXERROR, idx)
 	}
 
 	replaceObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "set", "*String", args[1].Type())
 	}
 
 	var out bytes.Buffer
@@ -949,22 +949,22 @@ func (s *StringsObj) CallMethod(line string, scope *Scope, method string, args .
 	case "hash":
 		return s.Hash(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, s.Type()))
+	return NewError(line, NOMETHODERROR, method, s.Type())
 }
 
 func (s *StringsObj) Count(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "count", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "count", "*String", args[0].Type())
 	}
 
 	sub, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "count", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "count", "*String", args[1].Type())
 	}
 
 	count := strings.Count(source.String, sub.String)
@@ -973,17 +973,17 @@ func (s *StringsObj) Count(line string, args ...Object) Object {
 
 func (s *StringsObj) Find(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "find", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "find", "*String", args[0].Type())
 	}
 
 	sub, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "find", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "find", "*String", args[1].Type())
 	}
 
 	idx := strings.Index(source.String, sub.String)
@@ -994,19 +994,19 @@ func (s *StringsObj) Find(line string, args ...Object) Object {
 func (s *StringsObj) Join(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 && argLen != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", argLen))
+		return NewError(line, ARGUMENTERROR, "1|2", argLen)
 	}
 
 	sep := ""
 	a, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "join", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "join", "*Array", args[0].Type())
 	}
 
 	if argLen == 2 {
 		v, ok := args[1].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "join", "*String", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "join", "*String", args[1].Type())
 		}
 		sep = v.String
 	}
@@ -1022,12 +1022,12 @@ func (s *StringsObj) Join(line string, args ...Object) Object {
 
 func (s *StringsObj) Reverse(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "reverse", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "reverse", "*String", args[0].Type())
 	}
 
 	runes := []rune(source.String)
@@ -1045,22 +1045,22 @@ func (s *StringsObj) Reverse(line string, args ...Object) Object {
 
 func (s *StringsObj) Replace(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type())
 	}
 
 	mObj, ok := args[1].(*String) //mObj: modify object
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type())
 	}
 
 	rObj, ok := args[2].(*String) //rObj: replace object
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "replace", "*String", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "replace", "*String", args[2].Type())
 	}
 
 	ret := strings.Replace(source.String, mObj.String, rObj.String, -1)
@@ -1069,12 +1069,12 @@ func (s *StringsObj) Replace(line string, args ...Object) Object {
 
 func (s *StringsObj) TrimLeft(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimLeft", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimLeft", "*String", args[0].Type())
 	}
 
 	if len(args) == 1 {
@@ -1084,7 +1084,7 @@ func (s *StringsObj) TrimLeft(line string, args ...Object) Object {
 
 	cutset, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "trimLeft", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "trimLeft", "*String", args[1].Type())
 	}
 
 	ret := strings.TrimLeft(source.String, cutset.String)
@@ -1093,12 +1093,12 @@ func (s *StringsObj) TrimLeft(line string, args ...Object) Object {
 
 func (s *StringsObj) TrimRight(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimRight", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimRight", "*String", args[0].Type())
 	}
 
 	if len(args) == 1 {
@@ -1108,7 +1108,7 @@ func (s *StringsObj) TrimRight(line string, args ...Object) Object {
 
 	cutset, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "trimRight", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "trimRight", "*String", args[1].Type())
 	}
 
 	ret := strings.TrimRight(source.String, cutset.String)
@@ -1117,12 +1117,12 @@ func (s *StringsObj) TrimRight(line string, args ...Object) Object {
 
 func (s *StringsObj) Trim(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trim", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trim", "*String", args[0].Type())
 	}
 
 	if len(args) == 1 {
@@ -1132,7 +1132,7 @@ func (s *StringsObj) Trim(line string, args ...Object) Object {
 
 	cutset, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "trim", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "trim", "*String", args[1].Type())
 	}
 
 	ret := strings.Trim(source.String, cutset.String)
@@ -1141,17 +1141,17 @@ func (s *StringsObj) Trim(line string, args ...Object) Object {
 
 func (s *StringsObj) TrimPrefix(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimPrefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimPrefix", "*String", args[0].Type())
 	}
 
 	prefix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "trimPrefix", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "trimPrefix", "*String", args[1].Type())
 	}
 
 	ret := strings.TrimPrefix(source.String, prefix.String)
@@ -1160,17 +1160,17 @@ func (s *StringsObj) TrimPrefix(line string, args ...Object) Object {
 
 func (s *StringsObj) TrimSuffix(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "trimSuffix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "trimSuffix", "*String", args[0].Type())
 	}
 
 	suffix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "trimSuffix", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "trimSuffix", "*String", args[1].Type())
 	}
 
 	ret := strings.TrimPrefix(source.String, suffix.String)
@@ -1179,17 +1179,17 @@ func (s *StringsObj) TrimSuffix(line string, args ...Object) Object {
 
 func (s *StringsObj) Split(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type())
 	}
 
 	sep, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "split", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "split", "*String", args[1].Type())
 	}
 
 	a := &Array{}
@@ -1202,12 +1202,12 @@ func (s *StringsObj) Split(line string, args ...Object) Object {
 
 func (s *StringsObj) Lower(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lower", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lower", "*String", args[0].Type())
 	}
 
 	if source.String == "" {
@@ -1220,12 +1220,12 @@ func (s *StringsObj) Lower(line string, args ...Object) Object {
 
 func (s *StringsObj) Upper(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "upper", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "upper", "*String", args[0].Type())
 	}
 
 	if source.String == "" {
@@ -1238,17 +1238,17 @@ func (s *StringsObj) Upper(line string, args ...Object) Object {
 
 func (s *StringsObj) SubStr(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	if args[0].Type() != STRING_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "subStr", "*STRING", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "subStr", "*STRING", args[0].Type())
 	}
 	if args[1].Type() != INTEGER_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "second", "subStr", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "subStr", "*Integer", args[1].Type())
 	}
 	if args[2].Type() != INTEGER_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "third", "subStr", "*Integer", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "subStr", "*Integer", args[2].Type())
 	}
 
 	source := args[0].(*String)
@@ -1256,7 +1256,7 @@ func (s *StringsObj) SubStr(line string, args ...Object) Object {
 	length := args[2].(*Integer)
 
 	if pos.Int64 < 0 || length.Int64 < 0 {
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	runes := []rune(source.String)
@@ -1271,12 +1271,12 @@ func (s *StringsObj) SubStr(line string, args ...Object) Object {
 
 func (s *StringsObj) Len(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "len", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "len", "*String", args[0].Type())
 	}
 
 	rune := []rune(source.String)
@@ -1286,17 +1286,17 @@ func (s *StringsObj) Len(line string, args ...Object) Object {
 
 func (s *StringsObj) Compare(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "compare", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "compare", "*String", args[0].Type())
 	}
 
 	b, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "compare", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "compare", "*String", args[1].Type())
 	}
 
 	ret := strings.Compare(source.String, b.String)
@@ -1305,17 +1305,17 @@ func (s *StringsObj) Compare(line string, args ...Object) Object {
 
 func (s *StringsObj) Contains(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "contains", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "contains", "*String", args[0].Type())
 	}
 
 	substr, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "contains", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "contains", "*String", args[1].Type())
 	}
 
 	ret := strings.Contains(source.String, substr.String)
@@ -1328,17 +1328,17 @@ func (s *StringsObj) Contains(line string, args ...Object) Object {
 
 func (s *StringsObj) ContainsAny(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "containsAny", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "containsAny", "*String", args[0].Type())
 	}
 
 	chars, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "containsAny", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "containsAny", "*String", args[1].Type())
 	}
 
 	ret := strings.ContainsAny(source.String, chars.String)
@@ -1351,12 +1351,12 @@ func (s *StringsObj) ContainsAny(line string, args ...Object) Object {
 
 func (s *StringsObj) Fields(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fields", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fields", "*String", args[0].Type())
 	}
 
 	arr := &Array{}
@@ -1370,17 +1370,17 @@ func (s *StringsObj) Fields(line string, args ...Object) Object {
 
 func (s *StringsObj) HasPrefix(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasprefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasprefix", "*String", args[0].Type())
 	}
 
 	prefix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "hasPrefix", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "hasPrefix", "*String", args[1].Type())
 	}
 
 	ret := strings.HasPrefix(source.String, prefix.String)
@@ -1393,17 +1393,17 @@ func (s *StringsObj) HasPrefix(line string, args ...Object) Object {
 
 func (s *StringsObj) HasSuffix(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*String", args[0].Type())
 	}
 
 	suffix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "hasSuffix", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "hasSuffix", "*String", args[1].Type())
 	}
 
 	ret := strings.HasSuffix(source.String, suffix.String)
@@ -1416,17 +1416,17 @@ func (s *StringsObj) HasSuffix(line string, args ...Object) Object {
 
 func (s *StringsObj) LastIndex(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*lastIndex", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasSuffix", "*lastIndex", args[0].Type())
 	}
 
 	sep, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "lastIndex", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "lastIndex", "*String", args[1].Type())
 	}
 
 	ret := strings.LastIndex(source.String, sep.String)
@@ -1435,17 +1435,17 @@ func (s *StringsObj) LastIndex(line string, args ...Object) Object {
 
 func (s *StringsObj) Repeat(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "repeat", "*lastIndex", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "repeat", "*lastIndex", args[0].Type())
 	}
 
 	count, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "repeat", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "repeat", "*Integer", args[1].Type())
 	}
 
 	ret := strings.Repeat(source.String, int(count.Int64))
@@ -1454,12 +1454,12 @@ func (s *StringsObj) Repeat(line string, args ...Object) Object {
 
 func (s *StringsObj) Title(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "title", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "title", "*String", args[0].Type())
 	}
 
 	ret := strings.Title(source.String)
@@ -1468,12 +1468,12 @@ func (s *StringsObj) Title(line string, args ...Object) Object {
 
 func (s *StringsObj) Chomp(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	source, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "chomp", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "chomp", "*String", args[0].Type())
 	}
 
 	ret := strings.TrimRight(source.String, "\r\n")
@@ -1488,19 +1488,19 @@ func (s *StringsObj) Chomp(line string, args ...Object) Object {
 // This also applies to parseFloat() and parseBool()
 func (s *StringsObj) ParseInt(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseInt", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseInt", "*String", args[0].Type())
 	}
 
 	var base int64 = 10
 	if len(args) == 2 {
 		iBaseObj, ok := args[1].(*Integer)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "parseInt", "*Integer", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "parseInt", "*Integer", args[1].Type())
 		}
 		base = iBaseObj.Int64
 	}
@@ -1514,19 +1514,19 @@ func (s *StringsObj) ParseInt(line string, args ...Object) Object {
 
 func (s *StringsObj) ParseUInt(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseUInt", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseUInt", "*String", args[0].Type())
 	}
 
 	var base uint64 = 10
 	if len(args) == 2 {
 		iBaseObj, ok := args[1].(*UInteger)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "parseUInt", "*UInteger", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "parseUInt", "*UInteger", args[1].Type())
 		}
 		base = iBaseObj.UInt64
 	}
@@ -1540,12 +1540,12 @@ func (s *StringsObj) ParseUInt(line string, args ...Object) Object {
 
 func (s *StringsObj) ParseBool(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseBool", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseBool", "*String", args[0].Type())
 	}
 
 	ret, err := strconv.ParseBool(strObj.String)
@@ -1561,12 +1561,12 @@ func (s *StringsObj) ParseBool(line string, args ...Object) Object {
 
 func (s *StringsObj) ParseFloat(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseFloat", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseFloat", "*String", args[0].Type())
 	}
 
 	ret, err := strconv.ParseFloat(strObj.String, 64)
@@ -1578,12 +1578,12 @@ func (s *StringsObj) ParseFloat(line string, args ...Object) Object {
 
 func (s *StringsObj) Atoi(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "atoi", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "atoi", "*String", args[0].Type())
 	}
 
 	ret, err := strconv.Atoi(strObj.String)
@@ -1595,7 +1595,7 @@ func (s *StringsObj) Atoi(line string, args ...Object) Object {
 
 func (s *StringsObj) Itoa(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var i int
@@ -1605,7 +1605,7 @@ func (s *StringsObj) Itoa(line string, args ...Object) Object {
 	case *UInteger:
 		i = int(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "itoa", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "itoa", "*Integer|*UInteger", args[0].Type())
 	}
 
 	ret := strconv.Itoa(i)
@@ -1614,12 +1614,12 @@ func (s *StringsObj) Itoa(line string, args ...Object) Object {
 
 func (s *StringsObj) WriteLine(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "writeLine", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "writeLine", "*String", args[0].Type())
 	}
 
 	fmt.Println(strObj.String)
@@ -1628,12 +1628,12 @@ func (s *StringsObj) WriteLine(line string, args ...Object) Object {
 
 func (s *StringsObj) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	fmt.Print(strObj.String)
@@ -1642,12 +1642,12 @@ func (s *StringsObj) Write(line string, args ...Object) Object {
 
 func (s *StringsObj) IsEmpty(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "isEmpty", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isEmpty", "*String", args[0].Type())
 	}
 
 	if len(strObj.String) == 0 {
@@ -1659,12 +1659,12 @@ func (s *StringsObj) IsEmpty(line string, args ...Object) Object {
 //code stolen from https://github.com/AlasdairF/Hash/blob/master/hash.go
 func (s *StringsObj) Hash(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hash", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hash", "*String", args[0].Type())
 	}
 
 	var v uint64 = 14695981039346656037

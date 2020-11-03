@@ -45,7 +45,7 @@ func absBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 
 			switch o := args[0].(type) {
@@ -57,7 +57,7 @@ func absBuiltin() *Builtin {
 			case *UInteger:
 				return o
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "abs", "*Integer|*UInteger", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "abs", "*Integer|*UInteger", args[0].Type())
 			}
 		}, //Here the ',' is a must, it confused me a lot
 	}
@@ -67,7 +67,7 @@ func rangeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 && len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+				return NewError(line, ARGUMENTERROR, "1|2", len(args))
 			}
 
 			var iValue int64
@@ -77,7 +77,7 @@ func rangeBuiltin() *Builtin {
 			case *UInteger:
 				iValue = int64(o.UInt64)
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "range", "*Integer|*UInteger", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "range", "*Integer|*UInteger", args[0].Type())
 			}
 
 			if iValue <= 0 {
@@ -92,11 +92,11 @@ func rangeBuiltin() *Builtin {
 				case *UInteger:
 					jValue = int64(o.UInt64)
 				default:
-					panic(NewError(line, PARAMTYPEERROR, "second", "range", "*Integer|*UInteger", args[0].Type()))
+					return NewError(line, PARAMTYPEERROR, "second", "range", "*Integer|*UInteger", args[0].Type())
 				}
 
 				if jValue <= 0 {
-					panic(NewError(line, GENERICERROR, "second parameter of 'range' should be >=0"))
+					return NewError(line, GENERICERROR, "second parameter of 'range' should be >=0")
 				}
 			}
 
@@ -119,19 +119,19 @@ func addmBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 3 {
-				panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+				return NewError(line, ARGUMENTERROR, "3", len(args))
 			}
 			st, ok := args[0].(*Struct)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "addm", "*Struct", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "addm", "*Struct", args[0].Type())
 			}
 			name, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "addm", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "addm", "*String", args[1].Type())
 			}
 			fn, ok := args[2].(*Function)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "third", "addm", "*Function", args[2].Type()))
+				return NewError(line, PARAMTYPEERROR, "third", "addm", "*Function", args[2].Type())
 			}
 			st.methods[name.String] = fn
 			return st
@@ -143,7 +143,7 @@ func chrBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 
 			var i int64
@@ -153,11 +153,11 @@ func chrBuiltin() *Builtin {
 			case *UInteger:
 				i = int64(o.UInt64)
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "chr", "*Integer|*UInteger", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "chr", "*Integer|*UInteger", args[0].Type())
 			}
 
 			if i < 0 || i > 255 {
-				panic(NewError(line, INPUTERROR, string(i), "chr"))
+				return NewError(line, INPUTERROR, string(i), "chr")
 			}
 			return NewString(string(i))
 		},
@@ -174,30 +174,30 @@ func newFileBuiltin() *Builtin {
 
 			argLen := len(args)
 			if argLen < 1 {
-				panic(NewError(line, ARGUMENTERROR, "at least one", argLen))
+				return NewError(line, ARGUMENTERROR, "at least one", argLen)
 			}
 
 			fname, ok = args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newFile", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newFile", "*String", args[0].Type())
 			}
 
 			if argLen == 2 {
 				m, ok := args[1].(*String)
 				if !ok {
-					panic(NewError(line, PARAMTYPEERROR, "second", "newFile", "*String", args[1].Type()))
+					return NewError(line, PARAMTYPEERROR, "second", "newFile", "*String", args[1].Type())
 				}
 
 				flag, ok = fileModeTable[m.String]
 				if !ok {
-					panic(NewError(line, FILEMODEERROR))
+					return NewError(line, FILEMODEERROR)
 				}
 			}
 
 			if len(args) == 3 {
 				p, ok := args[2].(*Integer)
 				if !ok {
-					panic(NewError(line, PARAMTYPEERROR, "third", "newFile", "*Integer", args[2].Type()))
+					return NewError(line, PARAMTYPEERROR, "third", "newFile", "*Integer", args[2].Type())
 				}
 
 				perm = os.FileMode(int(p.Int64))
@@ -220,7 +220,7 @@ func intBuiltin() *Builtin {
 				return NewInteger(0)
 			}
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Integer:
@@ -255,11 +255,11 @@ func intBuiltin() *Builtin {
 					n, err = strconv.ParseInt(content, 10, 64)
 				}
 				if err != nil {
-					panic(NewError(line, INPUTERROR, "STRING: "+input.String, "int"))
+					return NewError(line, INPUTERROR, "STRING: "+input.String, "int")
 				}
 				return NewInteger(n)
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "int", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "int", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type())
 		},
 	}
 }
@@ -272,7 +272,7 @@ func uintBuiltin() *Builtin {
 				return NewInteger(0)
 			}
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Integer:
@@ -306,11 +306,11 @@ func uintBuiltin() *Builtin {
 					n, err = strconv.ParseUint(content, 10, 64)
 				}
 				if err != nil {
-					panic(NewError(line, INPUTERROR, "STRING: "+input.String, "uint"))
+					return NewError(line, INPUTERROR, "STRING: "+input.String, "uint")
 				}
 				return NewUInteger(n)
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "int", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "int", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type())
 		},
 	}
 }
@@ -323,7 +323,7 @@ func floatBuiltin() *Builtin {
 				return NewFloat(0.0)
 			}
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Integer:
@@ -367,11 +367,11 @@ func floatBuiltin() *Builtin {
 					n, err = strconv.ParseFloat(input.String, 64)
 				}
 				if err != nil {
-					panic(NewError(line, INPUTERROR, "STRING: "+input.String, "float"))
+					return NewError(line, INPUTERROR, "STRING: "+input.String, "float")
 				}
 				return NewFloat(float64(n))
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "float", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "float", "*String|*Integer|*UInteger|*Boolean|*Float", args[0].Type())
 		},
 	}
 }
@@ -384,7 +384,7 @@ func strBuiltin() *Builtin {
 				return NewString("")
 			}
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *String:
@@ -392,7 +392,7 @@ func strBuiltin() *Builtin {
 			default:
 				return NewString(input.Inspect())
 			}
-			//panic(NewError(line, INPUTERROR, args[0].Type(), "str"))
+			//return NewError(line, INPUTERROR, args[0].Type(), "str")
 		},
 	}
 }
@@ -406,7 +406,7 @@ func arrayBuiltin() *Builtin {
 			}
 
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Array:
@@ -432,7 +432,7 @@ func tupleBuiltin() *Builtin {
 			}
 
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Tuple:
@@ -458,7 +458,7 @@ func hashBuiltin() *Builtin {
 			}
 
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *Hash:
@@ -484,7 +484,7 @@ func hashBuiltin() *Builtin {
 						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
 						i = i + 2
 					} else {
-						panic(NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i)))
+						return NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i))
 					}
 				}
 
@@ -510,13 +510,13 @@ func hashBuiltin() *Builtin {
 						//hash.Pairs[hashable.HashKey()] = HashPair{Key: newMembers[i], Value: newMembers[i+1]}
 						i = i + 2
 					} else {
-						panic(NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i)))
+						return NewError(line, GENERICERROR, fmt.Sprintf("%d index is not hashable", i))
 					}
 				}
 
 				return hash
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "hash", "*Tuple|*Array|*Hash", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "hash", "*Tuple|*Array|*Hash", args[0].Type())
 		},
 	}
 }
@@ -529,7 +529,7 @@ func decimalBuiltin() *Builtin {
 				return &DecimalObj{Number: NewDec(0, 0), Valid: true}
 			}
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch input := args[0].(type) {
 			case *DecimalObj:
@@ -569,12 +569,11 @@ func decimalBuiltin() *Builtin {
 					n, err = strconv.ParseFloat(input.String, 64)
 				}
 				if err != nil {
-					panic(NewError(line, INPUTERROR, "STRING: "+input.String, "decimal"))
+					return NewError(line, INPUTERROR, "STRING: "+input.String, "decimal")
 				}
 				return &DecimalObj{Number: NewFromFloat(n), Valid: true}
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "decimal", "*String|*Integer|*UInteger|*Boolean|*Float|*Decimal", args[0].Type()))
-		},
+			return NewError(line, PARAMTYPEERROR, "first", "decimal", "*String|*Integer|*UInteger|*Boolean|*Float|*Decimal", args[0].Type())		},
 	}
 }
 
@@ -582,7 +581,7 @@ func lenBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			switch arg := args[0].(type) {
 			case *String:
@@ -597,7 +596,7 @@ func lenBuiltin() *Builtin {
 			case *Nil:
 				return NewInteger(0)
 			}
-			panic(NewError(line, PARAMTYPEERROR, "first", "len", "*String|*Array|*Hash|*Nil", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "len", "*String|*Array|*Hash|*Nil", args[0].Type())
 		},
 	}
 }
@@ -606,7 +605,7 @@ func methodsBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			arr := &Array{}
 			t := reflect.TypeOf(args[0])
@@ -625,14 +624,14 @@ func ordBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			s, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "ord", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "ord", "*String", args[0].Type())
 			}
 			if len(s.String) > 1 {
-				panic(NewError(line, INLENERR, "1", len(s.String)))
+				return NewError(line, INLENERR, "1", len(s.String))
 			}
 			return NewInteger(int64(s.String[0]))
 		},
@@ -693,12 +692,12 @@ func printfBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) < 1 {
-				panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
 
 			formatObj, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type())
 			}
 
 			subArgs := args[1:]
@@ -728,12 +727,12 @@ func sprintfBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) < 1 {
-				panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
 
 			formatObj, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "sprintf", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "sprintf", "*String", args[0].Type())
 			}
 
 			subArgs := args[1:]
@@ -759,17 +758,17 @@ func sscanfBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) < 2 {
-				panic(NewError(line, ARGUMENTERROR, ">=2", len(args)))
+				return NewError(line, ARGUMENTERROR, ">=2", len(args))
 			}
 
 			strObj, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "sscanf", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "sscanf", "*String", args[0].Type())
 			}
 
 			formatObj, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "sscanf", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "sscanf", "*String", args[1].Type())
 			}
 
 			subArgs := args[2:]
@@ -813,7 +812,7 @@ func typeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 			return NewString(fmt.Sprintf("%s", args[0].Type()))
 		},
@@ -833,11 +832,11 @@ func chanBuiltin() *Builtin {
 				case *UInteger:
 					v = int64(o.UInt64)
 				default:
-					panic(NewError(line, PARAMTYPEERROR, "first", "chan", "*Integer|*UInteger", args[0].Type()))
+					return NewError(line, PARAMTYPEERROR, "first", "chan", "*Integer|*UInteger", args[0].Type())
 				}
 				return &ChanObject{ch: make(chan Object, v)}
 			}
-			panic(NewError(line, ARGUMENTERROR, "Not 0|1", len(args)))
+			return NewError(line, ARGUMENTERROR, "Not 0|1", len(args))
 		},
 	}
 }
@@ -846,19 +845,19 @@ func assertBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 
 			v, ok := args[0].(*Boolean)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "assert", "*Boolean", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "assert", "*Boolean", args[0].Type())
 			}
 
 			if v.Bool == true {
 				return NIL
 			}
 
-			panic(NewError(line, ASSERTIONERROR))
+			return NewError(line, ASSERTIONERROR)
 		},
 	}
 }
@@ -867,7 +866,7 @@ func reverseBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 
 			switch input := args[0].(type) {
@@ -900,7 +899,7 @@ func reverseBuiltin() *Builtin {
 				}
 				return hash
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "reverse", "*Array|*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "reverse", "*Array|*String", args[0].Type())
 			}
 			return NIL
 		},
@@ -911,12 +910,12 @@ func iffBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 3 {
-				panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+				return NewError(line, ARGUMENTERROR, "3", len(args))
 			}
 
 			v, ok := args[0].(*Boolean)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "iff", "*Boolean", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "iff", "*Boolean", args[0].Type())
 			}
 
 			if v.Bool == true {
@@ -932,7 +931,7 @@ func newArrayBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) < 0 {
-				panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+				return NewError(line, ARGUMENTERROR, ">0", len(args))
 			}
 
 			var count int64
@@ -942,11 +941,11 @@ func newArrayBuiltin() *Builtin {
 			case *UInteger:
 				count = int64(o.UInt64)
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "newArray", "*Integer|*UInteger", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newArray", "*Integer|*UInteger", args[0].Type())
 			}
 
 			if count < 0 {
-				panic(NewError(line, GENERICERROR, "Parameter of 'newArry' is less than zero."))
+				return NewError(line, GENERICERROR, "Parameter of 'newArry' is less than zero.")
 			}
 
 			remainingArgs := args[1:]
@@ -987,15 +986,15 @@ func dialTCPBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			netStr, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "dialTCP", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "dialTCP", "*String", args[0].Type())
 			}
 			addrStr, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "dialTCP", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "dialTCP", "*String", args[1].Type())
 			}
 
 			tcpAddr, err := net.ResolveTCPAddr(netStr.String, addrStr.String)
@@ -1017,15 +1016,15 @@ func listenTCPBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			netStr, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "listenTCP", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "listenTCP", "*String", args[0].Type())
 			}
 			addrStr, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "listenTCP", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "listenTCP", "*String", args[1].Type())
 			}
 
 			tcpAddr, err := net.ResolveTCPAddr(netStr.String, addrStr.String)
@@ -1047,15 +1046,15 @@ func dialUDPBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			netStr, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "dialUDP", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "dialUDP", "*String", args[0].Type())
 			}
 			addrStr, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "dialUDP", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "dialUDP", "*String", args[1].Type())
 			}
 
 			udpAddr, err := net.ResolveUDPAddr(netStr.String, addrStr.String)
@@ -1077,15 +1076,15 @@ func dialUnixBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			netStr, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "dialUnix", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "dialUnix", "*String", args[0].Type())
 			}
 			addrStr, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "dialUnix", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "dialUnix", "*String", args[1].Type())
 			}
 
 			unixAddr, err := net.ResolveUnixAddr(netStr.String, addrStr.String)
@@ -1107,15 +1106,15 @@ func listenUnixBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			netStr, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "listenTCP", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "listenTCP", "*String", args[0].Type())
 			}
 			addrStr, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "listenTCP", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "listenTCP", "*String", args[1].Type())
 			}
 
 			unixAddr, err := net.ResolveUnixAddr(netStr.String, addrStr.String)
@@ -1137,16 +1136,16 @@ func dbOpenBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 			driverName, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "dbOpen", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "dbOpen", "*String", args[0].Type())
 			}
 
 			dataSourceName, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "dbOpen", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "dbOpen", "*String", args[1].Type())
 			}
 
 			db, err := sql.Open(driverName.String, dataSourceName.String)
@@ -1163,7 +1162,7 @@ func newTimeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 && len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+				return NewError(line, ARGUMENTERROR, "0|1", len(args))
 			}
 
 			if len(args) == 0 {
@@ -1172,7 +1171,7 @@ func newTimeBuiltin() *Builtin {
 
 			location, ok := args[0].(*Integer)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newTime", "*Integer", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newTime", "*Integer", args[0].Type())
 			}
 			if location.Int64 == UTC {
 				return &TimeObj{Tm: time.Now().UTC(), Valid: true}
@@ -1187,7 +1186,7 @@ func unixTimeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 && len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+				return NewError(line, ARGUMENTERROR, "1|2", len(args))
 			}
 
 			var ok bool
@@ -1196,14 +1195,14 @@ func unixTimeBuiltin() *Builtin {
 			if len(args) == 1 {
 				second, ok = args[0].(*Integer)
 				if !ok {
-					panic(NewError(line, PARAMTYPEERROR, "first", "unixTime", "*Integer", args[0].Type()))
+					return NewError(line, PARAMTYPEERROR, "first", "unixTime", "*Integer", args[0].Type())
 				}
 			}
 
 			if len(args) == 2 {
 				nsecond, ok = args[1].(*Integer)
 				if !ok {
-					panic(NewError(line, PARAMTYPEERROR, "second", "unixTime", "*Integer", args[1].Type()))
+					return NewError(line, PARAMTYPEERROR, "second", "unixTime", "*Integer", args[1].Type())
 				}
 			}
 
@@ -1221,42 +1220,42 @@ func newDateBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 7 && argLen != 8 {
-				panic(NewError(line, ARGUMENTERROR, "7|8", len(args)))
+				return NewError(line, ARGUMENTERROR, "7|8", len(args))
 			}
 
 			year, ok1 := args[0].(*Integer)
 			if !ok1 {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newDate", "*Integer", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newDate", "*Integer", args[0].Type())
 			}
 
 			month, ok2 := args[1].(*Integer)
 			if !ok2 {
-				panic(NewError(line, PARAMTYPEERROR, "second", "newDate", "*Integer", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "newDate", "*Integer", args[1].Type())
 			}
 
 			day, ok3 := args[2].(*Integer)
 			if !ok3 {
-				panic(NewError(line, PARAMTYPEERROR, "third", "newDate", "*Integer", args[2].Type()))
+				return NewError(line, PARAMTYPEERROR, "third", "newDate", "*Integer", args[2].Type())
 			}
 
 			hour, ok4 := args[3].(*Integer)
 			if !ok4 {
-				panic(NewError(line, PARAMTYPEERROR, "fourth", "newDate", "*Integer", args[3].Type()))
+				return NewError(line, PARAMTYPEERROR, "fourth", "newDate", "*Integer", args[3].Type())
 			}
 
 			min, ok5 := args[4].(*Integer)
 			if !ok5 {
-				panic(NewError(line, PARAMTYPEERROR, "fifth", "newDate", "*Integer", args[4].Type()))
+				return NewError(line, PARAMTYPEERROR, "fifth", "newDate", "*Integer", args[4].Type())
 			}
 
 			sec, ok6 := args[5].(*Integer)
 			if !ok6 {
-				panic(NewError(line, PARAMTYPEERROR, "sixth", "newDate", "*Integer", args[5].Type()))
+				return NewError(line, PARAMTYPEERROR, "sixth", "newDate", "*Integer", args[5].Type())
 			}
 
 			nsec, ok7 := args[6].(*Integer)
 			if !ok7 {
-				panic(NewError(line, PARAMTYPEERROR, "seventh", "newDate", "*Integer", args[6].Type()))
+				return NewError(line, PARAMTYPEERROR, "seventh", "newDate", "*Integer", args[6].Type())
 			}
 
 			var location Object
@@ -1264,7 +1263,7 @@ func newDateBuiltin() *Builtin {
 			if argLen == 8 {
 				location, ok8 = args[7].(*Integer)
 				if !ok8 {
-					panic(NewError(line, PARAMTYPEERROR, "eighth", "newDate", "*Integer", args[7].Type()))
+					return NewError(line, PARAMTYPEERROR, "eighth", "newDate", "*Integer", args[7].Type())
 				}
 			}
 
@@ -1292,7 +1291,7 @@ func newCondBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+				return NewError(line, ARGUMENTERROR, "1", len(args))
 			}
 
 			switch arg := args[0].(type) {
@@ -1301,7 +1300,7 @@ func newCondBuiltin() *Builtin {
 			case *SyncRWMutexObj:
 				return &SyncCondObj{Cond: sync.NewCond(arg.RWMutex)}
 			default:
-				panic(NewError(line, PARAMTYPEERROR, "first", "newCond", "*SyncMutexObj|*SyncRWMutexObj", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newCond", "*SyncMutexObj|*SyncRWMutexObj", args[0].Type())
 			}
 		},
 	}
@@ -1311,7 +1310,7 @@ func newOnceBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 			return &SyncOnceObj{Once: new(sync.Once)}
 		},
@@ -1322,7 +1321,7 @@ func newMutexBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 			return &SyncMutexObj{Mutex: new(sync.Mutex)}
 		},
@@ -1333,7 +1332,7 @@ func newRWMutexBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 			return &SyncRWMutexObj{RWMutex: new(sync.RWMutex)}
 		},
@@ -1344,7 +1343,7 @@ func newWaitGroupBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 			return &SyncWaitGroupObj{WaitGroup: new(sync.WaitGroup)}
 		},
@@ -1355,7 +1354,7 @@ func newPipeBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 			r, w := io.Pipe()
 			return &PipeObj{Reader: r, Writer: w}
@@ -1367,7 +1366,7 @@ func newLoggerBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 3 && len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0|3", len(args)))
+				return NewError(line, ARGUMENTERROR, "0|3", len(args))
 			}
 
 			if len(args) == 0 {
@@ -1377,17 +1376,17 @@ func newLoggerBuiltin() *Builtin {
 
 			out, ok := args[0].(Writable)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newLogger", "Writable", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newLogger", "Writable", args[0].Type())
 			}
 
 			prefix, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "newLogger", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "newLogger", "*String", args[1].Type())
 			}
 
 			flag, ok := args[2].(*Integer)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "third", "newLogger", "*Integer", args[2].Type()))
+				return NewError(line, PARAMTYPEERROR, "third", "newLogger", "*Integer", args[2].Type())
 			}
 
 			logger := log.New(out.IOWriter(), prefix.String, int(flag.Int64))
@@ -1400,7 +1399,7 @@ func newListBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 0 {
-				panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+				return NewError(line, ARGUMENTERROR, "0", len(args))
 			}
 
 			return &ListObject{List: list.New()}
@@ -1412,7 +1411,7 @@ func newDeepEqualBuiltin() *Builtin {
 	return &Builtin{
 		Fn: func(line string, args ...Object) Object {
 			if len(args) != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+				return NewError(line, ARGUMENTERROR, "2", len(args))
 			}
 
 			r := reflect.DeepEqual(args[0], args[1])
@@ -1429,12 +1428,12 @@ func newCsvReaderBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", argLen))
+				return NewError(line, ARGUMENTERROR, "1", argLen)
 			}
 
 			fname, ok := args[0].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newCsv", "*String", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newCsv", "*String", args[0].Type())
 			}
 
 			f, err := os.Open(fname.String)
@@ -1452,12 +1451,12 @@ func newCsvWriterBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", argLen))
+				return NewError(line, ARGUMENTERROR, "1", argLen)
 			}
 
 			writer, ok := args[0].(Writable)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "first", "newCsvWriterBuiltin", "Writable", args[0].Type()))
+				return NewError(line, PARAMTYPEERROR, "first", "newCsvWriterBuiltin", "Writable", args[0].Type())
 			}
 
 			return &CsvObj{Writer: csv.NewWriter(writer.IOWriter())}
@@ -1470,7 +1469,7 @@ func instanceOfBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 2 {
-				panic(NewError(line, ARGUMENTERROR, "2", argLen))
+				return NewError(line, ARGUMENTERROR, "2", argLen)
 			}
 
 			instance, ok := args[0].(*ObjectInstance)
@@ -1485,7 +1484,7 @@ func instanceOfBuiltin() *Builtin {
 				return nativeBoolToBooleanObject(InstanceOf(class.Name, instance))
 			}
 
-			panic(NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for second argument"))
+			return NewError(line, GENERICERROR, "is_a/instanceOf expected a class or string for second argument")
 		},
 	}
 }
@@ -1495,7 +1494,7 @@ func classOfBuiltin() *Builtin {
 		Fn: func(line string, args ...Object) Object {
 			argLen := len(args)
 			if argLen != 1 {
-				panic(NewError(line, ARGUMENTERROR, "1", argLen))
+				return NewError(line, ARGUMENTERROR, "1", argLen)
 			}
 
 			instance, ok := args[0].(*ObjectInstance)
@@ -1606,7 +1605,7 @@ func (b *BuiltinMethod) classMethod() ast.ModifierLevel {
 }
 
 func (b *BuiltinMethod) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, b.Type()))
+	return NewError(line, NOMETHODERROR, method, b.Type())
 }
 
 func MakeBuiltinMethod(fn BuiltinMethodFunction) *BuiltinMethod {

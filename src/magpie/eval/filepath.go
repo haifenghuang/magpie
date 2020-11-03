@@ -68,17 +68,17 @@ func (f *FilePathObj) CallMethod(line string, scope *Scope, method string, args 
 	case "walk":
 		return f.Walk(scope, line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, f.Type()))
+	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
 func (f *FilePathObj) Abs(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "abs", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "abs", "*String", args[0].Type())
 	}
 
 	ret, err := filepath.Abs(path.String)
@@ -91,12 +91,12 @@ func (f *FilePathObj) Abs(line string, args ...Object) Object {
 
 func (f *FilePathObj) Base(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "base", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "base", "*String", args[0].Type())
 	}
 
 	ret := filepath.Base(path.String)
@@ -105,12 +105,12 @@ func (f *FilePathObj) Base(line string, args ...Object) Object {
 
 func (f *FilePathObj) Clean(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "clean", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "clean", "*String", args[0].Type())
 	}
 
 	ret := filepath.Clean(path.String)
@@ -119,12 +119,12 @@ func (f *FilePathObj) Clean(line string, args ...Object) Object {
 
 func (f *FilePathObj) Dir(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "dir", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "dir", "*String", args[0].Type())
 	}
 
 	ret := filepath.Dir(path.String)
@@ -133,12 +133,12 @@ func (f *FilePathObj) Dir(line string, args ...Object) Object {
 
 func (f *FilePathObj) EvalSymlinks(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "evalSymlinks", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "evalSymlinks", "*String", args[0].Type())
 	}
 
 	ret, err := filepath.EvalSymlinks(path.String)
@@ -151,12 +151,12 @@ func (f *FilePathObj) EvalSymlinks(line string, args ...Object) Object {
 
 func (f *FilePathObj) Ext(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "ext", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "ext", "*String", args[0].Type())
 	}
 
 	ret := filepath.Ext(path.String)
@@ -165,12 +165,12 @@ func (f *FilePathObj) Ext(line string, args ...Object) Object {
 
 func (f *FilePathObj) FromSlash(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fromSlash", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fromSlash", "*String", args[0].Type())
 	}
 
 	ret := filepath.FromSlash(path.String)
@@ -179,12 +179,12 @@ func (f *FilePathObj) FromSlash(line string, args ...Object) Object {
 
 func (f *FilePathObj) Glob(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	pattern, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "glob", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "glob", "*String", args[0].Type())
 	}
 
 	ret, err := filepath.Glob(pattern.String)
@@ -202,17 +202,17 @@ func (f *FilePathObj) Glob(line string, args ...Object) Object {
 
 func (f *FilePathObj) HasPrefix(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	p, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "hasPrefix", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "hasPrefix", "*String", args[0].Type())
 	}
 
 	prefix, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "hasPrefix", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "hasPrefix", "*String", args[1].Type())
 	}
 
 	ret := filepath.HasPrefix(p.String, prefix.String)
@@ -224,12 +224,12 @@ func (f *FilePathObj) HasPrefix(line string, args ...Object) Object {
 
 func (f *FilePathObj) IsAbs(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "isAbs", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isAbs", "*String", args[0].Type())
 	}
 
 	ret := filepath.IsAbs(path.String)
@@ -241,14 +241,14 @@ func (f *FilePathObj) IsAbs(line string, args ...Object) Object {
 
 func (f *FilePathObj) Join(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	joinList := []string{}
 	for idx, v := range args {
 		path, ok := v.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "all", "join", "*String", args[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "all", "join", "*String", args[idx].Type())
 		}
 
 		joinList = append(joinList, path.String)
@@ -260,17 +260,17 @@ func (f *FilePathObj) Join(line string, args ...Object) Object {
 
 func (f *FilePathObj) Match(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	pattern, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "match", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "match", "*String", args[0].Type())
 	}
 
 	name, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "match", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "match", "*String", args[1].Type())
 	}
 
 	matched, err := filepath.Match(pattern.String, name.String)
@@ -286,17 +286,17 @@ func (f *FilePathObj) Match(line string, args ...Object) Object {
 
 func (f *FilePathObj) Rel(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	basepath, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "rel", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "rel", "*String", args[0].Type())
 	}
 
 	targpath, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "rel", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "rel", "*String", args[1].Type())
 	}
 
 	relative, err := filepath.Rel(basepath.String, targpath.String)
@@ -309,12 +309,12 @@ func (f *FilePathObj) Rel(line string, args ...Object) Object {
 
 func (f *FilePathObj) Split(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type())
 	}
 
 	dir, file := filepath.Split(path.String)
@@ -336,12 +336,12 @@ func (f *FilePathObj) Split(line string, args ...Object) Object {
 
 func (f *FilePathObj) SplitList(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "splitList", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "splitList", "*String", args[0].Type())
 	}
 
 	ret := filepath.SplitList(path.String)
@@ -356,12 +356,12 @@ func (f *FilePathObj) SplitList(line string, args ...Object) Object {
 
 func (f *FilePathObj) ToSlash(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "toSlash", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "toSlash", "*String", args[0].Type())
 	}
 
 	ret := filepath.ToSlash(path.String)
@@ -370,12 +370,12 @@ func (f *FilePathObj) ToSlash(line string, args ...Object) Object {
 
 func (f *FilePathObj) VolumeName(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "volumeName", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "volumeName", "*String", args[0].Type())
 	}
 
 	ret := filepath.VolumeName(path.String)
@@ -384,22 +384,22 @@ func (f *FilePathObj) VolumeName(line string, args ...Object) Object {
 
 func (f *FilePathObj) Walk(scope *Scope, line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	root, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "walk", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "walk", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "walk", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "walk", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 2 {
-		panic(NewError(line, FUNCCALLBACKERROR, 2, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 2, paramCount)
 	}
 
 	err := filepath.Walk(root.String, func(path string, info os.FileInfo, err error) error {

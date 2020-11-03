@@ -97,12 +97,12 @@ func (h *Hash) CallMethod(line string, scope *Scope, method string, args ...Obje
 		return h.Values(line, args...)
 	}
 
-	panic(NewError(line, NOMETHODERROR, method, h.Type()))
+	return NewError(line, NOMETHODERROR, method, h.Type())
 }
 
 func (h *Hash) Clear(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	h.Order = nil
@@ -113,7 +113,7 @@ func (h *Hash) Clear(line string, args ...Object) Object {
 
 func (h *Hash) Exists(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if len(h.Order) == 0 {
@@ -121,7 +121,7 @@ func (h *Hash) Exists(line string, args ...Object) Object {
 	}
 	hashable, ok := args[0].(Hashable)
 	if !ok {
-		panic(NewError(line, KEYERROR, args[0].Type()))
+		return NewError(line, KEYERROR, args[0].Type())
 	}
 
 	_, ok = h.Pairs[hashable.HashKey()]
@@ -133,14 +133,14 @@ func (h *Hash) Exists(line string, args ...Object) Object {
 
 func (h *Hash) Filter(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type())
 	}
 	if len(block.Literal.Parameters) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters)))
+		return NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters))
 	}
 	hash := NewHash()
 	s := NewScope(scope)
@@ -158,11 +158,11 @@ func (h *Hash) Filter(line string, scope *Scope, args ...Object) Object {
 
 func (h *Hash) Index(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	hashable, ok := args[0].(Hashable)
 	if !ok {
-		panic(NewError(line, KEYERROR, args[0].Type()))
+		return NewError(line, KEYERROR, args[0].Type())
 	}
 
 	hk := hashable.HashKey()
@@ -178,11 +178,11 @@ func (h *Hash) Index(line string, args ...Object) Object {
 
 func (h *Hash) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	hashable, ok := args[0].(Hashable)
 	if !ok {
-		panic(NewError(line, KEYERROR, args[0].Type()))
+		return NewError(line, KEYERROR, args[0].Type())
 	}
 	if hashPair, ok := h.Pairs[hashable.HashKey()]; ok {
 		return hashPair.Value
@@ -211,19 +211,19 @@ func (h *Hash) Get(line string, args ...Object) Object {
 */
 func (h *Hash) GetPath(line string, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2", len(args))
 	}
 
 	pathObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "getPath", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "getPath", "*String", args[0].Type())
 	}
 
 	separator := "."
 	if len(args) == 2 {
 		sepObj, ok := args[1].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "second", "getPath", "*String", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "getPath", "*String", args[1].Type())
 		}
 		separator = sepObj.String
 	}
@@ -322,7 +322,7 @@ func (h *Hash) GetPath(line string, args ...Object) Object {
 
 func (h *Hash) Keys(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	keys := &Array{}
 	for _, hk := range h.Order { //hk:hash key
@@ -334,7 +334,7 @@ func (h *Hash) Keys(line string, args ...Object) Object {
 
 func (h *Hash) Len(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewInteger(int64(len(h.Order)))
@@ -342,14 +342,14 @@ func (h *Hash) Len(line string, args ...Object) Object {
 
 func (h *Hash) Map(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type())
 	}
 	if len(block.Literal.Parameters) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters)))
+		return NewError(line, ARGUMENTERROR, "2", len(block.Literal.Parameters))
 	}
 	hash := NewHash()
 	s := NewScope(scope)
@@ -375,11 +375,11 @@ func (h *Hash) Map(line string, scope *Scope, args ...Object) Object {
 
 func (h *Hash) Merge(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	m, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, ARGUMENTERROR, args[0].Type(), "hash.merge"))
+		return NewError(line, ARGUMENTERROR, args[0].Type(), "hash.merge")
 	}
 
 	hash := NewHash()
@@ -398,11 +398,11 @@ func (h *Hash) Merge(line string, args ...Object) Object {
 
 func (h *Hash) Pop(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	hashable, ok := args[0].(Hashable)
 	if !ok {
-		panic(NewError(line, KEYERROR, args[0].Type()))
+		return NewError(line, KEYERROR, args[0].Type())
 	}
 
 	hk := hashable.HashKey()
@@ -425,7 +425,7 @@ func (h *Hash) Pop(line string, args ...Object) Object {
 
 func (h *Hash) Push(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 	if hashable, ok := args[0].(Hashable); ok {
 		hk := hashable.HashKey()
@@ -437,14 +437,14 @@ func (h *Hash) Push(line string, args ...Object) Object {
 
 		h.Pairs[hk] = HashPair{Key: args[0], Value: args[1]}
 	} else {
-		panic(NewError(line, KEYERROR, args[0].Type()))
+		return NewError(line, KEYERROR, args[0].Type())
 	}
 	return h
 }
 
 func (h *Hash) Values(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	values := &Array{}

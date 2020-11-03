@@ -51,16 +51,16 @@ func (re *RegEx) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "subexpNames":
 		return re.SubexpNames(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, re.Type()))
+	return NewError(line, NOMETHODERROR, method, re.Type())
 }
 
 func (re *RegEx) Match(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if args[0].Type() != STRING_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "match", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "match", "*String", args[0].Type())
 	}
 
 	str := args[0].(*String)
@@ -73,15 +73,15 @@ func (re *RegEx) Match(line string, args ...Object) Object {
 
 func (re *RegEx) Replace(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	if args[0].Type() != STRING_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replace", "*String", args[0].Type())
 	}
 
 	if args[1].Type() != STRING_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replace", "*String", args[1].Type())
 	}
 
 	str := args[0].(*String)
@@ -92,11 +92,11 @@ func (re *RegEx) Replace(line string, args ...Object) Object {
 
 func (re *RegEx) Split(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if args[0].Type() != STRING_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type())
 	}
 
 	str := args[0].(*String)
@@ -111,17 +111,17 @@ func (re *RegEx) Split(line string, args ...Object) Object {
 
 func (re *RegEx) FindAllString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllString", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllString", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllString", "*Integer", args[1].Type())
 	}
 
 	ret := &Array{}
@@ -135,17 +135,17 @@ func (re *RegEx) FindAllString(line string, args ...Object) Object {
 
 func (re *RegEx) FindAllStringIndex(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringIndex", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringIndex", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringIndex", "*Integer", args[1].Type())
 	}
 
 	ret := &Array{}
@@ -163,17 +163,17 @@ func (re *RegEx) FindAllStringIndex(line string, args ...Object) Object {
 
 func (re *RegEx) FindAllStringSubmatch(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatch", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatch", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatch", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatch", "*Integer", args[1].Type())
 	}
 
 	ret := &Array{}
@@ -191,17 +191,17 @@ func (re *RegEx) FindAllStringSubmatch(line string, args ...Object) Object {
 
 func (re *RegEx) FindAllStringSubmatchIndex(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatchIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatchIndex", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatchIndex", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatchIndex", "*Integer", args[1].Type())
 	}
 
 	ret := &Array{}
@@ -219,12 +219,12 @@ func (re *RegEx) FindAllStringSubmatchIndex(line string, args ...Object) Object 
 
 func (re *RegEx) FindString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findString", "*String", args[0].Type())
 	}
 
 	ret := re.RegExp.FindString(strObj.String)
@@ -233,12 +233,12 @@ func (re *RegEx) FindString(line string, args ...Object) Object {
 
 func (re *RegEx) FindStringIndex(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringIndex", "*String", args[0].Type())
 	}
 
 	ret := &Array{}
@@ -252,12 +252,12 @@ func (re *RegEx) FindStringIndex(line string, args ...Object) Object {
 
 func (re *RegEx) FindStringSubmatch(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringSubmatch", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringSubmatch", "*String", args[0].Type())
 	}
 
 	ret := &Array{}
@@ -271,12 +271,12 @@ func (re *RegEx) FindStringSubmatch(line string, args ...Object) Object {
 
 func (re *RegEx) FindStringSubmatchIndex(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringSubmatchIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringSubmatchIndex", "*String", args[0].Type())
 	}
 
 	ret := &Array{}
@@ -290,7 +290,7 @@ func (re *RegEx) FindStringSubmatchIndex(line string, args ...Object) Object {
 
 func (re *RegEx) NumSubexp(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	i := re.RegExp.NumSubexp()
@@ -300,17 +300,17 @@ func (re *RegEx) NumSubexp(line string, args ...Object) Object {
 
 func (re *RegEx) ReplaceAllLiteralString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceAllLiteralString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceAllLiteralString", "*String", args[0].Type())
 	}
 
 	replObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceAllLiteralString", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceAllLiteralString", "*String", args[1].Type())
 	}
 
 	s := re.RegExp.ReplaceAllLiteralString(srcObj.String, replObj.String)
@@ -319,17 +319,17 @@ func (re *RegEx) ReplaceAllLiteralString(line string, args ...Object) Object {
 
 func (re *RegEx) ReplaceFirstString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceFirstString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceFirstString", "*String", args[0].Type())
 	}
 
 	replObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceFirstString", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceFirstString", "*String", args[1].Type())
 	}
 
 	s := replaceFirstString(re.RegExp, srcObj.String, replObj.String)
@@ -338,22 +338,22 @@ func (re *RegEx) ReplaceFirstString(line string, args ...Object) Object {
 
 func (re *RegEx) ReplaceAllStringFunc(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceAllStringFunc", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceAllStringFunc", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceAllStringFunc", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceAllStringFunc", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 1 {
-		panic(NewError(line, FUNCCALLBACKERROR, 1, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 1, paramCount)
 	}
 
 	ret := re.RegExp.ReplaceAllStringFunc(srcObj.String, func(str string) string {
@@ -365,7 +365,7 @@ func (re *RegEx) ReplaceAllStringFunc(line string, scope *Scope, args ...Object)
 
 func (re *RegEx) String(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	s := re.RegExp.String()
@@ -374,7 +374,7 @@ func (re *RegEx) String(line string, args ...Object) Object {
 
 func (re *RegEx) SubexpNames(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := &Array{}
@@ -472,17 +472,17 @@ func (rex *RegExpObj) CallMethod(line string, scope *Scope, method string, args 
 	case "subexpNames":
 		return rex.SubexpNames(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, rex.Type()))
+	return NewError(line, NOMETHODERROR, method, rex.Type())
 }
 
 func (rex *RegExpObj) Compile(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "compile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "compile", "*String", args[0].Type())
 	}
 
 	var err error = nil
@@ -496,12 +496,12 @@ func (rex *RegExpObj) Compile(line string, args ...Object) Object {
 
 func (rex *RegExpObj) CompilePOSIX(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "compile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "compile", "*String", args[0].Type())
 	}
 
 	var err error = nil
@@ -515,12 +515,12 @@ func (rex *RegExpObj) CompilePOSIX(line string, args ...Object) Object {
 
 func (rex *RegExpObj) MustCompile(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "mustCompile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "mustCompile", "*String", args[0].Type())
 	}
 
 	//if regexp.MustCompile() panic, we capture it, and set 'reg.RegExp' to nil.
@@ -536,12 +536,12 @@ func (rex *RegExpObj) MustCompile(line string, args ...Object) Object {
 
 func (rex *RegExpObj) MustCompilePOSIX(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "mustCompilePOSIX", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "mustCompilePOSIX", "*String", args[0].Type())
 	}
 
 	//if regexp.MustCompilePOSIX() panic, we capture it, and set 'reg.RegExp' to nil.
@@ -557,17 +557,17 @@ func (rex *RegExpObj) MustCompilePOSIX(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindAllString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllString", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllString", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllString", "*Integer", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -585,17 +585,17 @@ func (rex *RegExpObj) FindAllString(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindAllStringIndex(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringIndex", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringIndex", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringIndex", "*Integer", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -617,17 +617,17 @@ func (rex *RegExpObj) FindAllStringIndex(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindAllStringSubmatch(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatch", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatch", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatch", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatch", "*Integer", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -649,17 +649,17 @@ func (rex *RegExpObj) FindAllStringSubmatch(line string, args ...Object) Object 
 
 func (rex *RegExpObj) FindAllStringSubmatchIndex(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatchIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findAllStringSubmatchIndex", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatchIndex", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "findAllStringSubmatchIndex", "*Integer", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -681,12 +681,12 @@ func (rex *RegExpObj) FindAllStringSubmatchIndex(line string, args ...Object) Ob
 
 func (rex *RegExpObj) FindString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findString", "*String", args[0].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -699,12 +699,12 @@ func (rex *RegExpObj) FindString(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindStringIndex(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringIndex", "*String", args[0].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -722,12 +722,12 @@ func (rex *RegExpObj) FindStringIndex(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindStringSubmatch(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringSubmatch", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringSubmatch", "*String", args[0].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -745,12 +745,12 @@ func (rex *RegExpObj) FindStringSubmatch(line string, args ...Object) Object {
 
 func (rex *RegExpObj) FindStringSubmatchIndex(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "findStringSubmatchIndex", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "findStringSubmatchIndex", "*String", args[0].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -768,12 +768,12 @@ func (rex *RegExpObj) FindStringSubmatchIndex(line string, args ...Object) Objec
 
 func (rex *RegExpObj) MatchString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "matchString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "matchString", "*String", args[0].Type())
 	}
 
 	b := rex.RegExp.MatchString(strObj.String)
@@ -785,7 +785,7 @@ func (rex *RegExpObj) MatchString(line string, args ...Object) Object {
 
 func (rex *RegExpObj) NumSubexp(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if rex.RegExp == nil {
@@ -799,17 +799,17 @@ func (rex *RegExpObj) NumSubexp(line string, args ...Object) Object {
 
 func (rex *RegExpObj) ReplaceAllLiteralString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceAllLiteralString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceAllLiteralString", "*String", args[0].Type())
 	}
 
 	replObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceAllLiteralString", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceAllLiteralString", "*String", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -822,17 +822,17 @@ func (rex *RegExpObj) ReplaceAllLiteralString(line string, args ...Object) Objec
 
 func (rex *RegExpObj) ReplaceAllString(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceAllString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceAllString", "*String", args[0].Type())
 	}
 
 	replObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceAllString", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceAllString", "*String", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -845,17 +845,17 @@ func (rex *RegExpObj) ReplaceAllString(line string, args ...Object) Object {
 
 func (rex *RegExpObj) ReplaceAllStringFunc(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	srcObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "replaceAllStringFunc", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "replaceAllStringFunc", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "replaceAllStringFunc", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "replaceAllStringFunc", "*Function", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -864,7 +864,7 @@ func (rex *RegExpObj) ReplaceAllStringFunc(line string, scope *Scope, args ...Ob
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 1 {
-		panic(NewError(line, FUNCCALLBACKERROR, 1, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 1, paramCount)
 	}
 
 	ret := rex.RegExp.ReplaceAllStringFunc(srcObj.String, func(str string) string {
@@ -876,17 +876,17 @@ func (rex *RegExpObj) ReplaceAllStringFunc(line string, scope *Scope, args ...Ob
 
 func (rex *RegExpObj) Split(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "split", "*String", args[0].Type())
 	}
 
 	intObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "split", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "split", "*Integer", args[1].Type())
 	}
 
 	if rex.RegExp == nil {
@@ -904,7 +904,7 @@ func (rex *RegExpObj) Split(line string, args ...Object) Object {
 
 func (rex *RegExpObj) String(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if rex.RegExp == nil {
@@ -917,7 +917,7 @@ func (rex *RegExpObj) String(line string, args ...Object) Object {
 
 func (rex *RegExpObj) SubexpNames(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if rex.RegExp == nil {

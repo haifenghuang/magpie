@@ -46,17 +46,17 @@ func (f *FmtObj) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "fprintln":
 		return f.Fprintln(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, f.Type()))
+	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
 func (f *FmtObj) Errorf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	formatObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "errorf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "errorf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -66,7 +66,7 @@ func (f *FmtObj) Errorf(line string, args ...Object) Object {
 	}
 
 	err := gofmt.Errorf(formatObj.String, wrapped...)
-	panic(NewError(line, GENERICERROR, err.Error()))
+	return NewError(line, GENERICERROR, err.Error())
 
 	return NIL
 }
@@ -91,12 +91,12 @@ func (f *FmtObj) Print(line string, args ...Object) Object {
 
 func (f *FmtObj) Printf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	formatObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "printf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -153,12 +153,12 @@ func (f *FmtObj) Sprint(line string, args ...Object) Object {
 
 func (f *FmtObj) Sprintf(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">0", len(args)))
+		return NewError(line, ARGUMENTERROR, ">0", len(args))
 	}
 
 	format, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sprintf", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sprintf", "*String", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -188,12 +188,12 @@ func (f *FmtObj) Sprintln(line string, args ...Object) Object {
 
 func (f *FmtObj) Fprint(line string, args ...Object) Object {
 	if len(args) < 2 {
-		panic(NewError(line, ARGUMENTERROR, ">=2", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
 
 	w, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fprint", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fprint", "Writable", args[0].Type())
 	}
 
 	subArgs := args[1:]
@@ -222,17 +222,17 @@ func (f *FmtObj) Fprint(line string, args ...Object) Object {
 
 func (f *FmtObj) Fprintf(line string, args ...Object) Object {
 	if len(args) < 2 {
-		panic(NewError(line, ARGUMENTERROR, ">=2", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
 
 	w, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fprintf", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fprintf", "Writable", args[0].Type())
 	}
 
 	formatObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "fprintf", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "fprintf", "*String", args[1].Type())
 	}
 
 	var n int
@@ -266,12 +266,12 @@ func (f *FmtObj) Fprintf(line string, args ...Object) Object {
 
 func (f *FmtObj) Fprintln(line string, args ...Object) Object {
 	if len(args) < 2 {
-		panic(NewError(line, ARGUMENTERROR, ">=2", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=2", len(args))
 	}
 
 	w, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "fprintln", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "fprintln", "Writable", args[0].Type())
 	}
 
 	subArgs := args[1:]

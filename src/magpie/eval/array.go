@@ -82,19 +82,19 @@ func (a *Array) CallMethod(line string, scope *Scope, method string, args ...Obj
 	case "max":
 		return a.Max(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, a.Type()))
+	return NewError(line, NOMETHODERROR, method, a.Type())
 }
 
 func (a *Array) Len(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	return NewInteger(int64(len(a.Members)))
 }
 
 func (a *Array) Count(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	count := 0
 	for _, v := range a.Members {
@@ -131,30 +131,30 @@ func (a *Array) Count(line string, args ...Object) Object {
 
 func (a *Array) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	idxObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type())
 	}
 
 	// if out-of-bounds, return NIL
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
 		return NIL
-		//panic(NewError(line, INDEXERROR, idxObj.Int64))
+		//return NewError(line, INDEXERROR, idxObj.Int64)
 	}
 	return a.Members[idxObj.Int64]
 }
 
 func (a *Array) Set(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	idxObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "set", "*Integer", args[0].Type())
 	}
 
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(a.Members)) {
@@ -162,7 +162,7 @@ func (a *Array) Set(line string, args ...Object) Object {
 		for i := oldLen; i <= idxObj.Int64; i++ {
 			a.Members = append(a.Members, NIL)
 		}
-		//panic(NewError(line, INDEXERROR, idxObj.Int64))
+		//return NewError(line, INDEXERROR, idxObj.Int64)
 	}
 
 	a.Members[idxObj.Int64] = args[1]
@@ -171,7 +171,7 @@ func (a *Array) Set(line string, args ...Object) Object {
 
 func (a *Array) Includes(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	for _, v := range a.Members {
@@ -184,11 +184,11 @@ func (a *Array) Includes(line string, args ...Object) Object {
 
 func (a *Array) Filter(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type())
 	}
 	arr := &Array{}
 	arr.Members = []Object{}
@@ -205,7 +205,7 @@ func (a *Array) Filter(line string, scope *Scope, args ...Object) Object {
 
 func (a *Array) Index(line string, args ...Object) Object {
 	if len(args) < 1 || len(args) > 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	for i, v := range a.Members {
 		switch c := args[0].(type) {
@@ -233,11 +233,11 @@ func (a *Array) Index(line string, args ...Object) Object {
 
 func (a *Array) Map(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type())
 	}
 	arr := &Array{}
 	s := NewScope(scope)
@@ -254,11 +254,11 @@ func (a *Array) Map(line string, scope *Scope, args ...Object) Object {
 
 func (a *Array) Merge(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	m, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "merge", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "merge", "*Array", args[0].Type())
 	}
 	arr := &Array{}
 	for _, v := range a.Members {
@@ -274,7 +274,7 @@ func (a *Array) Pop(line string, args ...Object) Object {
 	last := len(a.Members) - 1
 	if len(args) == 0 {
 		if last < 0 {
-			panic(NewError(line, INDEXERROR, last))
+			return NewError(line, INDEXERROR, last)
 		}
 		popped := a.Members[last]
 		a.Members = a.Members[:last]
@@ -285,7 +285,7 @@ func (a *Array) Pop(line string, args ...Object) Object {
 		idx = idx + int64(last+1)
 	}
 	if idx < 0 || idx > int64(last) {
-		panic(NewError(line, INDEXERROR, idx))
+		return NewError(line, INDEXERROR, idx)
 	}
 	popped := a.Members[idx]
 	a.Members = append(a.Members[:idx], a.Members[idx+1:]...)
@@ -295,7 +295,7 @@ func (a *Array) Pop(line string, args ...Object) Object {
 func (a *Array) Push(line string, args ...Object) Object {
 	l := len(args)
 	if l != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", l))
+		return NewError(line, ARGUMENTERROR, "1", l)
 	}
 	a.Members = append(a.Members, args[0])
 	return a
@@ -313,7 +313,7 @@ func (a *Array) Shift(line string, args ...Object) Object {
 	}
 	idx := args[0].(*Integer).Int64
 	if idx < 0 || idx > int64(last) {
-		panic(NewError(line, INDEXERROR, idx))
+		return NewError(line, INDEXERROR, idx)
 	}
 	shifted := a.Members[idx]
 	a.Members = append(a.Members[:idx], a.Members[idx+1:]...)
@@ -323,7 +323,7 @@ func (a *Array) Shift(line string, args ...Object) Object {
 func (a *Array) UnShift(line string, args ...Object) Object {
 	l := len(args)
 	if l != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", l))
+		return NewError(line, ARGUMENTERROR, "1", l)
 	}
 
 	a.Members = append([]Object{args[0]}, a.Members...)
@@ -333,12 +333,12 @@ func (a *Array) UnShift(line string, args ...Object) Object {
 func (a *Array) Reduce(line string, scope *Scope, args ...Object) Object {
 	l := len(args)
 	if 1 != 2 && l != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", l))
+		return NewError(line, ARGUMENTERROR, "1|2", l)
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "reduce", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "reduce", "*Function", args[0].Type())
 	}
 	s := NewScope(scope)
 	start := 1
@@ -366,7 +366,7 @@ func (a *Array) Reduce(line string, scope *Scope, args ...Object) Object {
 func (a *Array) Empty(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	if len(a.Members) == 0 {
@@ -378,7 +378,7 @@ func (a *Array) Empty(line string, args ...Object) Object {
 func (a *Array) First(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	if len(a.Members) == 0 {
@@ -390,7 +390,7 @@ func (a *Array) First(line string, args ...Object) Object {
 func (a *Array) Last(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(a.Members)
@@ -403,7 +403,7 @@ func (a *Array) Last(line string, args ...Object) Object {
 func (a *Array) Tail(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(a.Members)
@@ -419,7 +419,7 @@ func (a *Array) Tail(line string, args ...Object) Object {
 func (a *Array) Average(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(a.Members)
@@ -447,7 +447,7 @@ func (a *Array) Average(line string, args ...Object) Object {
 func (a *Array) Sum(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(a.Members)
@@ -502,7 +502,7 @@ func (a *Array) Sum(line string, args ...Object) Object {
 // Min returns the minimum value in a collection of values.
 func (a *Array) Min(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	length := len(a.Members)
@@ -527,7 +527,7 @@ func (a *Array) Min(line string, args ...Object) Object {
 // Max returns the maximum value in a collection of values.
 func (a *Array) Max(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	length := len(a.Members)

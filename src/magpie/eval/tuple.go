@@ -72,19 +72,19 @@ func (t *Tuple) CallMethod(line string, scope *Scope, method string, args ...Obj
 	case "tail", "rest":
 		return t.Tail(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, t.Type()))
+	return NewError(line, NOMETHODERROR, method, t.Type())
 }
 
 func (t *Tuple) Len(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	return NewInteger(int64(len(t.Members)))
 }
 
 func (t *Tuple) Count(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	count := 0
@@ -122,27 +122,27 @@ func (t *Tuple) Count(line string, args ...Object) Object {
 
 func (t *Tuple) Get(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	idxObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "get", "*Integer", args[0].Type())
 	}
 
 	if idxObj.Int64 < 0 || idxObj.Int64 >= int64(len(t.Members)) {
-		panic(NewError(line, INDEXERROR, idxObj.Int64))
+		return NewError(line, INDEXERROR, idxObj.Int64)
 	}
 	return t.Members[idxObj.Int64]
 }
 
 func (t *Tuple) Filter(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "filter", "*Function", args[0].Type())
 	}
 
 	tuple := &Tuple{}
@@ -160,7 +160,7 @@ func (t *Tuple) Filter(line string, scope *Scope, args ...Object) Object {
 
 func (t *Tuple) Index(line string, args ...Object) Object {
 	if len(args) < 1 || len(args) > 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	for i, v := range t.Members {
 		switch c := args[0].(type) {
@@ -188,11 +188,11 @@ func (t *Tuple) Index(line string, args ...Object) Object {
 
 func (t *Tuple) Map(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "map", "*Function", args[0].Type())
 	}
 
 	tuple := &Tuple{}
@@ -210,11 +210,11 @@ func (t *Tuple) Map(line string, scope *Scope, args ...Object) Object {
 
 func (t *Tuple) Merge(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 	m, ok := args[0].(*Array)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "merge", "*Array", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "merge", "*Array", args[0].Type())
 	}
 
 	tuple := &Tuple{}
@@ -230,12 +230,12 @@ func (t *Tuple) Merge(line string, args ...Object) Object {
 func (t *Tuple) Reduce(line string, scope *Scope, args ...Object) Object {
 	l := len(args)
 	if 1 != 2 && l != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1|2", l))
+		return NewError(line, ARGUMENTERROR, "1|2", l)
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "reduce", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "reduce", "*Function", args[0].Type())
 	}
 	s := NewScope(scope)
 	start := 1
@@ -263,7 +263,7 @@ func (t *Tuple) Reduce(line string, scope *Scope, args ...Object) Object {
 func (t *Tuple) Empty(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	if len(t.Members) == 0 {
@@ -275,7 +275,7 @@ func (t *Tuple) Empty(line string, args ...Object) Object {
 func (t *Tuple) First(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	if len(t.Members) == 0 {
@@ -287,7 +287,7 @@ func (t *Tuple) First(line string, args ...Object) Object {
 func (t *Tuple) Last(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(t.Members)
@@ -300,7 +300,7 @@ func (t *Tuple) Last(line string, args ...Object) Object {
 func (t *Tuple) Tail(line string, args ...Object) Object {
 	l := len(args)
 	if l != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", l))
+		return NewError(line, ARGUMENTERROR, "0", l)
 	}
 
 	length := len(t.Members)

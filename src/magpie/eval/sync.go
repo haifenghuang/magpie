@@ -30,12 +30,12 @@ func (c *SyncCondObj) CallMethod(line string, scope *Scope, method string, args 
 	case "wait":
 		return c.Wait(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, c.Type()))
+	return NewError(line, NOMETHODERROR, method, c.Type())
 }
 
 func (c *SyncCondObj) Broadcast(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	c.Cond.Broadcast()
@@ -44,7 +44,7 @@ func (c *SyncCondObj) Broadcast(line string, args ...Object) Object {
 
 func (c *SyncCondObj) Signal(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	c.Cond.Signal()
@@ -53,7 +53,7 @@ func (c *SyncCondObj) Signal(line string, args ...Object) Object {
 
 func (c *SyncCondObj) Wait(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	c.Cond.Wait()
@@ -73,22 +73,22 @@ func (o *SyncOnceObj) CallMethod(line string, scope *Scope, method string, args 
 	case "do":
 		return o.Do(line, scope, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, o.Type()))
+	return NewError(line, NOMETHODERROR, method, o.Type())
 }
 
 func (o *SyncOnceObj) Do(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "do", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "do", "*Function", args[0].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 0 {
-		panic(NewError(line, FUNCCALLBACKERROR, 0, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 0, paramCount)
 	}
 
 	o.Once.Do(func() {
@@ -120,12 +120,12 @@ func (m *SyncMutexObj) CallMethod(line string, scope *Scope, method string, args
 	case "unlock":
 		return m.Unlock(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, m.Type()))
+	return NewError(line, NOMETHODERROR, method, m.Type())
 }
 
 func (m *SyncMutexObj) Lock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	m.Mutex.Lock()
@@ -134,7 +134,7 @@ func (m *SyncMutexObj) Lock(line string, args ...Object) Object {
 
 func (m *SyncMutexObj) Unlock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	m.Mutex.Unlock()
@@ -160,12 +160,12 @@ func (rwm *SyncRWMutexObj) CallMethod(line string, scope *Scope, method string, 
 	case "unlock":
 		return rwm.Unlock(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, rwm.Type()))
+	return NewError(line, NOMETHODERROR, method, rwm.Type())
 }
 
 func (rwm *SyncRWMutexObj) Lock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	rwm.RWMutex.Lock()
@@ -174,7 +174,7 @@ func (rwm *SyncRWMutexObj) Lock(line string, args ...Object) Object {
 
 func (rwm *SyncRWMutexObj) RLock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	rwm.RWMutex.RLock()
@@ -183,7 +183,7 @@ func (rwm *SyncRWMutexObj) RLock(line string, args ...Object) Object {
 
 func (rwm *SyncRWMutexObj) RUnlock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	rwm.RWMutex.RUnlock()
@@ -192,7 +192,7 @@ func (rwm *SyncRWMutexObj) RUnlock(line string, args ...Object) Object {
 
 func (rwm *SyncRWMutexObj) Unlock(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	rwm.RWMutex.Unlock()
@@ -216,17 +216,17 @@ func (wg *SyncWaitGroupObj) CallMethod(line string, scope *Scope, method string,
 	case "wait":
 		return wg.Wait(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, wg.Type()))
+	return NewError(line, NOMETHODERROR, method, wg.Type())
 }
 
 func (wg *SyncWaitGroupObj) Add(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	delta, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "do", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "do", "*Integer", args[0].Type())
 	}
 
 	wg.WaitGroup.Add(int(delta.Int64))
@@ -235,7 +235,7 @@ func (wg *SyncWaitGroupObj) Add(line string, args ...Object) Object {
 
 func (wg *SyncWaitGroupObj) Done(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	wg.WaitGroup.Done()
@@ -244,7 +244,7 @@ func (wg *SyncWaitGroupObj) Done(line string, args ...Object) Object {
 
 func (wg *SyncWaitGroupObj) Wait(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	wg.WaitGroup.Wait()

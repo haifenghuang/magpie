@@ -289,14 +289,14 @@ func evalProgram(program *ast.Program, scope *Scope) (results Object) {
 			return s.Value
 		case *Error:
 			if s.Kind == THROWNOTHANDLED {
-				panic(NewError(statement.Pos().Sline(), THROWNOTHANDLED, s.Message))
+				return NewError(statement.Pos().Sline(), THROWNOTHANDLED, s.Message)
 			}
 			return s
 			//		case *ThrowValue:
 			//			//convert ThrowValue to Errors
 			//			throwObj := results.(*ThrowValue).Value
 			//			throwObjStr := throwObj.(*String).String
-			//			panic(NewError(statement.Pos().Sline(), THROWNOTHANDLED, throwObjStr))
+			//			return NewError(statement.Pos().Sline(), THROWNOTHANDLED, throwObjStr)
 		}
 	}
 	if results == nil {
@@ -418,7 +418,7 @@ func evalLetStatement(l *ast.LetStatement, scope *Scope) (val Object) {
 			}
 
 		default:
-			panic(NewError(l.Pos().Sline(), GENERICERROR, "Only Array|Tuple|Hash is allowed!"))
+			return NewError(l.Pos().Sline(), GENERICERROR, "Only Array|Tuple|Hash is allowed!")
 		}
 
 		return
@@ -523,7 +523,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "-=":
 		result := leftVal - rightVal
@@ -543,7 +543,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "*=":
 		result := leftVal * rightVal
@@ -563,11 +563,11 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "/=":
 		if rightVal == 0 {
-			panic(NewError(a.Pos().Sline(), DIVIDEBYZERO))
+			return NewError(a.Pos().Sline(), DIVIDEBYZERO)
 		}
 
 		result := leftVal / rightVal
@@ -576,7 +576,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 		if ok {
 			return
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "%=":
 		if isInt {
@@ -596,7 +596,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "^=":
 		if isInt {
@@ -610,7 +610,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "|=":
 		if isInt {
@@ -624,7 +624,7 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 	case "&=":
 		if isInt {
@@ -638,9 +638,9 @@ func evalNumAssignExpression(a *ast.AssignExpression, name string, left Object, 
 				return
 			}
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	}
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 }
 
 func checkNumAssign(scope *Scope, name string, left Object, right Object, result float64) (ret Object, ok bool) {
@@ -685,7 +685,7 @@ func evalStrAssignExpression(a *ast.AssignExpression, name string, left Object, 
 			}
 
 			if idx < 0 || idx >= int64(len(leftVal)) {
-				panic(NewError(a.Pos().Sline(), INDEXERROR, idx))
+				return NewError(a.Pos().Sline(), INDEXERROR, idx)
 			}
 
 			str := NewString(leftVal[:idx] + val.Inspect() + leftVal[idx+1:])
@@ -700,7 +700,7 @@ func evalStrAssignExpression(a *ast.AssignExpression, name string, left Object, 
 	if ok {
 		return
 	}
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 
 }
 
@@ -738,7 +738,7 @@ func evalArrayAssignExpression(a *ast.AssignExpression, name string, left Object
 				idx = int64(o.UInt64)
 			}
 			if idx < 0 {
-				panic(NewError(a.Pos().Sline(), INDEXERROR, idx))
+				return NewError(a.Pos().Sline(), INDEXERROR, idx)
 			}
 
 			if idx < int64(len(leftVals)) { //index is in range
@@ -760,19 +760,19 @@ func evalArrayAssignExpression(a *ast.AssignExpression, name string, left Object
 			}
 		}
 
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	}
 
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 }
 
 func evalTupleAssignExpression(a *ast.AssignExpression, name string, left Object, scope *Scope, val Object) (ret Object) {
 	//Tuple is an immutable sequence of values
 	if a.Token.Literal == "=" { //tuple[idx] = item
 		str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
-		panic(NewError(a.Pos().Sline(), INFIXOP, str, a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, str, a.Token.Literal, val.Type())
 	}
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 }
 
 func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object, scope *Scope, val Object) (ret Object) {
@@ -782,7 +782,7 @@ func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object,
 	switch a.Token.Literal {
 	case "+=":
 		if _, ok := val.(*Hash); !ok { //must be hash type
-			panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+			return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 		}
 
 		rightHash := val.(*Hash)
@@ -794,18 +794,18 @@ func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object,
 		if ok {
 			return
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	case "-=":
 		_, ok := val.(Hashable)
 		if !ok {
-			panic(NewError(a.Pos().Sline(), KEYERROR, val.Type()))
+			return NewError(a.Pos().Sline(), KEYERROR, val.Type())
 		}
 		leftHash.Pop(a.Pos().Sline(), val)
 		ret, ok = scope.Reset(name, leftHash)
 		if ok {
 			return
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	case "=":
 		switch nodeType := a.Name.(type) {
 		case *ast.IndexExpression: //hashObj[key] = val
@@ -818,10 +818,10 @@ func evalHashAssignExpression(a *ast.AssignExpression, name string, left Object,
 			leftHash.Push(a.Pos().Sline(), keyObj, val)
 			return leftHash
 		}
-		panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+		return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 	}
 
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 }
 
 func evalStructAssignExpression(a *ast.AssignExpression, scope *Scope, val Object) (retVal Object) {
@@ -830,16 +830,16 @@ func evalStructAssignExpression(a *ast.AssignExpression, scope *Scope, val Objec
 	var aVal Object
 	var ok bool
 	if aObj, ok = scope.Get(strArr[0]); !ok {
-		panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0]))
+		return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0])
 	}
 
 	st, ok := aObj.(*Struct)
 	if !ok {
-		panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0]))
+		return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0])
 	}
 
 	if aVal, ok = st.Scope.Get(strArr[1]); !ok {
-		panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[1]))
+		return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[1])
 	}
 
 	structScope := st.Scope
@@ -849,7 +849,7 @@ func evalStructAssignExpression(a *ast.AssignExpression, scope *Scope, val Objec
 		if ok {
 			return v
 		}
-		panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String()))
+		return NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String())
 	}
 
 	switch aVal.Type() {
@@ -871,7 +871,7 @@ func evalStructAssignExpression(a *ast.AssignExpression, scope *Scope, val Objec
 		return
 	}
 
-	panic(NewError(a.Pos().Sline(), INFIXOP, aVal.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, aVal.Type(), a.Token.Literal, val.Type())
 }
 
 //instanceObj[x] = xxx
@@ -891,14 +891,14 @@ func evalClassIndexerAssignExpression(a *ast.AssignExpression, obj Object, index
 
 	//check if the Indexer is static
 	if instanceObj.IsStatic(propName, ClassPropertyKind) {
-		panic(NewError(a.Pos().Sline(), INDEXERSTATICERROR, instanceObj.Class.Name))
+		return NewError(a.Pos().Sline(), INDEXERSTATICERROR, instanceObj.Class.Name)
 	}
 
 	p := instanceObj.GetProperty(propName)
 	if p != nil {
 		//no setter or setter block is empty, e.g. 'property xxx { set; }'
 		if p.Setter == nil || len(p.Setter.Body.Statements) == 0 {
-			panic(NewError(a.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name))
+			return NewError(a.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
 			newScope := NewScope(instanceObj.Scope)
 			newScope.Set("value", val)
@@ -921,7 +921,7 @@ func evalClassIndexerAssignExpression(a *ast.AssignExpression, obj Object, index
 			return results
 		}
 	} else {
-		panic(NewError(a.Pos().Sline(), INDEXNOTFOUNDERROR, instanceObj.Class.Name))
+		return NewError(a.Pos().Sline(), INDEXNOTFOUNDERROR, instanceObj.Class.Name)
 	}
 
 	return val
@@ -963,7 +963,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 						v.Set(a.Pos().Sline(), indexVal, val)
 					case *Tuple:
 						str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
-						panic(NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type()))
+						return NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type())
 					}
 					return NIL
 				}
@@ -974,12 +974,12 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 
 		strArr := strings.Split(a.Name.String(), ".")
 		if aObj, ok = scope.Get(strArr[0]); !ok {
-			reportTypoSuggestions(a.Pos().Sline(), scope, strArr[0])
-			//panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0]))
+			return reportTypoSuggestions(a.Pos().Sline(), scope, strArr[0])
+			//return NewError(a.Pos().Sline(), UNKNOWNIDENT, strArr[0])3
 		}
 
 		if aObj.Type() == ENUM_OBJ { //it's enum type
-			panic(NewError(a.Pos().Sline(), GENERICERROR, "Enum value cannot be reassigned!"))
+			return NewError(a.Pos().Sline(), GENERICERROR, "Enum value cannot be reassigned!")
 		} else if aObj.Type() == HASH_OBJ { //e.g. hash.key = value
 			return evalHashAssignExpression(a, strArr[0], aObj, scope, val)
 		} else if aObj.Type() == INSTANCE_OBJ { //e.g. this.var = xxxx
@@ -988,7 +988,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			//			//get variable's modifier level
 			//			ml := instanceObj.GetModifierLevel(strArr[1], ClassMemberKind) //ml:modifier level
 			//			if ml == ast.ModifierPrivate {
-			//				panic(NewError(a.Pos().Sline(), CLSMEMBERPRIVATE, strArr[1], instanceObj.Class.Name))
+			//				return NewError(a.Pos().Sline(), CLSMEMBERPRIVATE, strArr[1], instanceObj.Class.Name)
 			//			}
 
 			//check if it's a property
@@ -996,13 +996,13 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			if p == nil { //not property, return value from scope
 				// check if it's a static variable
 				if instanceObj.IsStatic(strArr[1], ClassMemberKind) {
-					panic(NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], instanceObj.Class.Name))
+					return NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], instanceObj.Class.Name)
 				}
 				instanceObj.Scope.Set(strArr[1], val)
 			} else {
 				// check if it's a static property
 				if instanceObj.IsStatic(strArr[1], ClassPropertyKind) {
-					panic(NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name))
+					return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name)
 				}
 
 				if p.Setter == nil { //property xxx { get; }
@@ -1010,7 +1010,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 					if !ok { //it's the first time assignment
 						instanceObj.Scope.Set(strArr[1], val)
 					} else {
-						panic(NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name))
+						return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], instanceObj.Class.Name)
 					}
 				} else {
 					if len(p.Setter.Body.Statements) == 0 { // property xxx { set; }
@@ -1034,12 +1034,12 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			if p == nil { //not property
 				// check if it's a static member
 				if !clsObj.IsStatic(strArr[1], ClassMemberKind) {
-					panic(NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], clsObj.Name))
+					return NewError(a.Pos().Sline(), MEMBERUSEERROR, strArr[1], clsObj.Name)
 				}
 			} else {
 				// check if it's a static property
 				if !clsObj.IsStatic(strArr[1], ClassPropertyKind) {
-					panic(NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], clsObj.Name))
+					return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], clsObj.Name)
 				}
 			}
 
@@ -1084,7 +1084,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 					if !ok { //it's the first time assignment
 						clsObj.Scope.Set(strArr[1], val)
 					} else {
-						panic(NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], clsObj.Name))
+						return NewError(a.Pos().Sline(), PROPERTYUSEERROR, strArr[1], clsObj.Name)
 					}
 				} else {
 					if len(p.Setter.Body.Statements) == 0 { // property xxx { set; }
@@ -1134,7 +1134,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				v.Set(a.Pos().Sline(), indexVal, val)
 			case *Tuple:
 				str := fmt.Sprintf("%s[IDX]", TUPLE_OBJ)
-				panic(NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type()))
+				return NewError(a.Pos().Sline(), INFIXOP, str, "=", val.Type())
 			}
 			return
 		}
@@ -1170,7 +1170,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 						thisObjClass := thisObj.(*ObjectInstance).Class
 						_, ok := thisObjClass.Scope.Get(name)
 						if ok {
-							panic(NewError(a.Pos().Sline(), UNKNOWNIDENTEX, name, thisObjClass.Name+"."+name))
+							return NewError(a.Pos().Sline(), UNKNOWNIDENTEX, name, thisObjClass.Name+"."+name)
 						}
 					}
 				}
@@ -1180,8 +1180,8 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 			if ok {
 				return v
 			}
-			reportTypoSuggestions(a.Pos().Sline(), scope, a.Name.String())
-			//panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String()))
+			return reportTypoSuggestions(a.Pos().Sline(), scope, a.Name.String())
+			//return NewError(a.Pos().Sline(), UNKNOWNIDENT, a.Name.String())
 		}
 	}
 
@@ -1189,8 +1189,8 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 	var left Object
 	var ok bool
 	if left, ok = scope.Get(name); !ok {
-		reportTypoSuggestions(a.Pos().Sline(), scope, name)
-		//panic(NewError(a.Pos().Sline(), UNKNOWNIDENT, name))
+		return reportTypoSuggestions(a.Pos().Sline(), scope, name)
+		//return NewError(a.Pos().Sline(), UNKNOWNIDENT, name)
 	}
 
 	switch left.Type() {
@@ -1211,7 +1211,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 		return
 	}
 
-	panic(NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type()))
+	return NewError(a.Pos().Sline(), INFIXOP, left.Type(), a.Token.Literal, val.Type())
 }
 
 func evalReturnStatement(r *ast.ReturnStatement, scope *Scope) Object {
@@ -1231,11 +1231,11 @@ func evalReturnStatement(r *ast.ReturnStatement, scope *Scope) Object {
 func evalDeferStatement(d *ast.DeferStmt, scope *Scope) Object {
 	frame := scope.CurrentFrame()
 	if frame == nil {
-		panic(NewError(d.Pos().Sline(), DEFERERROR))
+		return NewError(d.Pos().Sline(), DEFERERROR)
 	}
 
 	if frame.CurrentCall == nil {
-		panic(NewError(d.Pos().Sline(), DEFERERROR))
+		return NewError(d.Pos().Sline(), DEFERERROR)
 	}
 
 	switch d.Call.(type) {
@@ -1265,7 +1265,7 @@ func evalThrowStatement(t *ast.ThrowStmt, scope *Scope) Object {
 	var strObj *String
 	var ok bool
 	if strObj, ok = value.(*String); !ok {
-		panic(NewError(t.Pos().Sline(), THROWERROR))
+		return NewError(t.Pos().Sline(), THROWERROR)
 	}
 	return &Error{Kind: THROWNOTHANDLED, Message: strObj.String}
 }
@@ -1322,7 +1322,7 @@ func evalTupleLiteral(t *ast.TupleLiteral, scope *Scope) Object {
 func evalRegExLiteral(re *ast.RegExLiteral) Object {
 	regExpression, err := regexp.Compile(re.Value)
 	if err != nil {
-		panic(NewError(re.Pos().Sline(), INVALIDARG))
+		return NewError(re.Pos().Sline(), INVALIDARG)
 	}
 
 	return &RegEx{RegExp: regExpression, Value: re.Value}
@@ -1342,7 +1342,7 @@ func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
 			   Here, the hash's key is a bare word, so, it will report that key 'A' is not defined.
 			*/
 			return NIL
-			//reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
+			//return reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
 		}
 	}
 	if i, ok := val.(*InterpolatedString); ok {
@@ -1394,7 +1394,7 @@ func evalStructLiteral(s *ast.StructLiteral, scope *Scope) Object {
 			aObj := Eval(value, scope)
 			structScope.Set(ident.String(), aObj)
 		} else {
-			panic(NewError(s.Pos().Sline(), KEYERROR, "IDENT"))
+			return NewError(s.Pos().Sline(), KEYERROR, "IDENT")
 		}
 	}
 	return &Struct{Scope: structScope, methods: make(map[string]*Function)}
@@ -1413,7 +1413,7 @@ func evalEnumLiteral(e *ast.EnumLiteral, scope *Scope) Object {
 			aObj := Eval(value, scope)
 			enumScope.Set(ident.String(), aObj)
 		} else {
-			panic(NewError(e.Pos().Sline(), KEYERROR, "IDENT"))
+			return NewError(e.Pos().Sline(), KEYERROR, "IDENT")
 		}
 	}
 	return &Enum{Scope: enumScope}
@@ -1479,13 +1479,13 @@ func evalPrefixExpressionUDO(p *ast.PrefixExpression, right Object, scope *Scope
 		}
 		return r
 	}
-	panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+	return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 }
 
 // Prefix expression for Meta-Operators
 func evalMetaOperatorPrefixExpression(p *ast.PrefixExpression, right Object, scope *Scope) Object {
 	if right.Type() != ARRAY_OBJ {
-		panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+		return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 	}
 
 	//convert prefix operator to infix operator,
@@ -1505,7 +1505,7 @@ func evalMetaOperatorPrefixExpression(p *ast.PrefixExpression, right Object, sco
 	if !leftIsNum {
 		_, leftIsStr = result.(*String)
 		if !leftIsStr {
-			panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+			return NewError(p.Pos().Sline(), METAOPERATORERROR)
 		}
 	}
 
@@ -1516,7 +1516,7 @@ func evalMetaOperatorPrefixExpression(p *ast.PrefixExpression, right Object, sco
 		if !rightIsNum {
 			_, rightIsStr = members[i].(*String)
 			if !rightIsStr {
-				panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+				return NewError(p.Pos().Sline(), METAOPERATORERROR)
 			}
 		}
 
@@ -1530,7 +1530,7 @@ func evalMetaOperatorPrefixExpression(p *ast.PrefixExpression, right Object, sco
 		if !leftIsNum {
 			_, leftIsStr = result.(*String)
 			if !leftIsStr {
-				panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+				return NewError(p.Pos().Sline(), METAOPERATORERROR)
 			}
 		}
 
@@ -1583,7 +1583,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 				//do nothing for now
 			}
 		}
-		panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+		return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 	}
 
 	switch p.Operator {
@@ -1618,7 +1618,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 				}
 			}
 			if err != nil {
-				panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+				return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 			}
 			return NewInteger(n)
 		case BOOLEAN_OBJ: //convert boolean to string
@@ -1647,7 +1647,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 			if i.UInt64 == 0 {
 				return i
 			} else {
-				panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+				return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 			}
 		case FLOAT_OBJ:
 			f := right.(*Float)
@@ -1662,7 +1662,7 @@ func evalPrefixExpression(p *ast.PrefixExpression, scope *Scope) Object {
 	case "--":
 		return evalDecrementPrefixOperatorExpression(p, right, scope)
 	}
-	panic(NewError(p.Pos().Sline(), PREFIXOP, p, right.Type()))
+	return NewError(p.Pos().Sline(), PREFIXOP, p, right.Type())
 }
 
 func evalIncrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object, scope *Scope) Object {
@@ -1683,7 +1683,7 @@ func evalIncrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object
 		scope.Reset(p.Right.String(), NewFloat(rightVal + 1))
 		return NewFloat(rightVal + 1)
 	default:
-		panic(NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type()))
+		return NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type())
 	}
 }
 
@@ -1705,7 +1705,7 @@ func evalDecrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object
 		scope.Reset(p.Right.String(), NewFloat(rightVal - 1))
 		return NewFloat(rightVal - 1)
 	default:
-		panic(NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type()))
+		return NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type())
 	}
 }
 
@@ -1737,7 +1737,7 @@ func evalInfixExpressionUDO(p *ast.InfixExpression, left Object, right Object, s
 		return r
 	}
 
-	panic(NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type()))
+	return NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type())
 }
 
 // Infix expression for Meta-Operators
@@ -1746,7 +1746,7 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 	//2. [1,2,3] ~+ 4 = [1+4, 2+4, 3+4]
 	//left must be an array
 	if left.Type() != ARRAY_OBJ {
-		panic(NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type()))
+		return NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type())
 	}
 
 	leftMembers := left.(*Array).Members
@@ -1763,13 +1763,13 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 		if right.Type() == ARRAY_OBJ {
 			rightMembers = right.(*Array).Members
 		} else {
-			panic(NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type()))
+			return NewError(p.Pos().Sline(), INFIXOP, left.Type(), p.Operator, right.Type())
 		}
 	}
 	rightNumLen := len(rightMembers)
 
 	if leftNumLen != rightNumLen {
-		panic(NewError(p.Pos().Sline(), GENERICERROR, "Number of items not equal for Meta-Operators!"))
+		return NewError(p.Pos().Sline(), GENERICERROR, "Number of items not equal for Meta-Operators!")
 	}
 
 	resultArr := &Array{}
@@ -1784,7 +1784,7 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 		if !leftIsNum {
 			_, leftIsStr = item.(*String)
 			if !leftIsStr {
-				panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+				return NewError(p.Pos().Sline(), METAOPERATORERROR)
 			}
 		}
 
@@ -1792,7 +1792,7 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 		if !rightIsNum {
 			_, rightIsStr = rightMembers[idx].(*String)
 			if !rightIsStr {
-				panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+				return NewError(p.Pos().Sline(), METAOPERATORERROR)
 			}
 		}
 
@@ -1804,7 +1804,7 @@ func evalMetaOperatorInfixExpression(p *ast.InfixExpression, left Object, right 
 		} else if leftIsStr || rightIsStr {
 			result = evalMixedTypeInfixExpression(p, item, rightMembers[idx])
 		} else {
-			panic(NewError(p.Pos().Sline(), METAOPERATORERROR))
+			return NewError(p.Pos().Sline(), METAOPERATORERROR)
 		}
 		resultArr.Members = append(resultArr.Members, result)
 	} // end for
@@ -1852,7 +1852,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 			var rightVar *ast.Identifier
 			var ok bool
 			if rightVar, ok = node.Right.(*ast.Identifier); !ok { //not an identifier
-				panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+				return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 			}
 			f := left.(*FileObject)
 			if f.File == os.Stdin {
@@ -1980,7 +1980,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		return nativeBoolToBooleanObject(left != right)
 	}
 
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 func isMetaOperators(tokenType token.TokenType) bool {
@@ -2081,7 +2081,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 			val := uint64(leftVal) & uint64(rightVal)
 			return NewUInteger(uint64(val))
 		}
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	case "|":
 		if isInt {
 			val := int64(leftVal) | int64(rightVal)
@@ -2090,7 +2090,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 			val := uint64(leftVal) | uint64(rightVal)
 			return NewUInteger(uint64(val))
 		}
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	case "^":
 		if isInt {
 			val := int64(leftVal) ^ int64(rightVal)
@@ -2099,7 +2099,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 			val := uint64(leftVal) ^ uint64(rightVal)
 			return NewUInteger(uint64(val))
 		}
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	case "+", "~+":
 		val := leftVal + rightVal
 		if isInt {
@@ -2129,7 +2129,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 		}
 	case "/", "~/":
 		if rightVal == 0 {
-			panic(NewError(node.Pos().Sline(), DIVIDEBYZERO))
+			return NewError(node.Pos().Sline(), DIVIDEBYZERO)
 		}
 		val := leftVal / rightVal
 		//Should Always return float
@@ -2171,7 +2171,7 @@ func evalNumberInfixExpression(node *ast.InfixExpression, left Object, right Obj
 	case "!=":
 		return nativeBoolToBooleanObject(leftVal != rightVal)
 	default:
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	}
 
 	return NIL
@@ -2224,7 +2224,7 @@ func evalStringInfixExpression(node *ast.InfixExpression, left Object, right Obj
 	case ">=":
 		return nativeBoolToBooleanObject(l.String >= r.String)
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type())
 }
 
 func evalTimeTimeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
@@ -2252,7 +2252,7 @@ func evalTimeTimeInfixExpression(node *ast.InfixExpression, left Object, right O
 		b = l.Tm.Equal(r.Tm) || l.Tm.After(r.Tm)
 		return NewBooleanObj(b)
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type())
 }
 
 
@@ -2273,12 +2273,12 @@ func evalTimeStringInfixExpression(node *ast.InfixExpression, left Object, right
 		timeObj, err := ParseDuration(l, r.String)
 		if err != nil {
 			msg := fmt.Sprintf("Invalid string duration '%s'", r.String)
-			panic(NewError(node.Pos().Sline(), GENERICERROR, msg))
+			return NewError(node.Pos().Sline(), GENERICERROR, msg)
 		}
 		return timeObj
 	}
 
-	panic(NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type())
 
 }
 
@@ -2296,7 +2296,7 @@ func evalTimeInfixExpression(node *ast.InfixExpression, left Object, right Objec
 		return evalTimeStringInfixExpression(node, left, right)
 	}
 
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
@@ -2337,7 +2337,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 			}
 			return NewString(strings.Repeat(left.Inspect(), int(uinteger)))
 		}
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	case "==":
 		if isGoObj(left) || isGoObj(right) { // if it's GoObject
 			ret := compareGoObj(left, right)
@@ -2352,7 +2352,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		}
 
 		if left.Type() != STRING_OBJ || right.Type() != STRING_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 
 		if left.(*String).String == right.(*String).String {
@@ -2374,7 +2374,7 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		}
 
 		if left.Type() != STRING_OBJ || right.Type() != STRING_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 
 		if left.(*String).String != right.(*String).String {
@@ -2413,10 +2413,10 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		return TRUE
 
 	default:
-		panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+		return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 	}
 
-	//panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	//return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 //array + item
@@ -2471,7 +2471,7 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		}
 
 		if left.Type() != ARRAY_OBJ || right.Type() != ARRAY_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 
 		leftVals := left.(*Array).Members
@@ -2493,7 +2493,7 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		}
 
 		if left.Type() != ARRAY_OBJ || right.Type() != ARRAY_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 		leftVals := left.(*Array).Members
 		rightVals := right.(*Array).Members
@@ -2516,7 +2516,7 @@ func evalArrayInfixExpression(node *ast.InfixExpression, left Object, right Obje
 			return left                      //return the original array, so it could be chained by another '<<'
 		}
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 //Almost same as evalArrayInfixExpression
@@ -2559,7 +2559,7 @@ func evalTupleInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		}
 
 		if left.Type() != TUPLE_OBJ || right.Type() != TUPLE_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 
 		leftVals := left.(*Tuple).Members
@@ -2581,7 +2581,7 @@ func evalTupleInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		}
 
 		if left.Type() != TUPLE_OBJ || right.Type() != TUPLE_OBJ {
-			panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+			return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 		}
 		leftVals := left.(*Tuple).Members
 		rightVals := right.(*Tuple).Members
@@ -2597,7 +2597,7 @@ func evalTupleInfixExpression(node *ast.InfixExpression, left Object, right Obje
 		}
 		return FALSE
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 //hash + item
@@ -2619,7 +2619,7 @@ func evalHashInfixExpression(node *ast.InfixExpression, left Object, right Objec
 	case "!=":
 		return nativeBoolToBooleanObject(!compareHashObj(leftHash.Pairs, rightHash.Pairs))
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 func compareHashObj(left, right map[HashKey]HashPair) bool {
@@ -2674,7 +2674,7 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 	//get methods's modifier level
 	//	ml := instanceObj.GetModifierLevel(node.Operator, ClassMethodKind) //ml:modifier level
 	//	if ml == ast.ModifierPrivate {
-	//		panic(NewError(node.Pos().Sline(), CLSCALLPRIVATE, node.Operator, instanceObj.Class.Name))
+	//		return NewError(node.Pos().Sline(), CLSCALLPRIVATE, node.Operator, instanceObj.Class.Name)
 	//	}
 
 	method := instanceObj.GetMethod(node.Operator)
@@ -2691,7 +2691,7 @@ func evalInstanceInfixExpression(node *ast.InfixExpression, left Object, right O
 			return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 		}
 	}
-	panic(NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type()))
+	return NewError(node.Pos().Sline(), INFIXOP, left.Type(), node.Operator, right.Type())
 }
 
 // IF macro statement: #ifdef xxx { block-statements } #else { block-statements }
@@ -2847,10 +2847,10 @@ func evalGrepExpression(ge *ast.GrepExpr, scope *Scope) Object {
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(ge.Pos().Sline(), GREPMAPNOTITERABLE))
+		return NewError(ge.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(ge.Pos().Sline(), GREPMAPNOTITERABLE))
+		return NewError(ge.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
 
 	var members []Object
@@ -2910,10 +2910,10 @@ func evalMapExpression(me *ast.MapExpr, scope *Scope) Object {
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(me.Pos().Sline(), GREPMAPNOTITERABLE))
+		return NewError(me.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(me.Pos().Sline(), GREPMAPNOTITERABLE))
+		return NewError(me.Pos().Sline(), GREPMAPNOTITERABLE)
 	}
 
 	var members []Object
@@ -2974,10 +2974,10 @@ func evalListComprehension(lc *ast.ListComprehension, scope *Scope) Object {
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(lc.Pos().Sline(), NOTITERABLE))
+		return NewError(lc.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(lc.Pos().Sline(), NOTITERABLE))
+		return NewError(lc.Pos().Sline(), NOTITERABLE)
 	}
 
 	var members []Object
@@ -3080,10 +3080,10 @@ func evalListMapComprehension(mc *ast.ListMapComprehension, scope *Scope) Object
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(mc.Pos().Sline(), NOTITERABLE))
+		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(mc.Pos().Sline(), NOTITERABLE))
+		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 
 	//must be a *Hash, if not, panic
@@ -3138,10 +3138,10 @@ func evalHashComprehension(hc *ast.HashComprehension, scope *Scope) Object {
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(hc.Pos().Sline(), NOTITERABLE))
+		return NewError(hc.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(hc.Pos().Sline(), NOTITERABLE))
+		return NewError(hc.Pos().Sline(), NOTITERABLE)
 	}
 
 	var members []Object
@@ -3254,10 +3254,10 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 
 	iterObj, ok := aValue.(Iterable) //must be Iterable
 	if !ok {
-		panic(NewError(mc.Pos().Sline(), NOTITERABLE))
+		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(mc.Pos().Sline(), NOTITERABLE))
+		return NewError(mc.Pos().Sline(), NOTITERABLE)
 	}
 
 	//must be a *Hash, if not, panic
@@ -3295,7 +3295,7 @@ func evalHashMapComprehension(mc *ast.HashMapComprehension, scope *Scope) Object
 			ret.Push(mc.Pos().Sline(), keyResult, valueResult)
 			//ret.Pairs[hashable.HashKey()] = HashPair{Key: keyResult, Value: valueResult}
 		} else {
-			panic(NewError(mc.Pos().Sline(), KEYERROR, keyResult.Type()))
+			return NewError(mc.Pos().Sline(), KEYERROR, keyResult.Type())
 		}
 	}
 
@@ -3465,10 +3465,10 @@ func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object 
 
 	iterObj, ok := aValue.(Iterable)
 	if !ok {
-		panic(NewError(fal.Pos().Sline(), NOTITERABLE))
+		return NewError(fal.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(fal.Pos().Sline(), NOTITERABLE))
+		return NewError(fal.Pos().Sline(), NOTITERABLE)
 	}
 
 	var members []Object
@@ -3672,10 +3672,10 @@ func evalForEachMapExpression(fml *ast.ForEachMapLoop, scope *Scope) Object { //
 
 	iterObj, ok := aValue.(Iterable)
 	if !ok {
-		panic(NewError(fml.Pos().Sline(), NOTITERABLE))
+		return NewError(fml.Pos().Sline(), NOTITERABLE)
 	}
 	if !iterObj.iter() {
-		panic(NewError(fml.Pos().Sline(), NOTITERABLE))
+		return NewError(fml.Pos().Sline(), NOTITERABLE)
 	}
 
 	//for index, value in arr
@@ -3739,12 +3739,12 @@ func evalForEachDotRangeExpression(fdr *ast.ForEachDotRange, scope *Scope) Objec
 
 	startIdx := Eval(fdr.StartIdx, innerScope)
 	//	if startIdx.Type() != INTEGER_OBJ {
-	//		panic(NewError(fdr.Pos().Sline(), RANGETYPEERROR, startIdx.Type()))
+	//		return NewError(fdr.Pos().Sline(), RANGETYPEERROR, startIdx.Type())
 	//	}
 
 	endIdx := Eval(fdr.EndIdx, innerScope)
 	//	if startIdx.Type() != INTEGER_OBJ {
-	//		panic(NewError(fdr.Pos().Sline(), RANGETYPEERROR, endIdx.Type()))
+	//		return NewError(fdr.Pos().Sline(), RANGETYPEERROR, endIdx.Type())
 	//	}
 
 	arr := evalRangeExpression(fdr, startIdx, endIdx, scope).(*Array)
@@ -3916,8 +3916,8 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 			if aFn, ok := aValue.(*Function); ok { //index expression
 				fn = aFn
 			} else {
-				reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
-				//panic(NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String()))
+				return reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
+				//return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
 			}
 		} else if builtin, ok := builtins[call.Function.String()]; ok {
 			args := evalArgs(call.Arguments, scope)
@@ -3932,13 +3932,13 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 
 			fn = aValue
 		} else {
-			reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
-			//panic(NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String()))
+			return reportTypoSuggestions(call.Function.Pos().Sline(), scope, call.Function.String())
+			//return NewError(call.Function.Pos().Sline(), UNKNOWNIDENT, call.Function.String())
 		}
 	}
 
 	if fn.Type() == CLASS_OBJ {
-		panic(NewError(call.Function.Pos().Sline(), CLASSCREATEERROR, call.Function.String()))
+		return NewError(call.Function.Pos().Sline(), CLASSCREATEERROR, call.Function.String())
 	}
 
 	f := fn.(*Function)
@@ -3969,7 +3969,7 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 	if ok {
 		if thisObj.Type() == CLASS_OBJ { // 'this' refers to Class object iteself
 			if !f.Literal.StaticFlag { //not static
-				panic(NewError(call.Function.Pos().Sline(), CALLNONSTATICERROR))
+				return NewError(call.Function.Pos().Sline(), CALLNONSTATICERROR)
 			}
 		} else { // 'this' refers to Class object instance
 			//instance method could call static method
@@ -4204,7 +4204,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if ok {
 				// check if it's a static variable
 				if instanceObj.IsStatic(o.Value, ClassMemberKind) {
-					panic(NewError(call.Call.Pos().Sline(), MEMBERUSEERROR, o.Value, instanceObj.Class.Name))
+					return NewError(call.Call.Pos().Sline(), MEMBERUSEERROR, o.Value, instanceObj.Class.Name)
 				}
 
 				switch val.(type) {
@@ -4220,11 +4220,11 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if p != nil {
 				// check if it's a static variable
 				if instanceObj.IsStatic(o.Value, ClassPropertyKind) {
-					panic(NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name))
+					return NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name)
 				}
 
 				if p.Getter == nil { //property xxx { set; }
-					panic(NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name))
+					return NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, instanceObj.Class.Name)
 				} else {
 					if len(p.Getter.Body.Statements) == 0 { //property xxx { get; }
 						v, _ := instanceObj.Scope.Get("_" + o.Value)
@@ -4239,7 +4239,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				}
 			}
 			reportTypoSuggestions(call.Call.Pos().Sline(), instanceObj.Scope, o.Value)
-			//panic(NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, o.Value))
+			//return NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, o.Value)
 
 		case *ast.CallExpression:
 			//e.g. instanceObj.method()
@@ -4247,7 +4247,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 
 			isStatic := instanceObj.IsStatic(fname, ClassMethodKind)
 			if isStatic {
-				panic(NewError(call.Call.Pos().Sline(), GENERICERROR, "Method is static!"))
+				return NewError(call.Call.Pos().Sline(), GENERICERROR, "Method is static!")
 			}
 
 			method := instanceObj.GetMethod(fname)
@@ -4265,8 +4265,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return evalFunctionDirect(builtinMethod, args, instanceObj, aScope, nil)
 				}
 			}
-			panic(NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type()))
-			return NIL
+			return NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type())
 		}
 	case *Class:
 		clsObj := m
@@ -4310,13 +4309,13 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			if p == nil { //not property, it's a member
 				// check if it's a static member
 				if !clsObj.IsStatic(o.Value, ClassMemberKind) {
-					panic(NewError(call.Call.Pos().Sline(), MEMBERUSEERROR, o.Value, clsObj.Name))
+					return NewError(call.Call.Pos().Sline(), MEMBERUSEERROR, o.Value, clsObj.Name)
 				}
 				val, ok = clsObj.Scope.Get(o.Value)
 			} else {
 				// check if it's a static property
 				if !clsObj.IsStatic(o.Value, ClassPropertyKind) {
-					panic(NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, clsObj.Name))
+					return NewError(call.Call.Pos().Sline(), PROPERTYUSEERROR, o.Value, clsObj.Name)
 				}
 				val, ok = clsObj.Scope.Get(o.Value)
 			}
@@ -4353,7 +4352,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 				if !isStatic {
 					objName := str
 					if objName != "parent" { // e.g. parent.method(parameters)
-						panic(NewError(call.Call.Pos().Sline(), CALLNONSTATICERROR))
+						return NewError(call.Call.Pos().Sline(), CALLNONSTATICERROR)
 					}
 				}
 
@@ -4368,7 +4367,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return evalFunctionDirect(builtinMethod, args, nil, aScope, nil)
 				}
 			} else {
-				reportTypoSuggestionsMeth(call.Call.Pos().Sline(), scope, clsObj.Name, fname)
+				return reportTypoSuggestionsMeth(call.Call.Pos().Sline(), scope, clsObj.Name, fname)
 				//args := evalArgs(o.Arguments, scope)
 				//return clsObj.CallMethod(call.Call.Pos().Sline(), scope, fname, args...)
 			}
@@ -4431,7 +4430,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 		}
 	}
 
-	panic(NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type()))
+	return NewError(call.Call.Pos().Sline(), NOMETHODERROR, call.String(), obj.Type())
 
 }
 
@@ -4461,7 +4460,7 @@ func evalIndexExpression(ie *ast.IndexExpression, scope *Scope) Object {
 	case *ObjectInstance: //class indexer's getter
 		return evalClassInstanceIndexer(iterable, ie, scope)
 	}
-	panic(NewError(ie.Pos().Sline(), NOINDEXERROR, left.Type()))
+	return NewError(ie.Pos().Sline(), NOINDEXERROR, left.Type())
 }
 
 func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpression, scope *Scope) Object {
@@ -4478,7 +4477,7 @@ func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpressi
 	if p != nil {
 		//no getter or getter block is empty, e.g. 'property xxx { get; }'
 		if p.Getter == nil || len(p.Getter.Body.Statements) == 0 {
-			panic(NewError(ie.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name))
+			return NewError(ie.Pos().Sline(), INDEXERUSEERROR, instanceObj.Class.Name)
 		} else {
 			newScope := NewScope(instanceObj.Scope)
 
@@ -4501,7 +4500,7 @@ func evalClassInstanceIndexer(instanceObj *ObjectInstance, ie *ast.IndexExpressi
 		}
 	}
 
-	panic(NewError(ie.Pos().Sline(), INDEXNOTFOUNDERROR, instanceObj.Class.Name))
+	return NewError(ie.Pos().Sline(), INDEXNOTFOUNDERROR, instanceObj.Class.Name)
 }
 
 func evalStringIndex(str *String, ie *ast.IndexExpression, scope *Scope) Object {
@@ -4529,7 +4528,7 @@ func evalStringIndex(str *String, ie *ast.IndexExpression, scope *Scope) Object 
 	}
 
 	if idx >= length || idx < 0 {
-		panic(NewError(ie.Pos().Sline(), INDEXERROR, idx))
+		return NewError(ie.Pos().Sline(), INDEXERROR, idx)
 	}
 
 	return NewString(string([]rune(str.String)[idx])) //support utf8,not very efficient
@@ -4555,7 +4554,7 @@ func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scop
 		idx = int64(o.UInt64)
 	}
 	if idx >= length || idx < 0 {
-		panic(NewError(se.Pos().Sline(), INDEXERROR, idx))
+		return NewError(se.Pos().Sline(), INDEXERROR, idx)
 	}
 
 	if se.EndIndex == nil {
@@ -4573,10 +4572,10 @@ func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scop
 			slice = int64(o.UInt64)
 		}
 		if slice >= (length + 1) {
-			panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+			return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 		}
 		if slice < 0 {
-			panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+			return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 		}
 	}
 	if idx == 0 && slice == length {
@@ -4584,7 +4583,7 @@ func evalStringSliceExpression(str *String, se *ast.SliceExpression, scope *Scop
 	}
 
 	if slice < idx {
-		panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+		return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 	}
 
 	runes := []rune(str.String)
@@ -4637,7 +4636,7 @@ func evalArraySliceExpression(array *Array, se *ast.SliceExpression, scope *Scop
 	}
 
 	if idx < 0 {
-		panic(NewError(se.Pos().Sline(), INDEXERROR, idx))
+		return NewError(se.Pos().Sline(), INDEXERROR, idx)
 	}
 
 	if idx >= length {
@@ -4664,7 +4663,7 @@ func evalArraySliceExpression(array *Array, se *ast.SliceExpression, scope *Scop
 			}
 		}
 		if slice >= (length+1) || slice < 0 {
-			panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+			return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 		}
 	}
 	if idx == 0 && slice == length {
@@ -4672,7 +4671,7 @@ func evalArraySliceExpression(array *Array, se *ast.SliceExpression, scope *Scop
 	}
 
 	if slice < idx {
-		panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+		return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 	}
 
 	if slice == length {
@@ -4704,7 +4703,7 @@ func evalArrayIndex(array *Array, ie *ast.IndexExpression, scope *Scope) Object 
 		}
 	}
 	if idx < 0 {
-		panic(NewError(ie.Pos().Sline(), INDEXERROR, idx))
+		return NewError(ie.Pos().Sline(), INDEXERROR, idx)
 	}
 	if idx >= length {
 		return NIL
@@ -4730,7 +4729,7 @@ func evalTupleSliceExpression(tuple *Tuple, se *ast.SliceExpression, scope *Scop
 		idx = int64(o.UInt64)
 	}
 	if idx < 0 {
-		panic(NewError(se.Pos().Sline(), INDEXERROR, idx))
+		return NewError(se.Pos().Sline(), INDEXERROR, idx)
 	}
 
 	if idx >= length {
@@ -4752,7 +4751,7 @@ func evalTupleSliceExpression(tuple *Tuple, se *ast.SliceExpression, scope *Scop
 			slice = int64(o.UInt64)
 		}
 		if slice >= (length+1) || slice < 0 {
-			panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+			return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 		}
 	}
 	if idx == 0 && slice == length {
@@ -4760,7 +4759,7 @@ func evalTupleSliceExpression(tuple *Tuple, se *ast.SliceExpression, scope *Scop
 	}
 
 	if slice < idx {
-		panic(NewError(se.Pos().Sline(), SLICEERROR, idx, slice))
+		return NewError(se.Pos().Sline(), SLICEERROR, idx, slice)
 	}
 
 	if slice == length {
@@ -4794,7 +4793,7 @@ func evalTupleIndex(tuple *Tuple, ie *ast.IndexExpression, scope *Scope) Object 
 	}
 
 	if idx < 0 {
-		panic(NewError(ie.Pos().Sline(), INDEXERROR, idx))
+		return NewError(ie.Pos().Sline(), INDEXERROR, idx)
 	}
 	if idx >= length {
 		return NIL
@@ -4816,7 +4815,7 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scop
 				//do nothing for now
 			}
 		}
-		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
+		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
 	}
 
 	switch node.Operator {
@@ -4825,7 +4824,7 @@ func evalPostfixExpression(left Object, node *ast.PostfixExpression, scope *Scop
 	case "--":
 		return evalDecrementPostfixOperatorExpression(node, left, scope)
 	default:
-		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
+		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
 	}
 }
 
@@ -4847,7 +4846,7 @@ func evalIncrementPostfixOperatorExpression(node *ast.PostfixExpression, left Ob
 		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 + 1))
 		return returnVal
 	default:
-		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
+		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
 	}
 }
 
@@ -4869,7 +4868,7 @@ func evalDecrementPostfixOperatorExpression(node *ast.PostfixExpression, left Ob
 		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 - 1))
 		return returnVal
 	default:
-		panic(NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type()))
+		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
 	}
 }
 
@@ -4909,7 +4908,7 @@ func evalTryStatement(ts *ast.TryStmt, scope *Scope) Object {
 				} else {
 					valStr, ok2 := val.(*String)
 					if !ok2 {
-						panic(NewError(cs.Pos().Sline(), THROWERROR))
+						return NewError(cs.Pos().Sline(), THROWERROR)
 					}
 					cs.Var = valStr.String
 				}
@@ -4976,7 +4975,7 @@ func evalSpawnStatement(s *ast.SpawnStmt, scope *Scope) Object {
 			evalMethodCallExpression(callExp, newSpawnScope)
 		})()
 	default:
-		panic(NewError(s.Pos().Sline(), SPAWNERROR))
+		return NewError(s.Pos().Sline(), SPAWNERROR)
 	}
 
 	return NIL
@@ -5022,7 +5021,7 @@ func evalClassStatement(c *ast.ClassStatement, scope *Scope) Object {
 	if c.CategoryName != nil { //it's a class category
 		clsObj, ok := scope.Get(c.Name.Value)
 		if !ok {
-			panic(NewError(c.Pos().Sline(), CLASSCATEGORYERROR, c.Name, c.CategoryName))
+			return NewError(c.Pos().Sline(), CLASSCATEGORYERROR, c.Name, c.CategoryName)
 		}
 
 		//category only support methods and properties
@@ -5056,12 +5055,12 @@ func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
 
 		parent, ok := scope.Get(c.Parent)
 		if !ok {
-			panic(NewError(c.Pos().Sline(), PARENTNOTDECL, c.Parent))
+			return NewError(c.Pos().Sline(), PARENTNOTDECL, c.Parent)
 		}
 
 		parentClass, ok = parent.(*Class)
 		if !ok {
-			panic(NewError(c.Pos().Sline(), NOTCLASSERROR, c.Parent))
+			return NewError(c.Pos().Sline(), NOTCLASSERROR, c.Parent)
 		}
 	}
 
@@ -5099,12 +5098,12 @@ func evalClassLiteral(c *ast.ClassLiteral, scope *Scope) Object {
 	}
 
 	//check if the method has @Override annotation, if so, search
-	//the method in parent hierarchical, if not found, then panic.
+	//the method in parent hierarchical, if not found, then return error.
 	for methodName, fnStmt := range c.Methods {
 		for _, anno := range fnStmt.Annotations {
 			if anno.Name.Value == OVERRIDE_ANNOCLASS.Name {
 				if clsObj.Parent.GetMethod(methodName) == nil {
-					panic(NewError(fnStmt.FunctionLiteral.Pos().Sline(), OVERRIDEERROR, methodName, clsObj.Name))
+					return NewError(fnStmt.FunctionLiteral.Pos().Sline(), OVERRIDEERROR, methodName, clsObj.Name)
 				}
 			}
 		}
@@ -5118,17 +5117,17 @@ func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
 	if c.Parent != "" {
 		parent, ok := scope.Get(c.Parent)
 		if !ok {
-			panic(NewError(c.Pos().Sline(), PARENTNOTDECL, c.Parent))
+			return NewError(c.Pos().Sline(), PARENTNOTDECL, c.Parent)
 		}
 
 		parentClass, ok = parent.(*Class)
 		if !ok {
-			panic(NewError(c.Pos().Sline(), NOTCLASSERROR, c.Parent))
+			return NewError(c.Pos().Sline(), NOTCLASSERROR, c.Parent)
 		}
 	}
 
 	if parentClass != BASE_CLASS && !parentClass.IsAnnotation { //parent not annotation
-		panic(NewError(c.Pos().Sline(), PARENTNOTANNOTATION, c.Name, parentClass.Name))
+		return NewError(c.Pos().Sline(), PARENTNOTANNOTATION, c.Name, parentClass.Name)
 	}
 
 	clsObj := &Class{
@@ -5150,12 +5149,12 @@ func evalClassLiterlForAnno(c *ast.ClassLiteral, scope *Scope) Object {
 func evalNewExpression(n *ast.NewExpression, scope *Scope) Object {
 	class := Eval(n.Class, scope)
 	if class == NIL || class == nil {
-		panic(NewError(n.Pos().Sline(), CLSNOTDEFINE, n.Class))
+		return NewError(n.Pos().Sline(), CLSNOTDEFINE, n.Class)
 	}
 
 	clsObj, ok := class.(*Class)
 	if !ok {
-		panic(NewError(n.Pos().Sline(), NOTCLASSERROR, n.Class))
+		return NewError(n.Pos().Sline(), NOTCLASSERROR, n.Class)
 	}
 
 	tmpClass := clsObj
@@ -5258,7 +5257,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 	case *Function:
 		fn.Instance = instance
 		//		if len(args) < len(fn.Literal.Parameters) {
-		//			panic(NewError("", GENERICERROR, "Not enough parameters to call function"))
+		//			return NewError("", GENERICERROR, "Not enough parameters to call function")
 		//		}
 
 		newScope := NewScope(scope)
@@ -5336,7 +5335,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 		return fn.Fn("", fn.Instance, scope, args...)
 	}
 
-	panic(NewError("", GENERICERROR, fn.Type()+" is not a function"))
+	return NewError("", GENERICERROR, fn.Type()+" is not a function")
 }
 
 //evaluate 'using' statement
@@ -5634,7 +5633,7 @@ func evalServiceStatement(s *ast.ServiceStatement, scope *Scope) Object {
 		}
 
 		if !hasUrl {
-			panic(NewError(s.Pos().Sline(), SERVICENOURLERROR, s.Name.Value, fnStmt.Name.Value))
+			return NewError(s.Pos().Sline(), SERVICENOURLERROR, s.Name.Value, fnStmt.Name.Value)
 		}
 
 		if methodArr != nil {
@@ -5677,7 +5676,7 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 		case *UInteger:
 			endVal = int64(o.UInt64)
 		default:
-			panic(NewError(node.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ+"|"+UINTEGER_OBJ, endIdx.Type()))
+			return NewError(node.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ+"|"+UINTEGER_OBJ, endIdx.Type())
 		}
 
 		var j int64
@@ -5700,7 +5699,7 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 		case *UInteger:
 			endVal = o.UInt64
 		default:
-			panic(NewError(node.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ+"|"+UINTEGER_OBJ, endIdx.Type()))
+			return NewError(node.Pos().Sline(), RANGETYPEERROR, INTEGER_OBJ+"|"+UINTEGER_OBJ, endIdx.Type())
 		}
 
 		var j uint64
@@ -5716,7 +5715,7 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 	case *String:
 		startVal := startIdx.(*String).String
 		if endIdx.Type() != STRING_OBJ {
-			panic(NewError(node.Pos().Sline(), RANGETYPEERROR, STRING_OBJ, endIdx.Type()))
+			return NewError(node.Pos().Sline(), RANGETYPEERROR, STRING_OBJ, endIdx.Type())
 		}
 		endVal := endIdx.(*String).String
 
@@ -5885,25 +5884,25 @@ func compareGoObj(left, right Object) bool {
 
 // user typo probs, add better error message here, 'Did you mean... ___?'
 // Used for reporting IDENTIFIER not found.
-func reportTypoSuggestions(line string, scope *Scope, miss string) {
+func reportTypoSuggestions(line string, scope *Scope, miss string) Object {
 	keys := scope.GetKeys()
 	found := TypoSuggestions(keys, miss)
 	if len(found) != 0 { //found suggestions
-		panic(NewError(line, UNKNOWNIDENTEX, miss, strings.Join(found, ", ")))
+		return NewError(line, UNKNOWNIDENTEX, miss, strings.Join(found, ", "))
 	} else {
-		panic(NewError(line, UNKNOWNIDENT, miss))
+		return NewError(line, UNKNOWNIDENT, miss)
 	}
 }
 
 // user typo probs, add better error message here, 'Did you mean... ___?'
 // Used for reporting METHOD not found.
-func reportTypoSuggestionsMeth(line string, scope *Scope, objName string, miss string) {
+func reportTypoSuggestionsMeth(line string, scope *Scope, objName string, miss string) Object {
 	keys := scope.GetKeys()
 	found := TypoSuggestions(keys, miss)
 	if len(found) != 0 { //found suggestions
-		panic(NewError(line, NOMETHODERROREX, miss, objName, strings.Join(found, ", ")))
+		return NewError(line, NOMETHODERROREX, miss, objName, strings.Join(found, ", "))
 	} else {
-		panic(NewError(line, NOMETHODERROR, miss, objName))
+		return NewError(line, NOMETHODERROR, miss, objName)
 	}
 }
 

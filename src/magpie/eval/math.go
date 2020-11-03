@@ -100,12 +100,12 @@ func (m *Math) CallMethod(line string, scope *Scope, method string, args ...Obje
 	case "rand":
 		return m.Rand(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, m.Type()))
+	return NewError(line, NOMETHODERROR, method, m.Type())
 }
 
 func (m *Math) Abs(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -117,7 +117,7 @@ func (m *Math) Abs(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "abs", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "abs", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Abs(val.Float64))
@@ -125,7 +125,7 @@ func (m *Math) Abs(line string, args ...Object) Object {
 
 func (m *Math) Acos(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -137,7 +137,7 @@ func (m *Math) Acos(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "acos", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "acos", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Acos(val.Float64))
@@ -145,7 +145,7 @@ func (m *Math) Acos(line string, args ...Object) Object {
 
 func (m *Math) Acosh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -157,7 +157,7 @@ func (m *Math) Acosh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "acosh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "acosh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Acosh(val.Float64))
@@ -165,7 +165,7 @@ func (m *Math) Acosh(line string, args ...Object) Object {
 
 func (m *Math) Asin(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -177,7 +177,7 @@ func (m *Math) Asin(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "asin", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "asin", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Asin(val.Float64))
@@ -185,7 +185,7 @@ func (m *Math) Asin(line string, args ...Object) Object {
 
 func (m *Math) Asinh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -197,7 +197,7 @@ func (m *Math) Asinh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "asinh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "asinh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Asinh(val.Float64))
@@ -205,7 +205,7 @@ func (m *Math) Asinh(line string, args ...Object) Object {
 
 func (m *Math) Atan(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -217,7 +217,7 @@ func (m *Math) Atan(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "atan", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "atan", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Atan(val.Float64))
@@ -225,7 +225,7 @@ func (m *Math) Atan(line string, args ...Object) Object {
 
 func (m *Math) Atan2(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var val1 *Float
@@ -237,7 +237,7 @@ func (m *Math) Atan2(line string, args ...Object) Object {
 	case *Float:
 		val1 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "atan2", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "atan2", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	var val2 *Float
@@ -249,7 +249,7 @@ func (m *Math) Atan2(line string, args ...Object) Object {
 	case *Float:
 		val2 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "atan2", "*Integer|*UInteger|*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "atan2", "*Integer|*UInteger|*Float", args[1].Type())
 	}
 
 	return NewFloat(math.Atan2(val1.Float64, val2.Float64))
@@ -257,7 +257,7 @@ func (m *Math) Atan2(line string, args ...Object) Object {
 
 func (m *Math) Atanh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -269,7 +269,7 @@ func (m *Math) Atanh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "atanh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "atanh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Atanh(val.Float64))
@@ -277,7 +277,7 @@ func (m *Math) Atanh(line string, args ...Object) Object {
 
 func (m *Math) Ceil(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -289,7 +289,7 @@ func (m *Math) Ceil(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "ceil", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "ceil", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Ceil(val.Float64))
@@ -297,7 +297,7 @@ func (m *Math) Ceil(line string, args ...Object) Object {
 
 func (m *Math) Cos(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -309,7 +309,7 @@ func (m *Math) Cos(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "cos", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "cos", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Cos(val.Float64))
@@ -317,7 +317,7 @@ func (m *Math) Cos(line string, args ...Object) Object {
 
 func (m *Math) Cosh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -329,7 +329,7 @@ func (m *Math) Cosh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "cosh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "cosh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Cosh(val.Float64))
@@ -337,7 +337,7 @@ func (m *Math) Cosh(line string, args ...Object) Object {
 
 func (m *Math) Exp(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -349,7 +349,7 @@ func (m *Math) Exp(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "exp", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "exp", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Exp(val.Float64))
@@ -357,7 +357,7 @@ func (m *Math) Exp(line string, args ...Object) Object {
 
 func (m *Math) Floor(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -369,7 +369,7 @@ func (m *Math) Floor(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "floor", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "floor", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Floor(val.Float64))
@@ -377,7 +377,7 @@ func (m *Math) Floor(line string, args ...Object) Object {
 
 func (m *Math) Inf(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Integer
@@ -389,7 +389,7 @@ func (m *Math) Inf(line string, args ...Object) Object {
 	case *Float:
 		val = NewInteger(int64(input.Float64))
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "inf", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "inf", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Inf(int(val.Int64)))
@@ -397,7 +397,7 @@ func (m *Math) Inf(line string, args ...Object) Object {
 
 func (m *Math) IsInf(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var val1 *Float
@@ -409,7 +409,7 @@ func (m *Math) IsInf(line string, args ...Object) Object {
 	case *Float:
 		val1 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "isInf", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isInf", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	var val2 *Integer
@@ -421,7 +421,7 @@ func (m *Math) IsInf(line string, args ...Object) Object {
 	case *Float:
 		val2 = NewInteger(int64(input.Float64))
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "isInf", "*Integer|*UInteger|*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "isInf", "*Integer|*UInteger|*Float", args[1].Type())
 	}
 
 	ret := math.IsInf(val1.Float64, int(val2.Int64))
@@ -433,7 +433,7 @@ func (m *Math) IsInf(line string, args ...Object) Object {
 
 func (m *Math) IsNaN(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -445,7 +445,7 @@ func (m *Math) IsNaN(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "isNaN", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isNaN", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	ret := math.IsNaN(val.Float64)
@@ -457,7 +457,7 @@ func (m *Math) IsNaN(line string, args ...Object) Object {
 
 func (m *Math) Max(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var val1 *Float
@@ -469,7 +469,7 @@ func (m *Math) Max(line string, args ...Object) Object {
 	case *Float:
 		val1 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "max", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "max", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	var val2 *Float
@@ -481,7 +481,7 @@ func (m *Math) Max(line string, args ...Object) Object {
 	case *Float:
 		val2 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "max", "*Integer|*UInteger|*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "max", "*Integer|*UInteger|*Float", args[1].Type())
 	}
 
 	return NewFloat(math.Max(val1.Float64, val2.Float64))
@@ -489,7 +489,7 @@ func (m *Math) Max(line string, args ...Object) Object {
 
 func (m *Math) Min(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var val1 *Float
@@ -501,7 +501,7 @@ func (m *Math) Min(line string, args ...Object) Object {
 	case *Float:
 		val1 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "min", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "min", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	var val2 *Float
@@ -513,7 +513,7 @@ func (m *Math) Min(line string, args ...Object) Object {
 	case *Float:
 		val2 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "min", "*Integer|*UInteger|*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "min", "*Integer|*UInteger|*Float", args[1].Type())
 	}
 
 	return NewFloat(math.Min(val1.Float64, val2.Float64))
@@ -521,7 +521,7 @@ func (m *Math) Min(line string, args ...Object) Object {
 
 func (m *Math) NaN(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewFloat(math.NaN())
@@ -529,7 +529,7 @@ func (m *Math) NaN(line string, args ...Object) Object {
 
 func (m *Math) Pow(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	var val1 *Float
@@ -541,7 +541,7 @@ func (m *Math) Pow(line string, args ...Object) Object {
 	case *Float:
 		val1 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "pow", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pow", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	var val2 *Float
@@ -553,7 +553,7 @@ func (m *Math) Pow(line string, args ...Object) Object {
 	case *Float:
 		val2 = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "pow", "*Integer|*UInteger|*Float", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "pow", "*Integer|*UInteger|*Float", args[1].Type())
 	}
 
 	return NewFloat(math.Pow(val1.Float64, val2.Float64))
@@ -561,7 +561,7 @@ func (m *Math) Pow(line string, args ...Object) Object {
 
 func (m *Math) Sin(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -573,7 +573,7 @@ func (m *Math) Sin(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "sin", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sin", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Sin(val.Float64))
@@ -581,7 +581,7 @@ func (m *Math) Sin(line string, args ...Object) Object {
 
 func (m *Math) Sinh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -593,7 +593,7 @@ func (m *Math) Sinh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "sinh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sinh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Sinh(val.Float64))
@@ -601,7 +601,7 @@ func (m *Math) Sinh(line string, args ...Object) Object {
 
 func (m *Math) Sqrt(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -613,7 +613,7 @@ func (m *Math) Sqrt(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "sqrt", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sqrt", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Sqrt(val.Float64))
@@ -621,7 +621,7 @@ func (m *Math) Sqrt(line string, args ...Object) Object {
 
 func (m *Math) Tan(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -633,7 +633,7 @@ func (m *Math) Tan(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "tan", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "tan", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Tan(val.Float64))
@@ -641,7 +641,7 @@ func (m *Math) Tan(line string, args ...Object) Object {
 
 func (m *Math) Tanh(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Float
@@ -653,7 +653,7 @@ func (m *Math) Tanh(line string, args ...Object) Object {
 	case *Float:
 		val = input
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "tanh", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "tanh", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	return NewFloat(math.Tanh(val.Float64))
@@ -661,7 +661,7 @@ func (m *Math) Tanh(line string, args ...Object) Object {
 
 func (m *Math) RandSeed(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var val *Integer
@@ -673,7 +673,7 @@ func (m *Math) RandSeed(line string, args ...Object) Object {
 	case *Float:
 		val = NewInteger(int64(input.Float64))
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "randseed", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "randseed", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	rand.Seed(val.Int64)
@@ -694,7 +694,7 @@ func (m *Math) Rand(line string, args ...Object) Object {
 		case *Float:
 			val = NewInteger(int64(input.Float64))
 		default:
-			panic(NewError(line, PARAMTYPEERROR, "first", "rand", "*Integer|*UInteger|*Float", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "rand", "*Integer|*UInteger|*Float", args[0].Type())
 		}
 		return NewInteger(int64(rand.Intn(int(val.Int64))))
 	default:
@@ -707,7 +707,7 @@ func (m *Math) Rand(line string, args ...Object) Object {
 		case *Float:
 			low = NewInteger(int64(input.Float64))
 		default:
-			panic(NewError(line, PARAMTYPEERROR, "first", "rand", "*Integer|*UInteger|*Float", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "rand", "*Integer|*UInteger|*Float", args[0].Type())
 		}
 
 		var high *Integer
@@ -719,7 +719,7 @@ func (m *Math) Rand(line string, args ...Object) Object {
 		case *Float:
 			high = NewInteger(int64(input.Float64))
 		default:
-			panic(NewError(line, PARAMTYPEERROR, "second", "rand", "*Integer|*UInteger|*Float", args[1].Type()))
+			return NewError(line, PARAMTYPEERROR, "second", "rand", "*Integer|*UInteger|*Float", args[1].Type())
 		}
 
 		rand.Seed(time.Now().UnixNano())

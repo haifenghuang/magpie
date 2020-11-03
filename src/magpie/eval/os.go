@@ -114,12 +114,12 @@ func (o *Os) CallMethod(line string, scope *Scope, method string, args ...Object
 	case "isExist":
 		return o.IsExist(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, o.Type()))
+	return NewError(line, NOMETHODERROR, method, o.Type())
 }
 
 func (o *Os) Args(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	arr := &Array{}
@@ -132,12 +132,12 @@ func (o *Os) Args(line string, args ...Object) Object {
 
 func (o *Os) Getenv(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "getenv", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "getenv", "*String", args[0].Type())
 	}
 
 	ret := os.Getenv(key.String)
@@ -146,17 +146,17 @@ func (o *Os) Getenv(line string, args ...Object) Object {
 
 func (o *Os) Setenv(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setenv", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setenv", "*String", args[0].Type())
 	}
 
 	value, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "setenv", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "setenv", "*String", args[1].Type())
 	}
 
 	err := os.Setenv(key.String, value.String)
@@ -168,7 +168,7 @@ func (o *Os) Setenv(line string, args ...Object) Object {
 
 func (o *Os) Clearenv(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	os.Clearenv()
@@ -177,7 +177,7 @@ func (o *Os) Clearenv(line string, args ...Object) Object {
 
 func (o *Os) Getwd(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, err := os.Getwd()
@@ -189,12 +189,12 @@ func (o *Os) Getwd(line string, args ...Object) Object {
 
 func (o *Os) Chdir(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	newDir, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "chdir", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "chdir", "*String", args[0].Type())
 	}
 
 	err := os.Chdir(newDir.String)
@@ -206,17 +206,17 @@ func (o *Os) Chdir(line string, args ...Object) Object {
 
 func (o *Os) Chmod(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "chmod", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "chmod", "*String", args[0].Type())
 	}
 
 	mode, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "chmod", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "chmod", "*Integer", args[1].Type())
 	}
 
 	err := os.Chmod(name.String, os.FileMode(mode.Int64))
@@ -229,22 +229,22 @@ func (o *Os) Chmod(line string, args ...Object) Object {
 
 func (o *Os) Chown(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "chown", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "chown", "*String", args[0].Type())
 	}
 
 	uid, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "chown", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "chown", "*Integer", args[1].Type())
 	}
 
 	gid, ok := args[2].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "chown", "*Integer", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "chown", "*Integer", args[2].Type())
 	}
 
 	err := os.Chown(name.String, int(uid.Int64), int(gid.Int64))
@@ -256,17 +256,17 @@ func (o *Os) Chown(line string, args ...Object) Object {
 
 func (o *Os) Mkdir(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "mkdir", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "mkdir", "*String", args[0].Type())
 	}
 
 	perm, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "mkdir", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "mkdir", "*Integer", args[1].Type())
 	}
 
 	err := os.Mkdir(name.String, os.FileMode(perm.Int64))
@@ -278,17 +278,17 @@ func (o *Os) Mkdir(line string, args ...Object) Object {
 
 func (o *Os) MkdirAll(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "mkdirAll", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "mkdirAll", "*String", args[0].Type())
 	}
 
 	perm, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "mkdirAll", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "mkdirAll", "*Integer", args[1].Type())
 	}
 
 	err := os.MkdirAll(path.String, os.FileMode(perm.Int64))
@@ -300,17 +300,17 @@ func (o *Os) MkdirAll(line string, args ...Object) Object {
 
 func (o *Os) Truncate(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "truncate", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "truncate", "*String", args[0].Type())
 	}
 
 	size, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "truncate", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "truncate", "*Integer", args[1].Type())
 	}
 
 	err := os.Truncate(name.String, size.Int64)
@@ -322,12 +322,12 @@ func (o *Os) Truncate(line string, args ...Object) Object {
 
 func (o *Os) Remove(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "remove", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "remove", "*String", args[0].Type())
 	}
 
 	err := os.Remove(name.String)
@@ -339,12 +339,12 @@ func (o *Os) Remove(line string, args ...Object) Object {
 
 func (o *Os) RemoveAll(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	path, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "removeAll", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "removeAll", "*String", args[0].Type())
 	}
 
 	err := os.RemoveAll(path.String)
@@ -358,12 +358,12 @@ func (o *Os) RemoveAll(line string, args ...Object) Object {
 //{name: bb.my, size: 240, mode: 438, isDir: false}
 func (o *Os) Stat(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "stat", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "stat", "*String", args[0].Type())
 	}
 
 	fi, err := os.Stat(name.String)
@@ -402,12 +402,12 @@ func (o *Os) Stat(line string, args ...Object) Object {
 
 func (o *Os) RunCmd(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	cmd, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "runCmd", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "runCmd", "*String", args[0].Type())
 	}
 
 	var params []string
@@ -415,7 +415,7 @@ func (o *Os) RunCmd(line string, args ...Object) Object {
 	for idx, arg := range arr {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "The remaining", "runCmd", "*String", arr[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "The remaining", "runCmd", "*String", arr[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -431,12 +431,12 @@ func (o *Os) RunCmd(line string, args ...Object) Object {
 
 func (o *Os) Unsetenv(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	key, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "unsetenv", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "unsetenv", "*String", args[0].Type())
 	}
 
 	err := os.Unsetenv(key.String)
@@ -448,7 +448,7 @@ func (o *Os) Unsetenv(line string, args ...Object) Object {
 
 func (o *Os) Environ(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	envs := os.Environ()
@@ -470,7 +470,7 @@ func (o *Os) Environ(line string, args ...Object) Object {
 
 func (o *Os) Exit(line string, args ...Object) Object {
 	if len(args) != 0 && len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", len(args)))
+		return NewError(line, ARGUMENTERROR, "0|1", len(args))
 	}
 
 	if len(args) == 0 {
@@ -480,7 +480,7 @@ func (o *Os) Exit(line string, args ...Object) Object {
 
 	code, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "exit", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "exit", "*Integer", args[0].Type())
 	}
 
 	os.Exit(int(code.Int64))
@@ -490,22 +490,22 @@ func (o *Os) Exit(line string, args ...Object) Object {
 
 func (o *Os) Expand(scope *Scope, line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	s, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "expand", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "expand", "*String", args[0].Type())
 	}
 
 	block, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "expand", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "expand", "*Function", args[1].Type())
 	}
 
 	paramCount := len(block.Literal.Parameters)
 	if paramCount != 1 {
-		panic(NewError(line, FUNCCALLBACKERROR, 1, paramCount))
+		return NewError(line, FUNCCALLBACKERROR, 1, paramCount)
 	}
 
 	ret := os.Expand(s.String, func(s string) string {
@@ -532,12 +532,12 @@ func evalExpandMappingFunc(scope *Scope, f *Function, s string) string {
 
 func (o *Os) ExpandEnv(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	s, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "expandEnv", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "expandEnv", "*String", args[0].Type())
 	}
 
 	ret := os.ExpandEnv(s.String)
@@ -547,7 +547,7 @@ func (o *Os) ExpandEnv(line string, args ...Object) Object {
 
 func (o *Os) Hostname(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret, err := os.Hostname()
@@ -560,17 +560,17 @@ func (o *Os) Hostname(line string, args ...Object) Object {
 
 func (o *Os) Link(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	oldName, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "link", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "link", "*String", args[0].Type())
 	}
 
 	newName, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "link", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "link", "*String", args[1].Type())
 	}
 
 	err := os.Link(oldName.String, newName.String)
@@ -583,12 +583,12 @@ func (o *Os) Link(line string, args ...Object) Object {
 
 func (o *Os) Readlink(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	name, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "readlink", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "readlink", "*String", args[0].Type())
 	}
 
 	ret, err := os.Readlink(name.String)
@@ -601,17 +601,17 @@ func (o *Os) Readlink(line string, args ...Object) Object {
 
 func (o *Os) Rename(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	oldPath, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "rename", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "rename", "*String", args[0].Type())
 	}
 
 	newPath, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "rename", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "rename", "*String", args[1].Type())
 	}
 
 	err := os.Rename(oldPath.String, newPath.String)
@@ -624,7 +624,7 @@ func (o *Os) Rename(line string, args ...Object) Object {
 
 func (o *Os) TempDir(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(os.TempDir())
@@ -632,17 +632,17 @@ func (o *Os) TempDir(line string, args ...Object) Object {
 
 func (o *Os) CopyFile(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	dst, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "copyFile", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "copyFile", "*String", args[0].Type())
 	}
 
 	src, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "copyFile", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "copyFile", "*String", args[1].Type())
 	}
 
 	in, err := os.Open(src.String)
@@ -667,12 +667,12 @@ func (o *Os) CopyFile(line string, args ...Object) Object {
 
 func (o *Os) IsExist(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fp, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "isExist", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "isExist", "*String", args[0].Type())
 	}
 
 	_, err := os.Stat(fp.String)
@@ -705,12 +705,12 @@ func (fi *FileInfoObj) CallMethod(line string, scope *Scope, method string, args
 	case "isDir":
 		return fi.IsDir(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, fi.Type()))
+	return NewError(line, NOMETHODERROR, method, fi.Type())
 }
 
 func (fi *FileInfoObj) Name(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(fi.Info.Name())
@@ -718,7 +718,7 @@ func (fi *FileInfoObj) Name(line string, args ...Object) Object {
 
 func (fi *FileInfoObj) Size(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewInteger(fi.Info.Size())
@@ -726,7 +726,7 @@ func (fi *FileInfoObj) Size(line string, args ...Object) Object {
 
 func (fi *FileInfoObj) Mode(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewInteger(int64(fi.Info.Mode()))
@@ -734,7 +734,7 @@ func (fi *FileInfoObj) Mode(line string, args ...Object) Object {
 
 func (fi *FileInfoObj) ModTime(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &TimeObj{Tm: fi.Info.ModTime(), Valid: true}
@@ -742,7 +742,7 @@ func (fi *FileInfoObj) ModTime(line string, args ...Object) Object {
 
 func (fi *FileInfoObj) IsDir(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if fi.Info.IsDir() {
@@ -773,12 +773,12 @@ func (p *PipeObj) CallMethod(line string, scope *Scope, method string, args ...O
 	case "writeClose":
 		return p.WriteClose(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, p.Type()))
+	return NewError(line, NOMETHODERROR, method, p.Type())
 }
 
 func (p *PipeObj) Read(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var readlen int
@@ -788,7 +788,7 @@ func (p *PipeObj) Read(line string, args ...Object) Object {
 	case *UInteger:
 		readlen = int(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "read", "*Integer|*UInteger", args[0].Type())
 	}
 
 	buffer := make([]byte, readlen)
@@ -806,7 +806,7 @@ func (p *PipeObj) Read(line string, args ...Object) Object {
 
 func (p *PipeObj) ReadClose(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := p.Reader.Close()
@@ -819,12 +819,12 @@ func (p *PipeObj) ReadClose(line string, args ...Object) Object {
 
 func (p *PipeObj) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	content, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	n, err := p.Writer.Write([]byte(content.String))
@@ -837,7 +837,7 @@ func (p *PipeObj) Write(line string, args ...Object) Object {
 
 func (p *PipeObj) WriteClose(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := p.Writer.Close()

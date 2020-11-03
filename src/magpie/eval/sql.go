@@ -30,7 +30,7 @@ type SqlsObject struct {
 func (s *SqlsObject) Inspect() string  { return "<" + sql_name + ">" }
 func (s *SqlsObject) Type() ObjectType { return SQL_OBJ }
 func (s *SqlsObject) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, s.Type()))
+	return NewError(line, NOMETHODERROR, method, s.Type())
 }
 
 func NewSqlsObject() Object {
@@ -87,14 +87,14 @@ func (s *SqlObject) CallMethod(line string, scope *Scope, method string, args ..
 	case "begin":
 		return s.Begin(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, s.Type()))
+		return NewError(line, NOMETHODERROR, method, s.Type())
 	}
 }
 
 //Return the remote address
 func (s *SqlObject) Ping(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := s.Db.Ping()
@@ -107,7 +107,7 @@ func (s *SqlObject) Ping(line string, args ...Object) Object {
 
 func (s *SqlObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := s.Db.Close()
 	if err != nil {
@@ -118,12 +118,12 @@ func (s *SqlObject) Close(line string, args ...Object) Object {
 
 func (s *SqlObject) SetMaxOpenConns(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	n, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setMaxOpenConns", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setMaxOpenConns", "*Integer", args[0].Type())
 	}
 
 	s.Db.SetMaxOpenConns(int(n.Int64))
@@ -132,12 +132,12 @@ func (s *SqlObject) SetMaxOpenConns(line string, args ...Object) Object {
 
 func (s *SqlObject) SetMaxIdleConns(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	n, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setMaxIdleConns", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setMaxIdleConns", "*Integer", args[0].Type())
 	}
 
 	s.Db.SetMaxIdleConns(int(n.Int64))
@@ -146,19 +146,19 @@ func (s *SqlObject) SetMaxIdleConns(line string, args ...Object) Object {
 
 func (s *SqlObject) Exec(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "exec", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "exec", "*String", args[0].Type())
 	}
 
 	var params []interface{}
 	if len(args) > 1 {
 		params = handleExecParams(args[1:])
 		if params == nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	}
 
@@ -172,12 +172,12 @@ func (s *SqlObject) Exec(line string, args ...Object) Object {
 
 func (s *SqlObject) Query(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "query", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "query", "*String", args[0].Type())
 	}
 
 	var params []interface{}
@@ -185,7 +185,7 @@ func (s *SqlObject) Query(line string, args ...Object) Object {
 	for idx, arg := range arr {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "remaining", "query", "*String", arr[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "remaining", "query", "*String", arr[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -200,12 +200,12 @@ func (s *SqlObject) Query(line string, args ...Object) Object {
 
 func (s *SqlObject) QueryRow(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "queryRow", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "queryRow", "*String", args[0].Type())
 	}
 
 	var params []interface{}
@@ -213,7 +213,7 @@ func (s *SqlObject) QueryRow(line string, args ...Object) Object {
 	for idx, arg := range arr {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "remaining", "queryRow", "*String", arr[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "remaining", "queryRow", "*String", arr[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -224,12 +224,12 @@ func (s *SqlObject) QueryRow(line string, args ...Object) Object {
 
 func (s *SqlObject) Prepare(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "prepare", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "prepare", "*String", args[0].Type())
 	}
 
 	stmt, err := s.Db.Prepare(query.String)
@@ -241,7 +241,7 @@ func (s *SqlObject) Prepare(line string, args ...Object) Object {
 
 func (s *SqlObject) Begin(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	tx, err := s.Db.Begin()
@@ -268,7 +268,7 @@ func (r *DbResultObject) CallMethod(line string, scope *Scope, method string, ar
 	case "rowsAffected":
 		return r.RowsAffected(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, r.Type()))
+		return NewError(line, NOMETHODERROR, method, r.Type())
 	}
 }
 
@@ -316,13 +316,13 @@ func (r *DbRowsObject) CallMethod(line string, scope *Scope, method string, args
 	case "err":
 		return r.Err(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, r.Type()))
+		return NewError(line, NOMETHODERROR, method, r.Type())
 	}
 }
 
 func (r *DbRowsObject) Columns(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	arr := &Array{}
@@ -344,7 +344,7 @@ func (r *DbRowsObject) Scan(line string, args ...Object) Object {
 
 func (r *DbRowsObject) Next(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	b := r.Rows.Next()
@@ -356,7 +356,7 @@ func (r *DbRowsObject) Next(line string, args ...Object) Object {
 
 func (r *DbRowsObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := r.Rows.Close()
@@ -369,7 +369,7 @@ func (r *DbRowsObject) Close(line string, args ...Object) Object {
 
 func (r *DbRowsObject) Err(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := r.Rows.Err()
@@ -395,7 +395,7 @@ func (r *DbRowObject) CallMethod(line string, scope *Scope, method string, args 
 	case "scan":
 		return r.Scan(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, r.Type()))
+		return NewError(line, NOMETHODERROR, method, r.Type())
 	}
 }
 
@@ -429,12 +429,12 @@ func (s *DbStmtObject) CallMethod(line string, scope *Scope, method string, args
 	case "close":
 		return s.Close(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, s.Type()))
+		return NewError(line, NOMETHODERROR, method, s.Type())
 	}
 }
 func (s *DbStmtObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := s.Stmt.Close()
 	if err != nil {
@@ -446,12 +446,12 @@ func (s *DbStmtObject) Close(line string, args ...Object) Object {
 func (s *DbStmtObject) Exec(line string, args ...Object) Object {
 
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	params := handleExecParams(args)
 	if params == nil {
-		panic(NewError(line, INVALIDARG))
+		return NewError(line, INVALIDARG)
 	}
 
 	result, err := s.Stmt.Exec(params...)
@@ -466,7 +466,7 @@ func (s *DbStmtObject) Query(line string, args ...Object) Object {
 	for idx, arg := range args {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "All", "query", "*String", args[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "All", "query", "*String", args[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -484,7 +484,7 @@ func (s *DbStmtObject) QueryRow(line string, args ...Object) Object {
 	for idx, arg := range args {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "all", "queryRow", "*String", args[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "all", "queryRow", "*String", args[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -520,25 +520,25 @@ func (t *DbTxObject) CallMethod(line string, scope *Scope, method string, args .
 	case "rollback":
 		return t.Rollback(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, t.Type()))
+		return NewError(line, NOMETHODERROR, method, t.Type())
 	}
 }
 
 func (t *DbTxObject) Exec(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "exec", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "exec", "*String", args[0].Type())
 	}
 
 	var params []interface{}
 	if len(args) > 1 {
 		params = handleExecParams(args[1:])
 		if params == nil {
-			panic(NewError(line, INVALIDARG))
+			return NewError(line, INVALIDARG)
 		}
 	}
 
@@ -551,12 +551,12 @@ func (t *DbTxObject) Exec(line string, args ...Object) Object {
 
 func (t *DbTxObject) Query(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "query", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "query", "*String", args[0].Type())
 	}
 
 	var params []interface{}
@@ -564,7 +564,7 @@ func (t *DbTxObject) Query(line string, args ...Object) Object {
 	for idx, arg := range arr {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "remaining", "query", "*String", arr[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "remaining", "query", "*String", arr[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -579,12 +579,12 @@ func (t *DbTxObject) Query(line string, args ...Object) Object {
 
 func (t *DbTxObject) QueryRow(line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, "at least 1", len(args)))
+		return NewError(line, ARGUMENTERROR, "at least 1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "queryRow", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "queryRow", "*String", args[0].Type())
 	}
 
 	var params []interface{}
@@ -592,7 +592,7 @@ func (t *DbTxObject) QueryRow(line string, args ...Object) Object {
 	for idx, arg := range arr {
 		_, ok := arg.(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "remaining", "queryRow", "*String", arr[idx].Type()))
+			return NewError(line, PARAMTYPEERROR, "remaining", "queryRow", "*String", arr[idx].Type())
 		}
 		params = append(params, arg.Inspect())
 	}
@@ -603,12 +603,12 @@ func (t *DbTxObject) QueryRow(line string, args ...Object) Object {
 
 func (t *DbTxObject) Prepare(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	query, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "prepare", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "prepare", "*String", args[0].Type())
 	}
 
 	stmt, err := t.Tx.Prepare(query.String)
@@ -620,12 +620,12 @@ func (t *DbTxObject) Prepare(line string, args ...Object) Object {
 
 func (t *DbTxObject) Stmt(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	stmt, ok := args[0].(*DbStmtObject)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "stmt", "*DbStmtObject", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "stmt", "*DbStmtObject", args[0].Type())
 	}
 
 	newStmt := t.Tx.Stmt(stmt.Stmt)
@@ -634,7 +634,7 @@ func (t *DbTxObject) Stmt(line string, args ...Object) Object {
 
 func (t *DbTxObject) Commit(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := t.Tx.Commit()
@@ -646,7 +646,7 @@ func (t *DbTxObject) Commit(line string, args ...Object) Object {
 
 func (t *DbTxObject) Rollback(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := t.Tx.Rollback()
@@ -723,7 +723,7 @@ func handleExecParams(args []Object) []interface{} {
 
 func scan(rowObj interface{}, line string, args ...Object) Object {
 	if len(args) < 1 {
-		panic(NewError(line, ARGUMENTERROR, ">=1", len(args)))
+		return NewError(line, ARGUMENTERROR, ">=1", len(args))
 	}
 
 	//Must do `[]Object ==> []interface{}`，or compiler will report error
@@ -733,7 +733,7 @@ func scan(rowObj interface{}, line string, args ...Object) Object {
 		case *Integer, *UInteger, *Boolean, *Float, *String, *TimeObj:
 			values = append(values, v)
 		default:
-			panic(NewError(line, DBSCANERROR))
+			return NewError(line, DBSCANERROR)
 		} //end switch
 	} //end for
 

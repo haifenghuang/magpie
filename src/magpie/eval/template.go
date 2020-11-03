@@ -91,18 +91,18 @@ func (t *TemplateObj) CallMethod(line string, scope *Scope, method string, args 
 	case "urlQueryEscaper":
 		return t.URLQueryEscaper(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, t.Type()))
+	return NewError(line, NOMETHODERROR, method, t.Type())
 }
 
 func (t *TemplateObj) NewText(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "newText", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "newText", "*String", args[0].Type())
 	}
 
 	t.TmplType = T_TEXT
@@ -113,12 +113,12 @@ func (t *TemplateObj) NewText(line string, args ...Object) Object {
 func (t *TemplateObj) NewHtml(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "newHtml", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "newHtml", "*String", args[0].Type())
 	}
 
 	t.TmplType = T_HTML
@@ -129,23 +129,23 @@ func (t *TemplateObj) NewHtml(line string, args ...Object) Object {
 func (t *TemplateObj) New(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", argLen))
+		return NewError(line, ARGUMENTERROR, "2", argLen)
 	}
 
 	intObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "new", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "new", "*Integer", args[0].Type())
 	}
 
 	tmplType := intObj.Int64
 	if tmplType != T_TEXT && tmplType != T_HTML {
-		panic(NewError(line, GENERICERROR, "First parameter of new() should be 0(text)|1(html)."))
+		return NewError(line, GENERICERROR, "First parameter of new() should be 0(text)|1(html).")
 	}
 
 	var name string = ""
 	strObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "new", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "new", "*String", args[1].Type())
 	}
 	name = strObj.String
 
@@ -161,12 +161,12 @@ func (t *TemplateObj) New(line string, args ...Object) Object {
 
 func (t *TemplateObj) Parse(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parse", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parse", "*String", args[0].Type())
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -193,12 +193,12 @@ func (t *TemplateObj) Parse(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseTextFiles(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseTextFiles", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseTextFiles", "*String", args[0].Type())
 	}
 
 	temp, err := text.ParseFiles(strObj.String)
@@ -211,12 +211,12 @@ func (t *TemplateObj) ParseTextFiles(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseHtmlFiles(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseHtmlFiles", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseHtmlFiles", "*String", args[0].Type())
 	}
 
 	temp, err := html.ParseFiles(strObj.String)
@@ -229,22 +229,22 @@ func (t *TemplateObj) ParseHtmlFiles(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseFiles(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	intObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseFiles", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseFiles", "*Integer", args[0].Type())
 	}
 
 	tmplType := intObj.Int64
 	if tmplType != T_TEXT && tmplType != T_HTML {
-		panic(NewError(line, GENERICERROR, "First parameter of parseFiles() should be 0(text)|1(html)."))
+		return NewError(line, GENERICERROR, "First parameter of parseFiles() should be 0(text)|1(html).")
 	}
 
 	strObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "parseFiles", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "parseFiles", "*String", args[1].Type())
 	}
 
 	if tmplType == T_TEXT {
@@ -266,12 +266,12 @@ func (t *TemplateObj) ParseFiles(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseTextGlob(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseTextGlob", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseTextGlob", "*String", args[0].Type())
 	}
 
 	temp, err := text.ParseGlob(strObj.String)
@@ -284,12 +284,12 @@ func (t *TemplateObj) ParseTextGlob(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseHtmlGlob(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseHtmlGlob", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseHtmlGlob", "*String", args[0].Type())
 	}
 
 	temp, err := html.ParseGlob(strObj.String)
@@ -302,12 +302,12 @@ func (t *TemplateObj) ParseHtmlGlob(line string, args ...Object) Object {
 
 func (t *TemplateObj) ParseGlob(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "parseGlob", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "parseGlob", "*String", args[0].Type())
 	}
 
 	if t.TmplType == T_TEXT {
@@ -329,7 +329,7 @@ func (t *TemplateObj) ParseGlob(line string, args ...Object) Object {
 
 func (t *TemplateObj) Clone(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -355,7 +355,7 @@ func (t *TemplateObj) Clone(line string, args ...Object) Object {
 
 func (t *TemplateObj) DefinedTemplates(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	var s string = ""
@@ -374,7 +374,7 @@ func (t *TemplateObj) DefinedTemplates(line string, args ...Object) Object {
 
 func (t *TemplateObj) Delims(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -383,12 +383,12 @@ func (t *TemplateObj) Delims(line string, args ...Object) Object {
 
 	leftStrObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "delims", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "delims", "*String", args[0].Type())
 	}
 
 	rightStrObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "delims", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "delims", "*String", args[1].Type())
 	}
 
 	if t.TmplType == T_TEXT {
@@ -402,7 +402,7 @@ func (t *TemplateObj) Delims(line string, args ...Object) Object {
 
 func (t *TemplateObj) Execute(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -416,7 +416,7 @@ func (t *TemplateObj) Execute(line string, args ...Object) Object {
 		var ok bool
 		strObj, ok = args[0].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "first", "execute", "Writable|*String", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "execute", "Writable|*String", args[0].Type())
 		}
 	} else {
 		isWriter = true
@@ -491,7 +491,7 @@ func (t *TemplateObj) Execute(line string, args ...Object) Object {
 			return NewFalseObj(err.Error())
 		}
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "second", "execute", "*Integer|*UInteger|*Float|*String|*Boolean|*Nil|*TimeObj|*Array|*Hash", objType))
+		return NewError(line, PARAMTYPEERROR, "second", "execute", "*Integer|*UInteger|*Float|*String|*Boolean|*Nil|*TimeObj|*Array|*Hash", objType)
 	}
 
 	var obj interface{}
@@ -536,7 +536,7 @@ func (t *TemplateObj) Execute(line string, args ...Object) Object {
 //Note :ExecuteTemplate is similar to Execute function, should extract a common private function.
 func (t *TemplateObj) ExecuteTemplate(line string, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -550,7 +550,7 @@ func (t *TemplateObj) ExecuteTemplate(line string, args ...Object) Object {
 		var ok bool
 		strObj, ok = args[0].(*String)
 		if !ok {
-			panic(NewError(line, PARAMTYPEERROR, "first", "executeTemplate", "Writable|*String", args[0].Type()))
+			return NewError(line, PARAMTYPEERROR, "first", "executeTemplate", "Writable|*String", args[0].Type())
 		}
 	} else {
 		isWriter = true
@@ -558,7 +558,7 @@ func (t *TemplateObj) ExecuteTemplate(line string, args ...Object) Object {
 
 	nameStrObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "executeTemplate", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "executeTemplate", "*String", args[1].Type())
 	}
 
 	var data []byte
@@ -630,7 +630,7 @@ func (t *TemplateObj) ExecuteTemplate(line string, args ...Object) Object {
 			return NewFalseObj(err.Error())
 		}
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "third", "executeTemplate", "*Integer|*UInteger|*Float|*String|*Boolean|*Nil|*TimeObj|*Array|*Hash", objType))
+		return NewError(line, PARAMTYPEERROR, "third", "executeTemplate", "*Integer|*UInteger|*Float|*String|*Boolean|*Nil|*TimeObj|*Array|*Hash", objType)
 	}
 
 	var obj interface{}
@@ -673,12 +673,12 @@ func (t *TemplateObj) ExecuteTemplate(line string, args ...Object) Object {
 
 func (t *TemplateObj) Funcs(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	hashObj, ok := args[0].(*Hash)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "funcs", "*Hash", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "funcs", "*Hash", args[0].Type())
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -688,11 +688,11 @@ func (t *TemplateObj) Funcs(line string, scope *Scope, args ...Object) Object {
 	funcMaps := make(map[string]interface{})
 	for _, pair := range hashObj.Pairs {
 		if pair.Key.Type() != STRING_OBJ {
-			panic(NewError(line, GENERICERROR, "Hash's key type should be 'STRING', got '"+pair.Key.Type()+"'"))
+			return NewError(line, GENERICERROR, "Hash's key type should be 'STRING', got '"+pair.Key.Type()+"'")
 		}
 
 		if pair.Value.Type() != FUNCTION_OBJ {
-			panic(NewError(line, GENERICERROR, "Hash's value type should be 'FUNCTION', got '"+pair.Value.Type()+"'"))
+			return NewError(line, GENERICERROR, "Hash's value type should be 'FUNCTION', got '"+pair.Value.Type()+"'")
 		}
 
 		key := pair.Key.(*String).String
@@ -731,7 +731,7 @@ func (t *TemplateObj) Funcs(line string, scope *Scope, args ...Object) Object {
 
 func (t *TemplateObj) Lookup(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -740,7 +740,7 @@ func (t *TemplateObj) Lookup(line string, args ...Object) Object {
 
 	nameStrObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lookup", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lookup", "*String", args[0].Type())
 	}
 
 	if t.TmplType == T_TEXT {
@@ -762,7 +762,7 @@ func (t *TemplateObj) Lookup(line string, args ...Object) Object {
 
 func (t *TemplateObj) Name(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -799,7 +799,7 @@ func (t *TemplateObj) Option(line string, args ...Object) Object {
 
 func (t *TemplateObj) Templates(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if t.TextTemplate == nil && t.HTMLTemplate == nil {
@@ -825,12 +825,12 @@ func (t *TemplateObj) Templates(line string, args ...Object) Object {
 
 func (t *TemplateObj) HTMLEscapeString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "htmlEscapeString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "htmlEscapeString", "*String", args[0].Type())
 	}
 
 	ret := text.HTMLEscapeString(strObj.String)
@@ -839,17 +839,17 @@ func (t *TemplateObj) HTMLEscapeString(line string, args ...Object) Object {
 
 func (t *TemplateObj) HTMLEscape(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	writerObj, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "htmlEscape", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "htmlEscape", "Writable", args[0].Type())
 	}
 
 	strObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "htmlEscape", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "htmlEscape", "*String", args[1].Type())
 	}
 
 	b := []byte(strObj.String)
@@ -874,12 +874,12 @@ func (t *TemplateObj) HTMLEscaper(line string, args ...Object) Object {
 
 func (t *TemplateObj) JSEscapeString(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	strObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "jsEscapeString", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "jsEscapeString", "*String", args[0].Type())
 	}
 
 	ret := text.JSEscapeString(strObj.String)
@@ -888,17 +888,17 @@ func (t *TemplateObj) JSEscapeString(line string, args ...Object) Object {
 
 func (t *TemplateObj) JSEscape(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	writerObj, ok := args[0].(Writable)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "jsEscape", "Writable", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "jsEscape", "Writable", args[0].Type())
 	}
 
 	strObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "jsEscape", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "jsEscape", "*String", args[1].Type())
 	}
 
 	b := []byte(strObj.String)

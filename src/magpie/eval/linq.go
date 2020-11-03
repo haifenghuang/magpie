@@ -142,19 +142,19 @@ func (kv *KeyValueObj) CallMethod(line string, scope *Scope, method string, args
 	case "value":
 		return kv.Value(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, kv.Type()))
+	return NewError(line, NOMETHODERROR, method, kv.Type())
 }
 
 func (kv *KeyValueObj) Key(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	return kv.KeyObj
 }
 
 func (kv *KeyValueObj) Value(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return kv.ValueObj
@@ -188,19 +188,19 @@ func (g *GroupObj) CallMethod(line string, scope *Scope, method string, args ...
 	case "value":
 		return g.Value(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, g.Type()))
+	return NewError(line, NOMETHODERROR, method, g.Type())
 }
 
 func (g *GroupObj) Key(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	return g.KeyObj
 }
 
 func (g *GroupObj) Value(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	arr := &Array{}
@@ -387,7 +387,7 @@ func (lq *LinqObj) CallMethod(line string, scope *Scope, method string, args ...
 	case "toMap":
 		return lq.ToMap(line, scope, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, lq.Type()))
+	return NewError(line, NOMETHODERROR, method, lq.Type())
 }
 
 // From initializes a linq query with passed slice, array or map as the source.
@@ -396,7 +396,7 @@ func (lq *LinqObj) CallMethod(line string, scope *Scope, method string, args ...
 // FromIterable internally.
 func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 && len(args) != 2 && len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "1|2|3", len(args)))
+		return NewError(line, ARGUMENTERROR, "1|2|3", len(args))
 	}
 
 	obj := args[0]
@@ -404,13 +404,13 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 	if obj.Type() != STRING_OBJ && obj.Type() != ARRAY_OBJ &&
 		obj.Type() != HASH_OBJ && obj.Type() != FILE_OBJ && obj.Type() != CSV_OBJ &&
 		obj.Type() != CHANNEL_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "from", "*Hash|*Array|*String|*File|*CsvObj|*ChanObject", obj.Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "from", "*Hash|*Array|*String|*File|*CsvObj|*ChanObject", obj.Type())
 	}
 
 	switch obj.Type() {
 	case FILE_OBJ:
 		if len(args) != 1 && len(args) != 2 && len(args) != 3 {
-			panic(NewError(line, GENERICERROR, "File object should have 1|2|3 parameter(s):from(file, [field-separator], [selector])"))
+			return NewError(line, GENERICERROR, "File object should have 1|2|3 parameter(s):from(file, [field-separator], [selector])")
 		}
 
 		var fsStr string = "," //field separator(default is ",")
@@ -418,7 +418,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 			//get the field separator
 			fsObj, ok := args[1].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "second", "from", "*String", args[1].Type()))
+				return NewError(line, PARAMTYPEERROR, "second", "from", "*String", args[1].Type())
 			}
 			fsStr = fsObj.String
 		}
@@ -429,7 +429,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 			var ok bool
 			selector, ok = args[2].(*Function)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "third", "from", "*Function", args[2].Type()))
+				return NewError(line, PARAMTYPEERROR, "third", "from", "*Function", args[2].Type())
 			}
 		}
 
@@ -661,17 +661,17 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 // Range generates a sequence of integral numbers within a specified range.
 func (lq *LinqObj) Range(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	startObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "range", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "range", "*Integer", args[0].Type())
 	}
 
 	countObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "range", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "range", "*Integer", args[1].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -697,17 +697,17 @@ func (lq *LinqObj) Range(line string, args ...Object) Object {
 // Repeat generates a sequence that contains one repeated value.
 func (lq *LinqObj) Repeat(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	valueObj, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "repeat", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "repeat", "Object", args[0].Type())
 	}
 
 	countObj, ok := args[1].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "repeat", "*Integer", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "repeat", "*Integer", args[1].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -731,12 +731,12 @@ func (lq *LinqObj) Repeat(line string, args ...Object) Object {
 // Where filters a collection of values based on a predicate.
 func (lq *LinqObj) Where(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -765,12 +765,12 @@ func (lq *LinqObj) Where(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) Select(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -798,7 +798,7 @@ func (lq *LinqObj) Select(line string, scope *Scope, args ...Object) Object {
 // Last returns the first element of a collection.
 func (lq *LinqObj) First(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	item, _ := lq.Query.Iterate()()
@@ -813,12 +813,12 @@ func (lq *LinqObj) First(line string, args ...Object) Object {
 // specified condition.
 func (lq *LinqObj) FirstWith(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "firstWith", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "firstWith", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -842,7 +842,7 @@ func (lq *LinqObj) FirstWith(line string, scope *Scope, args ...Object) Object {
 // Last returns the last element of a collection.
 func (lq *LinqObj) Last(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -859,12 +859,11 @@ func (lq *LinqObj) Last(line string, args ...Object) Object {
 // condition.
 func (lq *LinqObj) LastWith(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
-
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lastWith", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lastWith", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -888,12 +887,12 @@ func (lq *LinqObj) LastWith(line string, scope *Scope, args ...Object) Object {
 // ForEach performs the specified action on each element of a collection.
 func (lq *LinqObj) ForEach(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "forEach", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "forEach", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -911,12 +910,12 @@ func (lq *LinqObj) ForEach(line string, scope *Scope, args ...Object) Object {
 // ForEachIndexed performs the specified action on each element of a collection.
 func (lq *LinqObj) ForEachIndexed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "forEachIndexed", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "forEachIndexed", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -938,12 +937,12 @@ func (lq *LinqObj) ForEachIndexed(line string, scope *Scope, args ...Object) Obj
 // collection.
 func (lq *LinqObj) Take(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	iObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "take", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "take", "*Integer", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -969,12 +968,12 @@ func (lq *LinqObj) Take(line string, args ...Object) Object {
 // is true, and then skips the remaining elements.
 func (lq *LinqObj) TakeWhile(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "takeWhile", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "takeWhile", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1019,12 +1018,12 @@ func (lq *LinqObj) TakeWhile(line string, scope *Scope, args ...Object) Object {
 // test.
 func (lq *LinqObj) TakeWhileIndexed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "takeWhileIndexed", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "takeWhileIndexed", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1069,12 +1068,12 @@ func (lq *LinqObj) TakeWhileIndexed(line string, scope *Scope, args ...Object) O
 // the remaining elements..
 func (lq *LinqObj) Skip(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	iObj, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "skip", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "skip", "*Integer", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -1105,12 +1104,12 @@ func (lq *LinqObj) Skip(line string, args ...Object) Object {
 // there are no more invocations of predicate.
 func (lq *LinqObj) SkipWhile(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "skipWhile", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "skipWhile", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1154,12 +1153,12 @@ func (lq *LinqObj) SkipWhile(line string, scope *Scope, args ...Object) Object {
 // there are no more invocations of predicate.
 func (lq *LinqObj) SkipWhileIndexed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "skipWhileIndexed", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "skipWhileIndexed", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1201,17 +1200,17 @@ func (lq *LinqObj) SkipWhileIndexed(line string, scope *Scope, args ...Object) O
 // specified function.
 func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	keySelector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "groupBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "groupBy", "*Function", args[0].Type())
 	}
 
 	elementSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type())
 	}
 
 	s := NewScope(scope)
@@ -1284,27 +1283,27 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 // these elements, the order of the matching elements of inner.
 func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 4 {
-		panic(NewError(line, ARGUMENTERROR, "4", len(args)))
+		return NewError(line, ARGUMENTERROR, "4", len(args))
 	}
 
 	inner, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "join", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "join", "*LinqObj", args[0].Type())
 	}
 
 	outerKeySelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "join", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "join", "*Function", args[1].Type())
 	}
 
 	innerKeySelector, ok := args[2].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "join", "*Function", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "join", "*Function", args[2].Type())
 	}
 
 	resultSelector, ok := args[3].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "fourth", "join", "*Function", args[3].Type()))
+		return NewError(line, PARAMTYPEERROR, "fourth", "join", "*Function", args[3].Type())
 	}
 
 	s := NewScope(scope)
@@ -1397,17 +1396,17 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 // result collection has only three elements.
 func (lq *LinqObj) Zip(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj) //lq:linq
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "zip", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "zip", "*LinqObj", args[0].Type())
 	}
 
 	resultSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "zip", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "zip", "*Function", args[1].Type())
 	}
 
 	s := NewScope(scope)
@@ -1444,12 +1443,12 @@ func (lq *LinqObj) Zip(line string, scope *Scope, args ...Object) Object {
 // collection including duplicates.
 func (lq *LinqObj) Union(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj) //lq:linq
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "union", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "union", "*LinqObj", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -1501,12 +1500,12 @@ func (lq *LinqObj) Union(line string, args ...Object) Object {
 // flattens the resulting collection into one collection.
 func (lq *LinqObj) SelectMany(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "selectMany", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "selectMany", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1564,12 +1563,12 @@ func (lq *LinqObj) SelectMany(line string, scope *Scope, args ...Object) Object 
 // element to process.
 func (lq *LinqObj) SelectManyIndexed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "selectManyIndexed", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "selectManyIndexed", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -1620,17 +1619,17 @@ func (lq *LinqObj) SelectManyIndexed(line string, scope *Scope, args ...Object) 
 // selector function on each element therein.
 func (lq *LinqObj) SelectManyBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "selectManyBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "selectManyBy", "*Function", args[0].Type())
 	}
 
 	resultSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "selectManyBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "selectManyBy", "*Function", args[1].Type())
 	}
 
 	s := NewScope(scope)
@@ -1685,17 +1684,17 @@ func (lq *LinqObj) SelectManyBy(line string, scope *Scope, args ...Object) Objec
 // source element is used in the intermediate projected form of that element.
 func (lq *LinqObj) SelectManyByIndexed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "selectManyByIndexed", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "selectManyByIndexed", "*Function", args[0].Type())
 	}
 
 	resultSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "selectManyByIndexed", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "selectManyByIndexed", "*Function", args[1].Type())
 	}
 
 	s := NewScope(scope)
@@ -1754,7 +1753,7 @@ func (lq *LinqObj) SelectManyByIndexed(line string, scope *Scope, args ...Object
 // the reverse order from which they are produced by the underlying source.
 func (lq *LinqObj) Reverse(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &LinqObj{Query: Query{
@@ -1786,12 +1785,12 @@ func (lq *LinqObj) Reverse(line string, args ...Object) Object {
 // the members of the first sequence that don't appear in the second sequence.
 func (lq *LinqObj) Except(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "except", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "except", "*LinqObj", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -1829,17 +1828,17 @@ func (lq *LinqObj) Except(line string, args ...Object) Object {
 // members of the first sequence that don't appear in the second sequence.
 func (lq *LinqObj) ExceptBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "exceptBy", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "exceptBy", "*LinqObj", args[0].Type())
 	}
 
 	selector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "exceptBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "exceptBy", "*Function", args[1].Type())
 	}
 
 	scop := NewScope(scope)
@@ -1889,7 +1888,7 @@ func (lq *LinqObj) ExceptBy(line string, scope *Scope, args ...Object) Object {
 // item.
 func (lq *LinqObj) Append(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	return &LinqObj{Query: Query{
@@ -1921,12 +1920,12 @@ func (lq *LinqObj) Append(line string, args ...Object) Object {
 // returns only unique elements.
 func (lq *LinqObj) Concat(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "concat", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "concat", "*LinqObj", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -1953,7 +1952,7 @@ func (lq *LinqObj) Concat(line string, args ...Object) Object {
 
 func (lq *LinqObj) Prepend(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	return &LinqObj{Query: Query{
@@ -1977,7 +1976,7 @@ func (lq *LinqObj) Prepend(line string, args ...Object) Object {
 // unordered collection that contains no duplicate values.
 func (lq *LinqObj) Distinct(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return &LinqObj{Query: Query{
@@ -2015,12 +2014,12 @@ func (lq *LinqObj) Distinct(line string, args ...Object) Object {
 // The result is an unordered collection that contains no duplicate values.
 func (lq *LinqObj) DistinctBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "distinctBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "distinctBy", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2062,12 +2061,12 @@ func (lq *LinqObj) DistinctBy(line string, scope *Scope, args ...Object) Object 
 // other elements.
 func (lq *LinqObj) Intersect(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "intersect", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "intersect", "*LinqObj", args[0].Type())
 	}
 
 	return &LinqObj{Query: Query{
@@ -2109,17 +2108,17 @@ func (lq *LinqObj) Intersect(line string, args ...Object) Object {
 // IntersectBy invokes a transform function on each element of both collections.
 func (lq *LinqObj) IntersectBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "intersectBy", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "intersectBy", "*LinqObj", args[0].Type())
 	}
 
 	selector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "intersectBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "intersectBy", "*Function", args[1].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2177,12 +2176,12 @@ func (lq *LinqObj) IntersectBy(line string, scope *Scope, args ...Object) Object
 // Aggregate returns the final result of f().
 func (lq *LinqObj) Aggregate(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fn, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "aggregate", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "aggregate", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2219,18 +2218,18 @@ func (lq *LinqObj) Aggregate(line string, scope *Scope, args ...Object) Object {
 // Aggregate returns the final result of f().
 func (lq *LinqObj) AggregateWithSeed(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	//this test is not needed, but here for completeness
 	seed, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "aggregateWithSeed", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "aggregateWithSeed", "Object", args[0].Type())
 	}
 
 	fn, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "aggregateWithSeed", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "aggregateWithSeed", "*Function", args[1].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2265,22 +2264,22 @@ func (lq *LinqObj) AggregateWithSeed(line string, scope *Scope, args ...Object) 
 // result of Aggregate.
 func (lq *LinqObj) AggregateWithSeedBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 3 {
-		panic(NewError(line, ARGUMENTERROR, "3", len(args)))
+		return NewError(line, ARGUMENTERROR, "3", len(args))
 	}
 
 	seed, ok := args[0].(Object)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "aggregateWithSeedBy", "Object", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "aggregateWithSeedBy", "Object", args[0].Type())
 	}
 
 	fn, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "aggregateWithSeedBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "aggregateWithSeedBy", "*Function", args[1].Type())
 	}
 
 	resultSelector, ok := args[2].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "third", "aggregateWithSeedBy", "*Function", args[2].Type()))
+		return NewError(line, PARAMTYPEERROR, "third", "aggregateWithSeedBy", "*Function", args[2].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2309,12 +2308,12 @@ func (lq *LinqObj) AggregateWithSeedBy(line string, scope *Scope, args ...Object
 // All determines whether all elements of a collection satisfy a condition.
 func (lq *LinqObj) All(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fn, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "all", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "all", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2337,7 +2336,7 @@ func (lq *LinqObj) All(line string, scope *Scope, args ...Object) Object {
 // Any determines whether any element of a collection exists.
 func (lq *LinqObj) Any(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	_, ok := lq.Query.Iterate()()
@@ -2346,12 +2345,12 @@ func (lq *LinqObj) Any(line string, args ...Object) Object {
 
 func (lq *LinqObj) AnyWith(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fn, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "anyWith", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "anyWith", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2375,7 +2374,7 @@ func (lq *LinqObj) AnyWith(line string, scope *Scope, args ...Object) Object {
 // Contains determines whether a collection contains a specified element.
 func (lq *LinqObj) Contains(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2393,7 +2392,7 @@ func (lq *LinqObj) Contains(line string, args ...Object) Object {
 // Count returns the number of elements in a collection.
 func (lq *LinqObj) Count(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2410,12 +2409,12 @@ func (lq *LinqObj) Count(line string, args ...Object) Object {
 // collection satisfy a condition.
 func (lq *LinqObj) CountWith(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fn, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "countWith", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "countWith", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2439,12 +2438,12 @@ func (lq *LinqObj) CountWith(line string, scope *Scope, args ...Object) Object {
 // SequenceEqual determines whether two collections are equalp.
 func (lq *LinqObj) SequenceEqual(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	lq2, ok := args[0].(*LinqObj)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sequenceEqual", "*LinqObj", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sequenceEqual", "*LinqObj", args[0].Type())
 	}
 
 	next := lq.Query.Iterate()
@@ -2468,7 +2467,7 @@ func (lq *LinqObj) SequenceEqual(line string, args ...Object) Object {
 // exactly one element in the collection.
 func (lq *LinqObj) Single(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2489,12 +2488,12 @@ func (lq *LinqObj) Single(line string, args ...Object) Object {
 // specified condition, and nil if more than one such element exists.
 func (lq *LinqObj) SingleWith(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fn, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "singleWith", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "singleWith", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2525,7 +2524,7 @@ func (lq *LinqObj) SingleWith(line string, scope *Scope, args ...Object) Object 
 // Method returns zero if collection contains no elements.
 func (lq *LinqObj) SumInts(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2548,7 +2547,7 @@ func (lq *LinqObj) SumInts(line string, args ...Object) Object {
 // Method returns zero if collection contains no elements.
 func (lq *LinqObj) SumUInts(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2571,7 +2570,7 @@ func (lq *LinqObj) SumUInts(line string, args ...Object) Object {
 // Method returns zero if collection contains no elements.
 func (lq *LinqObj) SumFloats(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2592,7 +2591,7 @@ func (lq *LinqObj) SumFloats(line string, args ...Object) Object {
 // Min returns the minimum value in a collection of values.
 func (lq *LinqObj) Min(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2616,7 +2615,7 @@ func (lq *LinqObj) Min(line string, args ...Object) Object {
 // Max returns the maximum value in a collection of values.
 func (lq *LinqObj) Max(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2640,7 +2639,7 @@ func (lq *LinqObj) Max(line string, args ...Object) Object {
 // Average computes the average of a collection of numeric values.
 func (lq *LinqObj) Average(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	next := lq.Query.Iterate()
@@ -2686,12 +2685,12 @@ func (lq *LinqObj) Average(line string, args ...Object) Object {
 // sorted according to a key.
 func (lq *LinqObj) OrderBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "orderBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "orderBy", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2723,12 +2722,12 @@ func (lq *LinqObj) OrderBy(line string, scope *Scope, args ...Object) Object {
 // Elements are sorted according to a key.
 func (lq *LinqObj) OrderByDescending(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "orderByDescending", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "orderByDescending", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2761,12 +2760,12 @@ func (lq *LinqObj) OrderByDescending(line string, scope *Scope, args ...Object) 
 // applying any number of ThenBy or ThenByDescending methods.
 func (lq *LinqObj) ThenBy(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2799,12 +2798,12 @@ func (lq *LinqObj) ThenBy(line string, scope *Scope, args ...Object) Object {
 // sort criteria by applying any number of ThenBy or ThenByDescending methods.
 func (lq *LinqObj) ThenByDescending(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	selector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "thenBy", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2840,7 +2839,7 @@ func (lq *LinqObj) ThenByDescending(line string, scope *Scope, args ...Object) O
 // v will point to it.
 func (lq *LinqObj) ToSlice(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	res := &Array{}
@@ -2854,7 +2853,7 @@ func (lq *LinqObj) ToSlice(line string, args ...Object) Object {
 
 func (lq *LinqObj) ToOrderedSlice(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	res := &Array{}
@@ -2873,12 +2872,12 @@ func (lq *LinqObj) ToOrderedSlice(line string, args ...Object) Object {
 // much better.
 func (lq *LinqObj) Sort(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	less, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "sort", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "sort", "*Function", args[0].Type())
 	}
 
 	scop := NewScope(scope)
@@ -2904,17 +2903,17 @@ func (lq *LinqObj) Sort(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) ToMap(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	keySelector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "toMap", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "toMap", "*Function", args[0].Type())
 	}
 
 	valueSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "toMap", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "toMap", "*Function", args[1].Type())
 	}
 
 	scop := NewScope(scope)
@@ -3012,7 +3011,7 @@ func getComparer(data Object) comparer {
 //========================================================
 //func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 //	if len(args) != 2 {
-//		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+//		return NewError(line, ARGUMENTERROR, "2", len(args))
 //	}
 //
 //	varStr := args[1].(*String).String
@@ -3039,7 +3038,7 @@ func getComparer(data Object) comparer {
 
 func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 	if len(args) < 2 {
-		panic(NewError(line, ARGUMENTERROR, "'>=2'", len(args)))
+		return NewError(line, ARGUMENTERROR, "'>=2'", len(args))
 	}
 
 	obj := args[0]
@@ -3049,13 +3048,13 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 	if obj.Type() != STRING_OBJ && obj.Type() != ARRAY_OBJ &&
 		obj.Type() != HASH_OBJ && obj.Type() != FILE_OBJ && obj.Type() != CSV_OBJ &&
 		obj.Type() != CHANNEL_OBJ {
-		panic(NewError(line, PARAMTYPEERROR, "first", "from", "*Hash|*Array|*String|*File|*CsvObj|*ChanObject", obj.Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "from", "*Hash|*Array|*String|*File|*CsvObj|*ChanObject", obj.Type())
 	}
 
 	switch obj.Type() {
 	case FILE_OBJ:
 		if len(args) != 2 && len(args) != 3 && len(args) != 4 {
-			panic(NewError(line, GENERICERROR, "File object should have 2|3|4 parameter(s):from(file, variable, [field-separator], [selector])"))
+			return NewError(line, GENERICERROR, "File object should have 2|3|4 parameter(s):from(file, variable, [field-separator], [selector])")
 		}
 
 		varStr := varObj.(*String).String
@@ -3065,7 +3064,7 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 			//get the field separator
 			fsObj, ok := args[2].(*String)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "third", "from", "*String", args[2].Type()))
+				return NewError(line, PARAMTYPEERROR, "third", "from", "*String", args[2].Type())
 			}
 			fsStr = fsObj.String
 		}
@@ -3076,7 +3075,7 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 			var ok bool
 			selector, ok = args[3].(*Function)
 			if !ok {
-				panic(NewError(line, PARAMTYPEERROR, "fourth", "from", "*Function", args[3].Type()))
+				return NewError(line, PARAMTYPEERROR, "fourth", "from", "*Function", args[3].Type())
 			}
 		}
 
@@ -3323,17 +3322,17 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "let", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "let", "*Function", args[0].Type())
 	}
 
 	letVarObj, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "let", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "let", "*String", args[1].Type())
 	}
 	letVar := letVarObj.String
 
@@ -3360,12 +3359,12 @@ func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) FromInner(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	fromVarObj, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "from", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "from", "*String", args[0].Type())
 	}
 
 	resultArr := &Array{}
@@ -3383,12 +3382,12 @@ func (lq *LinqObj) FromInner(line string, scope *Scope, args ...Object) Object {
 // Where filters a collection of values based on a predicate.
 func (lq *LinqObj) Where2(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "where", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -3416,12 +3415,12 @@ func (lq *LinqObj) Where2(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) Select2(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	block, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "select", "*Function", args[0].Type())
 	}
 
 	s := NewScope(scope)
@@ -3446,17 +3445,17 @@ func (lq *LinqObj) Select2(line string, scope *Scope, args ...Object) Object {
 
 func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	keySelector, ok := args[0].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "groupBy", "*Function", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "groupBy", "*Function", args[0].Type())
 	}
 
 	elementSelector, ok := args[1].(*Function)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "groupBy", "*Function", args[1].Type())
 	}
 
 	s := NewScope(scope)

@@ -49,22 +49,22 @@ func (n *NetObj) CallMethod(line string, scope *Scope, method string, args ...Ob
 	case "splitHostPort":
 		return n.SplitHostPort(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, n.Type()))
+	return NewError(line, NOMETHODERROR, method, n.Type())
 }
 
 func (n *NetObj) JoinHostPort(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	host, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "joinHostPort", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "joinHostPort", "*String", args[0].Type())
 	}
 
 	port, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "joinHostPort", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "joinHostPort", "*String", args[1].Type())
 	}
 
 	str := net.JoinHostPort(host.String, port.String)
@@ -73,12 +73,12 @@ func (n *NetObj) JoinHostPort(line string, args ...Object) Object {
 
 func (n *NetObj) LookupAddr(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	addr, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lookupAddr", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lookupAddr", "*String", args[0].Type())
 	}
 
 	names, err := net.LookupAddr(addr.String)
@@ -96,12 +96,12 @@ func (n *NetObj) LookupAddr(line string, args ...Object) Object {
 
 func (n *NetObj) LookupHost(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	host, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lookupHost", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lookupHost", "*String", args[0].Type())
 	}
 
 	addrs, err := net.LookupHost(host.String)
@@ -119,12 +119,12 @@ func (n *NetObj) LookupHost(line string, args ...Object) Object {
 
 func (n *NetObj) LookupIP(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	host, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lookupIP", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lookupIP", "*String", args[0].Type())
 	}
 
 	ips, err := net.LookupIP(host.String)
@@ -143,17 +143,17 @@ func (n *NetObj) LookupIP(line string, args ...Object) Object {
 
 func (n *NetObj) LookupPort(line string, args ...Object) Object {
 	if len(args) != 2 {
-		panic(NewError(line, ARGUMENTERROR, "2", len(args)))
+		return NewError(line, ARGUMENTERROR, "2", len(args))
 	}
 
 	network, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "lookupPort", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "lookupPort", "*String", args[0].Type())
 	}
 
 	service, ok := args[1].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "second", "lookupPort", "*String", args[1].Type()))
+		return NewError(line, PARAMTYPEERROR, "second", "lookupPort", "*String", args[1].Type())
 	}
 
 	port, err := net.LookupPort(network.String, service.String)
@@ -166,12 +166,12 @@ func (n *NetObj) LookupPort(line string, args ...Object) Object {
 
 func (n *NetObj) SplitHostPort(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	hostport, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "splitHostPort", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "splitHostPort", "*String", args[0].Type())
 	}
 
 	host, port, err := net.SplitHostPort(hostport.String)
@@ -230,7 +230,7 @@ func (t *TcpConnObject) CallMethod(line string, scope *Scope, method string, arg
 	case "setWriteBuffer":
 		return t.SetWriteBuffer(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, t.Type()))
+		return NewError(line, NOMETHODERROR, method, t.Type())
 	}
 }
 
@@ -241,7 +241,7 @@ func (t *TcpConnObject) Addr(line string, args ...Object) Object {
 
 func (t *TcpConnObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := t.Conn.Close()
 	if err != nil {
@@ -252,7 +252,7 @@ func (t *TcpConnObject) Close(line string, args ...Object) Object {
 
 func (t *TcpConnObject) CloseRead(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := t.Conn.CloseRead()
@@ -264,7 +264,7 @@ func (t *TcpConnObject) CloseRead(line string, args ...Object) Object {
 
 func (t *TcpConnObject) CloseWrite(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := t.Conn.CloseWrite()
@@ -276,7 +276,7 @@ func (t *TcpConnObject) CloseWrite(line string, args ...Object) Object {
 
 func (t *TcpConnObject) Read(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	bytes, err := ioutil.ReadAll(t.Conn)
@@ -289,12 +289,12 @@ func (t *TcpConnObject) Read(line string, args ...Object) Object {
 
 func (t *TcpConnObject) Read2(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	length, ok := args[0].(*Integer) //read length
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "read", "*Integer", args[0].Type())
 	}
 
 	data := make([]byte, length.Int64)
@@ -321,12 +321,12 @@ func (t *TcpConnObject) Read2(line string, args ...Object) Object {
 
 func (t *TcpConnObject) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	str, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	n, err := t.Conn.Write([]byte(str.String))
@@ -338,12 +338,12 @@ func (t *TcpConnObject) Write(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -356,12 +356,12 @@ func (t *TcpConnObject) SetDeadline(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetReadDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -374,12 +374,12 @@ func (t *TcpConnObject) SetReadDeadline(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetWriteDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -392,12 +392,12 @@ func (t *TcpConnObject) SetWriteDeadline(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetLinger(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setLinger", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setLinger", "*Integer", args[0].Type())
 	}
 
 	err := t.Conn.SetLinger(int(sec.Int64))
@@ -409,12 +409,12 @@ func (t *TcpConnObject) SetLinger(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetNoDelay(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	noDelay, ok := args[0].(*Boolean)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setNoDelay", "*Boolean", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setNoDelay", "*Boolean", args[0].Type())
 	}
 
 	err := t.Conn.SetNoDelay(noDelay.Bool)
@@ -426,12 +426,12 @@ func (t *TcpConnObject) SetNoDelay(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetReadBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type())
 	}
 
 	err := t.Conn.SetReadBuffer(int(bytes.Int64))
@@ -443,12 +443,12 @@ func (t *TcpConnObject) SetReadBuffer(line string, args ...Object) Object {
 
 func (t *TcpConnObject) SetWriteBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type())
 	}
 
 	err := t.Conn.SetWriteBuffer(int(bytes.Int64))
@@ -482,7 +482,7 @@ func (l *TCPListenerObject) CallMethod(line string, scope *Scope, method string,
 	case "setDeadline":
 		return l.SetDeadline(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, l.Type()))
+		return NewError(line, NOMETHODERROR, method, l.Type())
 	}
 }
 
@@ -492,7 +492,7 @@ func (l *TCPListenerObject) Addr(line string, args ...Object) Object {
 
 func (l *TCPListenerObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := l.Listener.Close()
 	if err != nil {
@@ -503,7 +503,7 @@ func (l *TCPListenerObject) Close(line string, args ...Object) Object {
 
 func (l *TCPListenerObject) AcceptTCP(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	tcpConn, err := l.Listener.AcceptTCP()
@@ -516,12 +516,12 @@ func (l *TCPListenerObject) AcceptTCP(line string, args ...Object) Object {
 
 func (l *TCPListenerObject) SetDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -566,7 +566,7 @@ func (u *UdpConnObject) CallMethod(line string, scope *Scope, method string, arg
 	case "setWriteBuffer":
 		return u.SetWriteBuffer(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, u.Type()))
+		return NewError(line, NOMETHODERROR, method, u.Type())
 	}
 }
 
@@ -577,7 +577,7 @@ func (u *UdpConnObject) Addr(line string, args ...Object) Object {
 
 func (u *UdpConnObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := u.Conn.Close()
 	if err != nil {
@@ -588,7 +588,7 @@ func (u *UdpConnObject) Close(line string, args ...Object) Object {
 
 func (u *UdpConnObject) Read(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	bytes, err := ioutil.ReadAll(u.Conn)
@@ -601,12 +601,12 @@ func (u *UdpConnObject) Read(line string, args ...Object) Object {
 
 func (u *UdpConnObject) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	str, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	n, err := u.Conn.Write([]byte(str.String))
@@ -618,12 +618,12 @@ func (u *UdpConnObject) Write(line string, args ...Object) Object {
 
 func (u *UdpConnObject) SetDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -636,12 +636,12 @@ func (u *UdpConnObject) SetDeadline(line string, args ...Object) Object {
 
 func (u *UdpConnObject) SetReadDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -654,12 +654,12 @@ func (u *UdpConnObject) SetReadDeadline(line string, args ...Object) Object {
 
 func (u *UdpConnObject) SetWriteDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -672,12 +672,12 @@ func (u *UdpConnObject) SetWriteDeadline(line string, args ...Object) Object {
 
 func (u *UdpConnObject) SetReadBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type())
 	}
 
 	err := u.Conn.SetReadBuffer(int(bytes.Int64))
@@ -689,12 +689,12 @@ func (u *UdpConnObject) SetReadBuffer(line string, args ...Object) Object {
 
 func (u *UdpConnObject) SetWriteBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type())
 	}
 
 	err := u.Conn.SetWriteBuffer(int(bytes.Int64))
@@ -742,7 +742,7 @@ func (u *UnixConnObject) CallMethod(line string, scope *Scope, method string, ar
 	case "setWriteBuffer":
 		return u.SetWriteBuffer(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, u.Type()))
+		return NewError(line, NOMETHODERROR, method, u.Type())
 	}
 }
 
@@ -753,7 +753,7 @@ func (u *UnixConnObject) Addr(line string, args ...Object) Object {
 
 func (u *UnixConnObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := u.Conn.Close()
 	if err != nil {
@@ -764,7 +764,7 @@ func (u *UnixConnObject) Close(line string, args ...Object) Object {
 
 func (u *UnixConnObject) CloseRead(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := u.Conn.CloseRead()
@@ -777,7 +777,7 @@ func (u *UnixConnObject) CloseRead(line string, args ...Object) Object {
 
 func (u *UnixConnObject) CloseWrite(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	err := u.Conn.CloseWrite()
@@ -790,7 +790,7 @@ func (u *UnixConnObject) CloseWrite(line string, args ...Object) Object {
 
 func (u *UnixConnObject) Read(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	bytes, err := ioutil.ReadAll(u.Conn)
@@ -803,12 +803,12 @@ func (u *UnixConnObject) Read(line string, args ...Object) Object {
 
 func (u *UnixConnObject) Write(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	str, ok := args[0].(*String)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "write", "*String", args[0].Type())
 	}
 
 	n, err := u.Conn.Write([]byte(str.String))
@@ -820,12 +820,12 @@ func (u *UnixConnObject) Write(line string, args ...Object) Object {
 
 func (u *UnixConnObject) SetDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -838,12 +838,12 @@ func (u *UnixConnObject) SetDeadline(line string, args ...Object) Object {
 
 func (u *UnixConnObject) SetReadDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -856,12 +856,12 @@ func (u *UnixConnObject) SetReadDeadline(line string, args ...Object) Object {
 
 func (u *UnixConnObject) SetWriteDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)
@@ -874,12 +874,12 @@ func (u *UnixConnObject) SetWriteDeadline(line string, args ...Object) Object {
 
 func (u *UnixConnObject) SetReadBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setReadBuffer", "*Integer", args[0].Type())
 	}
 
 	err := u.Conn.SetReadBuffer(int(bytes.Int64))
@@ -891,12 +891,12 @@ func (u *UnixConnObject) SetReadBuffer(line string, args ...Object) Object {
 
 func (u *UnixConnObject) SetWriteBuffer(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	bytes, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setWriteBuffer", "*Integer", args[0].Type())
 	}
 
 	err := u.Conn.SetWriteBuffer(int(bytes.Int64))
@@ -930,7 +930,7 @@ func (l *UnixListenerObject) CallMethod(line string, scope *Scope, method string
 	case "setDeadline":
 		return l.SetDeadline(line, args...)
 	default:
-		panic(NewError(line, NOMETHODERROR, method, l.Type()))
+		return NewError(line, NOMETHODERROR, method, l.Type())
 	}
 }
 
@@ -940,7 +940,7 @@ func (l *UnixListenerObject) Addr(line string, args ...Object) Object {
 
 func (l *UnixListenerObject) Close(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	err := l.Listener.Close()
 	if err != nil {
@@ -951,7 +951,7 @@ func (l *UnixListenerObject) Close(line string, args ...Object) Object {
 
 func (l *UnixListenerObject) AcceptUnix(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	unixConn, err := l.Listener.AcceptUnix()
@@ -964,12 +964,12 @@ func (l *UnixListenerObject) AcceptUnix(line string, args ...Object) Object {
 
 func (l *UnixListenerObject) SetDeadline(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	sec, ok := args[0].(*Integer) //seconds
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setDeadline", "*Integer", args[0].Type())
 	}
 
 	d := time.Duration(int64(time.Second) * sec.Int64)

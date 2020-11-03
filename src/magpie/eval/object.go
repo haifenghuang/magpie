@@ -124,7 +124,7 @@ func (s *Struct) Type() ObjectType { return STRUCT_OBJ }
 func (s *Struct) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	fn, ok := s.methods[method]
 	if !ok {
-		panic(NewError(line, NOMETHODERROR, method, s.Type()))
+		return NewError(line, NOMETHODERROR, method, s.Type())
 	}
 	fn.Scope = NewScope(scope)
 	fn.Scope.Set("this", s)
@@ -168,12 +168,12 @@ func (e *Enum) CallMethod(line string, scope *Scope, method string, args ...Obje
 	case "getValues":
 		return e.GetValues(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, e.Type()))
+	return NewError(line, NOMETHODERROR, method, e.Type())
 }
 
 func (e *Enum) GetNames(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := &Array{}
@@ -185,7 +185,7 @@ func (e *Enum) GetNames(line string, args ...Object) Object {
 
 func (e *Enum) GetValues(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	ret := &Array{}
@@ -197,7 +197,7 @@ func (e *Enum) GetValues(line string, args ...Object) Object {
 
 func (e *Enum) GetName(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	for k, v := range e.Scope.store {
@@ -211,7 +211,7 @@ func (e *Enum) GetName(line string, args ...Object) Object {
 func (b *Builtin) Inspect() string  { return "<builtin function>" }
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
 func (b *Builtin) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, b.Type()))
+	return NewError(line, NOMETHODERROR, method, b.Type())
 }
 
 type IncludedObject struct {
@@ -222,7 +222,7 @@ type IncludedObject struct {
 func (io *IncludedObject) Inspect() string  { return fmt.Sprintf("included object: %s", io.Name) }
 func (io *IncludedObject) Type() ObjectType { return INCLUDED_OBJ }
 func (io *IncludedObject) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, io.Type()))
+	return NewError(line, NOMETHODERROR, method, io.Type())
 }
 
 type Function struct {
@@ -243,7 +243,7 @@ func (f *Function) classMethod() ast.ModifierLevel {
 }
 
 func (f *Function) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, f.Type()))
+	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
 type ReturnValue struct {
@@ -267,7 +267,7 @@ func (rv *ReturnValue) Inspect() string {
 
 func (rv *ReturnValue) Type() ObjectType { return RETURN_VALUE_OBJ }
 func (rv *ReturnValue) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, rv.Type()))
+	return NewError(line, NOMETHODERROR, method, rv.Type())
 }
 
 //type ThrowValue struct{ Value Object }
@@ -275,7 +275,7 @@ func (rv *ReturnValue) CallMethod(line string, scope *Scope, method string, args
 //func (tv *ThrowValue) Inspect() string  { return tv.Value.Inspect() }
 //func (tv *ThrowValue) Type() ObjectType { return THROW_OBJ }
 //func (tv *ThrowValue) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-//	panic(NewError(line, NOMETHODERROR, method, tv.Type()))
+//	return NewError(line, NOMETHODERROR, method, tv.Type())
 //}
 
 //return a Nil object with error message 's'
@@ -301,12 +301,12 @@ func (n *Nil) CallMethod(line string, scope *Scope, method string, args ...Objec
 	case "message":
 		return n.Message(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, n.Type()))
+	return NewError(line, NOMETHODERROR, method, n.Type())
 }
 
 func (n *Nil) Message(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(n.OptionalMsg)
@@ -360,12 +360,12 @@ func (i *Integer) CallMethod(line string, scope *Scope, method string, args ...O
 	case "upto":
 		return i.Upto(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, i.Type()))
+	return NewError(line, NOMETHODERROR, method, i.Type())
 }
 
 func (i *Integer) IsValid(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -377,7 +377,7 @@ func (i *Integer) IsValid(line string, args ...Object) Object {
 func (i *Integer) SetValid(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 0 && argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", argLen))
+		return NewError(line, ARGUMENTERROR, "0|1", argLen)
 	}
 
 	if argLen == 0 {
@@ -387,7 +387,7 @@ func (i *Integer) SetValid(line string, args ...Object) Object {
 
 	val, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setValid", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setValid", "*Integer", args[0].Type())
 	}
 
 	i.Int64, i.Valid = val.Int64, true
@@ -396,7 +396,7 @@ func (i *Integer) SetValid(line string, args ...Object) Object {
 
 func (i *Integer) Next(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -407,7 +407,7 @@ func (i *Integer) Next(line string, args ...Object) Object {
 
 func (i *Integer) Prev(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -418,7 +418,7 @@ func (i *Integer) Prev(line string, args ...Object) Object {
 
 func (i *Integer) IsEven(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -432,7 +432,7 @@ func (i *Integer) IsEven(line string, args ...Object) Object {
 
 func (i *Integer) IsOdd(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -447,12 +447,12 @@ func (i *Integer) IsOdd(line string, args ...Object) Object {
 func (i *Integer) Downto(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	val, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "downto", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "downto", "*Integer", args[0].Type())
 	}
 
 	retArr := &Array{}
@@ -465,12 +465,12 @@ func (i *Integer) Downto(line string, args ...Object) Object {
 func (i *Integer) Upto(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	val, ok := args[0].(*Integer)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "upto", "*Integer", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "upto", "*Integer", args[0].Type())
 	}
 
 	retArr := &Array{}
@@ -583,12 +583,12 @@ func (i *UInteger) CallMethod(line string, scope *Scope, method string, args ...
 	case "upto":
 		return i.Upto(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, i.Type()))
+	return NewError(line, NOMETHODERROR, method, i.Type())
 }
 
 func (i *UInteger) IsValid(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -600,7 +600,7 @@ func (i *UInteger) IsValid(line string, args ...Object) Object {
 func (i *UInteger) SetValid(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 0 && argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", argLen))
+		return NewError(line, ARGUMENTERROR, "0|1", argLen)
 	}
 
 	if argLen == 0 {
@@ -610,7 +610,7 @@ func (i *UInteger) SetValid(line string, args ...Object) Object {
 
 	val, ok := args[0].(*UInteger)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setValid", "*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setValid", "*UInteger", args[0].Type())
 	}
 
 	i.UInt64, i.Valid = val.UInt64, true
@@ -619,7 +619,7 @@ func (i *UInteger) SetValid(line string, args ...Object) Object {
 
 func (i *UInteger) Next(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -630,7 +630,7 @@ func (i *UInteger) Next(line string, args ...Object) Object {
 
 func (i *UInteger) Prev(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -641,7 +641,7 @@ func (i *UInteger) Prev(line string, args ...Object) Object {
 
 func (i *UInteger) IsEven(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -655,7 +655,7 @@ func (i *UInteger) IsEven(line string, args ...Object) Object {
 
 func (i *UInteger) IsOdd(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if i.Valid {
@@ -670,12 +670,12 @@ func (i *UInteger) IsOdd(line string, args ...Object) Object {
 func (i *UInteger) Downto(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	val, ok := args[0].(*UInteger)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "downto", "*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "downto", "*UInteger", args[0].Type())
 	}
 
 	retArr := &Array{}
@@ -688,12 +688,12 @@ func (i *UInteger) Downto(line string, args ...Object) Object {
 func (i *UInteger) Upto(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", argLen))
+		return NewError(line, ARGUMENTERROR, "1", argLen)
 	}
 
 	val, ok := args[0].(*UInteger)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "upto", "*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "upto", "*UInteger", args[0].Type())
 	}
 
 	retArr := &Array{}
@@ -808,12 +808,12 @@ func (f *Float) CallMethod(line string, scope *Scope, method string, args ...Obj
 	case "round":
 		return f.Round(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, f.Type()))
+	return NewError(line, NOMETHODERROR, method, f.Type())
 }
 
 func (f *Float) IsValid(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if f.Valid {
@@ -825,7 +825,7 @@ func (f *Float) IsValid(line string, args ...Object) Object {
 func (f *Float) SetValid(line string, args ...Object) Object {
 	argLen := len(args)
 	if argLen != 0 && argLen != 1 {
-		panic(NewError(line, ARGUMENTERROR, "0|1", argLen))
+		return NewError(line, ARGUMENTERROR, "0|1", argLen)
 	}
 
 	if argLen == 0 {
@@ -835,7 +835,7 @@ func (f *Float) SetValid(line string, args ...Object) Object {
 
 	val, ok := args[0].(*Float)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setValid", "*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setValid", "*Float", args[0].Type())
 	}
 
 	f.Float64, f.Valid = val.Float64, true
@@ -844,7 +844,7 @@ func (f *Float) SetValid(line string, args ...Object) Object {
 
 func (f *Float) Ceil(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if f.Valid {
@@ -855,7 +855,7 @@ func (f *Float) Ceil(line string, args ...Object) Object {
 
 func (f *Float) Floor(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if f.Valid {
@@ -867,7 +867,7 @@ func (f *Float) Floor(line string, args ...Object) Object {
 
 func (f *Float) Trunc(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if f.Valid {
@@ -879,7 +879,7 @@ func (f *Float) Trunc(line string, args ...Object) Object {
 
 func (f *Float) Sqrt(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	if f.Valid {
@@ -891,7 +891,7 @@ func (f *Float) Sqrt(line string, args ...Object) Object {
 
 func (f *Float) Pow(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var temp float64
@@ -903,7 +903,7 @@ func (f *Float) Pow(line string, args ...Object) Object {
 	case *Float:
 		temp = input.Float64
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "pow", "*Integer|*UInteger|*Float", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "pow", "*Integer|*UInteger|*Float", args[0].Type())
 	}
 
 	if f.Valid {
@@ -915,7 +915,7 @@ func (f *Float) Pow(line string, args ...Object) Object {
 
 func (f *Float) Round(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	var precision int64
@@ -925,7 +925,7 @@ func (f *Float) Round(line string, args ...Object) Object {
 	case *UInteger:
 		precision = int64(o.UInt64)
 	default:
-		panic(NewError(line, PARAMTYPEERROR, "first", "round", "*Integer|*UInteger", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "round", "*Integer|*UInteger", args[0].Type())
 	}
 
 	format := fmt.Sprintf("%%.%df", precision)    //'%.xf', x is the precision, e.g. %.2f
@@ -1037,12 +1037,12 @@ func (b *Boolean) CallMethod(line string, scope *Scope, method string, args ...O
 	case "toTrueFalse":
 		return b.ToTrueFalse(line, args...)
 	}
-	panic(NewError(line, NOMETHODERROR, method, b.Type()))
+	return NewError(line, NOMETHODERROR, method, b.Type())
 }
 
 func (b *Boolean) Message(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 
 	return NewString(b.OptionalMsg)
@@ -1050,7 +1050,7 @@ func (b *Boolean) Message(line string, args ...Object) Object {
 
 func (b *Boolean) IsValid(line string, args ...Object) Object {
 	if len(args) != 0 {
-		panic(NewError(line, ARGUMENTERROR, "0", len(args)))
+		return NewError(line, ARGUMENTERROR, "0", len(args))
 	}
 	if b.Valid {
 		return TRUE
@@ -1060,12 +1060,12 @@ func (b *Boolean) IsValid(line string, args ...Object) Object {
 
 func (b *Boolean) SetValid(line string, args ...Object) Object {
 	if len(args) != 1 {
-		panic(NewError(line, ARGUMENTERROR, "1", len(args)))
+		return NewError(line, ARGUMENTERROR, "1", len(args))
 	}
 
 	val, ok := args[0].(*Boolean)
 	if !ok {
-		panic(NewError(line, PARAMTYPEERROR, "first", "setValid", "*Boolean", args[0].Type()))
+		return NewError(line, PARAMTYPEERROR, "first", "setValid", "*Boolean", args[0].Type())
 	}
 
 	b.Bool, b.Valid = val.Bool, true
@@ -1141,7 +1141,7 @@ type Break struct{}
 func (b *Break) Inspect() string  { return "break" }
 func (b *Break) Type() ObjectType { return BREAK_OBJ }
 func (b *Break) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, b.Type()))
+	return NewError(line, NOMETHODERROR, method, b.Type())
 }
 
 type Continue struct{}
@@ -1149,7 +1149,7 @@ type Continue struct{}
 func (c *Continue) Inspect() string  { return "continue" }
 func (c *Continue) Type() ObjectType { return CONTINUE_OBJ }
 func (c *Continue) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-	panic(NewError(line, NOMETHODERROR, method, c.Type()))
+	return NewError(line, NOMETHODERROR, method, c.Type())
 }
 
 func initGlobalObj() {
