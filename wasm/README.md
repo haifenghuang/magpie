@@ -6,6 +6,6 @@ open your browser, and type `http://localhost:9090`.
 
 Below is the snapshot of the running magpie demo in browser:
 
-<p align="center">
+<p>
     <img alt="magpie playground" src="https://github.com/haifenghuang/magpie/blob/master/wasm/magpie_playground.png?raw=true" width="450" height="450">
 </p>
