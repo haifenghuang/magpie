@@ -1176,6 +1176,11 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				}
 			}
 
+			//check if it's a readonly variable
+			if scope.IsReadOnly(name) {
+				return NewError(a.Pos().Sline(), CONSTNOTASSIGNERROR, name)
+			}
+
 			v, ok := scope.Reset(name, val)
 			if ok {
 				return v

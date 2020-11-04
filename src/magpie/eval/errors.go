@@ -57,6 +57,7 @@ const (
 	OVERRIDEERROR
 	METAOPERATORERROR
 	SERVICENOURLERROR
+	CONSTNOTASSIGNERROR
 	GENERICERROR
 )
 
@@ -106,13 +107,14 @@ var errorType = map[int]string{
 	INDEXERTYPEERROR:    "Invalid use of Indexer of class(%s), Only interger type of Indexer is supported",
 	INDEXERSTATICERROR:  "Invalid use of Indexer of class(%s), Indexer cannot declared as static",
 	INDEXNOTFOUNDERROR:  "Indexer not found for class(%s)",
-	CALLNONSTATICERROR:  "Could not call non-static.",
-	CLASSCATEGORYERROR:  "No class(%s) found for category(%s).",
+	CALLNONSTATICERROR:  "Could not call non-static",
+	CLASSCATEGORYERROR:  "No class(%s) found for category(%s)",
 	CLASSCREATEERROR:    "You must use 'new' to create class('%s')",
-	PARENTNOTANNOTATION: "Annotation(%s)'s Parent(%s) is not annotation.",
-	OVERRIDEERROR:       "Method(%s) of class(%s) must override a superclass method!",
-	METAOPERATORERROR:   "Meta-Operators' item must be Numbers|String!",
+	PARENTNOTANNOTATION: "Annotation(%s)'s Parent(%s) is not annotation",
+	OVERRIDEERROR:       "Method(%s) of class(%s) must override a superclass method",
+	METAOPERATORERROR:   "Meta-Operators' item must be Numbers|String",
 	SERVICENOURLERROR:   "Service(%s)'s function('%s') must have url",
+	CONSTNOTASSIGNERROR: "Const variable '%s' cannot be modified",
 	GENERICERROR:        "%s",
 }
 
