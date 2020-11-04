@@ -91,14 +91,17 @@ for i in arr1 where /^\d+/.match(i) {
             }
 
             //check for Runtime error, and mark line if has error
-            let reg = /Runtime Error:.* at line (\d+)/g;
+            let reg = /Runtime Error:[^]*? at line (\d+)/gm;
             var match;
+            let annotations = [];
             while (match = reg.exec(output)) {
                 let line = parseInt(match[1]);
                 editor.session.addMarker(new Range(line - 1, 0, line - 1, 2000), "magpie-error", "fullLine");
-                 // show the error icon
-                editor.session.setAnnotations([{ row: line - 1, text: match[0], type: "error"}])
+                annotations.push({ row: line - 1, text: match[0], type: "error"});
             }
+            //setAnnotations takes array of annotations, which replaces annotations from previous call, 
+            //so you need to collect all annotations into array and call setAnnotations after that, once
+            editor.session.setAnnotations(annotations);
 
             //output result
             result.value = output
