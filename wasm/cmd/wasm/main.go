@@ -31,8 +31,13 @@ func runCode(this js.Value, i []js.Value) interface{} {
 	}
 
 	scope := eval.NewScope(nil, &buf)
-	eval.Eval(program, scope)
-	m["output"] = buf.String()
+	result := eval.Eval(program, scope)
+	if (string(result.Type()) == eval.ERROR_OBJ) {
+		m["output"] = buf.String() + result.Inspect()
+	} else {
+		m["output"] = buf.String()
+	}
+
 	return m
 }
 
