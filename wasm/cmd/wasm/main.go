@@ -19,9 +19,8 @@ func runCode(this js.Value, i []js.Value) interface{} {
 	p := parser.New(l, "")
 	program := p.ParseProgram()
 	if len(p.Errors()) != 0 {
-		buf.WriteString("Parser errors:\n")
 		for _, msg := range p.Errors() {
-			buf.WriteString("\t" + msg + "\n")
+			buf.WriteString(msg + "\n")
 		}
 		errLines := p.ErrorLines()
 
