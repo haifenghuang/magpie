@@ -1030,14 +1030,18 @@ Examples:
             let reg = /Runtime Error:[^]*? at line (\d+)/gm;
             var match;
             let annotations = [];
+            var matched = false;
             while (match = reg.exec(output)) {
+                matched = true;
                 let line = parseInt(match[1]);
                 editor.session.addMarker(new Range(line - 1, 0, line - 1, 2000), "magpie-error", "fullLine");
                 annotations.push({ row: line - 1, text: match[0], type: "error"});
             }
-            //setAnnotations takes array of annotations, which replaces annotations from previous call, 
-            //so you need to collect all annotations into array and call setAnnotations after that, once
-            editor.session.setAnnotations(annotations);
+            if (matched) {
+                //setAnnotations takes array of annotations, which replaces annotations from previous call, 
+                //so you need to collect all annotations into array and call setAnnotations after that, once
+                editor.session.setAnnotations(annotations);
+            }
 
             //output result
             result.value = output
