@@ -23,6 +23,9 @@
                 background:rgba(100,200,100,0.5);
                 z-index:20
             }
+            select option {
+                font-size: 16px;
+            }
         </style>
 
 <script>
@@ -938,10 +941,17 @@ Test.Main()
     editor.setValue(exampleArr[idx]);
     editor.gotoLine(0, 0, false);
 }
+
+//theme comboBox onchange event function
+function changeTheme(themes, ace_editor) {
+    let theme = themes.options[themes.selectedIndex].text
+    editor = ace.edit("editor");
+    editor.setTheme("ace/theme/" + theme);
+}
 </script>
 
 Examples:
-<select name="examples" id="examples" onChange="changeExample(this, 'editor')">
+<select style="min-height:30px;min-width:100px;" name="examples" id="examples" onChange="changeExample(this, 'editor')">
   <option>basic</option>
   <option>constant</option>
   <option>if expression</option>
@@ -970,6 +980,49 @@ Examples:
   <option>class(property)</option>
   <option>class(static)</option>
 </select>
+
+&nbsp;&nbsp;&nbsp;&nbsp;Editor Themes:
+<select style="min-height:30px;min-width:100px;" name="themes" id="themes" onChange="changeTheme(this, 'editor')">
+  <option>ambiance</option>
+  <option>chaos</option>
+  <option>chrome</option>
+  <option>clouds</option>
+  <option>clouds_midnight</option>
+  <option>cobalt</option>
+  <option>crimson_editor</option>
+  <option>dawn</option>
+  <option>dracula</option>
+  <option>dreamweaver</option>
+  <option>eclipse</option>
+  <option>github</option>
+  <option>gob</option>
+  <option>gruvbox</option>
+  <option>idle_fingers</option>
+  <option>iplastic</option>
+  <option>katzenmilch</option>
+  <option>kr_theme</option>
+  <option>kuroir</option>
+  <option>merbivore</option>
+  <option>merbivore_soft</option>
+  <option>mono_industrial</option>
+  <option>monokai</option>
+  <option>nord_dark</option>
+  <option>pastel_on_dark</option>
+  <option>solarized_dark</option>
+  <option selected>solarized_light</option>
+  <option>sqlserver</option>
+  <option>terminal</option>
+  <option>textmate</option>
+  <option>tomorrow</option>
+  <option>tomorrow_night</option>
+  <option>tomorrow_night_blue</option>
+  <option>tomorrow_night_bright</option>
+  <option>tomorrow_night_eighties</option>
+  <option>twilight</option>
+  <option>vibrant_ink</option>
+  <option>xcode</option>
+</select>
+
 
 <h3>Input</h3>
 <div id="editor"></div>
