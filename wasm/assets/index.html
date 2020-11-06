@@ -1069,14 +1069,18 @@ Examples:
 
             //evaluate code
             let code = editor.getValue();
-            let { errline, output } = magpie_run_code(code)
+            let { errlines, output } = magpie_run_code(code)
 
             //check for parser error, and mark line if has error
             var Range = ace.require('ace/range').Range;
-            if (errline > 0) { //parser error
-                editor.session.addMarker(new Range(errline - 1, 0, errline - 1, 2000), "magpie-error", "fullLine");
-                // show the error icon
-                editor.session.setAnnotations([{ row: errline - 1, text: output, type: "error"}])
+            if (errlines != "-1") { //parser error
+                let errlinesArr = errlines.split("|")
+                for (let i = 0; i < errlinesArr.length; i++) {
+                    let errline = errlinesArr[i]
+                    editor.session.addMarker(new Range(errline - 1, 0, errline - 1, 2000), "magpie-error", "fullLine");
+                    // show the error icon
+                    editor.session.setAnnotations([{ row: errline - 1, text: output, type: "error"}])
+                }
             }
 
             //check for Runtime error, and mark line if has error

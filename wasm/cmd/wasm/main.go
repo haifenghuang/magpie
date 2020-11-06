@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	_ "fmt"
+	"strings"
 	"syscall/js"
 
 	"magpie/eval"
@@ -14,7 +15,7 @@ func runCode(this js.Value, i []js.Value) interface{} {
 	m := make(map[string]interface{})
 	var buf bytes.Buffer
 
-	m["errline"] = -1
+	m["errlines"] = "-1"
 	l := lexer.New("", i[0].String())
 	p := parser.New(l, "")
 	program := p.ParseProgram()
@@ -22,9 +23,8 @@ func runCode(this js.Value, i []js.Value) interface{} {
 		for _, msg := range p.Errors() {
 			buf.WriteString(msg + "\n")
 		}
-		errLines := p.ErrorLines()
 
-		m["errline"] = errLines[0]
+		m["errlines"] = strings.Join(p.ErrorLines(), "|")
 		m["output"] = buf.String()
 		return m
 	}
