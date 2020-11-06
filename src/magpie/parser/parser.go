@@ -350,6 +350,46 @@ func (p *Parser) registerAction() {
 	p.registerInfix(token.TILDECARET, p.parseInfixExpression)
 }
 
+/*
+  Synchronizing a recursive descent parser:
+    It discards tokens until it thinks it found a statement boundary. 
+    After catching a parser error, we’ll call this and then we are hopefully back in sync. 
+    When it works well, we have discarded tokens that would have likely caused cascaded errors 
+    anyway and now we can parse the rest of the file starting at the next statement.
+*/
+func (p *Parser) synchronize() {
+	p.nextToken()
+	if p.peekTokenIs(token.EOF) {
+		return
+	}
+
+	for !p.peekTokenIs(token.EOF) {
+		if p.curTokenIs(token.SEMICOLON) {
+			return
+		}
+
+		if p.peekTokenIs(token.LET) ||
+		   p.peekTokenIs(token.CONST) ||
+		   p.peekTokenIs(token.IF) ||
+		   p.peekTokenIs(token.UNLESS) ||
+		   p.peekTokenIs(token.FOR) ||
+		   p.peekTokenIs(token.DO) ||
+		   p.peekTokenIs(token.WHILE) ||
+		   p.peekTokenIs(token.CONTINUE) ||
+		   p.peekTokenIs(token.BREAK) ||
+		   p.peekTokenIs(token.CLASS) ||
+		   p.peekTokenIs(token.ENUM) ||
+		   p.peekTokenIs(token.CASE) ||
+		   p.peekTokenIs(token.TRY) ||
+		   p.peekTokenIs(token.THROW) ||
+		   p.peekTokenIs(token.DEFER) ||
+		   p.peekTokenIs(token.SPAWN) {
+		   	return
+		}
+		p.nextToken();
+	}
+}
+
 func (p *Parser) ParseProgram() *ast.Program {
 	defer func() {
 		if r := recover(); r != nil {
@@ -369,6 +409,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 	for p.curToken.Type != token.EOF {
 		stmt := p.parseStatement()
 		if stmt != nil {
+			if len(p.errors) > 0 {
+				p.synchronize()
+			}
+
 			if include, ok := stmt.(*ast.IncludeStatement); ok {
 				includePath := strings.TrimSpace(include.IncludePath.String())
 				_, ok := program.Includes[includePath]
@@ -1139,6 +1183,7 @@ func (p *Parser) parseConstStatement() *ast.ConstStatement {
 }
 
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	oldToken := p.curToken
 	expression := &ast.BlockStatement{Token: p.curToken}
 	expression.Statements = []ast.Statement{}
 	p.nextToken() //skip '{'
@@ -1163,9 +1208,8 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	Above 'if' expression has no '}', if we do not check below condition, it will evaluate correctly and no problem occurred.
 	*/
 	if p.peekTokenIs(token.EOF) && !p.curTokenIs(token.RBRACE) {
-		pos := p.peekToken.Pos
-		pos.Col += 1
-		msg := fmt.Sprintf("Syntax Error:%v- expected next token to be '}', got EOF instead. Block should end with '}'.", pos)
+		pos := oldToken.Pos
+		msg := fmt.Sprintf("Syntax Error:%v- no end symbol '}' found for block statement.", pos)
 		p.errors = append(p.errors, msg)
 		p.errorLines = append(p.errorLines, pos.Line)
 	}
@@ -1769,9 +1813,11 @@ func (p *Parser) parseConditionalExpressions(ie *ast.IfExpression) []*ast.IfCond
 				if p.peekTokenIs(token.LBRACE) { //block statement. e.g. 'else {'
 					p.nextToken()
 					ie.Alternative = p.parseBlockStatement()
-				} else { //single expression, e.g. 'else println(xxx)'
-					p.nextToken()
-					ie.Alternative = p.parseExpressionStatement().Expression
+				} else {
+					msg := fmt.Sprintf("Syntax Error:%v- 'else' part must be followed by a '{'.", p.curToken.Pos)
+					p.errors = append(p.errors, msg)
+					p.errorLines = append(p.errorLines, p.curToken.Pos.Line)
+					return nil
 				}
 				break
 			} else { //'else if'
@@ -1797,8 +1843,10 @@ func (p *Parser) parseConditionalExpression() *ast.IfConditionExpr {
 	}
 
 	if !p.peekTokenIs(token.LBRACE) {
-		p.nextToken()
-		ic.Body = p.parseExpressionStatement().Expression
+		msg := fmt.Sprintf("Syntax Error:%v- 'if' expression must be followed by a '{'.", p.curToken.Pos)
+		p.errors = append(p.errors, msg)
+		p.errorLines = append(p.errorLines, p.curToken.Pos.Line)
+		return nil
 	} else {
 		p.nextToken()
 		ic.Body = p.parseBlockStatement()
