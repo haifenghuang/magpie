@@ -3967,7 +3967,7 @@ func (p *Parser) fixPosCol() token.Position {
 
 //DEBUG ONLY
 func (p *Parser) debugToken(message string) {
-	fmt.Printf("%s, curToken = %s, peekToken = %s\n", message, p.curToken.Literal, p.peekToken.Literal)
+	fmt.Printf("%s, curToken = %s, curToken.Pos = %d, peekToken = %s, peekToken.Pos=%d\n", message, p.curToken.Literal, p.curToken.Pos.Line, p.peekToken.Literal, p.peekToken.Pos.Line)
 }
 
 func (p *Parser) debugNode(message string, node ast.Node) {
