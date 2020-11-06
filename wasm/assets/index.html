@@ -938,6 +938,18 @@ Test.Main()
 
     var idx = examples.selectedIndex;
     editor = ace.edit("editor");
+
+    //Clears all the annotations
+    editor.session.clearAnnotations()
+
+    //remove all markers previously added
+    let all_markers = editor.session.getMarkers();
+    for(var key in all_markers) {
+        if (all_markers[key].type == "fullLine") {
+            editor.session.removeMarker(all_markers[key].id);
+        }
+    }
+
     editor.setValue(exampleArr[idx]);
     editor.gotoLine(0, 0, false);
 }
@@ -1056,12 +1068,12 @@ Examples:
         let interpret = function() {
             let editor = ace.edit("editor");
 
-             //Clears all the annotations
-             editor.session.clearAnnotations()
+            //Clears all the annotations
+            editor.session.clearAnnotations()
 
             //remove all markers previously added
             let all_markers = editor.session.getMarkers();
-            for(var key in all_markers){
+            for(var key in all_markers) {
                 if (all_markers[key].type == "fullLine") {
                     editor.session.removeMarker(all_markers[key].id);
                 }
@@ -1071,6 +1083,7 @@ Examples:
             let code = editor.getValue();
             let { errlines, output } = magpie_run_code(code)
 
+            let parser_err_annotations = [];
             //check for parser error, and mark line if has error
             var Range = ace.require('ace/range').Range;
             if (errlines != "-1") { //parser error
@@ -1078,26 +1091,28 @@ Examples:
                 for (let i = 0; i < errlinesArr.length; i++) {
                     let errline = errlinesArr[i]
                     editor.session.addMarker(new Range(errline - 1, 0, errline - 1, 2000), "magpie-error", "fullLine");
-                    // show the error icon
-                    editor.session.setAnnotations([{ row: errline - 1, text: output, type: "error"}])
+                    parser_err_annotations.push({ row: errline - 1, text: output, type: "error"})
                 }
+
+                // show the error icon
+                editor.session.setAnnotations(parser_err_annotations)
             }
 
             //check for Runtime error, and mark line if has error
             let reg = /Runtime Error:[^]*? at line (\d+)/gm;
             var match;
-            let annotations = [];
+            let runtime_err_annotations = [];
             var matched = false;
             while (match = reg.exec(output)) {
                 matched = true;
                 let line = parseInt(match[1]);
                 editor.session.addMarker(new Range(line - 1, 0, line - 1, 2000), "magpie-error", "fullLine");
-                annotations.push({ row: line - 1, text: match[0], type: "error"});
+                runtime_err_annotations.push({ row: line - 1, text: match[0], type: "error"});
             }
             if (matched) {
                 //setAnnotations takes array of annotations, which replaces annotations from previous call, 
                 //so you need to collect all annotations into array and call setAnnotations after that, once
-                editor.session.setAnnotations(annotations);
+                editor.session.setAnnotations(runtime_err_annotations);
             }
 
             //output result
