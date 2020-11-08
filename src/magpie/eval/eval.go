@@ -1176,6 +1176,11 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 				}
 			}
 
+			//check if it's a readonly variable
+			if scope.IsReadOnly(name) {
+				return NewError(a.Pos().Sline(), CONSTNOTASSIGNERROR, name)
+			}
+
 			v, ok := scope.Reset(name, val)
 			if ok {
 				return v
@@ -1337,12 +1342,7 @@ func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
 	val, ok := scope.Get(i.String())
 	if !ok {
 		if val, ok = includeScope.Get(i.String()); !ok {
-			/* We do not report Typo-Suggestions, because we support hash's key with bare word. e.g.
-			       h = {A: "xxxx"} // we want to treat it as h = {"A": "xxxx"}
-			   Here, the hash's key is a bare word, so, it will report that key 'A' is not defined.
-			*/
-			return NIL
-			//return reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
+			return reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
 		}
 	}
 	if i, ok := val.(*InterpolatedString); ok {
@@ -1358,26 +1358,29 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 
 	hash := NewHash()
 	for _, key := range hl.Order {
-		value, _ := hl.Pairs[key]
-		k := Eval(key, innerScope)
-		if k.Type() == NIL_OBJ { //key is not defined
-			switch key.(type) {
-			case *ast.Identifier: //It's an identifier, so it's a bare word.
-				/* e.g. h = {A: "xxxx"}
-				  Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
-				  is an identifier, so we need to treat it as string. that is, we want it to become:
-				      h = {"A": "xxxx"}
-				*/
+		var k Object
+		switch key.(type) {
+		case *ast.Identifier: //It's an identifier, so it's a bare word.
+			/* e.g. h = {A: "xxxx"}
+			  Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
+			  is an identifier, so we need to treat it as string. that is, we want it to become:
+			      h = {"A": "xxxx"}
+			*/
+
+			if _, ok := scope.Get(key.(*ast.Identifier).Value); !ok {
 				t := key.(*ast.Identifier).Value
 				k = NewString(t)
 				innerScope.Set(t, k)
 			}
+		default:
+			k = Eval(key, innerScope)
 		}
 
 		if k.Type() == ERROR_OBJ {
 			return k
 		}
 
+		value, _ := hl.Pairs[key]
 		v := Eval(value, innerScope)
 		if v.Type() == ERROR_OBJ {
 			return v

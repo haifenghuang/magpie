@@ -22,22 +22,22 @@ do
         output_name+='.exe'
     fi
 
-    echo "Building ${interpreter_name}...($output_name)"
-    env GOOS=$GOOS GOARCH=$GOARCH go build -o $output_name main.go
+    echo "Building ${interpreter_name}...       ($output_name)"
+    env GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-s -w" -o $output_name main.go
     if [ $? -ne 0 ]; then
         echo 'An error has occurred! Aborting the script execution...'
         exit 1
     fi
 done
 
-echo "Building mdoc...(mdoc)"
-go build -o mdoc mdoc.go
+echo "Building mdoc...         (mdoc)"
+go build -ldflags "-s -w" -o mdoc mdoc.go
 
 # run: ./fmt demo.my
-echo "Building Formatter...(fmt)"
-go build -o fmt fmt.go
+echo "Building Formatter...    (fmt)"
+go build -ldflags "-s -w" -o fmt fmt.go
 
 # run:    ./highlight demo.my               (generate: demo.my.html)
 #     or  ./fmt demo.my | ./highlight   (generate: output.html)
-echo "Building Highlighter...(highlight)"
-go build -o highlight highlight.go
+echo "Building Highlighter...  (highlight)"
+go build -ldflags "-s -w" -o highlight highlight.go

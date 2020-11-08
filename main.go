@@ -67,7 +67,11 @@ func runProgram(debug bool, filename string) {
 
 	}
 
-	eval.Eval(program, scope)
+	result := eval.Eval(program, scope)
+	if result.Type() == eval.ERROR_OBJ {
+		fmt.Println(result.Inspect())
+	}
+
 //	e := eval.Eval(program, scope)
 //	if e.Inspect() != "nil" {
 //		fmt.Println(e.Inspect())

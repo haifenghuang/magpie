@@ -384,7 +384,7 @@ func (l *Lexer) readRunesToken() token.Token {
 	var tok token.Token
 	switch {
 	case l.ch == 0:
-		tok.Literal = ""
+		tok.Literal = "<EOF>"
 		tok.Type = token.EOF
 		return tok
 	case isLetter(l.ch):

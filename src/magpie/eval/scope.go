@@ -3,7 +3,7 @@ package eval
 import (
 	"fmt"
 	"magpie/ast"
-	"os"
+	_ "os"
 	"sync"
 )
 
@@ -98,16 +98,28 @@ func (s *Scope) DebugPrint(indent string) {
 
 }
 
-func (s *Scope) Set(name string, val Object) Object {
+func (s *Scope) IsReadOnly(name string) bool {
 	s.Lock()
 	defer s.Unlock()
 
 	//check if it is readonly
 	_, ok := s.store[name]
-	if ok && s.readonly[name] {
-		fmt.Printf("Const variable '%s' cannot be modified.\n", name)
-		os.Exit(3)
+	if ok {
+		if s.readonly[name] {
+			return true
+		}
+	} else {
+		if s.parentScope != nil {
+			return s.parentScope.IsReadOnly(name)
+		}
 	}
+
+	return false
+}
+
+func (s *Scope) Set(name string, val Object) Object {
+	s.Lock()
+	defer s.Unlock()
 
 	s.store[name] = val
 	return val
@@ -130,10 +142,6 @@ func (s *Scope) Reset(name string, val Object) (Object, bool) {
 	var ok bool
 	_, ok = s.store[name]
 	if ok {
-		if s.readonly[name] {
-			fmt.Printf("Const variable '%s' cannot be modified.\n", name)
-			os.Exit(3)
-		}
 		s.store[name] = val
 	}
 
@@ -192,3 +200,4 @@ func SetGlobalObj(name string, Obj Object) {
 
 	GlobalScopes[name] = Obj
 }
+
