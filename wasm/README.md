@@ -9,3 +9,13 @@ Below is the snapshot of the running magpie demo in browser:
 <p>
     <img alt="magpie playground" src="https://github.com/haifenghuang/magpie/blob/master/wasm/magpie_playground.png?raw=true" width="450" height="450">
 </p>
+
+<br>
+<p>
+    <img alt="magpie playground" src="https://github.com/haifenghuang/magpie/blob/master/wasm/magpie_playground2.png?raw=true" width="450" height="450">
+</p>
+
+<br>
+<p>
+    <img alt="magpie playground" src="https://github.com/haifenghuang/magpie/blob/master/wasm/magpie_playground3.png?raw=true" width="450" height="450">
+</p>
