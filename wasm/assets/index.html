@@ -41,7 +41,7 @@ println(s1)
 println(三)
 
 i = 20_000_000         // int
-println()
+println(i)
 
 u = 10u                // uint
 println(u)
@@ -272,7 +272,28 @@ if "abc 123	mnj" =~ \`\`\\d+\\t\`\` {
 }
 `;
 
-     let conversionExample = `// convert to string using str() function
+    let grepMapExample = `let sourceArr = [2,4,6,8,10,12]
+
+let m = grep  $_ > 5, sourceArr
+printf("m is %v\\n", m)
+
+let cp = map $_ * 2 , sourceArr
+printf("cp is %v\\n", cp)
+
+//a little bit more complex example
+let fields = {
+                "animal"   : "dog",
+                "building" : "house",
+                "colour"   : "red",
+                "fruit"    : "apple"
+             }
+let pattern = \`\`animal|fruit\`\`
+// =~(match), !~(unmatch)
+let values = map { fields[$_] } grep { $_ =~ pattern } fields.keys()
+println(values)
+`;
+
+    let conversionExample = `// convert to string using str() function
 x = str(10) // convert 10 to string  
 printf("x=%s\\n", x)
 
@@ -929,7 +950,7 @@ Test.Main()
 
     let exampleArr = [basicExample, constExample,ifExample, forExample,
                       whileExample, doExample, caseInExample, arrayExample,
-                      hashExample, tupleExample, dtLiteralExample, regexExample,
+                      hashExample, tupleExample, dtLiteralExample, regexExample, grepMapExample,
                       conversionExample, funcExample, exceptionExample, 
                       optionalExample,pipeOperatorExample, linqExample, jsonExample,
                       userDefinedOperatorExample,classNormalExample, classExtensionExample,
@@ -976,6 +997,7 @@ Examples:
   <option>tuple</option>
   <option>datetime literal</option>
   <option>regular expression</option>
+  <option>grep and map</option>
   <option>conversion</option>
   <option>function</option>
   <option>exception handling</option>
