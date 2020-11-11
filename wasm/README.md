@@ -19,3 +19,8 @@ Below is the snapshot of the running magpie demo in browser:
 <p>
     <img alt="magpie playground" src="https://github.com/haifenghuang/magpie/blob/master/wasm/magpie_playground3.png?raw=true" width="450" height="450">
 </p>
+
+## Limitation
+
+1. Can not use 'stdin', 'stdout' and 'stderr'
+2. Can not use file object's method. e.g. fileObj.read(), fileObj.readLine()
