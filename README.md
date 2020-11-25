@@ -22,6 +22,8 @@ It also has a REPL with realtime syntax highlighter.
 
 I also made a simple programming language written using `magpie`.
 
+You can even run most of the `magpie` script in a web browser.
+
 ## Documention
 
 Complete language tutorial can be found in [docs](docs)
