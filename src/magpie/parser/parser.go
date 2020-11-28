@@ -293,6 +293,9 @@ func (p *Parser) registerAction() {
 	//datetime literal
 	p.registerPrefix(token.DATETIME, p.parseDateTime)
 
+	//diamond expression: <$fobj>
+	p.registerPrefix(token.LD, p.parseDiamond)
+
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -3691,6 +3694,10 @@ func (p *Parser)parseDateTime() ast.Expression {
 
 	expr.Pattern = is
 	return expr
+}
+
+func (p *Parser) parseDiamond() ast.Expression {
+	return &ast.DiamondExpr{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 //define macro
