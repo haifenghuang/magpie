@@ -3532,6 +3532,26 @@ func (dt *DateTimeExpr) String() string {
 	return out.String()
 }
 
+///////////////////////////////////////////////////////////
+//                         Diamond                       //
+///////////////////////////////////////////////////////////
+type DiamondExpr struct {
+	Token token.Token
+	Value string
+}
+
+func (d *DiamondExpr) Pos() token.Position {
+	return d.Token.Pos
+}
+
+func (d *DiamondExpr) End() token.Position {
+	length := utf8.RuneCountInString(d.Value)
+	return token.Position{Line: d.Token.Pos.Line, Col: d.Token.Pos.Col + length + 1}
+}
+
+func (d *DiamondExpr) expressionNode()      {}
+func (d *DiamondExpr) TokenLiteral() string { return d.Token.Literal }
+func (d *DiamondExpr) String() string       { return "<$" + d.Value + ">" }
 
 ///////////////////////////////////////////////////////////
 //                       COMMENTS                        //

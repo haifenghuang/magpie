@@ -199,6 +199,11 @@ func (l *Lexer) NextToken() token.Token {
 			} else if l.peek() == '<' {
 				tok = token.Token{Type: token.SHIFT_L, Literal: string(l.ch) + string(l.peek())}
 				l.readNext()
+			} else if l.peek() == '$' {
+				if s, err := l.readDiamond(); err == nil {
+					tok = token.Token{Type: token.LD, Literal: s}
+					return tok
+				}
 			} else if strings.Contains(op_chars, string(l.peek())) {
 				//User Defined Operator
 				tok = token.Token{Type: token.UDO, Literal: string(l.ch) + string(l.peek())}
@@ -831,6 +836,25 @@ func (l *Lexer) skipWhitespace() {
 	for unicode.IsSpace(l.ch) {
 		l.readNext()
 	}
+}
+
+func (l *Lexer) readDiamond() (string, error ) {
+	var ret []rune
+	l.readNext()
+	for {
+		l.readNext()
+		if l.ch == 0 {
+			return "", errors.New("unexpected EOF")
+		}
+
+		if l.ch == '>' {
+			l.readNext()
+			break
+		}
+		ret = append(ret, l.ch)
+	}
+
+	return string(ret), nil
 }
 
 func (l *Lexer) readComment() (string, int) {

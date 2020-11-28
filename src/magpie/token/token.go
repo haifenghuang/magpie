@@ -1,5 +1,7 @@
 package token
 
+import "fmt"
+
 type TokenType int
 
 const (
@@ -34,6 +36,7 @@ const (
 	LT        // <
 	LE        // <=
 	SHIFT_L   // << (SHIFT LEFT)
+	LD        // <$
 	GT        // >
 	GE        // >=
 	SHIFT_R   // >> (SHIFT RIGHT)
@@ -295,6 +298,8 @@ func (tt TokenType) String() string {
 		return "<="
 	case SHIFT_L:
 		return "<<"
+	case LD:
+		return "<$>"
 	case GT:
 		return ">"
 	case GE:
@@ -532,6 +537,11 @@ type Token struct {
 	Pos     Position
 	Type    TokenType
 	Literal string
+}
+
+//Stringer method for Token
+func (t Token) String() string {
+	return fmt.Sprintf("Pos: %s, Type: %s, Literal: %s", t.Pos, t.Type, t.Literal)
 }
 
 func LookupIdent(ident string) TokenType {

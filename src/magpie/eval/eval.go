@@ -275,7 +275,11 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 			dt.Valid = false
 		}
 		return dt
+	//diamond: <$fobj>
+	case *ast.DiamondExpr:
+		return evalDiamondExpr(node, scope)
 	}
+
 	return nil
 }
 
@@ -5745,6 +5749,27 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 	}
 
 	return arr
+}
+
+func evalDiamondExpr(d *ast.DiamondExpr, scope *Scope) Object {
+	var obj Object
+	var ok bool
+
+	if obj, ok = GetGlobalObj(d.String()); !ok {
+		obj, ok = scope.Get(d.String())
+		if !ok {
+			if obj, ok = includeScope.Get(d.String()); !ok {
+				return reportTypoSuggestions(d.Pos().Sline(), scope, d.Value)
+			}
+		}
+	}
+
+	if fileObj, ok := obj.(*FileObject); ok {
+		return fileObj.ReadLine(d.Pos().Sline())
+	} else {
+		return NewError(d.Pos().Sline(), DIAMONDOPERERROR)
+	}
+
 }
 
 // Convert a Object to an ast.Expression.

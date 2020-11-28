@@ -8,6 +8,7 @@ fileread = fn() {
 	}
 	defer file.close()
 
+	//while ((l = <$file>) != nil) { //same as below
 	while ((l = file.readLine()) != nil) {
 		println(l)
 	}
