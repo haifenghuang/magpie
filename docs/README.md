@@ -739,6 +739,7 @@ using (infile = newFile("./file.demo", "r")) {
     let num = 0
     //Read file by using extraction operator(">>")
     while (infile>>line != nil) {
+    //while ((line = <$infile>) != nil) { same as below line
         num++
         printf("%d	%s\n", num, line)
     }
@@ -1917,6 +1918,7 @@ if (infile == nil) {
 }
 let line;
 let num = 0
+//while ( (line = <$infile>) != nil) {
 while ( infile>>line != nil) {
     num++
     printf("%d	%s\n", num, line)

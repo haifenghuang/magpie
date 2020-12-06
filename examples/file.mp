@@ -8,9 +8,13 @@ fileread = fn() {
 	}
 	defer file.close()
 
-	//while ((l = <$file>) != nil) { //same as below
-	while ((l = file.readLine()) != nil) {
-		println(l)
+	//while (l = <$file>) { //same as below
+	//while ((l = file.readLine()) != nil) {
+	//	println(l)
+	//}
+
+	while (<$file>) { //same as above 'while' loop
+		println($_)
 	}
 
 	//Position to beginning of file

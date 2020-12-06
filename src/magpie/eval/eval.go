@@ -2792,6 +2792,11 @@ func evalWhileLoopExpression(wl *ast.WhileLoop, scope *Scope) Object {
 	var result Object
 	for {
 		condition := Eval(wl.Condition, innerScope)
+		switch wl.Condition.(type) {
+		case *ast.DiamondExpr:
+			innerScope.Set("$_", condition)
+		}
+
 		if condition.Type() == ERROR_OBJ {
 			return condition
 		}
@@ -5754,11 +5759,10 @@ func evalRangeExpression(node ast.Node, startIdx Object, endIdx Object, scope *S
 func evalDiamondExpr(d *ast.DiamondExpr, scope *Scope) Object {
 	var obj Object
 	var ok bool
-
-	if obj, ok = GetGlobalObj(d.String()); !ok {
-		obj, ok = scope.Get(d.String())
+	if obj, ok = GetGlobalObj(d.Value); !ok {
+		obj, ok = scope.Get(d.Value)
 		if !ok {
-			if obj, ok = includeScope.Get(d.String()); !ok {
+			if obj, ok = includeScope.Get(d.Value); !ok {
 				return reportTypoSuggestions(d.Pos().Sline(), scope, d.Value)
 			}
 		}
