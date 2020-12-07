@@ -201,7 +201,7 @@ func (l *Lexer) NextToken() token.Token {
 				l.readNext()
 			} else if l.peek() == '$' {
 				if s, err := l.readDiamond(); err == nil {
-					tok = token.Token{Type: token.LD, Literal: s}
+					tok = token.Token{Pos:pos, Type: token.LD, Literal: s}
 					return tok
 				}
 			} else if strings.Contains(op_chars, string(l.peek())) {
