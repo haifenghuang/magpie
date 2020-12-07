@@ -2390,6 +2390,10 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		return FALSE
 
 	case "=~": //match
+		if left.Type() == NIL_OBJ { //nil is not matched with anything
+			return FALSE
+		}
+
 		var str string
 		if left.Type() == INTEGER_OBJ {
 			str = fmt.Sprintf("%d", left.(*Integer).Int64)
@@ -2405,6 +2409,10 @@ func evalMixedTypeInfixExpression(node *ast.InfixExpression, left Object, right 
 		return FALSE
 
 	case "!~": //not match
+		if left.Type() == NIL_OBJ {
+			return TRUE
+		}
+
 		var str string
 		if left.Type() == INTEGER_OBJ {
 			str = fmt.Sprintf("%d", left.(*Integer).Int64)
@@ -3455,14 +3463,65 @@ func evalForEverLoopExpression(fel *ast.ForEverLoop, scope *Scope) Object {
 	return e
 }
 
+func evalForEachFileLine(fal *ast.ForEachArrayLoop, scope *Scope) Object {
+	for {
+		line := Eval(fal.Value, scope)
+		if line.Type() == ERROR_OBJ {
+				return line
+		}
+
+		if line.Type() == NIL_OBJ { //at end-of-line
+			break
+		}
+		scope.Set(fal.Var, line)
+
+		if fal.Cond != nil {
+			cond := Eval(fal.Cond, scope)
+			if cond.Type() == ERROR_OBJ {
+				return cond
+			}
+
+			if !IsTrue(cond) {
+				continue
+			}
+		}
+
+		result := Eval(fal.Block, scope)
+		if result.Type() == ERROR_OBJ {
+			return result
+		}
+
+		if _, ok := result.(*Break); ok {
+			break
+		}
+		if _, ok := result.(*Continue); ok {
+			continue
+		}
+		if v, ok := result.(*ReturnValue); ok {
+			if v.Value != nil {
+				return v
+			}
+			break
+		}
+	}
+
+	return NIL
+}
+
 //for item in array
 //for item in string
 //for item in tuple
 //for item in channel
 //for item in goObj
 //for item in linqObj
+//for item in <$fileObj>
 func evalForEachArrayExpression(fal *ast.ForEachArrayLoop, scope *Scope) Object { //fal:For Array Loop
 	innerScope := NewScope(scope, nil)
+
+	switch fal.Value.(type) {
+	case *ast.DiamondExpr:
+		return evalForEachFileLine(fal, innerScope)
+	}
 
 	aValue := Eval(fal.Value, innerScope)
 	if aValue.Type() == ERROR_OBJ {
@@ -3835,10 +3894,14 @@ func IsTrue(obj Object) bool {
 			if obj.(*Float).Float64 == 0.0 {
 				return false
 			}
-		case STRING_OBJ:
-			if len(obj.(*String).String) == 0 {
-				return false
-			}
+
+//why remove below check? please see below code:
+//    for line in <$f> { println(line) }
+//Here when the line is empty, we should not return false.
+//		case STRING_OBJ:
+//			if len(obj.(*String).String) == 0 {
+//				return false
+//			}
 		case ARRAY_OBJ:
 			if len(obj.(*Array).Members) == 0 {
 				return false

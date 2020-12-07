@@ -268,6 +268,12 @@ let a = [1,2,3,4]
 for i in a where i % 2 != 0 {
     println(i)
 }
+
+# read line by line
+let f = newFile("./file.log", "r")
+for line in <$f> where line =~ ``magpie`` {
+    println(line) //print only lines which match 'magpie'
+}
 ```
 
 #### while
@@ -277,6 +283,12 @@ i = 10
 while (i>3) {
     i--
     println('i={i}')
+}
+
+# read line by line
+let f = newFile("./file.log", "r")
+while (<$f>) {
+    println($_) //$_: line read from file
 }
 ```
 
