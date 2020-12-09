@@ -5417,6 +5417,10 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 func evalUsingStatement(u *ast.UsingStmt, scope *Scope) Object {
 	//evaluate the assignment expression
 	obj := evalAssignExpression(u.Expr, scope)
+	if obj.Type() == ERROR_OBJ {
+		return obj
+	}
+
 	fn := func() {
 		if obj.Type() != NIL_OBJ {
 			// Check if val is 'Closeable'

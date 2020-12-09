@@ -270,9 +270,10 @@ for i in a where i % 2 != 0 {
 }
 
 # read line by line
-let f = newFile("./file.log", "r")
-for line in <$f> where line =~ ``magpie`` {
-    println(line) //print only lines which match 'magpie'
+using (f = open("./file.log", "r")) {
+    for line in <$f> where line =~ ``magpie`` {
+        println(line) //print only lines which match 'magpie'
+    }
 }
 ```
 
@@ -286,9 +287,10 @@ while (i>3) {
 }
 
 # read line by line
-let f = newFile("./file.log", "r")
-while (<$f>) {
-    println($_) //$_: line read from file
+using (f = open("./file.log", "r")) {
+    while <$f> {
+        println($_) //$_: line read from file
+    }
 }
 ```
 

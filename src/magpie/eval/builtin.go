@@ -164,7 +164,7 @@ func chrBuiltin() *Builtin {
 	}
 }
 
-func newFileBuiltin() *Builtin {
+func newFileBuiltin(funcName string) *Builtin {
 	return &Builtin{
 		Fn: func(line string, scope *Scope, args ...Object) Object {
 			var fname *String
@@ -179,13 +179,13 @@ func newFileBuiltin() *Builtin {
 
 			fname, ok = args[0].(*String)
 			if !ok {
-				return NewError(line, PARAMTYPEERROR, "first", "newFile", "*String", args[0].Type())
+				return NewError(line, PARAMTYPEERROR, "first", funcName, "*String", args[0].Type())
 			}
 
 			if argLen == 2 {
 				m, ok := args[1].(*String)
 				if !ok {
-					return NewError(line, PARAMTYPEERROR, "second", "newFile", "*String", args[1].Type())
+					return NewError(line, PARAMTYPEERROR, "second", funcName, "*String", args[1].Type())
 				}
 
 				flag, ok = fileModeTable[m.String]
@@ -197,7 +197,7 @@ func newFileBuiltin() *Builtin {
 			if len(args) == 3 {
 				p, ok := args[2].(*Integer)
 				if !ok {
-					return NewError(line, PARAMTYPEERROR, "third", "newFile", "*Integer", args[2].Type())
+					return NewError(line, PARAMTYPEERROR, "third", funcName, "*Integer", args[2].Type())
 				}
 
 				perm = os.FileMode(int(p.Int64))
@@ -1517,7 +1517,8 @@ func init() {
 		"range":    rangeBuiltin(),
 		"addm":     addmBuiltin(),
 		"chr":      chrBuiltin(),
-		"newFile":  newFileBuiltin(),
+		"newFile":  newFileBuiltin("newFile"),
+		"open":     newFileBuiltin("open"),
 		"int":      intBuiltin(),
 		"uint":     uintBuiltin(),
 		"float":    floatBuiltin(),
