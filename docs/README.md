@@ -839,7 +839,7 @@ Below is a list of predefined operators and user defined operators:
   </tr>
 </table>
 
-> In the table above, `X` could be `.=+-*/%&,|^~<,>},!?@#$`
+> In the table above, `X` could be `.=+-*/%&,|^~,>},!?@#$`
 
 ### Integer
 
