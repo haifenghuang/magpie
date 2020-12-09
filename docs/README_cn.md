@@ -818,7 +818,7 @@ printf("pp=%v\n", pp) // result: pp=[10, 12, 14, 16, 18, 20]
   </tr>
   <tr>
     <td>&lt;=<br/>&lt;&lt;</td>
-    <td>&lt;X</td>
+    <td>&lt;X2</td>
   </tr>
   <tr>
     <td>!=<br/>!~</td>
@@ -847,6 +847,7 @@ printf("pp=%v\n", pp) // result: pp=[10, 12, 14, 16, 18, 20]
 </table>
 
 > 在上面的表格中，`X`可以是`.=+-*/%&,|^~,>},!?@#$`。
+> `X2` = `X` - '$'(即无$符号)
 
 
 ### 整型(Integer)

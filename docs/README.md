@@ -811,7 +811,7 @@ Below is a list of predefined operators and user defined operators:
   </tr>
   <tr>
     <td>&lt;=<br/>&lt;&lt;</td>
-    <td>&lt;X</td>
+    <td>&lt;X2</td>
   </tr>
   <tr>
     <td>!=<br/>!~</td>
@@ -840,6 +840,7 @@ Below is a list of predefined operators and user defined operators:
 </table>
 
 > In the table above, `X` could be `.=+-*/%&,|^~,>},!?@#$`
+> `X2` = `X` - '$' (i.e. no '$' sign)
 
 ### Integer
 
