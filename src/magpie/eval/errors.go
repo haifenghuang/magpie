@@ -116,7 +116,7 @@ var errorType = map[int]string{
 	METAOPERATORERROR:   "Meta-Operators' item must be Numbers|String",
 	SERVICENOURLERROR:   "Service(%s)'s function('%s') must have url",
 	CONSTNOTASSIGNERROR: "Const variable '%s' cannot be modified",
-	DIAMONDOPERERROR:    "Diamond operator must be followed by a file object",
+	DIAMONDOPERERROR:    "Diamond operator must be followed by a file object, but got '%s'",
 	GENERICERROR:        "%s",
 }
 

@@ -5834,7 +5834,7 @@ func evalDiamondExpr(d *ast.DiamondExpr, scope *Scope) Object {
 	if fileObj, ok := obj.(*FileObject); ok {
 		return fileObj.ReadLine(d.Pos().Sline())
 	} else {
-		return NewError(d.Pos().Sline(), DIAMONDOPERERROR)
+		return NewError(d.Pos().Sline(), DIAMONDOPERERROR, obj.Type())
 	}
 
 }
