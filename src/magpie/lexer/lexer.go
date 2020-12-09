@@ -26,7 +26,14 @@ type Mode uint
 
 const (
 	ScanComments Mode = 1 << iota // return comments as COMMENT tokens
-	op_chars          = ".=+-*/%&,|^~<,>},!?@#$"
+
+	//Here I removed the '<' from the 'op_chars', why? See below example
+	// 1   f = open("./a.txt", "r")
+	// 2   line=<$f>
+	// 3   f.close()
+	//In line 2, the lexer found '=<', so the lexer treats it as an 'UDO'(User Defined Operator) token,
+	//but what we want is to read one line from the file 'f'.
+	op_chars          = ".=+-*/%&,|^~,>},!?@#$"
 )
 
 type Lexer struct {
