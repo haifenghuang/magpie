@@ -59,6 +59,7 @@ const (
 	SERVICENOURLERROR
 	CONSTNOTASSIGNERROR
 	DIAMONDOPERERROR
+	NAMENOTEXPORTED
 	GENERICERROR
 )
 
@@ -117,6 +118,7 @@ var errorType = map[int]string{
 	SERVICENOURLERROR:   "Service(%s)'s function('%s') must have url",
 	CONSTNOTASSIGNERROR: "Const variable '%s' cannot be modified",
 	DIAMONDOPERERROR:    "Diamond operator must be followed by a file object, but got '%s'",
+	NAMENOTEXPORTED:     "Cannot refer to unexported name '%s.%s'",
 	GENERICERROR:        "%s",
 }
 

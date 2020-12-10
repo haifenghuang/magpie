@@ -12,3 +12,6 @@ fn Minus(x, y) {
 fn multiply(x, y) {
     x * y
 }
+
+let SQUARE_OF_TWO = 4
+let sQUARE_OF_FOUR = 16 //not exported

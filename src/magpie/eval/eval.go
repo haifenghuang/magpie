@@ -4206,10 +4206,16 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 		case *ast.Identifier:
 			if i, ok := m.Scope.Get(call.Call.String()); ok {
 				return i
+			} else {
+				return NewError(call.Call.Pos().Sline(), NAMENOTEXPORTED, str, call.Call.String())
 			}
 		case *ast.CallExpression:
 			if o.Function.String() == "Scope" {
 				return obj.CallMethod(call.Call.Pos().Sline(), m.Scope, "Scope")
+			}
+
+			if _, ok := m.Scope.Get(o.Function.String()); !ok {
+				return NewError(o.Function.Pos().Sline(), NAMENOTEXPORTED, str, o.Function.String())
 			}
 			return evalFunctionCall(o, m.Scope)
 		}
