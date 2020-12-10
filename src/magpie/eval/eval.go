@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -285,6 +286,10 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 
 // Program Evaluation Entry Point Functions, and Helpers:
 func evalProgram(program *ast.Program, scope *Scope) (results Object) {
+	if importedCache == nil {
+		importedCache = make(map[string]Object)
+	}
+
 	loadIncludes(program.Includes, scope)
 	for _, statement := range program.Statements {
 		results = Eval(statement, scope)
@@ -337,6 +342,12 @@ func evalIncludeStatement(i *ast.IncludeStatement, scope *Scope) Object {
 	os.Stdout = w
 	if _, ok := includeScope.Get(i.IncludePath.String()); !ok {
 		evalProgram(i.Program, imported.Scope)
+		for k, _ := range imported.Scope.store {
+			// only uppercase letter is exported
+			if !unicode.IsUpper(rune(k[0])) {
+				delete(imported.Scope.store, k);
+			}
+		}
 		includeScope.Set(i.IncludePath.String(), imported)
 	}
 

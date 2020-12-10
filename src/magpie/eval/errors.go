@@ -121,7 +121,7 @@ var errorType = map[int]string{
 }
 
 func NewError(line string, t int, args ...interface{}) Object {
-	msg := fmt.Sprintf(errorType[t], args...) + " at line " + line
+	msg := fmt.Sprintf(errorType[t], args...) + " at line" + line
 	return &Error{Kind: t, Message: msg}
 }
 

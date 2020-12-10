@@ -1295,7 +1295,7 @@ func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) 
 		path = "."
 	}
 
-	fn := filepath.Join(path, importpath+".my")
+	fn := filepath.Join(path, importpath+".mp")
 	f, err := ioutil.ReadFile(fn)
 	if err != nil { //error occurred, maybe the file do not exists.
 		// Check for 'MAGPIE_ROOT' environment variable
