@@ -1,3 +1,6 @@
+//Identifiers and functions which have their first 
+//letter 'Uppercased' will be exported.
+
 //exported
 fn Add(x, y) {
     x + y
@@ -13,5 +16,7 @@ fn multiply(x, y) {
     x * y
 }
 
-let SQUARE_OF_TWO = 4
-let sQUARE_OF_FOUR = 16 //not exported
+const (
+    SQUARE_OF_TWO = 4,   //exported
+    sQUARE_OF_FOUR = 16, //not exported
+)
