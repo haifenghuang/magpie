@@ -1,5 +1,5 @@
 ################################################################
-# Same as httpserver2.my file, but use fmt.fprintf function
+# Same as httpserver2.mp file, but use fmt.fprintf function
 ################################################################
 let todos = []
 let showToDo = fn(writer, request) {

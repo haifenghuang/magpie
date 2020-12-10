@@ -13,7 +13,7 @@ Select `Tools|Select Configuration|Define Configurations...`, Then do the follow
 1. In the `Define Configurations` dialog, click `New` and input `magpie`.
 
 1. In the `Define Configurations` dialog, click `Associations...` button. In the `Configuration Associations` dialog, click `New` and
-   in `File Types` column, input `*.my`, then in `Configuration` combobox, select `magpie`.
+   in `File Types` column, input `*.mp`, then in `Configuration` combobox, select `magpie`.
 
 1. In `Define Configurations` dialog, click `Properties` or double click `magpie` item in the `Configurations` lists.
 

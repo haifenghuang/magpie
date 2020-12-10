@@ -1204,7 +1204,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	/*  LONG HIDDEN BUG!
 	NOTE: If we got 'EOF' and current token is not '}', then that means that the block is not ended with a '}', like below:
 
-		//if.my
+		//if.mp
 	   if (10 > 2) {
 	       println("10>2")
 
@@ -1301,12 +1301,12 @@ func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) 
 		// Check for 'MAGPIE_ROOT' environment variable
 		includeRoot := os.Getenv("MAGPIE_ROOT")
 		if len(includeRoot) == 0 { //'MAGPIE_ROOT' environment variable is not set
-			return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.my, %s", p.curToken.Pos, importpath, path)
+			return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, path)
 		} else {
-			fn = filepath.Join(includeRoot, importpath+".my")
+			fn = filepath.Join(includeRoot, importpath+".mp")
 			e, err := ioutil.ReadFile(fn)
 			if err != nil {
-				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.my, %s", p.curToken.Pos, importpath, includeRoot)
+				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, includeRoot)
 			}
 			f = e
 		}

@@ -33,11 +33,11 @@ done
 echo "Building mdoc...         (mdoc)"
 go build -ldflags "-s -w" -o mdoc mdoc.go
 
-# run: ./fmt demo.my
+# run: ./fmt demo.mp
 echo "Building Formatter...    (fmt)"
 go build -ldflags "-s -w" -o fmt fmt.go
 
-# run:    ./highlight demo.my               (generate: demo.my.html)
-#     or  ./fmt demo.my | ./highlight   (generate: output.html)
+# run:    ./highlight demo.mp               (generate: demo.mp.html)
+#     or  ./fmt demo.mp | ./highlight   (generate: output.html)
 echo "Building Highlighter...  (highlight)"
 go build -ldflags "-s -w" -o highlight highlight.go

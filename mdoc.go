@@ -34,7 +34,7 @@ func genDocs(path string, cfg doc.Config, isDir bool) {
 	}
 
 	for _, d := range list {
-		if strings.HasSuffix(d.Name(), ".my") {
+		if strings.HasSuffix(d.Name(), ".mp") {
 			filename := filepath.Join(path, d.Name())
 			genDoc(filename, cfg)
 		}
@@ -69,7 +69,7 @@ func genDoc(filename string, cfg doc.Config) {
 	file := doc.New(filename, program)
 	md := doc.MdDocGen(file)
 
-	//remove the '.my' extension
+	//remove the '.mp' extension
 	genFilename := strings.TrimSuffix(filename, filepath.Ext(filename))
 
 	//create markdown file

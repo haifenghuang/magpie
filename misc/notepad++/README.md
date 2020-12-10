@@ -14,7 +14,7 @@ This file provides Syntax highlighting support for the magpie Language in Notepa
 
 3. A user defined language window should open. Click the import button and navigate to the magpie.xml file and open it.
 
-4. You may need to re-open your .my files or restart notepad++ in order to see the highlighting changes.
+4. You may need to re-open your .mp files or restart notepad++ in order to see the highlighting changes.
 
 ## Limitation of the notepad++'s syntax highlight
 

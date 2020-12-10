@@ -57,13 +57,13 @@ func TestFileObjects(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{`let f = open("../parser/test_files/module.my");str(f)`, "<file object: ../parser/test_files/module.my>"},
-		{`let f = open("../parser/test_files/module.my");f.read()`, `include eval
+		{`let f = open("../parser/test_files/module.mp");str(f)`, "<file object: ../parser/test_files/module.mp>"},
+		{`let f = open("../parser/test_files/module.mp");f.read()`, `include eval
 include test
 include sub_package`},
-		{`let f = open("../parser/test_files/module.my");f.readline()`, "include eval"},
-		{`let f = open("../parser/test_files/module.my");f.readline();f.readline()`, "include test"},
-		{`let f = open("../parser/test_files/module.my");f.readline();f.readline();f.readline()`, "include sub_package"},
+		{`let f = open("../parser/test_files/module.mp");f.readline()`, "include eval"},
+		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline()`, "include test"},
+		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline();f.readline()`, "include sub_package"},
 	}
 	d, _ := os.Getwd()
 	fmt.Println(d)
