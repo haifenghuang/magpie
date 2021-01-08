@@ -126,7 +126,6 @@ var tokenMap = map[rune]token.TokenType{
 	'|': token.BITOR,
 	'^': token.BITXOR,
 	'@': token.AT,
-	'_': token.UNDERSCORE,
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -665,6 +664,10 @@ func (l *Lexer) readIdentifier() token.Token {
 	// Why '$' : Because Magpie support extend built-in types with 'integer', 'float', etc.
 	// For example, you could extend 'integer' type with 'integer$funcname(xxx)'
 	for isLetter(l.ch) || isDigit(l.ch) || l.ch == '?' || l.ch == '$' {
+		if l.ch == '_' && !isLetter(l.peek()) {
+			l.readNext()
+			return newToken(token.UNDERSCORE, '_')
+		}
 		l.readNext()
 	}
 

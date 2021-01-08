@@ -1,9 +1,12 @@
 //Identifiers and functions which have their first 
 //letter 'Uppercased' will be exported.
 
+fn _add(x, y) {
+    x + y
+}
 //exported
 fn Add(x, y) {
-    x + y
+    return _add(x, y)
 }
 
 //exported
