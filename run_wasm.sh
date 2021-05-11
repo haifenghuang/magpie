@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 export GOPATH=$(pwd)
 
+#if you got "package XXX is not in GOROOT", then uncomment below line
+#export GO111MODULE=off
+
 olddir=$(pwd)
 # build-wasm
 cd wasm/cmd/wasm
