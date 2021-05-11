@@ -33,7 +33,7 @@ const (
 	// 3   f.close()
 	//In line 2, the lexer found '=<', so the lexer treats it as an 'UDO'(User Defined Operator) token,
 	//but what we want is to read one line from the file 'f'.
-	op_chars          = ".=+-*/%&,|^~,>},!?@#$"
+	op_chars = ".=+-*/%&,|^~,>},!?@#$"
 )
 
 type Lexer struct {
@@ -207,7 +207,7 @@ func (l *Lexer) NextToken() token.Token {
 				l.readNext()
 			} else if l.peek() == '$' {
 				if s, err := l.readDiamond(); err == nil {
-					tok = token.Token{Pos:pos, Type: token.LD, Literal: s}
+					tok = token.Token{Pos: pos, Type: token.LD, Literal: s}
 					return tok
 				}
 			} else if strings.Contains(op_chars, string(l.peek())) {
@@ -664,7 +664,9 @@ func (l *Lexer) readIdentifier() token.Token {
 	// Why '$' : Because Magpie support extend built-in types with 'integer', 'float', etc.
 	// For example, you could extend 'integer' type with 'integer$funcname(xxx)'
 	for isLetter(l.ch) || isDigit(l.ch) || l.ch == '?' || l.ch == '$' {
-		if l.ch == '_' && !isLetter(l.peek()) {
+		if l.ch == '$' && l.peek() == '_' { // for '$_'
+			l.readNext()
+		} else if l.ch == '_' && !isLetter(l.peek()) {
 			l.readNext()
 			return newToken(token.UNDERSCORE, '_')
 		}
@@ -848,7 +850,7 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func (l *Lexer) readDiamond() (string, error ) {
+func (l *Lexer) readDiamond() (string, error) {
 	var ret []rune
 	l.readNext()
 	for {
