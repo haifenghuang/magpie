@@ -1235,7 +1235,7 @@ func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
 }
 
 func evalReturnStatement(r *ast.ReturnStatement, scope *Scope) Object {
-	ret := &ReturnValue{Values: []Object{}}
+	ret := &ReturnValue{Value: NIL, Values: []Object{}}
 	for _, value := range r.ReturnValues {
 		ret.Values = append(ret.Values, Eval(value, scope))
 	}
