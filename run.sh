@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 export GOPATH=$(pwd)
 
-#if you got "package XXX is not in GOROOT", then uncomment below line
-#export GO111MODULE=off
+# for newer go version's build error: "package XXX is not in GOROOT"
+export GO111MODULE=off
 
 # format each go file
 #echo "Formatting go file..."
