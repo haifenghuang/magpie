@@ -33,7 +33,7 @@ const (
 	// 3   f.close()
 	//In line 2, the lexer found '=<', so the lexer treats it as an 'UDO'(User Defined Operator) token,
 	//but what we want is to read one line from the file 'f'.
-	op_chars = ".=+-*/%&,|^~,>},!?@#$"
+	op_chars = ".=+*/%&,|^~,>},?@#$"
 )
 
 type Lexer struct {
