@@ -572,7 +572,11 @@ func (h *HashLiteral) String() string {
 	var out bytes.Buffer
 
 	pairs := []string{}
-	for key, value := range h.Pairs {
+	//for key, value := range h.Pairs {
+	//	pairs = append(pairs, key.String()+": "+value.String())
+	//}
+	for _, key := range h.Order {
+		value, _ := h.Pairs[key]
 		pairs = append(pairs, key.String()+": "+value.String())
 	}
 	out.WriteString("{")
