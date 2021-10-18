@@ -1,6 +1,7 @@
 package eval
 
 import "fmt"
+import "strings"
 
 // constants for error types
 const (
@@ -123,7 +124,7 @@ var errorType = map[int]string{
 }
 
 func NewError(line string, t int, args ...interface{}) Object {
-	msg := fmt.Sprintf(errorType[t], args...) + " at line" + line
+	msg := fmt.Sprintf(errorType[t], args...) + " at line " + strings.TrimLeft(line, " \t")
 	return &Error{Kind: t, Message: msg}
 }
 

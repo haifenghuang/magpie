@@ -336,24 +336,10 @@ func evalIncludeStatement(i *ast.IncludeStatement, scope *Scope) Object {
 
 	imported := &IncludedObject{Name: i.IncludePath.String(), Scope: NewScope(nil, scope.Writer)}
 
-	// capture stdout to suppress output during evaluating import
-	so := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
 	if _, ok := includeScope.Get(i.IncludePath.String()); !ok {
 		evalProgram(i.Program, imported.Scope)
-		for k, _ := range imported.Scope.store {
-			// only uppercase letter is exported
-			if !unicode.IsUpper(rune(k[0])) {
-				delete(imported.Scope.store, k);
-			}
-		}
 		includeScope.Set(i.IncludePath.String(), imported)
 	}
-
-	// restore stdout
-	w.Close()
-	os.Stdout = so
 
 	//store the evaluated result to cache
 	importedCache[i.IncludePath.String()] = imported
@@ -4204,20 +4190,35 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 	case *IncludedObject:
 		switch o := call.Call.(type) {
 		case *ast.Identifier:
-			if i, ok := m.Scope.Get(call.Call.String()); ok {
-				return i
+			idName := call.Call.String()
+			if i, ok := m.Scope.Get(idName); ok {
+				if !unicode.IsUpper(rune(idName[0])) {
+					return NewError(call.Call.Pos().Sline(), NAMENOTEXPORTED, str, idName)
+				} else {
+					return i
+				}
 			} else {
-				return NewError(call.Call.Pos().Sline(), NAMENOTEXPORTED, str, call.Call.String())
+				return NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, idName)
 			}
 		case *ast.CallExpression:
 			if o.Function.String() == "Scope" {
 				return obj.CallMethod(call.Call.Pos().Sline(), m.Scope, "Scope")
 			}
 
-			if _, ok := m.Scope.Get(o.Function.String()); !ok {
+			var fnObj Object
+			var ok bool
+			if fnObj, ok = m.Scope.Get(o.Function.String()); !ok {
+				return NewError(o.Function.Pos().Sline(), NOMETHODERROR, o.Function.String(), m.Type())
+
+			}
+
+			funcName := o.Function.String()
+			if !unicode.IsUpper(rune(funcName[0])) {
 				return NewError(o.Function.Pos().Sline(), NAMENOTEXPORTED, str, o.Function.String())
 			}
-			return evalFunctionCall(o, m.Scope)
+
+			return evalFunctionObj(o, fnObj.(*Function), scope)
+			//return evalFunctionCall(o, m.Scope)
 		}
 	case *Struct:
 		switch o := call.Call.(type) {

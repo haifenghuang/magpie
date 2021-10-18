@@ -8,4 +8,13 @@ printf("10 - 2 = %d\n", calc.Minus(a, b))
 //printf("10*2=%d\n", calc.multiply(a, b))
 
 printf("2 * 2 = %d\n", calc.SQUARE_OF_TWO)
-//printf("4*4 = %d\n", calc.sQUARE_OF_FOUR)
+
+//will report error: 'unexported name'
+printf("4*4 = %d\n", calc.sQUARE_OF_FOUR)
+
+//will report error: 'undefined method'
+printf("10 + 2 = %d\n", calc.Adds(a, b))
+
+//will report error: 'unexported name'
+printf("10 + 2 = %d\n", calc._add(a, b))
+
