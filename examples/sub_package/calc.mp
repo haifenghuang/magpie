@@ -1,6 +1,7 @@
 //Identifiers and functions which have their first 
 //letter 'Uppercased' will be exported.
 
+//not exported, the first letter is not Uppercase.
 fn _add(x, y) {
     x + y
 }
@@ -14,6 +15,11 @@ fn Minus(x, y) {
     x - y
 }
 
+//exported
+fn Add_and_Minus(x,y) {
+    return x + y, x - y
+}
+
 //not exported, the first letter is not Uppercase.
 fn multiply(x, y) {
     x * y
@@ -21,5 +27,5 @@ fn multiply(x, y) {
 
 const (
     SQUARE_OF_TWO = 4,   //exported
-    sQUARE_OF_FOUR = 16, //not exported
+    sQUARE_OF_FOUR = 16, //not exported, the first letter is not Uppercase.
 )
