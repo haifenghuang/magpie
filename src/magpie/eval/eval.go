@@ -3993,6 +3993,12 @@ func evalFunctionCall(call *ast.CallExpression, scope *Scope) Object {
 			}
 		} else if builtin, ok := builtins[call.Function.String()]; ok {
 			args := evalArgs(call.Arguments, scope)
+			//check for errors
+			for _, v := range args {
+				if v.Type() == ERROR_OBJ {
+					return v
+				}
+			}
 			return builtin.Fn(call.Function.Pos().Sline(), scope, args...)
 		} else if callExpr, ok := call.Function.(*ast.CallExpression); ok { //call expression
 			//let complex={ "add" : fn(x,y){ fn(z) {x+y+z} } }
