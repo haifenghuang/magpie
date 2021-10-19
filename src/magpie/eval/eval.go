@@ -270,7 +270,7 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 
 		is := evalInterpolatedString(node.Pattern, scope).(*InterpolatedString)
 		var err error
-		dt := &TimeObj{Valid:true}
+		dt := &TimeObj{Valid: true}
 		dt.Tm, err = time.Parse(builtinDate_Normal, is.String.String)
 		if err != nil {
 			dt.Valid = false
@@ -476,7 +476,7 @@ func evalConstStatement(c *ast.ConstStatement, scope *Scope) Object {
 			return val
 		}
 		scope.SetConst(name.Value, val)
-	} 
+	}
 	return NIL
 }
 
@@ -1363,9 +1363,9 @@ func evalHashLiteral(hl *ast.HashLiteral, scope *Scope) Object {
 		switch key.(type) {
 		case *ast.Identifier: //It's an identifier, so it's a bare word.
 			/* e.g. h = {A: "xxxx"}
-			  Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
-			  is an identifier, so we need to treat it as string. that is, we want it to become:
-			      h = {"A": "xxxx"}
+			Here when evaluate the hash key 'A', it will evaluate to NIL_OBJ, because it's a bare word and
+			is an identifier, so we need to treat it as string. that is, we want it to become:
+			    h = {"A": "xxxx"}
 			*/
 
 			if _, ok := scope.Get(key.(*ast.Identifier).Value); !ok {
@@ -1674,17 +1674,17 @@ func evalIncrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object
 	case INTEGER_OBJ:
 		rightObj := right.(*Integer)
 		rightVal := rightObj.Int64
-		scope.Reset(p.Right.String(), NewInteger(rightVal + 1))
+		scope.Reset(p.Right.String(), NewInteger(rightVal+1))
 		return NewInteger(rightVal + 1)
 	case UINTEGER_OBJ:
 		rightObj := right.(*UInteger)
 		rightVal := rightObj.UInt64
-		scope.Reset(p.Right.String(), NewUInteger(rightVal + 1))
+		scope.Reset(p.Right.String(), NewUInteger(rightVal+1))
 		return NewUInteger(rightVal + 1)
 	case FLOAT_OBJ:
 		rightObj := right.(*Float)
 		rightVal := rightObj.Float64
-		scope.Reset(p.Right.String(), NewFloat(rightVal + 1))
+		scope.Reset(p.Right.String(), NewFloat(rightVal+1))
 		return NewFloat(rightVal + 1)
 	default:
 		return NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type())
@@ -1696,17 +1696,17 @@ func evalDecrementPrefixOperatorExpression(p *ast.PrefixExpression, right Object
 	case INTEGER_OBJ:
 		rightObj := right.(*Integer)
 		rightVal := rightObj.Int64
-		scope.Reset(p.Right.String(), NewInteger(rightVal - 1))
+		scope.Reset(p.Right.String(), NewInteger(rightVal-1))
 		return NewInteger(rightVal - 1)
 	case UINTEGER_OBJ:
 		rightObj := right.(*UInteger)
 		rightVal := rightObj.UInt64
-		scope.Reset(p.Right.String(), NewUInteger(rightVal - 1))
+		scope.Reset(p.Right.String(), NewUInteger(rightVal-1))
 		return NewUInteger(rightVal - 1)
 	case FLOAT_OBJ:
 		rightObj := right.(*Float)
 		rightVal := rightObj.Float64
-		scope.Reset(p.Right.String(), NewFloat(rightVal - 1))
+		scope.Reset(p.Right.String(), NewFloat(rightVal-1))
 		return NewFloat(rightVal - 1)
 	default:
 		return NewError(p.Pos().Sline(), PREFIXOP, p.Operator, right.Type())
@@ -1897,7 +1897,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 	switch {
 	case node.Operator == "and" || node.Operator == "&&":
 		leftCond := objectToNativeBoolean(left)
-		if  leftCond == false {
+		if leftCond == false {
 			return FALSE
 		}
 
@@ -1917,7 +1917,7 @@ func evalInfixExpression(node *ast.InfixExpression, left, right Object, scope *S
 		return evalArrayInfixExpression(node, left, right, scope)
 	case (left.Type() == TUPLE_OBJ || right.Type() == TUPLE_OBJ):
 		return evalTupleInfixExpression(node, left, right, scope)
-	case (left.Type() ==TIME_OBJ || right.Type() == TIME_OBJ):
+	case (left.Type() == TIME_OBJ || right.Type() == TIME_OBJ):
 		return evalTimeInfixExpression(node, left, right)
 	case left.Type() == STRING_OBJ && right.Type() == STRING_OBJ:
 		return evalStringInfixExpression(node, left, right)
@@ -2259,7 +2259,6 @@ func evalTimeTimeInfixExpression(node *ast.InfixExpression, left Object, right O
 	return NewError(node.Pos().Sline(), INFIXOP, l.Type(), node.Operator, r.Type())
 }
 
-
 /*
 	The Duration String support "YMDhms":
 		Y:Year    M:Month    D:Day
@@ -2287,9 +2286,9 @@ func evalTimeStringInfixExpression(node *ast.InfixExpression, left Object, right
 }
 
 /*
-    let dt1 = dt/2018-01-01 12:01:00/
-    let dt2 = dt/2019-01-01 12:01:00/
-    pringln(dt1 <= dt2) # result: true
+   let dt1 = dt/2018-01-01 12:01:00/
+   let dt2 = dt/2019-01-01 12:01:00/
+   pringln(dt1 <= dt2) # result: true
 */
 func evalTimeInfixExpression(node *ast.InfixExpression, left Object, right Object) Object {
 	if left.Type() == TIME_OBJ && right.Type() == TIME_OBJ {
@@ -3464,7 +3463,7 @@ func evalForEachFileLine(fal *ast.ForEachArrayLoop, scope *Scope) Object {
 	for {
 		line := Eval(fal.Value, scope)
 		if line.Type() == ERROR_OBJ {
-				return line
+			return line
 		}
 
 		if line.Type() == NIL_OBJ { //at end-of-line
@@ -3892,13 +3891,13 @@ func IsTrue(obj Object) bool {
 				return false
 			}
 
-//why remove below check? please see below code:
-//    for line in <$f> { println(line) }
-//Here when the line is empty, we should not return false.
-//		case STRING_OBJ:
-//			if len(obj.(*String).String) == 0 {
-//				return false
-//			}
+			//why remove below check? please see below code:
+			//    for line in <$f> { println(line) }
+			//Here when the line is empty, we should not return false.
+			//		case STRING_OBJ:
+			//			if len(obj.(*String).String) == 0 {
+			//				return false
+			//			}
 		case ARRAY_OBJ:
 			if len(obj.(*Array).Members) == 0 {
 				return false
@@ -4073,7 +4072,7 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 
 	variadicParam := []Object{}
 	args := evalArgs(call.Arguments, scope)
-	for i, _ := range call.Arguments {
+	for i := range call.Arguments {
 		//Because of function default values, we need to check `i >= len(args)`
 		if f.Variadic && i >= len(f.Literal.Parameters)-1 {
 			for j := i; j < len(args); j++ {
@@ -4115,11 +4114,11 @@ func evalFunctionObj(call *ast.CallExpression, f *Function, scope *Scope) Object
 	}
 
 	/* If the function call do not end in a 'return' statement. e.g.
-	    let add = fn(x, y) {
-	        x + y // not 'return x + y'
-	    }
-	    We need to send EVAL_LINE to the debugger, so we can step into this line,
-	    or else we cannot step into it.
+	   let add = fn(x, y) {
+	       x + y // not 'return x + y'
+	   }
+	   We need to send EVAL_LINE to the debugger, so we can step into this line,
+	   or else we cannot step into it.
 	*/
 	if Dbg != nil {
 		MsgHandler.SendMessage(message.Message{Type: message.EVAL_LINE, Body: Context{N: []ast.Node{call}, S: newScope}})
@@ -4932,17 +4931,17 @@ func evalIncrementPostfixOperatorExpression(node *ast.PostfixExpression, left Ob
 	case INTEGER_OBJ:
 		leftObj := left.(*Integer)
 		returnVal := NewInteger(leftObj.Int64)
-		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64 + 1))
+		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64+1))
 		return returnVal
 	case UINTEGER_OBJ:
 		leftObj := left.(*UInteger)
 		returnVal := NewUInteger(leftObj.UInt64)
-		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64 + 1))
+		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64+1))
 		return returnVal
 	case FLOAT_OBJ:
 		leftObj := left.(*Float)
 		returnVal := NewFloat(leftObj.Float64)
-		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 + 1))
+		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64+1))
 		return returnVal
 	default:
 		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
@@ -4954,17 +4953,17 @@ func evalDecrementPostfixOperatorExpression(node *ast.PostfixExpression, left Ob
 	case INTEGER_OBJ:
 		leftObj := left.(*Integer)
 		returnVal := NewInteger(leftObj.Int64)
-		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64 - 1))
+		scope.Reset(node.Left.String(), NewInteger(leftObj.Int64-1))
 		return returnVal
 	case UINTEGER_OBJ:
 		leftObj := left.(*UInteger)
 		returnVal := NewUInteger(leftObj.UInt64)
-		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64 - 1))
+		scope.Reset(node.Left.String(), NewUInteger(leftObj.UInt64-1))
 		return returnVal
 	case FLOAT_OBJ:
 		leftObj := left.(*Float)
 		returnVal := NewFloat(leftObj.Float64)
-		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64 - 1))
+		scope.Reset(node.Left.String(), NewFloat(leftObj.Float64-1))
 		return returnVal
 	default:
 		return NewError(node.Pos().Sline(), POSTFIXOP, node.Operator, left.Type())
@@ -5361,7 +5360,7 @@ func evalFunctionDirect(fn Object, args []Object, instance *ObjectInstance, scop
 
 		newScope := NewScope(scope, nil)
 		variadicParam := []Object{}
-		for i, _ := range args {
+		for i := range args {
 			//Because of function default values, we need to check `i >= len(args)`
 			if fn.Variadic && i >= len(fn.Literal.Parameters)-1 {
 				for j := i; j < len(args); j++ {
