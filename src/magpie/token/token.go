@@ -8,10 +8,10 @@ const (
 	ILLEGAL TokenType = (iota - 1) // Illegal token
 	EOF
 
-	IDENT //identifier
-	INT   //int literal
-	UINT  //unsigned int
-	FLOAT //float literal
+	IDENT    //identifier
+	INT      //int literal
+	UINT     //unsigned int
+	FLOAT    //float literal
 	DATETIME //datetime
 
 	EQ         // ==
@@ -82,7 +82,7 @@ const (
 	ELIF
 	ELSE
 	RETURN
-	INCLUDE
+	IMPORT
 	STRING
 	ISTRING
 	BYTES
@@ -181,7 +181,7 @@ var keywords = map[string]TokenType{
 	"elif":      ELIF,
 	"else":      ELSE,
 	"return":    RETURN,
-	"include":   INCLUDE,
+	"import":    IMPORT,
 	"and":       AND,
 	"or":        OR,
 	"struct":    STRUCT,
@@ -378,8 +378,8 @@ func (tt TokenType) String() string {
 		return "ELSE"
 	case RETURN:
 		return "RETURN"
-	case INCLUDE:
-		return "INCLUDE"
+	case IMPORT:
+		return "IMPORT"
 	case STRING:
 		return "STRING"
 	case ISTRING:

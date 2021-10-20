@@ -389,7 +389,7 @@ Keywords are predefined, reserved identifiers that have special meanings to the 
 * if elif else
 * unless
 * return
-* include
+* import
 * and or
 * enum
 * struct # reserved, not used
@@ -2961,7 +2961,7 @@ There are some other things i plan to do:
 * Write more tests!
 * Improve this document with more explanation of the language.
 * Rewrite the demo program for better understanding of the language.
-* Rewrite the 'include' module logic.
+* Rewrite the 'import' module logic.
 * ~~Add support for if-elif-else expression~~.
 
 ## License

@@ -61,6 +61,7 @@ const (
 	CONSTNOTASSIGNERROR
 	DIAMONDOPERERROR
 	NAMENOTEXPORTED
+	IMPORTERROR
 	GENERICERROR
 )
 
@@ -120,6 +121,7 @@ var errorType = map[int]string{
 	CONSTNOTASSIGNERROR: "Const variable '%s' cannot be modified",
 	DIAMONDOPERERROR:    "Diamond operator must be followed by a file object, but got '%s'",
 	NAMENOTEXPORTED:     "Cannot refer to unexported name '%s.%s'",
+	IMPORTERROR:         "Import error: %s",
 	GENERICERROR:        "%s",
 }
 

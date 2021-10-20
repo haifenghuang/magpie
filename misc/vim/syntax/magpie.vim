@@ -5,7 +5,7 @@ endif
 
 syn case match
 
-syn keyword     magpieDirective         include
+syn keyword     magpieDirective         import
 syn keyword     magpieDeclaration       let const
 
 

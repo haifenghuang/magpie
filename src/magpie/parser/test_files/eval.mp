@@ -1,4 +1,4 @@
-include sub_package
+import sub_package
 
 let a = 5;
 let b = pkg.testfn(5, 5);

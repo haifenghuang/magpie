@@ -17,7 +17,7 @@ import (
 
 var magpieKeywords = []string{
 	"fn", "let", "true", "false", "if", "else",
-	"elif", "return", "include", "and", "or", "struct", "do", "while",
+	"elif", "return", "import", "and", "or", "struct", "do", "while",
 	"break", "continue", "for", "in", "where", "grep", "map", "case",
 	"is", "try", "catch", "finally", "throw", "qw", "unless", "spawn",
 	"enum", "defer", "nil", "class", "new", "this", "parent", "property",
@@ -113,10 +113,10 @@ func Start(out io.Writer, color bool) {
 					if program == nil {
 						printParserErrors(out, p.Errors())
 						continue
-					} else if len(program.Statements) == 0 { //it's an 'include' statement
+					} else if len(program.Statements) == 0 { //it's an 'import' statement
 						var errFlag bool
-						for _, include := range program.Includes {
-							if include.Program == nil { // error
+						for _, importItem := range program.Imports {
+							if importItem.Program == nil { // error
 								errFlag = true
 								break
 							}

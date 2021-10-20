@@ -394,7 +394,7 @@ PI = 3.14 //error
 * if elif else
 * unless
 * return
-* include
+* import
 * and or
 * enum
 * struct # 保留,暂时没使用

@@ -432,13 +432,13 @@ func TestLetStatements(t *testing.T) {
 	}
 }
 
-func TestIncludeStatements(t *testing.T) {
+func TestImportStatements(t *testing.T) {
 	tests := []struct {
 		input         string
 		expectedValue string
 		ismodule      bool
 	}{
-		{"include test_files", "test_files", true},
+		{"import test_files", "test_files", true},
 	}
 
 	for _, tt := range tests {
@@ -448,18 +448,18 @@ func TestIncludeStatements(t *testing.T) {
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
 
-		if len(program.Includes) != 1 {
-			t.Fatalf("program.Includes does not contain 1 statements. got=%d", len(program.Includes))
+		if len(program.Imports) != 1 {
+			t.Fatalf("program.Imports does not contain 1 statements. got=%d", len(program.Imports))
 		}
-		for _, v := range program.Includes {
-			if !testLiteralExpression(t, v.IncludePath, tt.expectedValue) {
+		for _, v := range program.Imports {
+			if !testLiteralExpression(t, v.ImportPath, tt.expectedValue) {
 				return
 			}
 			if v.IsModule != tt.ismodule {
-				t.Fatalf("Included value not %v. got=%v", v.IsModule, tt.ismodule)
+				t.Fatalf("Imported value not %v. got=%v", v.IsModule, tt.ismodule)
 			}
-			if len(v.Program.Includes) != 3 {
-				t.Fatalf("Included Program had wrong number of modules. expected=3, got=%d", len(v.Program.Includes))
+			if len(v.Program.Imports) != 3 {
+				t.Fatalf("Imported Program had wrong number of modules. expected=3, got=%d", len(v.Program.Imports))
 			}
 		}
 	}

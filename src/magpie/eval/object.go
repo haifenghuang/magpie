@@ -54,7 +54,7 @@ const (
 	ARRAY_OBJ        = "ARRAY"
 	TUPLE_OBJ        = "TUPLE"
 	HASH_OBJ         = "HASH"
-	INCLUDED_OBJ     = "INCLUDE"
+	IMPORTED_OBJ     = "IMPORT"
 	STRUCT_OBJ       = "STRUCT"
 	ENUM_OBJ         = "ENUM"
 	FILE_OBJ         = "FILE"
@@ -177,7 +177,7 @@ func (e *Enum) GetNames(line string, args ...Object) Object {
 	}
 
 	ret := &Array{}
-	for k, _ := range e.Scope.store {
+	for k := range e.Scope.store {
 		ret.Members = append(ret.Members, NewString(k))
 	}
 	return ret
@@ -214,14 +214,14 @@ func (b *Builtin) CallMethod(line string, scope *Scope, method string, args ...O
 	return NewError(line, NOMETHODERROR, method, b.Type())
 }
 
-type IncludedObject struct {
+type ImportedObject struct {
 	Name  string
 	Scope *Scope
 }
 
-func (io *IncludedObject) Inspect() string  { return fmt.Sprintf("included object: %s", io.Name) }
-func (io *IncludedObject) Type() ObjectType { return INCLUDED_OBJ }
-func (io *IncludedObject) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
+func (io *ImportedObject) Inspect() string  { return fmt.Sprintf("imported object: %s", io.Name) }
+func (io *ImportedObject) Type() ObjectType { return IMPORTED_OBJ }
+func (io *ImportedObject) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
 	return NewError(line, NOMETHODERROR, method, io.Type())
 }
 

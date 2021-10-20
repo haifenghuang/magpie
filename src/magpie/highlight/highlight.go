@@ -39,7 +39,7 @@ var keywords = map[string]int{
 	"else":       1,
 	"elif":       1,
 	"return":     1,
-	"include":    1,
+	"import":     1,
 	"and":        1,
 	"or":         1,
 	"struct":     1,

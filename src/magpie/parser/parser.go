@@ -164,10 +164,10 @@ type Parser struct {
 	comments    []*ast.CommentGroup
 	lineComment *ast.CommentGroup // last line comment
 
-	l      *lexer.Lexer
-	errors []string //error messages
+	l          *lexer.Lexer
+	errors     []string //error messages
 	errorLines []string
-	path   string
+	path       string
 
 	curToken  token.Token
 	peekToken token.Token
@@ -199,11 +199,11 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 
 func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:          l,
+		errors:     []string{},
 		errorLines: []string{},
-		path:   wd,
-		mode:   ParseComments,
+		path:       wd,
+		mode:       ParseComments,
 	}
 	p.l.SetMode(lexer.ScanComments)
 
@@ -219,10 +219,10 @@ func NewWithDoc(l *lexer.Lexer, wd string) *Parser {
 
 func New(l *lexer.Lexer, wd string) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:          l,
+		errors:     []string{},
 		errorLines: []string{},
-		path:   wd,
+		path:       wd,
 	}
 
 	p.classMap = make(map[string]bool)
@@ -355,9 +355,9 @@ func (p *Parser) registerAction() {
 
 /*
   Synchronizing a recursive descent parser:
-    It discards tokens until it thinks it found a statement boundary. 
-    After catching a parser error, we’ll call this and then we are hopefully back in sync. 
-    When it works well, we have discarded tokens that would have likely caused cascaded errors 
+    It discards tokens until it thinks it found a statement boundary.
+    After catching a parser error, we’ll call this and then we are hopefully back in sync.
+    When it works well, we have discarded tokens that would have likely caused cascaded errors
     anyway and now we can parse the rest of the file starting at the next statement.
 */
 func (p *Parser) synchronize() {
@@ -372,24 +372,24 @@ func (p *Parser) synchronize() {
 		}
 
 		if p.peekTokenIs(token.LET) ||
-		   p.peekTokenIs(token.CONST) ||
-		   p.peekTokenIs(token.IF) ||
-		   p.peekTokenIs(token.UNLESS) ||
-		   p.peekTokenIs(token.FOR) ||
-		   p.peekTokenIs(token.DO) ||
-		   p.peekTokenIs(token.WHILE) ||
-		   p.peekTokenIs(token.CONTINUE) ||
-		   p.peekTokenIs(token.BREAK) ||
-		   p.peekTokenIs(token.CLASS) ||
-		   p.peekTokenIs(token.ENUM) ||
-		   p.peekTokenIs(token.CASE) ||
-		   p.peekTokenIs(token.TRY) ||
-		   p.peekTokenIs(token.THROW) ||
-		   p.peekTokenIs(token.DEFER) ||
-		   p.peekTokenIs(token.SPAWN) {
-		   	return
+			p.peekTokenIs(token.CONST) ||
+			p.peekTokenIs(token.IF) ||
+			p.peekTokenIs(token.UNLESS) ||
+			p.peekTokenIs(token.FOR) ||
+			p.peekTokenIs(token.DO) ||
+			p.peekTokenIs(token.WHILE) ||
+			p.peekTokenIs(token.CONTINUE) ||
+			p.peekTokenIs(token.BREAK) ||
+			p.peekTokenIs(token.CLASS) ||
+			p.peekTokenIs(token.ENUM) ||
+			p.peekTokenIs(token.CASE) ||
+			p.peekTokenIs(token.TRY) ||
+			p.peekTokenIs(token.THROW) ||
+			p.peekTokenIs(token.DEFER) ||
+			p.peekTokenIs(token.SPAWN) {
+			return
 		}
-		p.nextToken();
+		p.nextToken()
 	}
 }
 
@@ -402,7 +402,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
-	program.Includes = make(map[string]*ast.IncludeStatement)
+	program.Imports = make(map[string]*ast.ImportStatement)
 
 	//if the magpie file only have ';', then we should return earlier.
 	if p.curTokenIs(token.SEMICOLON) && p.peekTokenIs(token.EOF) {
@@ -416,11 +416,11 @@ func (p *Parser) ParseProgram() *ast.Program {
 				p.synchronize()
 			}
 
-			if include, ok := stmt.(*ast.IncludeStatement); ok {
-				includePath := strings.TrimSpace(include.IncludePath.String())
-				_, ok := program.Includes[includePath]
+			if importStmt, ok := stmt.(*ast.ImportStatement); ok {
+				importPath := strings.TrimSpace(importStmt.ImportPath.String())
+				_, ok := program.Imports[importPath]
 				if !ok {
-					program.Includes[includePath] = include
+					program.Imports[importPath] = importStmt
 				}
 			} else {
 				program.Statements = append(program.Statements, stmt)
@@ -501,8 +501,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		ret = p.parseDeferStatement()
 	case token.SPAWN:
 		ret = p.parseSpawnStatement()
-	case token.INCLUDE:
-		return p.parseIncludeStatement()
+	case token.IMPORT:
+		return p.parseImportStatement()
 	case token.THROW:
 		ret = p.parseThrowStatement()
 	case token.FUNCTION:
@@ -535,7 +535,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.LBRACE:
 		return p.parseBlockStatement()
 	case token.IDENT:
-		//if the current token is an 'identifier' and next token is a ',', 
+		//if the current token is an 'identifier' and next token is a ',',
 		//then we think it's a multiple assignment, but we treat it as a 'let' statement.
 		//otherwise, we just fallthrough.
 		if p.peekTokenIs(token.COMMA) {
@@ -659,7 +659,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	// if the token is '**', we process it specially. e.g. 3 ** 2 ** 3 = 3 ** (2 ** 3)
 	// i.e. Exponent operator '**'' has right-to-left associativity
 	if p.curTokenIs(token.POWER) {
-		precedence-- 
+		precedence--
 	}
 
 	p.nextToken()
@@ -1226,7 +1226,7 @@ func (p *Parser) parseAssignExpression(name ast.Expression) ast.Expression {
 
 	// if n, ok := name.(*ast.Identifier); ok { //e.g. a = 10
 	// 	e.Name = n
-	// } else if call, ok := name.(*ast.MethodCallExpression); ok { //might be 'includeModule.a = xxx' or 'aHashObj.key = value'
+	// } else if call, ok := name.(*ast.MethodCallExpression); ok { //might be 'importModule.a = xxx' or 'aHashObj.key = value'
 	// 	e.Name = call
 	// } else if indexExp, ok := name.(*ast.IndexExpression); ok {
 	// 	//e.g.
@@ -1256,8 +1256,8 @@ func (p *Parser) parseAssignExpression(name ast.Expression) ast.Expression {
 	return e
 }
 
-func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
-	stmt := &ast.IncludeStatement{Token: p.curToken}
+func (p *Parser) parseImportStatement() *ast.ImportStatement {
+	stmt := &ast.ImportStatement{Token: p.curToken}
 
 	p.nextToken()
 	if p.curToken.Type != token.STRING && p.curToken.Type != token.IDENT {
@@ -1268,17 +1268,17 @@ func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
 	}
 
 	oldToken := p.curToken
-	stmt.IncludePath = p.parseExpressionStatement().Expression
-	includePath := strings.TrimSpace(stmt.IncludePath.String())
+	stmt.ImportPath = p.parseExpressionStatement().Expression
+	importPath := strings.TrimSpace(stmt.ImportPath.String())
 	if oldToken.Type == token.STRING { //if token type is STRING, we need to extract the basename of the path.
-		path := stmt.IncludePath.(*ast.StringLiteral).Value
-		includePath = path
+		path := stmt.ImportPath.(*ast.StringLiteral).Value
+		importPath = path
 		baseName := filepath.Base(path)
 		oldToken.Literal = baseName
-		stmt.IncludePath = &ast.StringLiteral{Token: oldToken, Value: baseName}
+		stmt.ImportPath = &ast.StringLiteral{Token: oldToken, Value: baseName}
 	}
 
-	program, err := p.getIncludedStatements(includePath)
+	program, err := p.getImportedStatements(importPath)
 	if err != nil {
 		p.errors = append(p.errors, err.Error())
 		p.errorLines = append(p.errorLines, p.curToken.Pos.Sline())
@@ -1288,7 +1288,7 @@ func (p *Parser) parseIncludeStatement() *ast.IncludeStatement {
 	return stmt
 }
 
-func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) {
+func (p *Parser) getImportedStatements(importpath string) (*ast.Program, error) {
 	path := p.path
 
 	if path == "" {
@@ -1299,14 +1299,14 @@ func (p *Parser) getIncludedStatements(importpath string) (*ast.Program, error) 
 	f, err := ioutil.ReadFile(fn)
 	if err != nil { //error occurred, maybe the file do not exists.
 		// Check for 'MAGPIE_ROOT' environment variable
-		includeRoot := os.Getenv("MAGPIE_ROOT")
-		if len(includeRoot) == 0 { //'MAGPIE_ROOT' environment variable is not set
+		importRoot := os.Getenv("MAGPIE_ROOT")
+		if len(importRoot) == 0 { //'MAGPIE_ROOT' environment variable is not set
 			return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, path)
 		} else {
-			fn = filepath.Join(includeRoot, importpath+".mp")
+			fn = filepath.Join(importRoot, importpath+".mp")
 			e, err := ioutil.ReadFile(fn)
 			if err != nil {
-				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, includeRoot)
+				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, importRoot)
 			}
 			f = e
 		}
@@ -1779,7 +1779,7 @@ func (p *Parser) parseIfMacroStatement() *ast.IfMacroStatement {
 	}
 
 	stmt.ConditionStr = p.curToken.Literal
-	_, stmt.Condition = p.defines[p.curToken.Literal];
+	_, stmt.Condition = p.defines[p.curToken.Literal]
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil
@@ -3668,7 +3668,7 @@ func (p *Parser) parseAwaitExpression() ast.Expression {
 }
 
 // dt//, dt/2018-01-01 12:01:00/, ...
-func (p *Parser)parseDateTime() ast.Expression {
+func (p *Parser) parseDateTime() ast.Expression {
 	expr := &ast.DateTimeExpr{Token: p.curToken}
 
 	if p.curToken.Literal == "" { //e.g. dtime = dt//
@@ -3701,7 +3701,7 @@ func (p *Parser) parseDiamond() ast.Expression {
 }
 
 //define macro
-func (p *Parser)parseDefineStatement() ast.Statement {
+func (p *Parser) parseDefineStatement() ast.Statement {
 	if !p.expectPeek(token.IDENT) { //macro name
 		pos := p.fixPosCol()
 		msg := fmt.Sprintf("Syntax Error:%v- expected next token to be 'IDENT', got %s instead", pos, p.peekToken.Type)

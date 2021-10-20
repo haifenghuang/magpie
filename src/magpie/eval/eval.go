@@ -41,7 +41,7 @@ var (
 		"hash"}
 )
 
-var includeScope *Scope
+var importScope *Scope
 var importedCache map[string]Object
 
 var mux sync.Mutex
@@ -98,8 +98,8 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 		return evalProgram(node, scope)
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression, scope)
-	case *ast.IncludeStatement:
-		return evalIncludeStatement(node, scope)
+	case *ast.ImportStatement:
+		return evalImportStatement(node, scope)
 	case *ast.LetStatement:
 		return evalLetStatement(node, scope)
 	case *ast.ConstStatement:
@@ -290,7 +290,11 @@ func evalProgram(program *ast.Program, scope *Scope) (results Object) {
 		importedCache = make(map[string]Object)
 	}
 
-	loadIncludes(program.Includes, scope)
+	results = loadImports(program.Imports, scope)
+	if results.Type() == ERROR_OBJ {
+		return
+	}
+
 	for _, statement := range program.Statements {
 		results = Eval(statement, scope)
 		switch s := results.(type) {
@@ -314,35 +318,39 @@ func evalProgram(program *ast.Program, scope *Scope) (results Object) {
 	return results
 }
 
-func loadIncludes(includes map[string]*ast.IncludeStatement, scope *Scope) {
-	if includeScope == nil {
-		includeScope = NewScope(nil, scope.Writer)
+func loadImports(imports map[string]*ast.ImportStatement, scope *Scope) Object {
+	if importScope == nil {
+		importScope = NewScope(nil, scope.Writer)
 	}
-	for _, p := range includes {
-		Eval(p, scope)
+	for _, p := range imports {
+		v := Eval(p, scope)
+		if v.Type() == ERROR_OBJ {
+			return NewError(p.Pos().Sline(), IMPORTERROR, p.ImportPath.String())
+		}
 	}
+	return NIL
 }
 
 // Statements...
-func evalIncludeStatement(i *ast.IncludeStatement, scope *Scope) Object {
+func evalImportStatement(i *ast.ImportStatement, scope *Scope) Object {
 
 	mux.Lock()
 	defer mux.Unlock()
 
 	// Check the cache
-	if cache, ok := importedCache[i.IncludePath.String()]; ok {
+	if cache, ok := importedCache[i.ImportPath.String()]; ok {
 		return cache
 	}
 
-	imported := &IncludedObject{Name: i.IncludePath.String(), Scope: NewScope(nil, scope.Writer)}
+	imported := &ImportedObject{Name: i.ImportPath.String(), Scope: NewScope(nil, scope.Writer)}
 
-	if _, ok := includeScope.Get(i.IncludePath.String()); !ok {
+	if _, ok := importScope.Get(i.ImportPath.String()); !ok {
 		evalProgram(i.Program, imported.Scope)
-		includeScope.Set(i.IncludePath.String(), imported)
+		importScope.Set(i.ImportPath.String(), imported)
 	}
 
 	//store the evaluated result to cache
-	importedCache[i.IncludePath.String()] = imported
+	importedCache[i.ImportPath.String()] = imported
 
 	return imported
 }
@@ -1342,7 +1350,7 @@ func evalIdentifier(i *ast.Identifier, scope *Scope) Object {
 
 	val, ok := scope.Get(i.String())
 	if !ok {
-		if val, ok = includeScope.Get(i.String()); !ok {
+		if val, ok = importScope.Get(i.String()); !ok {
 			return reportTypoSuggestions(i.Pos().Sline(), scope, i.Value)
 		}
 	}
@@ -4192,7 +4200,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 	}
 
 	switch m := obj.(type) {
-	case *IncludedObject:
+	case *ImportedObject:
 		switch o := call.Call.(type) {
 		case *ast.Identifier:
 			idName := call.Call.String()
@@ -5852,7 +5860,7 @@ func evalDiamondExpr(d *ast.DiamondExpr, scope *Scope) Object {
 	if obj, ok = GetGlobalObj(d.Value); !ok {
 		obj, ok = scope.Get(d.Value)
 		if !ok {
-			if obj, ok = includeScope.Get(d.Value); !ok {
+			if obj, ok = importScope.Get(d.Value); !ok {
 				return reportTypoSuggestions(d.Pos().Sline(), scope, d.Value)
 			}
 		}

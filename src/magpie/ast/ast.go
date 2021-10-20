@@ -33,7 +33,7 @@ type Expression interface {
 
 type Program struct {
 	Statements []Statement
-	Includes   map[string]*IncludeStatement
+	Imports    map[string]*ImportStatement
 }
 
 func (p *Program) Pos() token.Position {
@@ -91,7 +91,7 @@ func (bs *BlockStatement) End() token.Position {
 	return token.Position{Line: bs.RBraceToken.Pos.Line, Col: bs.RBraceToken.Pos.Col + 1}
 }
 
-func (bs *BlockStatement) statementNode()      {}
+func (bs *BlockStatement) statementNode()       {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 
 func (bs *BlockStatement) String() string {
@@ -378,11 +378,11 @@ func (i *Identifier) String() string       { return i.Value }
 //                IFELSE MACRO  STATEMENT                //
 ///////////////////////////////////////////////////////////
 type IfMacroStatement struct {
-	Token       token.Token
-	Condition   bool
+	Token        token.Token
+	Condition    bool
 	ConditionStr string
-	Consequence *BlockStatement
-	Alternative *BlockStatement
+	Consequence  *BlockStatement
+	Alternative  *BlockStatement
 }
 
 func (ifex *IfMacroStatement) Pos() token.Position {
@@ -396,7 +396,7 @@ func (ifex *IfMacroStatement) End() token.Position {
 	return ifex.Consequence.End()
 }
 
-func (ifex *IfMacroStatement) statementNode()      {}
+func (ifex *IfMacroStatement) statementNode()       {}
 func (ifex *IfMacroStatement) TokenLiteral() string { return ifex.Token.Literal }
 
 func (ifex *IfMacroStatement) String() string {
@@ -1470,30 +1470,30 @@ func (cs *ConstStatement) Docs() string {
 }
 
 ///////////////////////////////////////////////////////////
-//                      INCLUDE STATEMENT                //
+//                      IMPORT STATEMENT                //
 ///////////////////////////////////////////////////////////
-type IncludeStatement struct {
-	Token       token.Token
-	IncludePath Expression
-	Program     *Program
+type ImportStatement struct {
+	Token      token.Token
+	ImportPath Expression
+	Program    *Program
 }
 
-func (is *IncludeStatement) Pos() token.Position {
+func (is *ImportStatement) Pos() token.Position {
 	return is.Token.Pos
 }
 
-func (is *IncludeStatement) End() token.Position {
-	return is.IncludePath.End()
+func (is *ImportStatement) End() token.Position {
+	return is.ImportPath.End()
 }
 
-func (is *IncludeStatement) statementNode()       {}
-func (is *IncludeStatement) TokenLiteral() string { return is.Token.Literal }
-func (is *IncludeStatement) String() string {
+func (is *ImportStatement) statementNode()       {}
+func (is *ImportStatement) TokenLiteral() string { return is.Token.Literal }
+func (is *ImportStatement) String() string {
 	var out bytes.Buffer
 
 	out.WriteString(is.TokenLiteral())
 	out.WriteString(" ")
-	out.WriteString(is.IncludePath.String())
+	out.WriteString(is.ImportPath.String())
 
 	return out.String()
 }

@@ -58,12 +58,12 @@ func TestFileObjects(t *testing.T) {
 		expected interface{}
 	}{
 		{`let f = open("../parser/test_files/module.mp");str(f)`, "<file object: ../parser/test_files/module.mp>"},
-		{`let f = open("../parser/test_files/module.mp");f.read()`, `include eval
-include test
-include sub_package`},
-		{`let f = open("../parser/test_files/module.mp");f.readline()`, "include eval"},
-		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline()`, "include test"},
-		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline();f.readline()`, "include sub_package"},
+		{`let f = open("../parser/test_files/module.mp");f.read()`, `import eval
+import test
+import sub_package`},
+		{`let f = open("../parser/test_files/module.mp");f.readline()`, "import eval"},
+		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline()`, "import test"},
+		{`let f = open("../parser/test_files/module.mp");f.readline();f.readline();f.readline()`, "import sub_package"},
 	}
 	d, _ := os.Getwd()
 	fmt.Println(d)
@@ -105,17 +105,17 @@ func TestStructObjects(t *testing.T) {
 	}
 }
 
-//func TestIncludeObjects(t *testing.T) {
+//func TestImportObjects(t *testing.T) {
 //	tests := []struct {
 //		input    string
 //		expected int64
 //	}{
-//		{"include test_files;eval.a;", 5},
-//		{"include test_files;eval.b;", 10},
-//		{"include test_files;eval.c(5);", 10},
-//		{"include test_files;eval.d(4,4);", 8},
-//		{"include test_files;test.d;", 25},
-//		{"include test_files;pkg.testfn(10,25);", 35},
+//		{"import test_files;eval.a;", 5},
+//		{"import test_files;eval.b;", 10},
+//		{"import test_files;eval.c(5);", 10},
+//		{"import test_files;eval.d(4,4);", 8},
+//		{"import test_files;test.d;", 25},
+//		{"import test_files;pkg.testfn(10,25);", 35},
 //	}
 //
 //	for _, tt := range tests {
@@ -125,13 +125,13 @@ func TestStructObjects(t *testing.T) {
 //		p := parser.New(l, path)
 //		s := NewScope(nil)
 //		program := p.ParseProgram()
-//		if len(program.Includes) == 0 {
-//			t.Errorf("Parsed program has no statements or included objects.\n")
+//		if len(program.Imports) == 0 {
+//			t.Errorf("Parsed program has no statements or imported objects.\n")
 //			os.Exit(1)
 //		}
 //		results := Eval(program, s)
-//		if len(includeScope.store) != 3 {
-//			t.Fatalf("program doesn't inlcude 3 modules. got=%d", len(includeScope.store))
+//		if len(importScope.store) != 3 {
+//			t.Fatalf("program doesn't import 3 modules. got=%d", len(importScope.store))
 //		}
 //		testIntegerObject(t, results, tt.expected)
 //	}
@@ -875,8 +875,8 @@ func testEval(input string) Object {
 	s := NewScope(nil, os.Stdout)
 	program := p.ParseProgram()
 	if len(program.Statements) == 0 {
-		if len(program.Includes) == 0 {
-			fmt.Printf("Parsed program has no statements or included objects.\n")
+		if len(program.Imports) == 0 {
+			fmt.Printf("Parsed program has no statements or imported objects.\n")
 			os.Exit(1)
 		}
 	}
