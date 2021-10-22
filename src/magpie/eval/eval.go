@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -4211,7 +4212,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 					return i
 				}
 			} else {
-				return NewError(call.Call.Pos().Sline(), UNKNOWNIDENT, idName)
+				return reportTypoSuggestions(call.Call.Pos().Sline(), m.Scope, idName)
 			}
 		case *ast.CallExpression:
 			if o.Function.String() == "Scope" {
@@ -4221,8 +4222,7 @@ func evalMethodCallExpression(call *ast.MethodCallExpression, scope *Scope) Obje
 			var fnObj Object
 			var ok bool
 			if fnObj, ok = m.Scope.Get(o.Function.String()); !ok {
-				return NewError(o.Function.Pos().Sline(), NOMETHODERROR, o.Function.String(), m.Type())
-
+				return reportTypoSuggestionsMeth(o.Function.Pos().Sline(), m.Scope, filepath.Base(m.Name), o.Function.String())
 			}
 
 			funcName := o.Function.String()
