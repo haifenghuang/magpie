@@ -85,8 +85,6 @@ func (gobj *GoObject) CallMethod(line string, scope *Scope, method string, args 
 		return &Tuple{Members: results, IsMulti: true}
 	}
 	return results[0]
-
-	return NewError(line, NOMETHODERROR, method, gobj.Type())
 }
 
 func NewGoObject(obj interface{}) *GoObject {

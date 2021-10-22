@@ -616,7 +616,7 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 				keys := &Array{}
 				values := &Array{}
 				for _, hk := range hash.Order {
-					pair, _ := hash.Pairs[hk]
+					pair := hash.Pairs[hk]
 					keys.Members = append(keys.Members, pair.Key)
 					values.Members = append(values.Members, pair.Value)
 				}
@@ -654,8 +654,6 @@ func (lq *LinqObj) From(line string, scope *Scope, args ...Object) Object {
 	default:
 		return &LinqObj{Query: Query{Iterate: obj.(*LinqObj).Query.Iterate}}
 	} //end switch
-
-	return NIL
 }
 
 // Range generates a sequence of integral numbers within a specified range.
@@ -1234,7 +1232,7 @@ func (lq *LinqObj) GroupBy(line string, scope *Scope, args ...Object) Object {
 					element = obj.Value
 				}
 
-				for k, _ := range setTmp {
+				for k := range setTmp {
 					if reflect.DeepEqual(k, key) {
 						setTmp[key] = true
 						set[k] = append(set[k], element)
@@ -1323,7 +1321,7 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 					innerKey = obj.Value
 				}
 
-				for k, _ := range setTmp {
+				for k := range setTmp {
 					if reflect.DeepEqual(k, innerKey) {
 						setTmp[innerKey] = true
 						innerLookup[k] = append(innerLookup[k], innerItem)
@@ -1358,7 +1356,7 @@ func (lq *LinqObj) Join(line string, scope *Scope, args ...Object) Object {
 							outerKey = obj.Value
 						}
 
-						for k, _ := range innerLookup {
+						for k := range innerLookup {
 							if reflect.DeepEqual(k, outerKey) {
 								has = true
 								break
@@ -1462,7 +1460,7 @@ func (lq *LinqObj) Union(line string, args ...Object) Object {
 			return func() (item Object, ok *Boolean) {
 				if use1 {
 					for item, ok = next(); ok.Bool; item, ok = next() {
-						for k, _ := range set {
+						for k := range set {
 							if reflect.DeepEqual(k, item) {
 								set[item] = true
 								break
@@ -1478,7 +1476,7 @@ func (lq *LinqObj) Union(line string, args ...Object) Object {
 				}
 
 				for item, ok = next2(); ok.Bool; item, ok = next2() {
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, item) {
 							set[item] = true
 							break
@@ -1806,7 +1804,7 @@ func (lq *LinqObj) Except(line string, args ...Object) Object {
 			return func() (item Object, ok *Boolean) {
 				for item, ok = next(); ok.Bool; item, ok = next() {
 
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, item) {
 							set[item] = true
 							break
@@ -1866,7 +1864,7 @@ func (lq *LinqObj) ExceptBy(line string, scope *Scope, args ...Object) Object {
 						s = obj.Value
 					}
 
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, s) {
 							set[s] = true
 							break
@@ -1990,7 +1988,7 @@ func (lq *LinqObj) Distinct(line string, args ...Object) Object {
 					//Why we need this 'for' logic? because in magpie, every object is
 					//a pointer, so if we do not have this, the below `if _, has := set[item]; !has {`
 					//will always evaluated to 'true', so we need to use 'DeepEqual'
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, item) {
 							set[item] = true
 							break
@@ -2037,7 +2035,7 @@ func (lq *LinqObj) DistinctBy(line string, scope *Scope, args ...Object) Object 
 						s = obj.Value
 					}
 
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, s) {
 							set[s] = true
 							break
@@ -2082,7 +2080,7 @@ func (lq *LinqObj) Intersect(line string, args ...Object) Object {
 			return func() (item Object, ok *Boolean) {
 				for item, ok = next(); ok.Bool; item, ok = next() {
 
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, item) {
 							set[item] = false
 							break
@@ -2146,7 +2144,7 @@ func (lq *LinqObj) IntersectBy(line string, scope *Scope, args ...Object) Object
 						s = obj.Value
 					}
 
-					for k, _ := range set {
+					for k := range set {
 						if reflect.DeepEqual(k, s) {
 							set[s] = false
 							break
@@ -3316,8 +3314,6 @@ func (lq *LinqObj) FromQuery(line string, scope *Scope, args ...Object) Object {
 	default:
 		return &LinqObj{Query: Query{Iterate: obj.(*LinqObj).Query.Iterate}}
 	} //end switch
-
-	return NIL
 }
 
 func (lq *LinqObj) Let(line string, scope *Scope, args ...Object) Object {
@@ -3478,7 +3474,7 @@ func (lq *LinqObj) GroupBy2(line string, scope *Scope, args ...Object) Object {
 					element = obj.Value
 				}
 
-				for k, _ := range setTmp {
+				for k := range setTmp {
 					if reflect.DeepEqual(k, key) {
 						setTmp[key] = true
 						set[k] = append(set[k], element)

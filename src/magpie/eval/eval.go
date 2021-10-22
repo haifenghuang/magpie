@@ -933,8 +933,6 @@ func evalClassIndexerAssignExpression(a *ast.AssignExpression, obj Object, index
 	} else {
 		return NewError(a.Pos().Sline(), INDEXNOTFOUNDERROR, instanceObj.Class.Name)
 	}
-
-	return val
 }
 
 func evalAssignExpression(a *ast.AssignExpression, scope *Scope) (val Object) {
@@ -5976,8 +5974,6 @@ func equal(isWholeMatch bool, lhsV, rhsV Object) bool {
 			return false
 		}
 	}
-
-	return false
 }
 
 func isTryError(o Object) bool {

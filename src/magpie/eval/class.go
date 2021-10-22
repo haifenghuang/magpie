@@ -299,7 +299,7 @@ func initRootObject() bool {
 
 				ret := &Array{}
 				if self != nil {
-					for name, _ := range self.Class.Methods {
+					for name := range self.Class.Methods {
 						//m := &MethodInfo{Name: name, instance: self, Method:self.GetMethod(name), Scope: scope}
 						m := &MethodInfo{Name: name, Instance: self, Scope: scope}
 						ret.Members = append(ret.Members, m)
@@ -318,7 +318,7 @@ func initRootObject() bool {
 
 				ret := &Array{}
 				if self != nil {
-					for name, _ := range self.Class.Properties {
+					for name := range self.Class.Properties {
 						m := &PropertyInfo{Name: name, Instance: self, Scope: scope}
 						ret.Members = append(ret.Members, m)
 					}

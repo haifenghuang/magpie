@@ -67,8 +67,6 @@ func (f *FmtObj) Errorf(line string, scope *Scope, args ...Object) Object {
 
 	err := gofmt.Errorf(formatObj.String, wrapped...)
 	return NewError(line, GENERICERROR, err.Error())
-
-	return NIL
 }
 
 func (f *FmtObj) Print(line string, scope *Scope, args ...Object) Object {

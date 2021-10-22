@@ -157,9 +157,9 @@ func chrBuiltin() *Builtin {
 			}
 
 			if i < 0 || i > 255 {
-				return NewError(line, INPUTERROR, string(i), "chr")
+				return NewError(line, INPUTERROR, strconv.FormatInt(i, 10), "chr")
 			}
-			return NewString(string(i))
+			return NewString(strconv.FormatInt(i, 10))
 		},
 	}
 }
@@ -573,7 +573,8 @@ func decimalBuiltin() *Builtin {
 				}
 				return &DecimalObj{Number: NewFromFloat(n), Valid: true}
 			}
-			return NewError(line, PARAMTYPEERROR, "first", "decimal", "*String|*Integer|*UInteger|*Boolean|*Float|*Decimal", args[0].Type())		},
+			return NewError(line, PARAMTYPEERROR, "first", "decimal", "*String|*Integer|*UInteger|*Boolean|*Float|*Decimal", args[0].Type())
+		},
 	}
 }
 
@@ -800,7 +801,7 @@ func sscanfBuiltin() *Builtin {
 			}
 
 			//convert go's interface{} back to magpie's Object
-			for i, _ := range subArgs {
+			for i := range subArgs {
 				subArgs[i], _ = unmarshalJsonObject(values[i])
 			}
 			return NIL
@@ -901,7 +902,6 @@ func reverseBuiltin() *Builtin {
 			default:
 				return NewError(line, PARAMTYPEERROR, "first", "reverse", "*Array|*String", args[0].Type())
 			}
-			return NIL
 		},
 	}
 }
@@ -1554,8 +1554,8 @@ func init() {
 		"dbOpen": dbOpenBuiltin(),
 
 		//time
-		"newTime": newTimeBuiltin(),
-		"newDate": newDateBuiltin(),
+		"newTime":  newTimeBuiltin(),
+		"newDate":  newDateBuiltin(),
 		"unixTime": unixTimeBuiltin(),
 
 		//sync

@@ -20,7 +20,7 @@ func NewScope(p *Scope, w io.Writer) *Scope {
 	r := make(map[string]bool)
 	ret := &Scope{store: s, readonly: r, parentScope: p}
 	if p == nil {
-		ret.CallStack = &CallStack{Frames: []CallFrame{CallFrame{}}} //creat a new empty CallStack
+		ret.CallStack = &CallStack{Frames: []CallFrame{}} //creat a new empty CallStack
 		ret.Writer = w
 	} else {
 		ret.Writer = p.Writer

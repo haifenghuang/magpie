@@ -608,7 +608,6 @@ func (h *HttpRequest) CallMethod(line string, scope *Scope, method string, args 
 	default:
 		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
-	return NIL
 }
 
 func (h *HttpRequest) Method(line string, args ...Object) Object {
@@ -892,7 +891,6 @@ func (h *HttpHeader) CallMethod(line string, scope *Scope, method string, args .
 	default:
 		return NewError(line, NOMETHODERROR, method, h.Type())
 	}
-	return NIL
 }
 
 func (h *HttpHeader) Add(line string, args ...Object) Object {

@@ -111,7 +111,6 @@ func (j *Json) Marshal(line string, args ...Object) Object {
 	default:
 		return NewError(line, JSONERROR)
 	}
-	return NIL
 }
 
 func (j *Json) UnMarshal(line string, args ...Object) Object {
