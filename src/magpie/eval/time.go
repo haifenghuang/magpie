@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"math"
 	"reflect"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,22 +61,22 @@ func NewTimeObj() Object {
 	SetGlobalObj(time_name+".HOUR", NewInteger(int64(time.Hour)))
 
 	//layout constant used in time.Format() method
-    SetGlobalObj(time_name+".ANSIC",      NewString("Mon Jan _2 15:04:05 2006"))
-    SetGlobalObj(time_name+"UnixDate",    NewString("Mon Jan _2 15:04:05 MST 2006"))
-    SetGlobalObj(time_name+"RubyDate",    NewString("Mon Jan 02 15:04:05 -0700 2006"))
-    SetGlobalObj(time_name+"RFC822",      NewString("02 Jan 06 15:04 MST"))
-    SetGlobalObj(time_name+"RFC822Z",     NewString("02 Jan 06 15:04 -0700")) // RFC822 with numeric zone
-    SetGlobalObj(time_name+"RFC850",      NewString("Monday, 02-Jan-06 15:04:05 MST"))
-    SetGlobalObj(time_name+"RFC1123",     NewString("Mon, 02 Jan 2006 15:04:05 MST"))
-    SetGlobalObj(time_name+"RFC1123Z",    NewString("Mon, 02 Jan 2006 15:04:05 -0700")) // RFC1123 with numeric zone
-    SetGlobalObj(time_name+"RFC3339",     NewString("2006-01-02T15:04:05Z07:00"))
-    SetGlobalObj(time_name+"RFC3339Nano", NewString("2006-01-02T15:04:05.999999999Z07:00"))
-    SetGlobalObj(time_name+"Kitchen",     NewString("3:04PM"))
-    // Handy time stamps.
-    SetGlobalObj(time_name+"Stamp",       NewString("Jan _2 15:04:05"))
-    SetGlobalObj(time_name+"StampMilli",  NewString("Jan _2 15:04:05.000"))
-    SetGlobalObj(time_name+"StampMicro",  NewString("Jan _2 15:04:05.000000"))
-    SetGlobalObj(time_name+"StampNano",   NewString("Jan _2 15:04:05.000000000"))
+	SetGlobalObj(time_name+".ANSIC", NewString("Mon Jan _2 15:04:05 2006"))
+	SetGlobalObj(time_name+"UnixDate", NewString("Mon Jan _2 15:04:05 MST 2006"))
+	SetGlobalObj(time_name+"RubyDate", NewString("Mon Jan 02 15:04:05 -0700 2006"))
+	SetGlobalObj(time_name+"RFC822", NewString("02 Jan 06 15:04 MST"))
+	SetGlobalObj(time_name+"RFC822Z", NewString("02 Jan 06 15:04 -0700")) // RFC822 with numeric zone
+	SetGlobalObj(time_name+"RFC850", NewString("Monday, 02-Jan-06 15:04:05 MST"))
+	SetGlobalObj(time_name+"RFC1123", NewString("Mon, 02 Jan 2006 15:04:05 MST"))
+	SetGlobalObj(time_name+"RFC1123Z", NewString("Mon, 02 Jan 2006 15:04:05 -0700")) // RFC1123 with numeric zone
+	SetGlobalObj(time_name+"RFC3339", NewString("2006-01-02T15:04:05Z07:00"))
+	SetGlobalObj(time_name+"RFC3339Nano", NewString("2006-01-02T15:04:05.999999999Z07:00"))
+	SetGlobalObj(time_name+"Kitchen", NewString("3:04PM"))
+	// Handy time stamps.
+	SetGlobalObj(time_name+"Stamp", NewString("Jan _2 15:04:05"))
+	SetGlobalObj(time_name+"StampMilli", NewString("Jan _2 15:04:05.000"))
+	SetGlobalObj(time_name+"StampMicro", NewString("Jan _2 15:04:05.000000"))
+	SetGlobalObj(time_name+"StampNano", NewString("Jan _2 15:04:05.000000000"))
 
 	return ret
 }
@@ -112,7 +112,7 @@ func (t *TimeObj) CallMethod(line string, scope *Scope, method string, args ...O
 		return t.UnixNano(line, args...)
 	case "unixLocal": //to timestamp(Local)
 		return t.UnixLocal(line, args...)
-	case "unixLocalNano"://to timestamp(Local)
+	case "unixLocalNano": //to timestamp(Local)
 		return t.UnixLocalNano(line, args...)
 	case "fromEpoch":
 		return t.FromEpoch(line, args...)
@@ -239,7 +239,7 @@ func (t *TimeObj) UnixLocal(line string, args ...Object) Object {
 	}
 
 	s := t.Tm.Format(builtinDate_Normal)
-	loc, _ := time.LoadLocation("Local") //get local timezone
+	loc, _ := time.LoadLocation("Local")                           //get local timezone
 	theTime, _ := time.ParseInLocation(builtinDate_Normal, s, loc) //convert to time.time
 	sr := theTime.Unix()
 
@@ -257,7 +257,7 @@ func (t *TimeObj) UnixLocalNano(line string, args ...Object) Object {
 	}
 
 	s := t.Tm.Format(builtinDate_Normal)
-	loc, _ := time.LoadLocation("Local") //get local timezone
+	loc, _ := time.LoadLocation("Local")                           //get local timezone
 	theTime, _ := time.ParseInLocation(builtinDate_Normal, s, loc) //convert to time.time
 	sr := theTime.UnixNano()
 
@@ -902,7 +902,6 @@ func timeToEpoch(time time.Time) float64 {
 	return float64(time.UnixNano() / (1000 * 1000))
 }
 
-
 //ParseDuration with support for Y(year), M(month) and D(day)
 func ParseDuration(t *TimeObj, s string) (*TimeObj, error) {
 	result := &TimeObj{Tm: t.Tm, Valid: true}
@@ -924,7 +923,7 @@ func ParseDuration(t *TimeObj, s string) (*TimeObj, error) {
 
 	result.Tm = result.Tm.AddDate(years, months, days)
 	if s == "" {
-		return result , nil
+		return result, nil
 	}
 
 	little, err := time.ParseDuration(s)

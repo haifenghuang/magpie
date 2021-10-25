@@ -23,12 +23,12 @@ type MessageListener interface {
 	/**
 	 * Called to receive a message sent by a message producer.
 	 * @param message the message that was sent.
-	*/
+	 */
 	MessageReceived(message Message)
 }
 
 type MessageHandler struct {
-	message Message
+	message   Message
 	listeners map[MessageListener]bool
 }
 

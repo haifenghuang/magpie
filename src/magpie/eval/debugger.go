@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"magpie/ast"
 	"magpie/lexer"
-	"magpie/parser"
 	"magpie/message"
+	"magpie/parser"
 	"os"
 	"strconv"
 	"strings"
@@ -19,29 +19,28 @@ const (
 
 type DbgInfo struct {
 	filename string
-	line int     //node's begin line
-	entered bool //true if the same line has been evaluated.
+	line     int  //node's begin line
+	entered  bool //true if the same line has been evaluated.
 }
 
 type Debugger struct {
-	SrcLines []string
+	SrcLines      []string
 	SrcLinesCache map[string][]string
-	DbgInfos  []*DbgInfo
-
+	DbgInfos      []*DbgInfo
 
 	Functions map[string]*ast.FunctionLiteral
 
 	//for line number breakpoint
 	Breakpoints map[int]bool
 
-	Node ast.Node
+	Node  ast.Node
 	Scope *Scope
 
 	Stepping bool
 
 	prevCommand string
-	showPrompt bool
-	listLine int
+	showPrompt  bool
+	listLine    int
 }
 
 func NewDebugger() *Debugger {
@@ -69,33 +68,33 @@ func (d *Debugger) DelBP(line int) {
 
 // Check if a source line is at a breakpoint
 func (d *Debugger) IsBP(line int) bool {
-	_, ok := d.Breakpoints[line];
+	_, ok := d.Breakpoints[line]
 	return ok
 }
 
-func (d * Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
+func (d *Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
 	d.Node = node
 	d.Scope = scope
 }
 
-func (d * Debugger) SetDbgInfos(dbgInfos [][]ast.Node) {
+func (d *Debugger) SetDbgInfos(dbgInfos [][]ast.Node) {
 	for _, inf := range dbgInfos {
 		d.DbgInfos = append(d.DbgInfos, &DbgInfo{filename: inf[0].Pos().Filename, line: inf[0].Pos().Line, entered: false})
 	}
 }
 
-func (d * Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
+func (d *Debugger) SetFunctions(functions map[string]*ast.FunctionLiteral) {
 	d.Functions = functions
 }
 
-func (d * Debugger) ShowBanner() {
+func (d *Debugger) ShowBanner() {
 	fmt.Println("                                    _     ")
 	fmt.Println("   ____ ___   ____ _ ____ _ ____   (_)___ ")
 	fmt.Println("  / __ `__ \\ / __ `// __ `// __ \\ / // _ \\")
 	fmt.Println(" / / / / / // /_/ // /_/ // /_/ // //  __/")
 	fmt.Println("/_/ /_/ /_/ \\__,_/ \\__, // .___//_/ \\___/ ")
-	fmt.Println("                  /____//_/             ");
-	fmt.Println("");
+	fmt.Println("                  /____//_/             ")
+	fmt.Println("")
 }
 
 func (d *Debugger) ProcessCommand() {
@@ -163,7 +162,7 @@ func (d *Debugger) ProcessCommand() {
 		} else if strings.Compare("n", command) == 0 || strings.Compare("next", command) == 0 {
 			d.Stepping = true
 			break
-		} else if strings.HasPrefix(command, "b ")|| strings.HasPrefix(command, "bp ") {
+		} else if strings.HasPrefix(command, "b ") || strings.HasPrefix(command, "bp ") {
 			arr := strings.Split(command, " ")
 			if len(arr) < 2 {
 				fmt.Println("Line number or function name expected.")
@@ -242,7 +241,7 @@ func (d *Debugger) ProcessCommand() {
 			d.Node = oldNode
 			d.showPrompt = true
 		} else if strings.Compare("exit", command) == 0 || strings.Compare("quit", command) == 0 ||
-				  strings.Compare("bye", command) == 0 || strings.Compare("q", command) == 0 {
+			strings.Compare("bye", command) == 0 || strings.Compare("q", command) == 0 {
 			os.Exit(0)
 		} else if strings.Compare("l", command) == 0 || strings.Compare("list", command) == 0 {
 			if d.listLine == 0 {
@@ -250,7 +249,7 @@ func (d *Debugger) ProcessCommand() {
 			}
 
 			if d.listLine < len(d.SrcLines) {
-				for i := d.listLine; i <= d.listLine + LineStep; i++ {
+				for i := d.listLine; i <= d.listLine+LineStep; i++ {
 					if i >= len(d.SrcLines) {
 						break
 					}
@@ -269,7 +268,7 @@ func (d *Debugger) ProcessCommand() {
 	} //end for
 }
 
-//Check if node can be stopped, some nodes cannot be stopped, 
+//Check if node can be stopped, some nodes cannot be stopped,
 //e.g. 'InfixExpression', 'IntegerLiteral'
 func (d *Debugger) CanStop() bool {
 	flag := false
@@ -337,12 +336,12 @@ func (d *Debugger) MessageReceived(msg message.Message) {
 	ctx := msg.Body.(Context)
 
 	msgType := msg.Type
-	switch (msgType) {
+	switch msgType {
 	case message.EVAL_LINE:
-		line := ctx.N[0].Pos().Line;
+		line := ctx.N[0].Pos().Line
 		if d.Stepping {
 			d.ProcessCommand()
-		} else if (d.IsBP(line)) {
+		} else if d.IsBP(line) {
 			fmt.Printf("\nBreakpoint hit at line %d\n", line)
 			d.ProcessCommand()
 		}

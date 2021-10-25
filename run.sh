@@ -5,11 +5,11 @@ export GOPATH=$(pwd)
 export GO111MODULE=off
 
 # format each go file
-#echo "Formatting go file..."
-#for file in `find ./src/magpie -name "*.go"`; do
-#	echo "    `basename $file`"
-#	go fmt $file > /dev/null
-#done
+echo "Formatting go file..."
+for file in `find ./src/magpie -name "*.go"`; do
+	echo "    `basename $file`"
+	go fmt $file > /dev/null
+done
 
 interpreter_name=magpie
 
