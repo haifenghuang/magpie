@@ -144,7 +144,7 @@ func SplitSlice(list []ast.Node) [][]ast.Node {
 			break
 		}
 
-		for j = i + 1; j < len(list) && list[i].Pos().Line == list[j].Pos().Line; j++ {
+		for j = i + 1; j < len(list) && list[i].Pos().Filename == list[j].Pos().Filename && list[i].Pos().Line == list[j].Pos().Line; j++ {
 		}
 
 		returnData = append(returnData, list[i:j])
@@ -420,6 +420,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 				importPath := strings.TrimSpace(importStmt.ImportPath.String())
 				_, ok := program.Imports[importPath]
 				if !ok {
+					for k, funcLiteral := range importStmt.Functions {
+						p.Functions[k] = funcLiteral
+					} //for debugger
 					program.Imports[importPath] = importStmt
 				}
 			} else {
@@ -1278,17 +1281,18 @@ func (p *Parser) parseImportStatement() *ast.ImportStatement {
 		stmt.ImportPath = &ast.StringLiteral{Token: oldToken, Value: baseName}
 	}
 
-	program, err := p.getImportedStatements(importPath)
+	program, funcs, err := p.getImportedStatements(importPath)
 	if err != nil {
 		p.errors = append(p.errors, err.Error())
 		p.errorLines = append(p.errorLines, p.curToken.Pos.Sline())
 		return stmt
 	}
+	stmt.Functions = funcs
 	stmt.Program = program
 	return stmt
 }
 
-func (p *Parser) getImportedStatements(importpath string) (*ast.Program, error) {
+func (p *Parser) getImportedStatements(importpath string) (*ast.Program, map[string]*ast.FunctionLiteral, error) {
 	path := p.path
 
 	if path == "" {
@@ -1301,12 +1305,12 @@ func (p *Parser) getImportedStatements(importpath string) (*ast.Program, error) 
 		// Check for 'MAGPIE_ROOT' environment variable
 		importRoot := os.Getenv("MAGPIE_ROOT")
 		if len(importRoot) == 0 { //'MAGPIE_ROOT' environment variable is not set
-			return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, path)
+			return nil, nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, path)
 		} else {
 			fn = filepath.Join(importRoot, importpath+".mp")
 			e, err := ioutil.ReadFile(fn)
 			if err != nil {
-				return nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, importRoot)
+				return nil, nil, fmt.Errorf("Syntax Error:%v- no file or directory: %s.mp, %s", p.curToken.Pos, importpath, importRoot)
 			}
 			f = e
 		}
@@ -1324,7 +1328,7 @@ func (p *Parser) getImportedStatements(importpath string) (*ast.Program, error) 
 		p.errors = append(p.errors, ps.errors...)
 		p.errorLines = append(p.errorLines, ps.errorLines...)
 	}
-	return parsed, nil
+	return parsed, ps.Functions, nil
 }
 
 func (p *Parser) parseDoLoopExpression() ast.Expression {

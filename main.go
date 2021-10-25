@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"io/ioutil"
 	"log"
-	"strings"
 	"time"
 	"regexp"
 	"runtime"
@@ -46,11 +45,7 @@ func runProgram(debug bool, filename string) {
 
 	if debug {
 		eval.REPLColor = true
-		Lines := strings.Split(input, "\n")
-		//pre-append an empty line, so the Lines start with 1, not zero.
-		Lines = append([]string{""}, Lines...)
-
-		eval.Dbg = eval.NewDebugger(Lines)
+		eval.Dbg = eval.NewDebugger()
 		eval.Dbg.SetFunctions(p.Functions)
 		eval.Dbg.ShowBanner()
 

@@ -3,6 +3,7 @@ package eval
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"magpie/ast"
 	"magpie/lexer"
 	"magpie/parser"
@@ -17,13 +18,14 @@ const (
 )
 
 type DbgInfo struct {
+	filename string
 	line int     //node's begin line
-	count int    //counts of the same line
 	entered bool //true if the same line has been evaluated.
 }
 
 type Debugger struct {
 	SrcLines []string
+	SrcLinesCache map[string][]string
 	DbgInfos  []*DbgInfo
 
 
@@ -42,8 +44,9 @@ type Debugger struct {
 	listLine int
 }
 
-func NewDebugger(lines []string) *Debugger {
-	d := &Debugger{SrcLines: lines}
+func NewDebugger() *Debugger {
+	d := &Debugger{}
+	d.SrcLinesCache = make(map[string][]string)
 	d.Breakpoints = make(map[int]bool)
 	d.showPrompt = true
 	d.Stepping = true
@@ -77,7 +80,7 @@ func (d * Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
 
 func (d * Debugger) SetDbgInfos(dbgInfos [][]ast.Node) {
 	for _, inf := range dbgInfos {
-		d.DbgInfos = append(d.DbgInfos, &DbgInfo{line: inf[0].Pos().Line, count: len(inf), entered: false})
+		d.DbgInfos = append(d.DbgInfos, &DbgInfo{filename: inf[0].Pos().Filename, line: inf[0].Pos().Line, entered: false})
 	}
 }
 
@@ -108,30 +111,40 @@ func (d *Debugger) ProcessCommand() {
 		   Above line have two CallExpressions(println & len),
 		   so when we press next, it will show the same line again. we want to avoid this
 		*/
-		found := false
+		entered := false
 		for _, inf := range d.DbgInfos {
-			if p.Line == inf.line {
-				if inf.count > 1 && inf.entered {
-					found = true
-					break
-				}
+			if p.Filename == inf.filename && p.Line == inf.line && inf.entered {
+				entered = true
+				break
 			}
 		}
-		if found {
+		if entered {
 			break
+		}
+
+		contents, ok := d.SrcLinesCache[p.Filename]
+		if ok {
+			d.SrcLines = contents
+		} else {
+			content, _ := ioutil.ReadFile(p.Filename)
+			lines := strings.Split(string(content), "\n")
+			//pre-append an empty line, so the Lines start with 1, not zero.
+			lines = append([]string{""}, lines...)
+			d.SrcLinesCache[p.Filename] = lines
+			d.SrcLines = lines
+		}
+
+		for _, inf := range d.DbgInfos {
+			if p.Filename == inf.filename && p.Line == inf.line {
+				inf.entered = true
+				break
+			}
 		}
 
 		fmt.Printf("\n%d\t\t%s", p.Line, d.SrcLines[p.Line])
 		fmt.Print("\n(magpie) ")
 
 		fmt.Print("\x1b[1m\x1b[36m")
-
-		for _, inf := range d.DbgInfos {
-			if p.Line == inf.line {
-				inf.entered = true
-				break
-			}
-		}
 
 		reader := bufio.NewReader(os.Stdin)
 		command, _ := reader.ReadString('\n')

@@ -9,6 +9,9 @@ printf("2 * 2 = %d\n", calc.SQUARE_OF_TWO)
 c, d = calc.Add_and_Minus(a, b)
 printf("c = %d, d = %d\n", c, d)
 
+e, f = calc.Add_and_Minus(c, d)
+printf("e = %d, f = %d\n", e, f)
+
 //multiply is not exported, so below line will report runtime error.
 //printf("10*2=%d\n", calc.multiply(a, b))
 

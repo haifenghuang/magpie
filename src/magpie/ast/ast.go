@@ -1415,6 +1415,10 @@ type ConstStatement struct {
 }
 
 func (cs *ConstStatement) Pos() token.Position {
+	if len(cs.Name) > 0 {
+		return cs.Name[0].Pos()
+	}
+
 	return cs.Token.Pos
 }
 
@@ -1476,6 +1480,7 @@ type ImportStatement struct {
 	Token      token.Token
 	ImportPath Expression
 	Program    *Program
+	Functions  map[string]*FunctionLiteral //for debugger usage
 }
 
 func (is *ImportStatement) Pos() token.Position {
@@ -1811,7 +1816,7 @@ type CallExpression struct {
 
 func (ce *CallExpression) Pos() token.Position {
 	length := utf8.RuneCountInString(ce.Function.String())
-	return token.Position{Line: ce.Token.Pos.Line, Col: ce.Token.Pos.Col - length}
+	return token.Position{Filename: ce.Token.Pos.Filename, Line: ce.Token.Pos.Line, Col: ce.Token.Pos.Col - length}
 }
 
 func (ce *CallExpression) End() token.Position {
