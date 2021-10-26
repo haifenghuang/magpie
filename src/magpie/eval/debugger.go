@@ -8,13 +8,20 @@ import (
 	"magpie/lexer"
 	"magpie/message"
 	"magpie/parser"
+	"magpie/token"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
 const (
 	LineStep = 5
+)
+
+const (
+	ADD_BP = iota
+	DEL_BP
 )
 
 type DbgInfo struct {
@@ -30,8 +37,8 @@ type Debugger struct {
 
 	Functions map[string]*ast.FunctionLiteral
 
-	//for line number breakpoint
-	Breakpoints map[int]bool
+	//for breakpoint
+	Breakpoints map[string]bool //key: 'filename:line'
 
 	Node  ast.Node
 	Scope *Scope
@@ -46,7 +53,7 @@ type Debugger struct {
 func NewDebugger() *Debugger {
 	d := &Debugger{}
 	d.SrcLinesCache = make(map[string][]string)
-	d.Breakpoints = make(map[int]bool)
+	d.Breakpoints = make(map[string]bool)
 	d.showPrompt = true
 	d.Stepping = true
 	d.prevCommand = ""
@@ -55,21 +62,28 @@ func NewDebugger() *Debugger {
 }
 
 // Add a breakpoint at source line
-func (d *Debugger) AddBP(line int) {
-	d.Breakpoints[line] = true
+func (d *Debugger) AddBP(filename string, line int) {
+	key := fmt.Sprintf("%s:%d", strings.TrimSpace(filename), line)
+	d.Breakpoints[key] = true
 }
 
 // Delete a breakpoint at source line
-func (d *Debugger) DelBP(line int) {
-	if _, ok := d.Breakpoints[line]; ok {
-		delete(d.Breakpoints, line)
+func (d *Debugger) DelBP(filename string, line int) {
+	key := fmt.Sprintf("%s:%d", strings.TrimSpace(filename), line)
+	if _, ok := d.Breakpoints[key]; ok {
+		delete(d.Breakpoints, key)
 	}
 }
 
 // Check if a source line is at a breakpoint
-func (d *Debugger) IsBP(line int) bool {
-	_, ok := d.Breakpoints[line]
-	return ok
+func (d *Debugger) IsBP(filename string, line int) bool {
+	key := fmt.Sprintf("%s:%d", strings.TrimSpace(filename), line)
+	for k := range d.Breakpoints {
+		if k == key {
+			return true
+		}
+	}
+	return false
 }
 
 func (d *Debugger) SetNodeAndScope(node ast.Node, scope *Scope) {
@@ -163,68 +177,13 @@ func (d *Debugger) ProcessCommand() {
 			d.Stepping = true
 			break
 		} else if strings.HasPrefix(command, "b ") || strings.HasPrefix(command, "bp ") {
-			arr := strings.Split(command, " ")
-			if len(arr) < 2 {
-				fmt.Println("Line number or function name expected.")
-			} else {
-				line, err := strconv.Atoi(arr[1])
-				if err == nil {
-					if line <= 0 {
-						fmt.Println("Line number must greater than zero.")
-					} else {
-						// check if the breakpoint is valid or not
-						found := false
-						for _, dbgInfo := range d.DbgInfos {
-							if line == dbgInfo.line {
-								found = true
-								break
-							}
-							if found {
-								break
-							}
-						}
-						if found {
-							d.AddBP(line)
-						} else {
-							fmt.Println("Invalid breakpoint!\n")
-						}
-					}
-				} else {
-					funcName := arr[1]
-					var f *ast.FunctionLiteral
-					var ok bool
-					if f, ok = d.Functions[funcName]; !ok {
-						fmt.Println("Function name not found.")
-					} else {
-						d.AddBP(f.StmtPos().Line)
-					}
-				}
-			}
-
+			d.processBreakPointCmd(command, ADD_BP)
+			d.Stepping = true
+			break
 		} else if strings.HasPrefix(command, "d ") || strings.HasPrefix(command, "del ") {
-			arr := strings.Split(command, " ")
-			if len(arr) < 2 {
-				fmt.Println("Line number expected.")
-			} else {
-				line, err := strconv.Atoi(arr[1])
-				if err == nil {
-					if line <= 0 {
-						fmt.Println("Line number must greater than zero.")
-					} else {
-						d.DelBP(line)
-					}
-				} else {
-					funcName := arr[1]
-					var f *ast.FunctionLiteral
-					var ok bool
-					if f, ok = d.Functions[funcName]; !ok {
-						fmt.Println("Function name not found.")
-					} else {
-						d.DelBP(f.StmtPos().Line)
-					}
-				}
-			}
-
+			d.processBreakPointCmd(command, DEL_BP)
+			d.Stepping = true
+			break
 		} else if strings.HasPrefix(command, "p ") || strings.HasPrefix(command, "print ") ||
 			strings.HasPrefix(command, "e ") || strings.HasPrefix(command, "eval ") {
 			exp := strings.Split(command, " ")[1:]
@@ -339,10 +298,11 @@ func (d *Debugger) MessageReceived(msg message.Message) {
 	switch msgType {
 	case message.EVAL_LINE:
 		line := ctx.N[0].Pos().Line
+		filename := filepath.Base(ctx.N[0].Pos().Filename)
 		if d.Stepping {
 			d.ProcessCommand()
-		} else if d.IsBP(line) {
-			fmt.Printf("\nBreakpoint hit at line %d\n", line)
+		} else if d.IsBP(filename, line) {
+			fmt.Printf("\nBreakpoint hit at '%s:%d'\n", filename, line)
 			d.ProcessCommand()
 		}
 
@@ -378,4 +338,67 @@ func (d *Debugger) MessageReceived(msg message.Message) {
 		// 	}
 		// }
 	}
+}
+
+func (d *Debugger) processBreakPointCmd(command string, add_or_del int) {
+	p := d.Node.Pos()
+
+	arr := strings.Split(command, " ")
+	if len(arr) < 2 {
+		fmt.Println("Line number expected.")
+	} else {
+		//get filename & line/function separator
+		filename, breakTxt := getCommandTxt(arr[1:], p)
+
+		line, err := strconv.Atoi(breakTxt)
+		if err == nil {
+			if line <= 0 {
+				fmt.Println("Line number must greater than zero.")
+			} else {
+				if add_or_del == ADD_BP {
+					d.AddBP(filename, line)
+				} else {
+					d.DelBP(filename, line)
+				}
+			}
+		} else {
+			funcName := breakTxt
+			var f *ast.FunctionLiteral
+			var ok bool
+			if f, ok = d.Functions[funcName]; !ok {
+				fmt.Println("Function name not found.")
+			} else {
+				baseName := filepath.Base(f.Pos().Filename)
+				if baseName == filename {
+					if add_or_del == ADD_BP {
+						d.AddBP(filename, line)
+					} else {
+						d.DelBP(filename, f.StmtPos().Line)
+					}
+				} else {
+					fmt.Println("Function name not found.")
+				}
+			}
+		}
+	}
+}
+
+//returns 'filename, line/func'
+func getCommandTxt(command []string, pos token.Position) (string, string) {
+	breakInfTxt := strings.Join(command, " ")
+	breakInfTxt = strings.ReplaceAll(breakInfTxt, " ", "") //remove all spaces
+
+	//get filename & line/function separator
+	var filename string
+	var breakTxt string
+	idx := strings.Index(breakInfTxt, ":")
+	if idx == -1 {
+		filename = filepath.Base(pos.Filename)
+		breakTxt = breakInfTxt
+	} else {
+		filename = breakInfTxt[:idx]
+		breakTxt = breakInfTxt[idx+1:]
+	}
+
+	return filename, breakTxt
 }

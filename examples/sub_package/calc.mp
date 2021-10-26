@@ -3,7 +3,7 @@
 
 //not exported, the first letter is not Uppercase.
 fn _add(x, y) {
-    x + y
+    return x + y
 }
 //exported
 fn Add(x, y) {
@@ -12,7 +12,7 @@ fn Add(x, y) {
 
 //exported
 fn Minus(x, y) {
-    x - y
+    return x - y
 }
 
 //exported
@@ -22,7 +22,7 @@ fn Add_and_Minus(x,y) {
 
 //not exported, the first letter is not Uppercase.
 fn multiply(x, y) {
-    x * y
+    return x * y
 }
 
 const (
