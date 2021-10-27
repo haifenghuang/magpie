@@ -172,9 +172,9 @@ func Eval(node ast.Node, scope *Scope) (val Object) {
 	case *ast.BlockStatement:
 		return evalBlockStatements(node.Statements, scope)
 	case *ast.CallExpression:
-		if Dbg != nil {
-			MsgHandler.SendMessage(message.Message{Type: message.CALL, Body: Context{N: []ast.Node{node}, S: scope}})
-		}
+		// if Dbg != nil {
+		// 	MsgHandler.SendMessage(message.Message{Type: message.CALL, Body: Context{N: []ast.Node{node}, S: scope}})
+		// }
 		return evalFunctionCall(node, scope)
 	case *ast.MethodCallExpression:
 		if Dbg != nil {
