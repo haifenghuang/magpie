@@ -168,24 +168,23 @@ func (d *Debugger) ProcessCommand() {
 
 		fmt.Print("\x1b[0m")
 
-		d.prevCommand = command
-
 		d.Stepping = false
 		if strings.Compare("c", command) == 0 || strings.Compare("continue", command) == 0 {
+			d.prevCommand = command
 			break
 		} else if strings.Compare("n", command) == 0 || strings.Compare("next", command) == 0 {
+			d.prevCommand = command
 			d.Stepping = true
 			break
 		} else if strings.HasPrefix(command, "b ") || strings.HasPrefix(command, "bp ") {
+			d.prevCommand = command
 			d.processBreakPointCmd(command, ADD_BP)
-			d.Stepping = true
-			break
 		} else if strings.HasPrefix(command, "d ") || strings.HasPrefix(command, "del ") {
+			d.prevCommand = command
 			d.processBreakPointCmd(command, DEL_BP)
-			d.Stepping = true
-			break
 		} else if strings.HasPrefix(command, "p ") || strings.HasPrefix(command, "print ") ||
 			strings.HasPrefix(command, "e ") || strings.HasPrefix(command, "eval ") {
+			d.prevCommand = command
 			exp := strings.Split(command, " ")[1:]
 			lex := lexer.New("", strings.Join(exp, ""))
 			wd, _ := os.Getwd()
@@ -203,7 +202,8 @@ func (d *Debugger) ProcessCommand() {
 			strings.Compare("bye", command) == 0 || strings.Compare("q", command) == 0 {
 			os.Exit(0)
 		} else if strings.Compare("l", command) == 0 || strings.Compare("list", command) == 0 {
-			if d.listLine == 0 {
+			fmt.Printf("111111111111, preCommand='%s', command='%s'\n", d.prevCommand, command)
+			if d.listLine == 0 || d.prevCommand != command {
 				d.listLine = p.Line
 			}
 
@@ -221,6 +221,7 @@ func (d *Debugger) ProcessCommand() {
 			if d.listLine >= len(d.SrcLines) {
 				d.listLine = 0
 			}
+			d.prevCommand = command
 		} else {
 			fmt.Printf("Undefined command: '%s'.  Try 'help'.\n", command)
 		}
