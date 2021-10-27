@@ -124,16 +124,16 @@ func (d *Debugger) ProcessCommand() {
 		   Above line have two CallExpressions(println & len),
 		   so when we press next, it will show the same line again. we want to avoid this
 		*/
-		entered := false
-		for _, inf := range d.DbgInfos {
-			if p.Filename == inf.filename && p.Line == inf.line && inf.entered {
-				entered = true
-				break
-			}
-		}
-		if entered {
-			break
-		}
+		// entered := false
+		// for _, inf := range d.DbgInfos {
+		// 	if p.Filename == inf.filename && p.Line == inf.line && inf.entered {
+		// 		entered = true
+		// 		break
+		// 	}
+		// }
+		// if entered {
+		// 	break
+		// }
 
 		contents, ok := d.SrcLinesCache[p.Filename]
 		if ok {
