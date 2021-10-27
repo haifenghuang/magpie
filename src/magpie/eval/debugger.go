@@ -202,7 +202,6 @@ func (d *Debugger) ProcessCommand() {
 			strings.Compare("bye", command) == 0 || strings.Compare("q", command) == 0 {
 			os.Exit(0)
 		} else if strings.Compare("l", command) == 0 || strings.Compare("list", command) == 0 {
-			fmt.Printf("111111111111, preCommand='%s', command='%s'\n", d.prevCommand, command)
 			if d.listLine == 0 || d.prevCommand != command {
 				d.listLine = p.Line
 			}
