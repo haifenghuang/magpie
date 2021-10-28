@@ -239,7 +239,29 @@ func (d *Debugger) CanStop() bool {
 	case *ast.ConstStatement:
 		flag = true
 	case *ast.ReturnStatement:
+		/* we want to stop the 'return' statement to stop only once. for example:
+		    fn xxx(x, y) {
+                return add(x, y)
+		    }
+
+		    if the 'return value(s)' has(have) function call(s), we just stop once, not two.
+		*/
+		hasCallExpression := false
+		for _, value := range n.ReturnValues {
+			switch value.(type) {
+			case *ast.CallExpression:
+				hasCallExpression = true
+			}
+			if hasCallExpression {
+				break
+			}
+		}
+
 		flag = true
+		if hasCallExpression {
+			flag = false
+		}
+
 	case *ast.DeferStmt:
 		flag = true
 	case *ast.EnumStatement:
@@ -271,7 +293,13 @@ func (d *Debugger) CanStop() bool {
 	case *ast.ContinueExpression:
 		flag = true
 	case *ast.AssignExpression:
+		//  if the assignment expression's value is a 'CallExpression',
+		//    we only want to stop once.
 		flag = true
+		switch n.Value.(type) {
+		case *ast.CallExpression:
+			flag = false
+		}
 	case *ast.CallExpression:
 		flag = true
 	case *ast.TryStmt:
