@@ -545,6 +545,9 @@ fn testReturn(a, b, c, d=40) {
     return a, b, c, d
 }
 let (x, y, c, d) = testReturn(10, 20, 30) // d为40
+
+//与上面的'let'语句等价
+//x, y, c, d = testReturn(10, 20, 30) // d为40
 ```
 
 ### 命令执行

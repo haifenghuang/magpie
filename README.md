@@ -498,7 +498,7 @@ t = tuple() // t = ()
 ```csharp
 #define DEBUG
 
-// only support two below format:
+// only support two below formats:
 //    1. #ifdef xxx { body }
 //    2. #ifdef xxx { body } #else { body }, here only one '#else' is supported'.
 #ifdef DEBUG2
@@ -546,6 +546,9 @@ fn testReturn(a, b, c, d=40) {
     return a, b, c, d
 }
 let (x, y, c, d) = testReturn(10, 20, 30) // d is 40
+
+//same as above 'let' statement
+//x, y, c, d = testReturn(10, 20, 30) // d is 40
 ```
 
 ### Command Execution
