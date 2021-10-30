@@ -359,6 +359,8 @@ func (i *Integer) CallMethod(line string, scope *Scope, method string, args ...O
 		return i.Downto(line, args...)
 	case "upto":
 		return i.Upto(line, args...)
+	case "str":
+		return i.Str(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, i.Type())
 }
@@ -480,6 +482,16 @@ func (i *Integer) Upto(line string, args ...Object) Object {
 	return retArr
 }
 
+func (i *Integer) Str(line string, args ...Object) Object {
+	argLen := len(args)
+	if argLen != 0 {
+		return NewError(line, ARGUMENTERROR, "0", argLen)
+	}
+
+	ret := strconv.FormatInt(i.Int64, 10)
+	return NewString(ret)
+}
+
 //Implements sql's Scanner Interface.
 //So when calling sql.Rows.Scan(xxx), or sql.Row.Scan(xxx), we could pass this object to `Scan` method
 func (i *Integer) Scan(value interface{}) error {
@@ -582,6 +594,8 @@ func (i *UInteger) CallMethod(line string, scope *Scope, method string, args ...
 		return i.Downto(line, args...)
 	case "upto":
 		return i.Upto(line, args...)
+	case "str":
+		return i.Str(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, i.Type())
 }
@@ -703,6 +717,16 @@ func (i *UInteger) Upto(line string, args ...Object) Object {
 	return retArr
 }
 
+func (i *UInteger) Str(line string, args ...Object) Object {
+	argLen := len(args)
+	if argLen != 0 {
+		return NewError(line, ARGUMENTERROR, "0", argLen)
+	}
+
+	str := strconv.FormatUint(i.UInt64, 10)
+	return NewString(str)
+}
+
 //Implements sql's Scanner Interface.
 //So when calling sql.Rows.Scan(xxx), or sql.Row.Scan(xxx), we could pass this object to `Scan` method
 func (i *UInteger) Scan(value interface{}) error {
@@ -807,6 +831,8 @@ func (f *Float) CallMethod(line string, scope *Scope, method string, args ...Obj
 		return f.Pow(line, args...)
 	case "round":
 		return f.Round(line, args...)
+	case "str":
+		return f.Str(line, args...)
 	}
 	return NewError(line, NOMETHODERROR, method, f.Type())
 }
@@ -935,6 +961,15 @@ func (f *Float) Round(line string, args ...Object) Object {
 		return NewFloat(math.NaN())
 	}
 	return NewFloat(ret)
+}
+
+func (f *Float) Str(line string, args ...Object) Object {
+	if len(args) != 0 {
+		return NewError(line, ARGUMENTERROR, "0", len(args))
+	}
+
+	ret := strconv.FormatFloat(f.Float64, 'f', -1, 64)
+	return NewString(ret)
 }
 
 func (f *Float) Scan(value interface{}) error {
