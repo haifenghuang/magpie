@@ -326,7 +326,7 @@ func loadImports(imports map[string]*ast.ImportStatement, scope *Scope) Object {
 	for _, p := range imports {
 		v := Eval(p, scope)
 		if v.Type() == ERROR_OBJ {
-			return NewError(p.Pos().Sline(), IMPORTERROR, p.ImportPath.String())
+			return NewError(p.Pos().Sline(), IMPORTERROR, p.ImportPath)
 		}
 	}
 	return NIL
@@ -339,19 +339,19 @@ func evalImportStatement(i *ast.ImportStatement, scope *Scope) Object {
 	defer mux.Unlock()
 
 	// Check the cache
-	if cache, ok := importedCache[i.ImportPath.String()]; ok {
+	if cache, ok := importedCache[i.ImportPath]; ok {
 		return cache
 	}
 
-	imported := &ImportedObject{Name: i.ImportPath.String(), Scope: NewScope(nil, scope.Writer)}
+	imported := &ImportedObject{Name: i.ImportPath, Scope: NewScope(nil, scope.Writer)}
 
-	if _, ok := importScope.Get(i.ImportPath.String()); !ok {
+	if _, ok := importScope.Get(i.ImportPath); !ok {
 		evalProgram(i.Program, imported.Scope)
-		importScope.Set(i.ImportPath.String(), imported)
+		importScope.Set(i.ImportPath, imported)
 	}
 
 	//store the evaluated result to cache
-	importedCache[i.ImportPath.String()] = imported
+	importedCache[i.ImportPath] = imported
 
 	return imported
 }

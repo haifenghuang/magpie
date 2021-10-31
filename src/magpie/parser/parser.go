@@ -417,7 +417,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 			}
 
 			if importStmt, ok := stmt.(*ast.ImportStatement); ok {
-				importPath := strings.TrimSpace(importStmt.ImportPath.String())
+				importPath := strings.TrimSpace(importStmt.ImportPath)
 				_, ok := program.Imports[importPath]
 				if !ok {
 					for k, funcLiteral := range importStmt.Functions {
@@ -1263,25 +1263,20 @@ func (p *Parser) parseImportStatement() *ast.ImportStatement {
 	stmt := &ast.ImportStatement{Token: p.curToken}
 
 	p.nextToken()
-	if p.curToken.Type != token.STRING && p.curToken.Type != token.IDENT {
-		msg := fmt.Sprintf("Syntax Error:%v- expected token to be STRING|IDENTIFIER, got %s instead", p.curToken.Pos, p.curToken.Type)
-		p.errors = append(p.errors, msg)
-		p.errorLines = append(p.errorLines, p.curToken.Pos.Sline())
-		return stmt
+
+	paths := []string{}
+	paths = append(paths, p.curToken.Literal)
+
+	for p.peekTokenIs(token.DOT) {
+		p.nextToken()
+		p.nextToken()
+		paths = append(paths, p.curToken.Literal)
 	}
 
-	oldToken := p.curToken
-	stmt.ImportPath = p.parseExpressionStatement().Expression
-	importPath := strings.TrimSpace(stmt.ImportPath.String())
-	if oldToken.Type == token.STRING { //if token type is STRING, we need to extract the basename of the path.
-		path := stmt.ImportPath.(*ast.StringLiteral).Value
-		importPath = path
-		baseName := filepath.Base(path)
-		oldToken.Literal = baseName
-		stmt.ImportPath = &ast.StringLiteral{Token: oldToken, Value: baseName}
-	}
+	path := strings.TrimSpace(strings.Join(paths, "/"))
+	stmt.ImportPath = filepath.Base(path)
 
-	program, funcs, err := p.getImportedStatements(importPath)
+	program, funcs, err := p.getImportedStatements(path)
 	if err != nil {
 		p.errors = append(p.errors, err.Error())
 		p.errorLines = append(p.errorLines, p.curToken.Pos.Sline())

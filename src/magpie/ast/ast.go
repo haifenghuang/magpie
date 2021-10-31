@@ -1478,7 +1478,7 @@ func (cs *ConstStatement) Docs() string {
 ///////////////////////////////////////////////////////////
 type ImportStatement struct {
 	Token      token.Token
-	ImportPath Expression
+	ImportPath string
 	Program    *Program
 	Functions  map[string]*FunctionLiteral //for debugger usage
 }
@@ -1488,7 +1488,8 @@ func (is *ImportStatement) Pos() token.Position {
 }
 
 func (is *ImportStatement) End() token.Position {
-	return is.ImportPath.End()
+	length := utf8.RuneCountInString(is.ImportPath)
+	return token.Position{Line: is.Token.Pos.Line, Col: is.Token.Pos.Col + length}
 }
 
 func (is *ImportStatement) statementNode()       {}
@@ -1498,7 +1499,7 @@ func (is *ImportStatement) String() string {
 
 	out.WriteString(is.TokenLiteral())
 	out.WriteString(" ")
-	out.WriteString(is.ImportPath.String())
+	out.WriteString(is.ImportPath)
 
 	return out.String()
 }

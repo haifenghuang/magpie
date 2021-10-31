@@ -1,4 +1,5 @@
-import "examples/sub_package/calc"
+//import "examples/sub_package/calc"
+import examples.sub_package.calc
 
 a, b = 10, 2
 printf("10 + 2 = %d\n", calc.Add(a, b))
