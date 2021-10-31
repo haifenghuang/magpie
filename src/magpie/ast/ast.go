@@ -88,7 +88,7 @@ func (bs *BlockStatement) Pos() token.Position {
 //}
 
 func (bs *BlockStatement) End() token.Position {
-	return token.Position{Line: bs.RBraceToken.Pos.Line, Col: bs.RBraceToken.Pos.Col + 1}
+	return token.Position{Filename: bs.Token.Pos.Filename, Line: bs.RBraceToken.Pos.Line, Col: bs.RBraceToken.Pos.Col + 1}
 }
 
 func (bs *BlockStatement) statementNode()       {}
@@ -367,7 +367,7 @@ func (i *Identifier) Pos() token.Position {
 
 func (i *Identifier) End() token.Position {
 	length := utf8.RuneCountInString(i.Value)
-	return token.Position{Line: i.Token.Pos.Line, Col: i.Token.Pos.Col + length}
+	return token.Position{Filename: i.Token.Pos.Filename, Line: i.Token.Pos.Line, Col: i.Token.Pos.Col + length}
 }
 
 func (i *Identifier) expressionNode()      {}
@@ -563,7 +563,7 @@ func (h *HashLiteral) Pos() token.Position {
 //}
 
 func (h *HashLiteral) End() token.Position {
-	return token.Position{Line: h.RBraceToken.Pos.Line, Col: h.RBraceToken.Pos.Col + 1}
+	return token.Position{Filename: h.Token.Pos.Filename, Line: h.RBraceToken.Pos.Line, Col: h.RBraceToken.Pos.Col + 1}
 }
 
 func (h *HashLiteral) expressionNode()      {}
@@ -976,7 +976,7 @@ func (s *StringLiteral) Pos() token.Position {
 
 func (s *StringLiteral) End() token.Position {
 	length := utf8.RuneCountInString(s.Value)
-	return token.Position{Line: s.Token.Pos.Line, Col: s.Token.Pos.Col + length}
+	return token.Position{Filename: s.Token.Pos.Filename, Line: s.Token.Pos.Line, Col: s.Token.Pos.Col + length}
 }
 
 func (s *StringLiteral) expressionNode()      {}
@@ -998,7 +998,7 @@ func (is *InterpolatedString) Pos() token.Position {
 
 func (is *InterpolatedString) End() token.Position {
 	length := utf8.RuneCountInString(is.Value)
-	return token.Position{Line: is.Token.Pos.Line, Col: is.Token.Pos.Col + length}
+	return token.Position{Filename: is.Token.Pos.Filename, Line: is.Token.Pos.Line, Col: is.Token.Pos.Col + length}
 }
 
 func (is *InterpolatedString) expressionNode()      {}
@@ -1179,7 +1179,7 @@ func (s *StructLiteral) Pos() token.Position {
 //}
 
 func (s *StructLiteral) End() token.Position {
-	return token.Position{Line: s.RBraceToken.Pos.Line, Col: s.RBraceToken.Pos.Col + 1}
+	return token.Position{Filename: s.Token.Pos.Filename, Line: s.RBraceToken.Pos.Line, Col: s.RBraceToken.Pos.Col + 1}
 }
 
 func (s *StructLiteral) expressionNode()      {}
@@ -1246,7 +1246,7 @@ func (rs *ReturnStatement) End() token.Position {
 		return rs.ReturnValues[aLen-1].End()
 	}
 
-	return token.Position{Line: rs.Token.Pos.Line, Col: rs.Token.Pos.Col + len(rs.Token.Literal)}
+	return token.Position{Filename: rs.Token.Pos.Filename, Line: rs.Token.Pos.Line, Col: rs.Token.Pos.Col + len(rs.Token.Literal)}
 }
 
 func (rs *ReturnStatement) statementNode()       {}
@@ -1489,7 +1489,7 @@ func (is *ImportStatement) Pos() token.Position {
 
 func (is *ImportStatement) End() token.Position {
 	length := utf8.RuneCountInString(is.ImportPath)
-	return token.Position{Line: is.Token.Pos.Line, Col: is.Token.Pos.Col + length}
+	return token.Position{Filename: is.Token.Pos.Filename, Line: is.Token.Pos.Line, Col: is.Token.Pos.Col + length}
 }
 
 func (is *ImportStatement) statementNode()       {}
@@ -3058,7 +3058,7 @@ func (c *CmdExpression) Pos() token.Position {
 
 func (c *CmdExpression) End() token.Position {
 	length := utf8.RuneCountInString(c.Value)
-	return token.Position{Line: c.Token.Pos.Line, Col: c.Token.Pos.Col + length}
+	return token.Position{Filename: c.Token.Pos.Filename, Line: c.Token.Pos.Line, Col: c.Token.Pos.Col + length}
 }
 
 func (c *CmdExpression) expressionNode()      {}
@@ -3313,7 +3313,7 @@ func (o *OrderingExpr) Pos() token.Position {
 func (o *OrderingExpr) End() token.Position {
 	if o.HasSortOrder {
 		length := utf8.RuneCountInString(o.OrderToken.Literal)
-		return token.Position{Line: o.OrderToken.Pos.Line, Col: o.OrderToken.Pos.Col + length}
+		return token.Position{Filename: o.OrderToken.Pos.Filename, Line: o.OrderToken.Pos.Line, Col: o.OrderToken.Pos.Col + length}
 	}
 
 	return o.Expr.End()
@@ -3556,7 +3556,7 @@ func (d *DiamondExpr) Pos() token.Position {
 
 func (d *DiamondExpr) End() token.Position {
 	length := utf8.RuneCountInString(d.Value)
-	return token.Position{Line: d.Token.Pos.Line, Col: d.Token.Pos.Col + length + 1}
+	return token.Position{Filename: d.Token.Pos.Filename, Line: d.Token.Pos.Line, Col: d.Token.Pos.Col + length + 1}
 }
 
 func (d *DiamondExpr) expressionNode()      {}
