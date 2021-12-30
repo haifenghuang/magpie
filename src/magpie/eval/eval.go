@@ -60,25 +60,25 @@ type Context struct {
 	S *Scope     //S: Scope
 }
 
-func PanicToError(p interface{}) error {
+func PanicToError(p interface{}, node ast.Node) error {
 	switch e := p.(type) {
 	case *Error: //Error Object defined in errors.go file
-		return fmt.Errorf(e.Inspect())
+		return fmt.Errorf("%s - Line:%s", e.Inspect(), node.Pos().Sline())
 	case error:
-		return e
+		return fmt.Errorf("%s - Line:%s", e, node.Pos().Sline())
 	case string:
-		return fmt.Errorf(e)
+		return fmt.Errorf("%s - Line:%s", e, node.Pos().Sline())
 	case fmt.Stringer:
-		return fmt.Errorf(e.String())
+		return fmt.Errorf("%s - Line:%s", e.String(), node.Pos().Sline())
 	default:
-		return fmt.Errorf("Unknown error type (%T)", e)
+		return fmt.Errorf("unknown error type (%T) - Line:%s", e, node.Pos().Sline())
 	}
 }
 
 func Eval(node ast.Node, scope *Scope) (val Object) {
 	defer func() {
 		if r := recover(); r != nil {
-			err := PanicToError(r)
+			err := PanicToError(r, node)
 			fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 			//WHY return NIL? if we do not return 'NIL', we may get something like below:
 			//    PANIC=runtime error: invalid memory address or nil pointer
