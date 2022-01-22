@@ -63,6 +63,7 @@ const (
 	NIL_OBJ          = "NIL_OBJ"
 	GO_OBJ           = "GO_OBJ"
 	GFO_OBJ          = "GFO_OBJ"
+	THROW_OBJ        = "THROW"
 )
 
 type Object interface {
@@ -270,13 +271,16 @@ func (rv *ReturnValue) CallMethod(line string, scope *Scope, method string, args
 	return NewError(line, NOMETHODERROR, method, rv.Type())
 }
 
-//type ThrowValue struct{ Value Object }
-//
-//func (tv *ThrowValue) Inspect() string  { return tv.Value.Inspect() }
-//func (tv *ThrowValue) Type() ObjectType { return THROW_OBJ }
-//func (tv *ThrowValue) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
-//	return NewError(line, NOMETHODERROR, method, tv.Type())
-//}
+type Throw struct {
+	stmt  *ast.ThrowStmt
+	value Object
+}
+
+func (t *Throw) Inspect() string  { return t.value.Inspect() }
+func (t *Throw) Type() ObjectType { return THROW_OBJ }
+func (t *Throw) CallMethod(line string, scope *Scope, method string, args ...Object) Object {
+	return NewError(line, NOMETHODERROR, method, t.Type())
+}
 
 //return a Nil object with error message 's'
 func NewNil(s string) *Nil {

@@ -256,7 +256,6 @@ func (p *Parser) registerAction() {
 	p.registerPrefix(token.GREP, p.parseGrepExpression)
 	p.registerPrefix(token.MAP, p.parseMapExpression)
 	p.registerPrefix(token.CASE, p.parseCaseExpression)
-	p.registerPrefix(token.TRY, p.parseTryStatement)
 	p.registerPrefix(token.STRING, p.parseStringLiteralExpression)
 	p.registerPrefix(token.REGEX, p.parseRegExLiteralExpression)
 	p.registerPrefix(token.LBRACKET, p.parseArrayExpression)
@@ -506,6 +505,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		ret = p.parseSpawnStatement()
 	case token.IMPORT:
 		return p.parseImportStatement()
+	case token.TRY:
+		return p.parseTryStatement()
 	case token.THROW:
 		ret = p.parseThrowStatement()
 	case token.FUNCTION:
@@ -777,79 +778,37 @@ func (p *Parser) parseTupleExpression(tok token.Token, expr ast.Expression) ast.
 	}
 }
 
-func (p *Parser) parseTryStatement() ast.Expression {
+func (p *Parser) parseTryStatement() ast.Statement {
+	tryStmt := &ast.TryStmt{Token: p.curToken}
 
-	savedToken := p.curToken
-	ts := &ast.TryStmt{Token: p.curToken}
-	ts.Catches = []ast.Expression{}
-
-	if !p.expectPeek(token.LBRACE) {
-		return nil
-	}
-	ts.Block = p.parseBlockStatement()
 	p.nextToken()
+	tryStmt.Try = p.parseBlockStatement()
 
-	for {
-		if !p.curTokenIs(token.CATCH) {
-			break
-		}
-		p.nextToken()
-		savedToken := p.curToken
-		if !p.curTokenIs(token.LBRACE) {
-			catchStmt := &ast.CatchStmt{Token: savedToken}
+	if p.peekTokenIs(token.CATCH) {
+		p.nextToken() //skip '}'
 
-			if p.curToken.Type == token.STRING {
-				catchStmt.Var = p.curToken.Literal
-				catchStmt.VarType = 0
-			} else if p.curToken.Type == token.IDENT {
-				aVar := p.parseIdentifier()
-				catchStmt.Var = aVar.(*ast.Identifier).Value
-				catchStmt.VarType = 1
-			} else {
-				return nil
-			}
-
-			if !p.expectPeek(token.LBRACE) {
-				return nil
-			}
-			catchStmt.Block = p.parseBlockStatement()
-			ts.Catches = append(ts.Catches, catchStmt)
-		} else {
-			if !p.curTokenIs(token.LBRACE) {
-				return nil
-			}
-			catchAllStmt := &ast.CatchAllStmt{Token: savedToken}
-			catchAllStmt.Block = p.parseBlockStatement()
-			ts.Catches = append(ts.Catches, catchAllStmt)
-		}
-
-		if !p.peekTokenIs(token.CATCH) {
-			break
-		}
-		p.nextToken()
-	} //end for
-
-	//finally
-	if p.curTokenIs(token.FINALLY) || p.peekTokenIs(token.FINALLY) {
-		if p.peekTokenIs(token.FINALLY) {
+		if p.peekTokenIs(token.IDENT) {
 			p.nextToken()
-			if !p.expectPeek(token.LBRACE) {
-				return nil
-			}
-		} else {
-			p.nextToken()
+			tryStmt.Var = p.curToken.Literal
 		}
 
-		ts.Finally = p.parseBlockStatement()
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		tryStmt.Catch = p.parseBlockStatement()
 	}
 
-	if len(ts.Catches) == 0 && ts.Finally == nil { //no catch and no finally
-		msg := fmt.Sprintf("Syntax Error:%v- Try block should have at least one 'catch' or 'finally' block.", savedToken.Pos)
-		p.errors = append(p.errors, msg)
-		p.errorLines = append(p.errorLines, savedToken.Pos.Sline())
-		return nil
+	if p.peekTokenIs(token.FINALLY) {
+		p.nextToken() //skip '}'
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		tryStmt.Finally = p.parseBlockStatement()
 	}
-	return ts
+
+	return tryStmt
 }
 
 func (p *Parser) parseThrowStatement() *ast.ThrowStmt {

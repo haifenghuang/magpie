@@ -1011,8 +1011,9 @@ func (is *InterpolatedString) String() string       { return is.Token.Literal }
 //TryStmt provide "try/catch/finally" statement.
 type TryStmt struct {
 	Token   token.Token
-	Block   *BlockStatement
-	Catches []Expression //catch
+	Try     *BlockStatement
+	Var     string
+	Catch   *BlockStatement
 	Finally *BlockStatement
 }
 
@@ -1025,31 +1026,31 @@ func (t *TryStmt) End() token.Position {
 		return t.Finally.End()
 	}
 
-	aLen := len(t.Catches)
-	if aLen > 0 {
-		return t.Catches[aLen-1].End()
-	}
-	return t.Token.Pos
+	return t.Catch.End()
 }
 
-func (t *TryStmt) expressionNode()      {}
+func (t *TryStmt) statementNode()       {}
 func (t *TryStmt) TokenLiteral() string { return t.Token.Literal }
 
 func (t *TryStmt) String() string {
 	var out bytes.Buffer
 
-	out.WriteString("try")
-	out.WriteString(" { ")
-	out.WriteString(t.Block.String())
-	out.WriteString(" } ")
+	out.WriteString("try { ")
+	out.WriteString(t.Try.String())
+	out.WriteString(" }")
 
-	for _, o := range t.Catches {
-		out.WriteString(o.String())
+	if t.Catch != nil {
+		if len(t.Var) > 0 {
+			out.WriteString(" catch " + t.Var + " { ")
+		} else {
+			out.WriteString(" catch { ")
+		}
+		out.WriteString(t.Catch.String())
+		out.WriteString(" }")
 	}
 
 	if t.Finally != nil {
-		out.WriteString("finally")
-		out.WriteString(" { ")
+		out.WriteString(" finally { ")
 		out.WriteString(t.Finally.String())
 		out.WriteString(" }")
 	}
@@ -1057,69 +1058,7 @@ func (t *TryStmt) String() string {
 	return out.String()
 }
 
-type CatchStmt struct {
-	Token   token.Token
-	Var     string //maybe nil
-	VarType int    // 0:STRING, 1:IDENTIFIER
-	Block   *BlockStatement
-}
-
-func (c *CatchStmt) Pos() token.Position {
-	return c.Token.Pos
-}
-
-func (c *CatchStmt) End() token.Position {
-	return c.Block.End()
-}
-
-func (c *CatchStmt) expressionNode()      {}
-func (c *CatchStmt) TokenLiteral() string { return c.Token.Literal }
-
-func (c *CatchStmt) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("catch ")
-
-	if len(c.Var) > 0 {
-		out.WriteString(c.Var)
-	}
-
-	out.WriteString(" { ")
-	out.WriteString(c.Block.String())
-	out.WriteString(" }")
-
-	return out.String()
-}
-
-type CatchAllStmt struct {
-	Token token.Token
-	Block *BlockStatement
-}
-
-func (ca *CatchAllStmt) Pos() token.Position {
-	return ca.Token.Pos
-}
-
-func (ca *CatchAllStmt) End() token.Position {
-	return ca.Block.End()
-}
-
-func (ca *CatchAllStmt) expressionNode()      {}
-func (ca *CatchAllStmt) TokenLiteral() string { return ca.Token.Literal }
-
-func (ca *CatchAllStmt) String() string {
-	var out bytes.Buffer
-
-	out.WriteString("catch ")
-	out.WriteString(" { ")
-	out.WriteString(ca.Block.String())
-	out.WriteString(" }")
-
-	return out.String()
-}
-
-//ThrowStmt provide "throw" expression statement.
-//Note: only support throwing "String" object
+//throw <expression>
 type ThrowStmt struct {
 	Token token.Token
 	Expr  Expression

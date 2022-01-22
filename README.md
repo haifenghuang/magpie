@@ -771,14 +771,8 @@ try {
     let th = 1 + 2
     if (th == 3) { throw exceptStr }
 }
-catch "OTHERERROR" {
-    println("Catched OTHERERROR")
-}
-catch exceptStr {
-    println("Catched is SUMERROR")
-}
-catch {
-    println("Catched ALL")
+catch e {
+    printf("Catched: %s\n", e)
 }
 finally {
     println("finally running")
