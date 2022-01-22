@@ -3397,14 +3397,11 @@ func evalForLoopExpression(fl *ast.ForLoop, scope *Scope) Object { //fl:For Loop
 			break
 		}
 		if _, ok := result.(*Continue); ok {
-			newVal := Eval(fl.Update, newSubScope) //Before continue, we need to call 'Update' and 'Cond'
-			if newVal.Type() == ERROR_OBJ {
-				return newVal
-			}
-
-			condition = Eval(fl.Cond, newSubScope)
-			if condition.Type() == ERROR_OBJ {
-				return condition
+			if fl.Update != nil {
+				newVal := Eval(fl.Update, newSubScope) //Before continue, we need to call 'Update' and 'Cond'
+				if newVal.Type() == ERROR_OBJ {
+					return newVal
+				}
 			}
 
 			continue
